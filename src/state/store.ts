@@ -7,21 +7,25 @@ import devicesReducer from './slices/devices.slice';
 // Import other reducers as they are created
 // import devicesReducer from './slices/devices.slice';
 
+// Define the root reducer type first
+const rootReducer = {
+  auth: authReducer,
+  organizations: organizationsReducer,
+  areas: areasReducer,
+  sensors: sensorsReducer,
+  devices: devicesReducer,
+  // Add other reducers as they are created
+  // devices: devicesReducer,
+};
+
 export const store = configureStore({
-  reducer: {
-    auth: authReducer,
-    organizations: organizationsReducer,
-    areas: areasReducer,
-    sensors: sensorsReducer,
-    devices: devicesReducer,
-    // Add other reducers as they are created
-    // devices: devicesReducer,
-  },
+  reducer: rootReducer,
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: false,
     }),
 });
 
+// Define RootState using reducer type
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch; 

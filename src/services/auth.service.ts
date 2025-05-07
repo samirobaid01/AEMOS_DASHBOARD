@@ -7,7 +7,13 @@ import { TOKEN_STORAGE_KEY, REFRESH_TOKEN_STORAGE_KEY } from '../config';
  */
 export const login = async (credentials: LoginRequest): Promise<LoginResponse> => {
   const response = await apiClient.post('/auth/login', credentials);
-  return response.data.data;
+  const data = response.data.data;
+  
+  // Store tokens in localStorage
+  localStorage.setItem(TOKEN_STORAGE_KEY, data.token);
+  localStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, data.refreshToken);
+  
+  return data;
 };
 
 /**
@@ -15,14 +21,26 @@ export const login = async (credentials: LoginRequest): Promise<LoginResponse> =
  */
 export const signup = async (userData: SignupRequest): Promise<LoginResponse> => {
   const response = await apiClient.post('/auth/signup', userData);
-  return response.data.data;
+  const data = response.data.data;
+  
+  // Store tokens in localStorage
+  localStorage.setItem(TOKEN_STORAGE_KEY, data.token);
+  localStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, data.refreshToken);
+  
+  return data;
 };
 
 /**
  * Logout user
  */
 export const logout = async (): Promise<void> => {
-  await apiClient.post('/auth/logout');
+  try {
+    await apiClient.post('/auth/logout');
+  } finally {
+    // Always clear localStorage on logout
+    localStorage.removeItem(TOKEN_STORAGE_KEY);
+    localStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY);
+  }
 };
 
 /**
@@ -62,7 +80,17 @@ export const verifyEmail = async (token: string): Promise<{ message: string }> =
  */
 export const refreshToken = async (refreshToken: string) => {
   const response = await apiClient.post('/auth/refresh-token', { refreshToken });
-  return response.data;
+  const data = response.data.data;
+  
+  if (data.token) {
+    localStorage.setItem(TOKEN_STORAGE_KEY, data.token);
+  }
+  
+  if (data.refreshToken) {
+    localStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, data.refreshToken);
+  }
+  
+  return data;
 };
 
 /**

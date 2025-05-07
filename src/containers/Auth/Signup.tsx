@@ -7,6 +7,7 @@ import { signup, selectAuthLoading, selectAuthError } from '../../state/slices/a
 import type { SignupRequest } from '../../types/auth';
 import Input from '../../components/common/Input/Input';
 import Button from '../../components/common/Button/Button';
+import AuthCard from '../../components/auth/AuthCard';
 
 const Signup = () => {
   const { t } = useTranslation();
@@ -103,162 +104,168 @@ const Signup = () => {
       console.error('Signup failed:', error);
     }
   };
+
+  const subtitle = (
+    <>
+      {t('already_have_account')}{' '}
+      <Link to="/login" className="font-medium text-leaf-600 hover:text-leaf-700 transition-colors duration-200">
+        {t('sign_in')}
+      </Link>
+    </>
+  );
   
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            {t('create_account')}
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            {t('already_have_account')}{' '}
-            <Link to="/login" className="font-medium text-blue-600 hover:text-blue-500">
-              {t('sign_in')}
-            </Link>
-          </p>
+    <AuthCard
+      title={t('create_account')}
+      subtitle={subtitle}
+      icon="🌱"
+    >
+      <form className="space-y-6" onSubmit={handleSubmit}>
+        <div className="space-y-4">
+          <Input
+            id="userName"
+            name="userName"
+            type="text"
+            autoComplete="name"
+            required
+            value={userData.userName}
+            onChange={handleChange}
+            label={t('user_name')}
+            placeholder={t('enter_your_name')}
+            error={formErrors.userName}
+            className="border-soil-200 focus:border-leaf-500 focus:ring-leaf-500"
+          />
+          
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            autoComplete="email"
+            required
+            value={userData.email}
+            onChange={handleChange}
+            label={t('email')}
+            placeholder={t('enter_your_email')}
+            error={formErrors.email}
+            className="border-soil-200 focus:border-leaf-500 focus:ring-leaf-500"
+          />
+          
+          <Input
+            id="password"
+            name="password"
+            type="password"
+            autoComplete="new-password"
+            required
+            value={userData.password}
+            onChange={handleChange}
+            label={t('password')}
+            placeholder={t('enter_password')}
+            error={formErrors.password}
+            className="border-soil-200 focus:border-leaf-500 focus:ring-leaf-500"
+          />
+          
+          <Input
+            id="passwordConfirm"
+            name="passwordConfirm"
+            type="password"
+            autoComplete="new-password"
+            required
+            value={passwordConfirm}
+            onChange={handleChange}
+            label={t('confirm_password')}
+            placeholder={t('confirm_your_password')}
+            error={formErrors.passwordConfirm}
+            className="border-soil-200 focus:border-leaf-500 focus:ring-leaf-500"
+          />
+          
+          <Input
+            id="phoneNumber"
+            name="phoneNumber"
+            type="tel"
+            autoComplete="tel"
+            value={userData.phoneNumber || ''}
+            onChange={handleChange}
+            label={t('phone_number')}
+            placeholder={t('enter_phone_number')}
+            helperText={t('phone_number_description')}
+            className="border-soil-200 focus:border-leaf-500 focus:ring-leaf-500"
+          />
         </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="rounded-md shadow-sm space-y-4">
-            <Input
-              id="userName"
-              name="userName"
-              type="text"
-              autoComplete="name"
-              required
-              value={userData.userName}
+        
+        <div className="space-y-4">
+          <div className="flex items-center">
+            <input
+              id="notifyByEmail"
+              name="notifyByEmail"
+              type="checkbox"
+              checked={userData.notifyByEmail}
               onChange={handleChange}
-              label={t('user_name')}
-              placeholder={t('enter_your_name')}
-              error={formErrors.userName}
+              className="h-4 w-4 text-leaf-600 focus:ring-leaf-500 border-soil-300 rounded"
             />
-            
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              autoComplete="email"
-              required
-              value={userData.email}
-              onChange={handleChange}
-              label={t('email')}
-              placeholder={t('enter_your_email')}
-              error={formErrors.email}
-            />
-            
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              autoComplete="new-password"
-              required
-              value={userData.password}
-              onChange={handleChange}
-              label={t('password')}
-              placeholder={t('enter_password')}
-              error={formErrors.password}
-            />
-            
-            <Input
-              id="passwordConfirm"
-              name="passwordConfirm"
-              type="password"
-              autoComplete="new-password"
-              required
-              value={passwordConfirm}
-              onChange={handleChange}
-              label={t('confirm_password')}
-              placeholder={t('confirm_your_password')}
-              error={formErrors.passwordConfirm}
-            />
-            
-            <Input
-              id="phoneNumber"
-              name="phoneNumber"
-              type="tel"
-              autoComplete="tel"
-              value={userData.phoneNumber || ''}
-              onChange={handleChange}
-              label={t('phone_number')}
-              placeholder={t('enter_phone_number')}
-              helperText={t('phone_number_description')}
-            />
+            <label htmlFor="notifyByEmail" className="ml-2 block text-sm text-soil-700">
+              {t('notify_by_email')}
+            </label>
           </div>
           
-          <div className="space-y-4">
-            <div className="flex items-center">
+          <div className="flex items-center">
+            <input
+              id="notifyBySMS"
+              name="notifyBySMS"
+              type="checkbox"
+              checked={userData.notifyBySMS}
+              onChange={handleChange}
+              className="h-4 w-4 text-leaf-600 focus:ring-leaf-500 border-soil-300 rounded"
+            />
+            <label htmlFor="notifyBySMS" className="ml-2 block text-sm text-soil-700">
+              {t('notify_by_sms')}
+            </label>
+          </div>
+          
+          <div className="flex items-start">
+            <div className="flex items-center h-5">
               <input
-                id="notifyByEmail"
-                name="notifyByEmail"
+                id="termsAndConditions"
+                name="termsAndConditions"
                 type="checkbox"
-                checked={userData.notifyByEmail}
+                checked={userData.termsAndConditions}
                 onChange={handleChange}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                className="h-4 w-4 text-leaf-600 focus:ring-leaf-500 border-soil-300 rounded"
               />
-              <label htmlFor="notifyByEmail" className="ml-2 block text-sm text-gray-900">
-                {t('notify_by_email')}
-              </label>
             </div>
-            
-            <div className="flex items-center">
-              <input
-                id="notifyBySMS"
-                name="notifyBySMS"
-                type="checkbox"
-                checked={userData.notifyBySMS}
-                onChange={handleChange}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-              />
-              <label htmlFor="notifyBySMS" className="ml-2 block text-sm text-gray-900">
-                {t('notify_by_sms')}
+            <div className="ml-2 text-sm">
+              <label htmlFor="termsAndConditions" className="font-medium text-soil-700">
+                {t('agree_to_terms')}{' '}
+                <a href="#" className="text-leaf-600 hover:text-leaf-700 transition-colors duration-200">
+                  {t('terms_and_conditions')}
+                </a>
               </label>
-            </div>
-            
-            <div className="flex items-start">
-              <div className="flex items-center h-5">
-                <input
-                  id="termsAndConditions"
-                  name="termsAndConditions"
-                  type="checkbox"
-                  checked={userData.termsAndConditions}
-                  onChange={handleChange}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                />
-              </div>
-              <div className="ml-2 text-sm">
-                <label htmlFor="termsAndConditions" className="font-medium text-gray-700">
-                  {t('agree_to_terms')}{' '}
-                  <a href="#" className="text-blue-600 hover:text-blue-500">
-                    {t('terms_and_conditions')}
-                  </a>
-                </label>
-                {formErrors.termsAndConditions && (
-                  <p className="text-red-500 text-sm mt-1">{formErrors.termsAndConditions}</p>
-                )}
-              </div>
+              {formErrors.termsAndConditions && (
+                <p className="text-red-500 text-sm mt-1">{formErrors.termsAndConditions}</p>
+              )}
             </div>
           </div>
-          
-          {error && (
-            <div className="text-red-500 text-sm mt-2">
-              {error}
-            </div>
-          )}
-          
-          <div>
-            <Button
-              type="submit"
-              disabled={isLoading}
-              isLoading={isLoading}
-              fullWidth
-              variant="primary"
-            >
-              {t('sign_up')}
-            </Button>
+        </div>
+        
+        {error && (
+          <div className="text-red-500 text-sm p-3 bg-red-50 rounded-md border border-red-100">
+            {error}
           </div>
-        </form>
-      </div>
-    </div>
+        )}
+        
+        <div>
+          <Button
+            type="submit"
+            disabled={isLoading}
+            isLoading={isLoading}
+            fullWidth
+            variant="primary"
+            className="bg-leaf-600 hover:bg-leaf-700 focus:ring-leaf-500"
+          >
+            {t('sign_up')}
+          </Button>
+        </div>
+      </form>
+    </AuthCard>
   );
 };
 

@@ -27,11 +27,11 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
   ) => {
     const inputId = id || `input-${Math.random().toString(36).substring(2, 9)}`;
 
-    const baseClasses = 'block w-full px-3 py-2 border rounded-md shadow-sm appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500';
+    const baseClasses = 'block w-full px-3 py-2 border rounded-md shadow-sm appearance-none focus:outline-none focus:ring-2 transition-colors duration-200';
 
     const stateClasses = error
       ? 'border-red-300 text-red-900 placeholder-red-300 focus:border-red-500 focus:ring-red-500'
-      : 'border-gray-300 focus:border-blue-500 text-gray-900 placeholder-gray-500';
+      : 'border-soil-200 focus:border-leaf-500 focus:ring-leaf-500 text-soil-800 placeholder-soil-400';
 
     const widthClass = fullWidth ? 'w-full' : '';
     
@@ -45,7 +45,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className={`${fullWidth ? 'w-full' : ''}`}>
         {label && (
-          <label htmlFor={inputId} className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor={inputId} className="block text-sm font-medium text-soil-700 mb-1">
             {label}
           </label>
         )}
@@ -75,7 +75,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           </p>
         )}
         {helperText && !error && (
-          <p id={`${inputId}-helper`} className="mt-1 text-sm text-gray-500">
+          <p id={`${inputId}-helper`} className="mt-1 text-sm text-soil-500">
             {helperText}
           </p>
         )}

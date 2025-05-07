@@ -3,6 +3,7 @@ import type { PayloadAction } from '@reduxjs/toolkit';
 import type { AuthState, LoginRequest, LoginResponse, SignupRequest, User } from '../../types/auth';
 import type { RootState } from '../store';
 import * as authService from '../../services/auth.service';
+import { TOKEN_STORAGE_KEY, REFRESH_TOKEN_STORAGE_KEY } from '../../config';
 
 // Initial state
 const initialState: AuthState = {
@@ -19,10 +20,7 @@ export const login = createAsyncThunk(
   'auth/login',
   async (credentials: LoginRequest, { rejectWithValue }) => {
     try {
-      const response = await authService.login(credentials);
-      localStorage.setItem('token', response.token);
-      localStorage.setItem('refreshToken', response.refreshToken);
-      return response;
+      return await authService.login(credentials);
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || 'Login failed');
     }
@@ -33,10 +31,7 @@ export const signup = createAsyncThunk(
   'auth/signup',
   async (userData: SignupRequest, { rejectWithValue }) => {
     try {
-      const response = await authService.signup(userData);
-      localStorage.setItem('token', response.token);
-      localStorage.setItem('refreshToken', response.refreshToken);
-      return response;
+      return await authService.signup(userData);
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || 'Signup failed');
     }
@@ -48,8 +43,6 @@ export const logout = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       await authService.logout();
-      localStorage.removeItem('token');
-      localStorage.removeItem('refreshToken');
       return true;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || 'Logout failed');
@@ -71,8 +64,8 @@ export const fetchUserProfile = createAsyncThunk(
 
 // Check if user is already logged in (from localStorage)
 const checkInitialAuth = () => {
-  const token = localStorage.getItem('token');
-  const refreshToken = localStorage.getItem('refreshToken');
+  const token = localStorage.getItem(TOKEN_STORAGE_KEY);
+  const refreshToken = localStorage.getItem(REFRESH_TOKEN_STORAGE_KEY);
   if (token && refreshToken) {
     return {
       isAuthenticated: true,
@@ -103,14 +96,16 @@ const authSlice = createSlice({
       state.token = action.payload.token;
       state.refreshToken = action.payload.refreshToken;
       state.isAuthenticated = true;
+      localStorage.setItem(TOKEN_STORAGE_KEY, action.payload.token);
+      localStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, action.payload.refreshToken);
     },
     clearCredentials: (state) => {
       state.user = null;
       state.token = null;
       state.refreshToken = null;
       state.isAuthenticated = false;
-      localStorage.removeItem('token');
-      localStorage.removeItem('refreshToken');
+      localStorage.removeItem(TOKEN_STORAGE_KEY);
+      localStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY);
     },
   },
   extraReducers: (builder) => {
@@ -174,10 +169,10 @@ const authSlice = createSlice({
 
 export const { setCredentials, clearCredentials } = authSlice.actions;
 
-// Selectors
-export const selectCurrentUser = (state: RootState) => state.auth.user;
-export const selectIsAuthenticated = (state: RootState) => state.auth.isAuthenticated;
-export const selectAuthLoading = (state: RootState) => state.auth.loading;
-export const selectAuthError = (state: RootState) => state.auth.error;
+// Selectors with type assertions
+export const selectCurrentUser = (state: RootState) => (state as any).auth.user as User | null;
+export const selectIsAuthenticated = (state: RootState) => (state as any).auth.isAuthenticated as boolean;
+export const selectAuthLoading = (state: RootState) => (state as any).auth.loading as boolean;
+export const selectAuthError = (state: RootState) => (state as any).auth.error as string | null;
 
 export default authSlice.reducer; 

@@ -5,9 +5,13 @@ import { selectOrganizations, fetchOrganizations } from '../../state/slices/orga
 import { selectAreas, fetchAreas } from '../../state/slices/areas.slice';
 import { selectSensors, fetchSensors } from '../../state/slices/sensors.slice';
 import { selectDevices, fetchDevices } from '../../state/slices/devices.slice';
-import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import LoadingScreen from '../../components/common/Loading/LoadingScreen';
+
+// Import our reusable components
+import StatCard from '../../components/dashboard/StatCard';
+import EntityList from '../../components/dashboard/EntityList';
+import DashboardHeader from '../../components/dashboard/DashboardHeader';
 
 const Dashboard = () => {
   const { t } = useTranslation();
@@ -43,104 +47,102 @@ const Dashboard = () => {
   }
 
   const stats = [
-    { name: t('organizations'), count: organizations.length, path: '/organizations', color: 'bg-blue-500' },
-    { name: t('areas'), count: areas.length, path: '/areas', color: 'bg-green-500' },
-    { name: t('sensors'), count: sensors.length, path: '/sensors', color: 'bg-yellow-500' },
-    { name: t('devices'), count: devices.length, path: '/devices', color: 'bg-purple-500' }
+    { 
+      name: t('organizations'), 
+      count: organizations.length, 
+      path: '/organizations', 
+      icon: '🚜', 
+      color: 'bg-leaf-600', 
+      textColor: 'text-leaf-800', 
+      bgColor: 'bg-leaf-50', 
+      borderColor: 'border-leaf-200' 
+    },
+    { 
+      name: t('areas'), 
+      count: areas.length, 
+      path: '/areas', 
+      icon: '🌾', 
+      color: 'bg-soil-600', 
+      textColor: 'text-soil-800', 
+      bgColor: 'bg-soil-50', 
+      borderColor: 'border-soil-200' 
+    },
+    { 
+      name: t('sensors'), 
+      count: sensors.length, 
+      path: '/sensors', 
+      icon: '🌡️', 
+      color: 'bg-wheat-600', 
+      textColor: 'text-wheat-800', 
+      bgColor: 'bg-wheat-50', 
+      borderColor: 'border-wheat-200' 
+    },
+    { 
+      name: t('devices'), 
+      count: devices.length, 
+      path: '/devices', 
+      icon: '📡', 
+      color: 'bg-sky-600', 
+      textColor: 'text-sky-800', 
+      bgColor: 'bg-sky-50', 
+      borderColor: 'border-sky-200' 
+    }
   ];
 
   return (
-    <div className="py-6 px-4 sm:px-6 lg:px-8">
-      <h1 className="text-2xl font-semibold text-gray-900 mb-6">{t('dashboard')}</h1>
+    <>
+      <DashboardHeader title="dashboard" />
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        {stats.map((item) => (
-          <Link 
-            key={item.name} 
-            to={item.path}
-            className="block bg-white overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow"
-          >
-            <div className="p-5">
-              <div className="flex items-center">
-                <div className={`flex-shrink-0 rounded-md p-3 ${item.color}`}>
-                  <div className="h-6 w-6 text-white"></div>
-                </div>
-                <div className="ml-5 w-0 flex-1">
-                  <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">{item.name}</dt>
-                    <dd>
-                      <div className="text-lg font-medium text-gray-900">{item.count}</div>
-                    </dd>
-                  </dl>
-                </div>
-              </div>
-            </div>
-          </Link>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+        {stats.map((stat) => (
+          <StatCard
+            key={stat.name}
+            name={stat.name}
+            count={stat.count}
+            path={stat.path}
+            icon={stat.icon}
+            color={stat.color}
+            textColor={stat.textColor}
+            bgColor={stat.bgColor}
+            borderColor={stat.borderColor}
+          />
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white shadow rounded-lg p-6">
-          <h2 className="text-lg font-medium text-gray-900 mb-4">{t('recent_organizations')}</h2>
-          {organizations.length > 0 ? (
-            <div className="overflow-hidden">
-              <ul className="divide-y divide-gray-200">
-                {organizations.slice(0, 5).map((org) => (
-                  <li key={org.id} className="py-4">
-                    <Link to={`/organizations/${org.id}`} className="flex items-center hover:bg-gray-50 p-2 rounded">
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium text-gray-900 truncate">{org.name}</p>
-                        <p className="text-sm text-gray-500 truncate">{org.detail || t('no_details')}</p>
-                      </div>
-                      <div className={`ml-4 flex-shrink-0 rounded-full h-3 w-3 ${org.status ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-              {organizations.length > 5 && (
-                <div className="mt-4">
-                  <Link to="/organizations" className="text-sm font-medium text-blue-600 hover:text-blue-500">
-                    {t('view_all')}
-                  </Link>
-                </div>
-              )}
-            </div>
-          ) : (
-            <p className="text-gray-500">{t('no_organizations')}</p>
-          )}
-        </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-6">
+        <EntityList
+          title={t('recent_organizations')}
+          titleIcon="🚜"
+          entities={organizations}
+          entityIcon="🚜"
+          emptyMessage={t('no_organizations')}
+          basePath="/organizations"
+          createPath="/organizations/create"
+          detailField="detail"
+          headerColor="bg-leaf-600"
+          hoverColor="bg-leaf-50"
+          dividerColor="divide-leaf-100"
+          buttonColor="text-leaf-600"
+          buttonHoverColor="text-leaf-700"
+        />
 
-        <div className="bg-white shadow rounded-lg p-6">
-          <h2 className="text-lg font-medium text-gray-900 mb-4">{t('recent_devices')}</h2>
-          {devices.length > 0 ? (
-            <div className="overflow-hidden">
-              <ul className="divide-y divide-gray-200">
-                {devices.slice(0, 5).map((device) => (
-                  <li key={device.id} className="py-4">
-                    <Link to={`/devices/${device.id}`} className="flex items-center hover:bg-gray-50 p-2 rounded">
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium text-gray-900 truncate">{device.name}</p>
-                        <p className="text-sm text-gray-500 truncate">{device.serialNumber}</p>
-                      </div>
-                      <div className={`ml-4 flex-shrink-0 rounded-full h-3 w-3 ${device.status ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-              {devices.length > 5 && (
-                <div className="mt-4">
-                  <Link to="/devices" className="text-sm font-medium text-blue-600 hover:text-blue-500">
-                    {t('view_all')}
-                  </Link>
-                </div>
-              )}
-            </div>
-          ) : (
-            <p className="text-gray-500">{t('no_devices')}</p>
-          )}
-        </div>
+        <EntityList
+          title={t('recent_devices')}
+          titleIcon="📡"
+          entities={devices}
+          entityIcon="📡"
+          emptyMessage={t('no_devices')}
+          basePath="/devices"
+          createPath="/devices/create"
+          detailField="serialNumber"
+          headerColor="bg-sky-600"
+          hoverColor="bg-sky-50"
+          dividerColor="divide-sky-100"
+          buttonColor="text-sky-600"
+          buttonHoverColor="text-sky-700"
+        />
       </div>
-    </div>
+    </>
   );
 };
 

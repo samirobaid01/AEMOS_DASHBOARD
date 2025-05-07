@@ -1,29 +1,27 @@
 import mixpanel from 'mixpanel-browser';
-import { ENABLE_MIXPANEL, MIXPANEL_TOKEN, IS_PROD } from '../config';
+import { MIXPANEL_TOKEN } from '../config';
 
-// Initialize mixpanel
-if (ENABLE_MIXPANEL && MIXPANEL_TOKEN) {
-  mixpanel.init(MIXPANEL_TOKEN, { 
-    debug: !IS_PROD,
+// Initialize Mixpanel
+if (MIXPANEL_TOKEN) {
+  mixpanel.init(MIXPANEL_TOKEN, {
+    debug: process.env.NODE_ENV === 'development',
     track_pageview: true,
     persistence: 'localStorage'
   });
-  
-  if (!IS_PROD) {
-    console.log('Mixpanel initialized');
-  }
+} else {
+  console.warn('Mixpanel token not found. Analytics will not be collected.');
 }
 
 /**
  * Track an event in Mixpanel
  */
-export const track = (eventName: string, properties?: Record<string, any>) => {
-  if (ENABLE_MIXPANEL && MIXPANEL_TOKEN) {
-    mixpanel.track(eventName, properties);
-    
-    if (!IS_PROD) {
-      console.log(`Mixpanel Event: ${eventName}`, properties);
-    }
+export const track = (event: string, properties?: Record<string, any>) => {
+  if (!MIXPANEL_TOKEN) return;
+  
+  try {
+    mixpanel.track(event, properties);
+  } catch (error) {
+    console.error('Error tracking event in Mixpanel:', error);
   }
 };
 
@@ -31,8 +29,12 @@ export const track = (eventName: string, properties?: Record<string, any>) => {
  * Identify a user in Mixpanel
  */
 export const identify = (userId: string | number) => {
-  if (ENABLE_MIXPANEL && MIXPANEL_TOKEN) {
+  if (!MIXPANEL_TOKEN) return;
+  
+  try {
     mixpanel.identify(String(userId));
+  } catch (error) {
+    console.error('Error identifying user in Mixpanel:', error);
   }
 };
 
@@ -40,8 +42,12 @@ export const identify = (userId: string | number) => {
  * Set user properties in Mixpanel
  */
 export const setPeople = (properties: Record<string, any>) => {
-  if (ENABLE_MIXPANEL && MIXPANEL_TOKEN) {
+  if (!MIXPANEL_TOKEN) return;
+  
+  try {
     mixpanel.people.set(properties);
+  } catch (error) {
+    console.error('Error setting people properties in Mixpanel:', error);
   }
 };
 
@@ -49,19 +55,28 @@ export const setPeople = (properties: Record<string, any>) => {
  * Track page view in Mixpanel
  */
 export const trackPageView = (pageName: string) => {
-  track('Page View', { page: pageName });
-};
-
-/**
- * Reset the Mixpanel user
- */
-export const reset = () => {
-  if (ENABLE_MIXPANEL && MIXPANEL_TOKEN) {
-    mixpanel.reset();
+  if (!MIXPANEL_TOKEN) return;
+  
+  try {
+    mixpanel.track('Page View', { page: pageName });
+  } catch (error) {
+    console.error('Error tracking page view in Mixpanel:', error);
   }
 };
 
-// Export Mixpanel service
+/**
+ * Reset user identity in Mixpanel
+ */
+export const reset = () => {
+  if (!MIXPANEL_TOKEN) return;
+  
+  try {
+    mixpanel.reset();
+  } catch (error) {
+    console.error('Error resetting Mixpanel:', error);
+  }
+};
+
 const MixpanelService = {
   track,
   identify,
