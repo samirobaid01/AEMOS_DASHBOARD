@@ -1,0 +1,181 @@
+{
+  "app": {
+    "name": "AEMOS Dashboard",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "notFound": "Page not found"
+  },
+  "auth": {
+    "login": "Login",
+    "signup": "Sign Up",
+    "logout": "Logout",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "userName": "Full Name",
+    "phoneNumber": "Phone Number",
+    "rememberMe": "Remember me",
+    "forgotPassword": "Forgot password?",
+    "noAccount": "Don't have an account?",
+    "haveAccount": "Already have an account?",
+    "signupNow": "Sign up now",
+    "loginNow": "Login now",
+    "termsAndConditions": "I agree to the Terms and Conditions",
+    "notifications": {
+      "title": "Notifications",
+      "byEmail": "Receive email notifications",
+      "bySMS": "Receive SMS notifications",
+      "byMessage": "Receive in-app notifications"
+    },
+    "errors": {
+      "emailRequired": "Email is required",
+      "emailInvalid": "Please enter a valid email",
+      "passwordRequired": "Password is required",
+      "passwordMinLength": "Password must be at least 8 characters long",
+      "passwordsNoMatch": "Passwords do not match",
+      "userNameRequired": "Full name is required",
+      "termsRequired": "You must agree to the terms and conditions"
+    },
+    "success": {
+      "login": "Login successful",
+      "signup": "Account created successfully",
+      "logout": "Logged out successfully"
+    }
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "organizations": "Organizations",
+    "areas": "Areas",
+    "sensors": "Sensors",
+    "devices": "Devices",
+    "settings": "Settings",
+    "profile": "Profile"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcomeMessage": "Welcome to AEMOS Dashboard",
+    "summary": {
+      "organizations": "Organizations",
+      "areas": "Areas",
+      "sensors": "Sensors",
+      "devices": "Devices"
+    }
+  },
+  "organizations": {
+    "title": "Organizations",
+    "add": "Add Organization",
+    "edit": "Edit Organization",
+    "delete": "Delete Organization",
+    "name": "Name",
+    "status": "Status",
+    "detail": "Details",
+    "paymentMethods": "Payment Methods",
+    "image": "Logo URL",
+    "address": "Address",
+    "zip": "ZIP Code",
+    "email": "Email",
+    "isParent": "Parent Organization",
+    "parentId": "Parent Organization",
+    "contactNumber": "Contact Number",
+    "actions": "Actions",
+    "confirmDelete": "Are you sure you want to delete this organization?",
+    "noOrganizations": "No organizations found",
+    "form": {
+      "nameLabel": "Organization Name",
+      "namePlaceholder": "Enter organization name",
+      "detailLabel": "Organization Details",
+      "detailPlaceholder": "Enter details about the organization",
+      "statusLabel": "Status",
+      "active": "Active",
+      "inactive": "Inactive"
+    }
+  },
+  "areas": {
+    "title": "Areas",
+    "add": "Add Area",
+    "edit": "Edit Area",
+    "delete": "Delete Area",
+    "name": "Name",
+    "organization": "Organization",
+    "description": "Description",
+    "status": "Status",
+    "actions": "Actions",
+    "confirmDelete": "Are you sure you want to delete this area?",
+    "noAreas": "No areas found"
+  },
+  "sensors": {
+    "title": "Sensors",
+    "add": "Add Sensor",
+    "edit": "Edit Sensor",
+    "delete": "Delete Sensor",
+    "name": "Name",
+    "area": "Area",
+    "type": "Type",
+    "description": "Description",
+    "status": "Status",
+    "metadata": "Metadata",
+    "actions": "Actions",
+    "confirmDelete": "Are you sure you want to delete this sensor?",
+    "noSensors": "No sensors found"
+  },
+  "devices": {
+    "title": "Devices",
+    "add": "Add Device",
+    "edit": "Edit Device",
+    "delete": "Delete Device",
+    "name": "Name",
+    "serialNumber": "Serial Number",
+    "organization": "Organization",
+    "type": "Type",
+    "status": "Status",
+    "firmware": "Firmware",
+    "description": "Description",
+    "configuration": "Configuration",
+    "actions": "Actions",
+    "confirmDelete": "Are you sure you want to delete this device?",
+    "noDevices": "No devices found"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "details": "Details",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "submit": "Submit",
+    "reset": "Reset",
+    "loading": "Loading...",
+    "noResults": "No results found",
+    "active": "Active",
+    "inactive": "Inactive",
+    "status": "Status",
+    "created": "Created",
+    "updated": "Updated",
+    "actions": "Actions",
+    "all": "All"
+  },
+  "errors": {
+    "notFound": "Page not found",
+    "unauthorized": "Unauthorized access",
+    "forbidden": "Access forbidden",
+    "serverError": "Server error",
+    "networkError": "Network error",
+    "unknown": "Unknown error"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "theme": "Theme",
+    "notifications": "Notifications",
+    "profile": "Profile",
+    "security": "Security",
+    "preferences": "Preferences"
+  }
+} 

@@ -1,0 +1,181 @@
+{
+  "app": {
+    "name": "AEMOS Dashboard",
+    "loading": "Cargando...",
+    "error": "Ha ocurrido un error",
+    "notFound": "Página no encontrada"
+  },
+  "auth": {
+    "login": "Iniciar sesión",
+    "signup": "Registrarse",
+    "logout": "Cerrar sesión",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "confirmPassword": "Confirmar contraseña",
+    "userName": "Nombre completo",
+    "phoneNumber": "Número de teléfono",
+    "rememberMe": "Recordarme",
+    "forgotPassword": "¿Olvidó su contraseña?",
+    "noAccount": "¿No tiene una cuenta?",
+    "haveAccount": "¿Ya tiene una cuenta?",
+    "signupNow": "Regístrese ahora",
+    "loginNow": "Inicie sesión ahora",
+    "termsAndConditions": "Acepto los Términos y Condiciones",
+    "notifications": {
+      "title": "Notificaciones",
+      "byEmail": "Recibir notificaciones por correo electrónico",
+      "bySMS": "Recibir notificaciones por SMS",
+      "byMessage": "Recibir notificaciones en la aplicación"
+    },
+    "errors": {
+      "emailRequired": "El correo electrónico es obligatorio",
+      "emailInvalid": "Por favor, introduzca un correo electrónico válido",
+      "passwordRequired": "La contraseña es obligatoria",
+      "passwordMinLength": "La contraseña debe tener al menos 8 caracteres",
+      "passwordsNoMatch": "Las contraseñas no coinciden",
+      "userNameRequired": "El nombre completo es obligatorio",
+      "termsRequired": "Debe aceptar los términos y condiciones"
+    },
+    "success": {
+      "login": "Inicio de sesión exitoso",
+      "signup": "Cuenta creada con éxito",
+      "logout": "Sesión cerrada con éxito"
+    }
+  },
+  "navigation": {
+    "dashboard": "Panel de control",
+    "organizations": "Organizaciones",
+    "areas": "Áreas",
+    "sensors": "Sensores",
+    "devices": "Dispositivos",
+    "settings": "Configuración",
+    "profile": "Perfil"
+  },
+  "dashboard": {
+    "title": "Panel de control",
+    "welcomeMessage": "Bienvenido al Panel de AEMOS",
+    "summary": {
+      "organizations": "Organizaciones",
+      "areas": "Áreas",
+      "sensors": "Sensores",
+      "devices": "Dispositivos"
+    }
+  },
+  "organizations": {
+    "title": "Organizaciones",
+    "add": "Añadir Organización",
+    "edit": "Editar Organización",
+    "delete": "Eliminar Organización",
+    "name": "Nombre",
+    "status": "Estado",
+    "detail": "Detalles",
+    "paymentMethods": "Métodos de pago",
+    "image": "URL del logo",
+    "address": "Dirección",
+    "zip": "Código postal",
+    "email": "Correo electrónico",
+    "isParent": "Organización principal",
+    "parentId": "Organización principal",
+    "contactNumber": "Número de contacto",
+    "actions": "Acciones",
+    "confirmDelete": "¿Está seguro de que desea eliminar esta organización?",
+    "noOrganizations": "No se encontraron organizaciones",
+    "form": {
+      "nameLabel": "Nombre de la Organización",
+      "namePlaceholder": "Introduzca el nombre de la organización",
+      "detailLabel": "Detalles de la Organización",
+      "detailPlaceholder": "Introduzca detalles sobre la organización",
+      "statusLabel": "Estado",
+      "active": "Activo",
+      "inactive": "Inactivo"
+    }
+  },
+  "areas": {
+    "title": "Áreas",
+    "add": "Añadir Área",
+    "edit": "Editar Área",
+    "delete": "Eliminar Área",
+    "name": "Nombre",
+    "organization": "Organización",
+    "description": "Descripción",
+    "status": "Estado",
+    "actions": "Acciones",
+    "confirmDelete": "¿Está seguro de que desea eliminar esta área?",
+    "noAreas": "No se encontraron áreas"
+  },
+  "sensors": {
+    "title": "Sensores",
+    "add": "Añadir Sensor",
+    "edit": "Editar Sensor",
+    "delete": "Eliminar Sensor",
+    "name": "Nombre",
+    "area": "Área",
+    "type": "Tipo",
+    "description": "Descripción",
+    "status": "Estado",
+    "metadata": "Metadatos",
+    "actions": "Acciones",
+    "confirmDelete": "¿Está seguro de que desea eliminar este sensor?",
+    "noSensors": "No se encontraron sensores"
+  },
+  "devices": {
+    "title": "Dispositivos",
+    "add": "Añadir Dispositivo",
+    "edit": "Editar Dispositivo",
+    "delete": "Eliminar Dispositivo",
+    "name": "Nombre",
+    "serialNumber": "Número de serie",
+    "organization": "Organización",
+    "type": "Tipo",
+    "status": "Estado",
+    "firmware": "Firmware",
+    "description": "Descripción",
+    "configuration": "Configuración",
+    "actions": "Acciones",
+    "confirmDelete": "¿Está seguro de que desea eliminar este dispositivo?",
+    "noDevices": "No se encontraron dispositivos"
+  },
+  "common": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "view": "Ver",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "sort": "Ordenar",
+    "details": "Detalles",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "previous": "Anterior",
+    "submit": "Enviar",
+    "reset": "Restablecer",
+    "loading": "Cargando...",
+    "noResults": "No se encontraron resultados",
+    "active": "Activo",
+    "inactive": "Inactivo",
+    "status": "Estado",
+    "created": "Creado",
+    "updated": "Actualizado",
+    "actions": "Acciones",
+    "all": "Todos"
+  },
+  "errors": {
+    "notFound": "Página no encontrada",
+    "unauthorized": "Acceso no autorizado",
+    "forbidden": "Acceso prohibido",
+    "serverError": "Error del servidor",
+    "networkError": "Error de red",
+    "unknown": "Error desconocido"
+  },
+  "settings": {
+    "title": "Configuración",
+    "language": "Idioma",
+    "theme": "Tema",
+    "notifications": "Notificaciones",
+    "profile": "Perfil",
+    "security": "Seguridad",
+    "preferences": "Preferencias"
+  }
+} 
