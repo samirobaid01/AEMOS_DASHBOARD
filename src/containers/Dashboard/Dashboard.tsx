@@ -17,11 +17,21 @@ const Dashboard = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch<AppDispatch>();
   const [loading, setLoading] = useState(true);
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
   const organizations = useSelector(selectOrganizations);
   const areas = useSelector(selectAreas);
   const sensors = useSelector(selectSensors);
   const devices = useSelector(selectDevices);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -89,11 +99,34 @@ const Dashboard = () => {
     }
   ];
 
+  // Calculate grid columns based on window width
+  const getStatGridTemplateColumns = () => {
+    if (windowWidth >= 1024) return 'repeat(4, 1fr)';
+    if (windowWidth >= 768) return 'repeat(2, 1fr)';
+    return '1fr';
+  };
+
+  const getEntityGridTemplateColumns = () => {
+    if (windowWidth >= 1024) return 'repeat(2, 1fr)';
+    return '1fr';
+  };
+
   return (
-    <>
+    <div style={{ 
+      padding: '2rem',
+      backgroundColor: '#f0f9f0',
+      minHeight: 'calc(100vh - 60px)',
+      maxWidth: '1400px',
+      margin: '0 auto'
+    }}>
       <DashboardHeader title="dashboard" />
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+      <div style={{ 
+        display: 'grid',
+        gridTemplateColumns: getStatGridTemplateColumns(),
+        gap: '1.5rem', 
+        marginBottom: '2.5rem' 
+      }}>
         {stats.map((stat) => (
           <StatCard
             key={stat.name}
@@ -109,7 +142,12 @@ const Dashboard = () => {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-6">
+      <div style={{ 
+        display: 'grid',
+        gridTemplateColumns: getEntityGridTemplateColumns(),
+        gap: '2rem', 
+        marginBottom: '1.5rem'
+      }}>
         <EntityList
           title={t('recent_organizations')}
           titleIcon="🚜"
@@ -142,7 +180,7 @@ const Dashboard = () => {
           buttonHoverColor="text-sky-700"
         />
       </div>
-    </>
+    </div>
   );
 };
 

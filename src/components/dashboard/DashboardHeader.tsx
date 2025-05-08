@@ -13,8 +13,21 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   const { t } = useTranslation();
 
   return (
-    <h1 className="text-3xl font-bold text-soil-800 mb-8 flex items-center">
-      <span className="text-2xl mr-3">{icon}</span> {t(title)}
+    <h1 style={{
+      fontSize: 'calc(1.5rem + 0.5vw)',
+      fontWeight: 'bold',
+      color: '#111827',
+      marginTop: 0,
+      marginBottom: 'calc(1.5rem + 1vw)',
+      display: 'flex',
+      alignItems: 'center',
+      borderBottom: '1px solid #e5e7eb',
+      paddingBottom: '1rem'
+    }}>
+      <span style={{ 
+        fontSize: 'calc(1.25rem + 0.5vw)',
+        marginRight: '0.75rem' 
+      }}>{icon}</span> {t(title)}
     </h1>
   );
 };

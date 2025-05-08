@@ -16,7 +16,19 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const user = useSelector(selectCurrentUser);
+  const isMobile = windowWidth < 768;
+
+  // Handle window resize
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Close sidebar when route changes on mobile
   useEffect(() => {
@@ -44,139 +56,175 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     return location.pathname.startsWith(path);
   };
 
+  const sidebarStyle = {
+    position: 'fixed' as const,
+    top: 0,
+    left: 0,
+    bottom: 0,
+    width: '260px',
+    backgroundColor: 'white',
+    boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+    zIndex: 40,
+    transform: (isMobile && !sidebarOpen) ? 'translateX(-100%)' : 'translateX(0)',
+    transition: 'transform 300ms ease-in-out',
+  };
+
+  const overlayStyle = {
+    position: 'fixed' as const,
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    zIndex: 30,
+    display: (isMobile && sidebarOpen) ? 'block' : 'none',
+  };
+
   return (
-    <div className="min-h-screen bg-leaf-50">
+    <div style={{ minHeight: '100vh', backgroundColor: '#f0f9f0' }}>
       {/* Mobile sidebar overlay */}
-      {sidebarOpen && (
-        <div 
-          className="fixed inset-0 z-40 bg-soil-800 bg-opacity-75 transition-opacity md:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-
-      {/* Mobile sidebar panel */}
       <div 
-        className={`fixed inset-y-0 left-0 z-40 w-72 transform transition duration-300 ease-in-out md:hidden ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
-      >
-        <div className="flex h-full flex-col bg-white shadow-xl">
-          <div className="flex items-center justify-between px-4 py-5 border-b border-leaf-100">
-            <div className="flex items-center space-x-2">
-              <span className="text-2xl">🌿</span>
-              <h1 className="text-xl font-bold text-leaf-600">AEMOS <span className="text-wheat-500">Agriculture</span></h1>
-            </div>
-            <button
-              type="button"
-              className="text-soil-500 hover:text-soil-700"
-              onClick={() => setSidebarOpen(false)}
-            >
-              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+        style={overlayStyle}
+        onClick={() => setSidebarOpen(false)}
+      />
+
+      {/* Sidebar (mobile & desktop) */}
+      <div style={sidebarStyle}>
+        <div style={{ 
+          display: 'flex', 
+          flexDirection: 'column' as const, 
+          height: '100%' 
+        }}>
+          {/* Logo section */}
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            padding: '16px', 
+            borderBottom: '1px solid #e5e7eb' 
+          }}>
+            <span style={{ fontSize: '24px', marginRight: '12px' }}>🌿</span>
+            <h1 style={{ 
+              fontSize: '18px', 
+              fontWeight: 'bold', 
+              color: '#166534' 
+            }}>
+              AEMOS <span style={{ color: '#b45309' }}>Agriculture</span>
+            </h1>
+            
+            {/* Mobile close button - only visible on mobile */}
+            {isMobile && (
+              <button
+                type="button"
+                style={{ 
+                  marginLeft: 'auto',
+                }}
+                onClick={() => setSidebarOpen(false)}
+              >
+                <svg style={{ width: '24px', height: '24px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
           </div>
 
-          <div className="flex-1 overflow-y-auto pt-5 pb-4">
-            <nav className="flex-1 space-y-1 px-4">
-              {navigation.map((item) => (
-                <Link
-                  key={item.name}
-                  to={item.path}
-                  className={`group flex items-center px-3 py-3 text-base font-medium rounded-lg transition duration-200 ${
-                    isActive(item.path)
-                      ? 'bg-leaf-500 text-white'
-                      : 'text-soil-700 hover:bg-leaf-50 hover:text-leaf-600'
-                  }`}
-                >
-                  <span className={`mr-4 h-6 w-6 flex items-center justify-center text-xl ${
-                    isActive(item.path) ? 'text-white' : 'text-leaf-500'
-                  }`}>
-                    {item.icon}
-                  </span>
-                  {item.name}
-                </Link>
-              ))}
-            </nav>
-          </div>
+          {/* Navigation links */}
+          <nav style={{ 
+            flex: '1 1 auto', 
+            overflowY: 'auto' as const, 
+            padding: '20px 16px' 
+          }}>
+            {navigation.map((item) => (
+              <Link
+                key={item.name}
+                to={item.path}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  padding: '12px 16px',
+                  borderRadius: '8px',
+                  marginBottom: '8px',
+                  fontWeight: 500,
+                  color: isActive(item.path) ? 'white' : '#4b5563',
+                  backgroundColor: isActive(item.path) ? '#16a34a' : 'transparent',
+                  transition: 'all 200ms',
+                  textDecoration: 'none'
+                }}
+                onMouseOver={(e) => {
+                  if (!isActive(item.path)) {
+                    e.currentTarget.style.backgroundColor = '#f0f9f0';
+                  }
+                }}
+                onMouseOut={(e) => {
+                  if (!isActive(item.path)) {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                  }
+                }}
+              >
+                <span style={{ 
+                  marginRight: '12px', 
+                  fontSize: '20px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '28px',
+                  height: '28px'
+                }}>
+                  {item.icon}
+                </span>
+                {item.name}
+              </Link>
+            ))}
+          </nav>
 
-          <div className="border-t border-leaf-100 p-4">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="h-10 w-10 rounded-full bg-leaf-600 flex items-center justify-center text-white text-lg font-bold">
-                  {getInitial(user?.userName)}
-                </div>
+          {/* User section */}
+          <div style={{ 
+            borderTop: '1px solid #e5e7eb', 
+            padding: '16px' 
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <div style={{
+                width: '40px',
+                height: '40px',
+                borderRadius: '50%',
+                backgroundColor: '#16a34a',
+                color: 'white',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontWeight: 'bold',
+                fontSize: '18px'
+              }}>
+                {getInitial(user?.userName)}
               </div>
-              <div className="ml-3">
-                <p className="text-base font-medium text-soil-800 truncate max-w-[180px]">
+              <div style={{ marginLeft: '12px' }}>
+                <p style={{ 
+                  fontSize: '14px', 
+                  fontWeight: 500, 
+                  color: '#4b5563',
+                  maxWidth: '160px',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap' as const
+                }}>
                   {user?.userName || user?.email || 'User'}
                 </p>
                 <button
                   type="button"
-                  className="mt-1 text-sm font-medium text-leaf-600 hover:text-leaf-700 flex items-center"
+                  style={{ 
+                    marginTop: '4px', 
+                    fontSize: '13px', 
+                    fontWeight: 500, 
+                    color: '#16a34a',
+                    background: 'none',
+                    border: 'none',
+                    padding: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    cursor: 'pointer'
+                  }}
                   onClick={handleLogout}
                 >
-                  <svg className="mr-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                  </svg>
-                  {t('sign_out')}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Desktop sidebar */}
-      <div className="hidden md:fixed md:inset-y-0 md:flex md:w-64 md:flex-col">
-        <div className="flex min-h-0 flex-1 flex-col bg-white shadow-xl">
-          <div className="flex h-16 flex-shrink-0 items-center justify-center border-b border-leaf-100 px-4">
-            <div className="flex items-center space-x-2">
-              <span className="text-2xl">🌿</span>
-              <h1 className="text-xl font-bold text-leaf-600">AEMOS <span className="text-wheat-500">Agriculture</span></h1>
-            </div>
-          </div>
-          
-          <div className="flex flex-1 flex-col overflow-y-auto pt-5 pb-4">
-            <nav className="mt-2 flex-1 space-y-1 px-4">
-              {navigation.map((item) => (
-                <Link
-                  key={item.name}
-                  to={item.path}
-                  className={`group flex items-center px-3 py-3 text-sm font-medium rounded-lg transition duration-200 ${
-                    isActive(item.path)
-                      ? 'bg-leaf-500 text-white'
-                      : 'text-soil-700 hover:bg-leaf-50 hover:text-leaf-600'
-                  }`}
-                >
-                  <span className={`mr-3 h-6 w-6 flex items-center justify-center text-xl ${
-                    isActive(item.path) ? 'text-white' : 'text-leaf-500'
-                  }`}>
-                    {item.icon}
-                  </span>
-                  {item.name}
-                </Link>
-              ))}
-            </nav>
-          </div>
-          
-          <div className="flex flex-shrink-0 border-t border-leaf-100 p-4">
-            <div className="flex items-center w-full">
-              <div className="flex-shrink-0">
-                <div className="h-10 w-10 rounded-full bg-leaf-600 flex items-center justify-center text-white text-lg font-bold">
-                  {getInitial(user?.userName)}
-                </div>
-              </div>
-              <div className="ml-3 flex-1">
-                <p className="text-sm font-medium text-soil-800 truncate">
-                  {user?.userName || user?.email || 'User'}
-                </p>
-                <button
-                  type="button"
-                  className="mt-1 text-xs font-medium text-leaf-600 hover:text-leaf-700 flex items-center"
-                  onClick={handleLogout}
-                >
-                  <svg className="mr-1 h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg style={{ marginRight: '4px', width: '14px', height: '14px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                   </svg>
                   {t('sign_out')}
@@ -188,35 +236,47 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       </div>
 
       {/* Main content area */}
-      <div className="flex flex-1 flex-col md:pl-64">
-        {/* Mobile top bar */}
-        <div className="sticky top-0 z-10 flex h-16 flex-shrink-0 bg-white shadow-sm md:hidden">
-          <button
-            type="button"
-            className="border-r border-leaf-100 px-4 text-soil-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-leaf-500 md:hidden"
-            onClick={() => setSidebarOpen(true)}
-          >
-            <span className="sr-only">{t('open_sidebar')}</span>
-            <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
-          <div className="flex flex-1 items-center justify-center px-4">
-            <div className="flex items-center space-x-2">
-              <span className="text-xl">🌿</span>
-              <h1 className="text-lg font-bold text-leaf-600">AEMOS <span className="text-wheat-500">Agriculture</span></h1>
+      <div style={{
+        paddingLeft: isMobile ? 0 : '260px',
+        minHeight: '100vh',
+        transition: 'padding-left 300ms ease-in-out'
+      }}>
+        {/* Mobile top bar - only visible on mobile */}
+        {isMobile && (
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            height: '64px',
+            backgroundColor: 'white',
+            boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
+            position: 'sticky' as const,
+            top: 0,
+            zIndex: 10,
+          }}>
+            <button
+              type="button"
+              style={{
+                padding: '16px',
+                color: '#4b5563'
+              }}
+              onClick={() => setSidebarOpen(true)}
+            >
+              <svg style={{ width: '24px', height: '24px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
+              <span style={{ fontSize: '20px', marginRight: '8px' }}>🌿</span>
+              <h1 style={{ fontSize: '16px', fontWeight: 'bold', color: '#166534' }}>
+                AEMOS <span style={{ color: '#b45309' }}>Agriculture</span>
+              </h1>
             </div>
           </div>
-        </div>
+        )}
 
-        <main className="flex-1 bg-leaf-50">
-          <div className="py-6">
-            <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
-              <div className="bg-white p-6 rounded-xl shadow-soft border border-leaf-100">
-                {children}
-              </div>
-            </div>
-          </div>
+        {/* Main content */}
+        <main style={{ padding: isMobile ? '24px' : '32px' }}>
+          {children}
         </main>
       </div>
     </div>

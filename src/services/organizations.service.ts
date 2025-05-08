@@ -6,7 +6,7 @@ import type { Organization, OrganizationCreateRequest, OrganizationUpdateRequest
  */
 export const getOrganizations = async (params?: OrganizationFilterParams) => {
   const response = await apiClient.get('/organizations', { params });
-  return response.data.data;
+  return response.data.data.organizations;
 };
 
 /**
@@ -14,7 +14,7 @@ export const getOrganizations = async (params?: OrganizationFilterParams) => {
  */
 export const getOrganizationById = async (id: number) => {
   const response = await apiClient.get(`/organizations/${id}`);
-  return response.data.data;
+  return response.data.data.organization;
 };
 
 /**
@@ -22,7 +22,7 @@ export const getOrganizationById = async (id: number) => {
  */
 export const createOrganization = async (organizationData: OrganizationCreateRequest) => {
   const response = await apiClient.post('/organizations', organizationData);
-  return response.data.data;
+  return response.data.data.organization;
 };
 
 /**
@@ -30,7 +30,7 @@ export const createOrganization = async (organizationData: OrganizationCreateReq
  */
 export const updateOrganization = async (id: number, organizationData: OrganizationUpdateRequest) => {
   const response = await apiClient.patch(`/organizations/${id}`, organizationData);
-  return response.data.data;
+  return response.data.data.organization;
 };
 
 /**

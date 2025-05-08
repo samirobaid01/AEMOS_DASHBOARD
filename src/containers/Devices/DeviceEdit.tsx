@@ -10,7 +10,7 @@ import {
   selectDevicesLoading,
   selectDevicesError
 } from '../../state/slices/devices.slice';
-import { fetchOrganizations, selectOrganizations } from '../../state/slices/organizations.slice';
+import { fetchOrganizations } from '../../state/slices/organizations.slice';
 import type { DeviceUpdateRequest } from '../../types/device';
 import Input from '../../components/common/Input/Input';
 import Button from '../../components/common/Button/Button';
@@ -22,7 +22,6 @@ const DeviceEdit = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const device = useSelector(selectSelectedDevice);
-  const organizations = useSelector(selectOrganizations);
   const isLoading = useSelector(selectDevicesLoading);
   const error = useSelector(selectDevicesError);
   

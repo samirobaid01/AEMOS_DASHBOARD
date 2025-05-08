@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDispatch, useSelector } from 'react-redux';
-import type { RootState } from '../../state/store';
+import { useDispatch } from 'react-redux';
 import i18n from '../../i18n/i18n';
 
 const Settings = () => {
@@ -9,11 +8,21 @@ const Settings = () => {
   const dispatch = useDispatch();
   const [darkMode, setDarkMode] = useState(false);
   const [language, setLanguage] = useState(i18n.language || 'en');
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [notifications, setNotifications] = useState({
     email: true,
     sms: false,
     app: true
   });
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const handleLanguageChange = (lang: string) => {
     setLanguage(lang);
@@ -49,138 +58,220 @@ const Settings = () => {
     }
   }, []);
 
+  const containerStyle = {
+    padding: '1.5rem 1rem',
+  };
+
+  const headerStyle = {
+    fontSize: '1.5rem',
+    fontWeight: 600,
+    color: '#1f2937',
+    marginBottom: '1.5rem',
+  };
+
+  const cardStyle = {
+    backgroundColor: 'white',
+    boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+    borderRadius: '0.5rem',
+    overflow: 'hidden',
+  };
+
+  const sectionStyle = {
+    padding: '1.5rem',
+    borderBottom: '1px solid #e5e7eb',
+  };
+
+  const sectionTitleStyle = {
+    fontSize: '1.125rem',
+    fontWeight: 500,
+    color: '#1f2937',
+    marginBottom: '1rem',
+  };
+
+  const languageButtonStyle = (isActive: boolean) => ({
+    padding: '0.5rem 1rem',
+    borderRadius: '0.375rem',
+    display: 'flex',
+    alignItems: 'center',
+    backgroundColor: isActive ? '#3b82f6' : '#f3f4f6',
+    color: isActive ? 'white' : '#1f2937',
+    cursor: 'pointer',
+    transition: 'background-color 0.2s',
+  });
+
+  const languageGridStyle = {
+    display: 'grid',
+    gridTemplateColumns: windowWidth >= 640 ? 'repeat(2, 1fr)' : '1fr',
+    gap: '1rem',
+  };
+
+  const toggleWrapperStyle = {
+    display: 'flex',
+    alignItems: 'center',
+  };
+
+  const toggleLabelStyle = {
+    fontSize: '0.875rem',
+    fontWeight: 500,
+    color: '#4b5563',
+    marginRight: '0.5rem',
+  };
+
+  const toggleSwitchStyle = (isActive: boolean) => ({
+    width: '2.75rem',
+    height: '1.5rem',
+    display: 'flex',
+    alignItems: 'center',
+    borderRadius: '9999px',
+    padding: '0.25rem',
+    transition: 'background-color 0.2s',
+    backgroundColor: isActive ? '#3b82f6' : '#d1d5db',
+    cursor: 'pointer',
+  });
+
+  const toggleKnobStyle = (isActive: boolean) => ({
+    backgroundColor: 'white',
+    width: '1rem',
+    height: '1rem',
+    borderRadius: '9999px',
+    boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+    transform: isActive ? 'translateX(1.25rem)' : 'translateX(0)',
+    transition: 'transform 0.2s',
+  });
+
+  const notificationItemStyle = {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: '1rem',
+  };
+
+  const notificationTextWrapperStyle = {
+    flex: 1,
+  };
+
+  const notificationTitleStyle = {
+    fontSize: '0.875rem',
+    fontWeight: 500,
+    color: '#4b5563',
+  };
+
+  const notificationDescStyle = {
+    fontSize: '0.875rem',
+    color: '#6b7280',
+  };
+
+  const buttonStyle = (colorScheme: 'blue' | 'red') => ({
+    padding: '0.5rem 1rem',
+    backgroundColor: colorScheme === 'blue' ? '#3b82f6' : '#ef4444',
+    color: 'white',
+    borderRadius: '0.375rem',
+    fontWeight: 500,
+    cursor: 'pointer',
+    transition: 'background-color 0.2s',
+    marginRight: colorScheme === 'blue' ? '1rem' : 0,
+  });
+
   return (
-    <div className="py-6 px-4 sm:px-6 lg:px-8">
-      <h1 className="text-2xl font-semibold text-gray-900 mb-6">{t('settings')}</h1>
+    <div style={containerStyle}>
+      <h1 style={headerStyle}>{t('settings')}</h1>
       
-      <div className="bg-white shadow rounded-lg overflow-hidden divide-y divide-gray-200">
+      <div style={cardStyle}>
         {/* Language Section */}
-        <div className="p-6">
-          <h2 className="text-lg font-medium text-gray-900 mb-4">{t('language')}</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div style={sectionStyle}>
+          <h2 style={sectionTitleStyle}>{t('language')}</h2>
+          <div style={languageGridStyle}>
             <button
               type="button"
               onClick={() => handleLanguageChange('en')}
-              className={`px-4 py-2 rounded-md flex items-center ${
-                language === 'en' 
-                  ? 'bg-blue-500 text-white' 
-                  : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
-              }`}
+              style={languageButtonStyle(language === 'en')}
             >
-              <span className="mr-2">🇺🇸</span> English
+              <span style={{ marginRight: '0.5rem' }}>🇺🇸</span> English
             </button>
             <button
               type="button"
               onClick={() => handleLanguageChange('es')}
-              className={`px-4 py-2 rounded-md flex items-center ${
-                language === 'es' 
-                  ? 'bg-blue-500 text-white' 
-                  : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
-              }`}
+              style={languageButtonStyle(language === 'es')}
             >
-              <span className="mr-2">🇪🇸</span> Español
+              <span style={{ marginRight: '0.5rem' }}>🇪🇸</span> Español
             </button>
           </div>
         </div>
         
         {/* Theme Section */}
-        <div className="p-6">
-          <h2 className="text-lg font-medium text-gray-900 mb-4">{t('theme')}</h2>
-          <div className="flex items-center">
-            <span className="text-sm font-medium text-gray-700 mr-2">{t('dark_mode')}</span>
+        <div style={sectionStyle}>
+          <h2 style={sectionTitleStyle}>{t('theme')}</h2>
+          <div style={toggleWrapperStyle}>
+            <span style={toggleLabelStyle}>{t('dark_mode')}</span>
             <button 
               type="button"
               onClick={handleDarkModeToggle}
-              className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors ${
-                darkMode ? 'bg-blue-500' : 'bg-gray-300'
-              }`}
+              style={toggleSwitchStyle(darkMode)}
             >
-              <span 
-                className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform ${
-                  darkMode ? 'translate-x-5' : 'translate-x-0'
-                }`} 
-              />
+              <span style={toggleKnobStyle(darkMode)} />
             </button>
           </div>
         </div>
         
         {/* Notifications Section */}
-        <div className="p-6">
-          <h2 className="text-lg font-medium text-gray-900 mb-4">{t('notifications')}</h2>
-          <ul className="space-y-4">
-            <li className="flex items-center justify-between">
-              <div>
-                <h3 className="text-sm font-medium text-gray-700">{t('email_notifications')}</h3>
-                <p className="text-sm text-gray-500">{t('email_notifications_desc')}</p>
+        <div style={sectionStyle}>
+          <h2 style={sectionTitleStyle}>{t('notifications')}</h2>
+          <div>
+            <div style={notificationItemStyle}>
+              <div style={notificationTextWrapperStyle}>
+                <h3 style={notificationTitleStyle}>{t('email_notifications')}</h3>
+                <p style={notificationDescStyle}>{t('email_notifications_desc')}</p>
               </div>
               <button 
                 type="button"
                 onClick={() => handleNotificationChange('email')}
-                className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors ${
-                  notifications.email ? 'bg-blue-500' : 'bg-gray-300'
-                }`}
+                style={toggleSwitchStyle(notifications.email)}
               >
-                <span 
-                  className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform ${
-                    notifications.email ? 'translate-x-5' : 'translate-x-0'
-                  }`} 
-                />
+                <span style={toggleKnobStyle(notifications.email)} />
               </button>
-            </li>
-            <li className="flex items-center justify-between">
-              <div>
-                <h3 className="text-sm font-medium text-gray-700">{t('sms_notifications')}</h3>
-                <p className="text-sm text-gray-500">{t('sms_notifications_desc')}</p>
+            </div>
+            <div style={notificationItemStyle}>
+              <div style={notificationTextWrapperStyle}>
+                <h3 style={notificationTitleStyle}>{t('sms_notifications')}</h3>
+                <p style={notificationDescStyle}>{t('sms_notifications_desc')}</p>
               </div>
               <button 
                 type="button"
                 onClick={() => handleNotificationChange('sms')}
-                className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors ${
-                  notifications.sms ? 'bg-blue-500' : 'bg-gray-300'
-                }`}
+                style={toggleSwitchStyle(notifications.sms)}
               >
-                <span 
-                  className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform ${
-                    notifications.sms ? 'translate-x-5' : 'translate-x-0'
-                  }`} 
-                />
+                <span style={toggleKnobStyle(notifications.sms)} />
               </button>
-            </li>
-            <li className="flex items-center justify-between">
-              <div>
-                <h3 className="text-sm font-medium text-gray-700">{t('app_notifications')}</h3>
-                <p className="text-sm text-gray-500">{t('app_notifications_desc')}</p>
+            </div>
+            <div style={notificationItemStyle}>
+              <div style={notificationTextWrapperStyle}>
+                <h3 style={notificationTitleStyle}>{t('app_notifications')}</h3>
+                <p style={notificationDescStyle}>{t('app_notifications_desc')}</p>
               </div>
               <button 
                 type="button"
                 onClick={() => handleNotificationChange('app')}
-                className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors ${
-                  notifications.app ? 'bg-blue-500' : 'bg-gray-300'
-                }`}
+                style={toggleSwitchStyle(notifications.app)}
               >
-                <span 
-                  className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform ${
-                    notifications.app ? 'translate-x-5' : 'translate-x-0'
-                  }`} 
-                />
+                <span style={toggleKnobStyle(notifications.app)} />
               </button>
-            </li>
-          </ul>
+            </div>
+          </div>
         </div>
         
         {/* Account Section */}
-        <div className="p-6">
-          <h2 className="text-lg font-medium text-gray-900 mb-4">{t('account')}</h2>
-          <div className="space-y-3">
+        <div style={sectionStyle}>
+          <h2 style={sectionTitleStyle}>{t('account')}</h2>
+          <div style={{ marginTop: '0.75rem' }}>
             <button 
               type="button" 
-              className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              style={buttonStyle('blue')}
             >
               {t('change_password')}
             </button>
             <button 
               type="button" 
-              className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 ml-4"
+              style={buttonStyle('red')}
             >
               {t('delete_account')}
             </button>

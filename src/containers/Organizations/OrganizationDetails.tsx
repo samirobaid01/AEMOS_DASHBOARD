@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { useTranslation } from 'react-i18next';
 import type { AppDispatch } from '../../state/store';
 import {
   fetchOrganizationById,
@@ -13,10 +12,9 @@ import {
 import { fetchAreasByOrganizationId, selectAreas } from '../../state/slices/areas.slice';
 import { fetchDevicesByOrganizationId, selectDevices } from '../../state/slices/devices.slice';
 import LoadingScreen from '../../components/common/Loading/LoadingScreen';
-import Button from '../../components/common/Button/Button';
+import { OrganizationDetails as OrganizationDetailsComponent } from '../../components/organizations';
 
 const OrganizationDetails = () => {
-  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
@@ -54,278 +52,36 @@ const OrganizationDetails = () => {
     }
   };
 
-  if (isLoading) {
+  const handleBack = () => {
+    navigate('/organizations');
+  };
+
+  const handleOpenDeleteModal = () => {
+    setDeleteModalOpen(true);
+  };
+
+  const handleCloseDeleteModal = () => {
+    setDeleteModalOpen(false);
+  };
+
+  if (isLoading && !organization) {
     return <LoadingScreen />;
   }
 
-  if (error) {
-    return (
-      <div className="py-6 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-3xl mx-auto">
-          <div className="bg-red-50 p-4 rounded-md">
-            <h3 className="text-sm font-medium text-red-800">{error}</h3>
-          </div>
-          <div className="mt-4">
-            <Button
-              variant="outline"
-              onClick={() => navigate('/organizations')}
-            >
-              {t('back_to_organizations')}
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!organization) {
-    return (
-      <div className="py-6 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-3xl mx-auto">
-          <div className="bg-yellow-50 p-4 rounded-md">
-            <h3 className="text-sm font-medium text-yellow-800">{t('organization_not_found')}</h3>
-          </div>
-          <div className="mt-4">
-            <Button
-              variant="outline"
-              onClick={() => navigate('/organizations')}
-            >
-              {t('back_to_organizations')}
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="py-6 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-semibold text-gray-900">{organization.name}</h1>
-          <div className="flex space-x-3">
-            <Button
-              variant="outline"
-              onClick={() => navigate('/organizations')}
-            >
-              {t('back')}
-            </Button>
-            <Link to={`/organizations/${id}/edit`}>
-              <Button variant="primary">
-                {t('edit')}
-              </Button>
-            </Link>
-            <Button
-              variant="danger"
-              onClick={() => setDeleteModalOpen(true)}
-            >
-              {t('delete')}
-            </Button>
-          </div>
-        </div>
-
-        <div className="bg-white shadow rounded-lg overflow-hidden">
-          {/* Organization Details */}
-          <div className="p-6 border-b border-gray-200">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">{t('organization_details')}</h2>
-            <dl className="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
-              <div>
-                <dt className="text-sm font-medium text-gray-500">{t('status')}</dt>
-                <dd className="mt-1">
-                  <span
-                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      organization.status
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-red-100 text-red-800'
-                    }`}
-                  >
-                    {organization.status ? t('active') : t('inactive')}
-                  </span>
-                </dd>
-              </div>
-              
-              <div>
-                <dt className="text-sm font-medium text-gray-500">{t('organization_type')}</dt>
-                <dd className="mt-1 text-sm text-gray-900">
-                  {organization.isParent ? t('parent_organization') : t('child_organization')}
-                </dd>
-              </div>
-
-              {organization.email && (
-                <div>
-                  <dt className="text-sm font-medium text-gray-500">{t('email')}</dt>
-                  <dd className="mt-1 text-sm text-gray-900">{organization.email}</dd>
-                </div>
-              )}
-
-              {organization.contactNumber && (
-                <div>
-                  <dt className="text-sm font-medium text-gray-500">{t('contact_number')}</dt>
-                  <dd className="mt-1 text-sm text-gray-900">{organization.contactNumber}</dd>
-                </div>
-              )}
-
-              {organization.address && (
-                <div className="sm:col-span-2">
-                  <dt className="text-sm font-medium text-gray-500">{t('address')}</dt>
-                  <dd className="mt-1 text-sm text-gray-900">
-                    {organization.address}
-                    {organization.zip && `, ${organization.zip}`}
-                  </dd>
-                </div>
-              )}
-
-              {organization.detail && (
-                <div className="sm:col-span-2">
-                  <dt className="text-sm font-medium text-gray-500">{t('description')}</dt>
-                  <dd className="mt-1 text-sm text-gray-900">{organization.detail}</dd>
-                </div>
-              )}
-            </dl>
-          </div>
-
-          {/* Areas Section */}
-          <div className="p-6 border-b border-gray-200">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-medium text-gray-900">{t('areas')}</h2>
-              <Link to={`/areas/create?organizationId=${id}`}>
-                <Button variant="outline" size="sm">
-                  {t('add_area')}
-                </Button>
-              </Link>
-            </div>
-            
-            {areas.length > 0 ? (
-              <ul className="divide-y divide-gray-200">
-                {areas.map(area => (
-                  <li key={area.id} className="py-3">
-                    <Link
-                      to={`/areas/${area.id}`}
-                      className="flex items-center hover:bg-gray-50 p-2 rounded-md"
-                    >
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium text-gray-900">{area.name}</p>
-                        <p className="text-sm text-gray-500 truncate">{area.description || t('no_description')}</p>
-                      </div>
-                      <div>
-                        <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            area.status
-                              ? 'bg-green-100 text-green-800'
-                              : 'bg-red-100 text-red-800'
-                          }`}
-                        >
-                          {area.status ? t('active') : t('inactive')}
-                        </span>
-                      </div>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-sm text-gray-500">{t('no_areas')}</p>
-            )}
-          </div>
-
-          {/* Devices Section */}
-          <div className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-medium text-gray-900">{t('devices')}</h2>
-              <Link to={`/devices/create?organizationId=${id}`}>
-                <Button variant="outline" size="sm">
-                  {t('add_device')}
-                </Button>
-              </Link>
-            </div>
-            
-            {devices.length > 0 ? (
-              <ul className="divide-y divide-gray-200">
-                {devices.map(device => (
-                  <li key={device.id} className="py-3">
-                    <Link
-                      to={`/devices/${device.id}`}
-                      className="flex items-center hover:bg-gray-50 p-2 rounded-md"
-                    >
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium text-gray-900">{device.name}</p>
-                        <p className="text-sm text-gray-500">{device.serialNumber}</p>
-                      </div>
-                      <div className="flex items-center">
-                        <span className="text-xs text-gray-500 mr-2">{device.type}</span>
-                        <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            device.status
-                              ? 'bg-green-100 text-green-800'
-                              : 'bg-red-100 text-red-800'
-                          }`}
-                        >
-                          {device.status ? t('active') : t('inactive')}
-                        </span>
-                      </div>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-sm text-gray-500">{t('no_devices')}</p>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Delete Confirmation Modal */}
-      {deleteModalOpen && (
-        <div className="fixed z-10 inset-0 overflow-y-auto">
-          <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div className="fixed inset-0 transition-opacity" aria-hidden="true">
-              <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
-            </div>
-
-            <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-
-            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                <div className="sm:flex sm:items-start">
-                  <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
-                    <svg className="h-6 w-6 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                    </svg>
-                  </div>
-                  <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                    <h3 className="text-lg font-medium text-gray-900">{t('delete_organization')}</h3>
-                    <div className="mt-2">
-                      <p className="text-sm text-gray-500">
-                        {t('delete_organization_confirm', { name: organization.name })}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                <Button
-                  type="button"
-                  variant="danger"
-                  isLoading={isDeleting}
-                  disabled={isDeleting}
-                  onClick={handleDelete}
-                  className="w-full sm:w-auto sm:ml-3"
-                >
-                  {t('delete')}
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setDeleteModalOpen(false)}
-                  className="mt-3 w-full sm:mt-0 sm:w-auto"
-                >
-                  {t('cancel')}
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+    <OrganizationDetailsComponent
+      organization={organization}
+      areas={areas}
+      devices={devices}
+      isLoading={isLoading}
+      error={error}
+      deleteModalOpen={deleteModalOpen}
+      isDeleting={isDeleting}
+      onBack={handleBack}
+      onDelete={handleDelete}
+      onOpenDeleteModal={handleOpenDeleteModal}
+      onCloseDeleteModal={handleCloseDeleteModal}
+    />
   );
 };
 

@@ -6,7 +6,7 @@ import type { Area, AreaCreateRequest, AreaUpdateRequest, AreaFilterParams } fro
  */
 export const getAreas = async (params?: AreaFilterParams) => {
   const response = await apiClient.get('/areas', { params });
-  return response.data.data;
+  return response.data.data.areas;
 };
 
 /**
@@ -14,7 +14,7 @@ export const getAreas = async (params?: AreaFilterParams) => {
  */
 export const getAreaById = async (id: number) => {
   const response = await apiClient.get(`/areas/${id}`);
-  return response.data.data;
+  return response.data.data.area;
 };
 
 /**
@@ -22,7 +22,7 @@ export const getAreaById = async (id: number) => {
  */
 export const getAreasByOrganizationId = async (organizationId: number) => {
   const response = await apiClient.get(`/areas/organization/${organizationId}`);
-  return response.data.data;
+  return response.data.data.areas;
 };
 
 /**
@@ -30,7 +30,7 @@ export const getAreasByOrganizationId = async (organizationId: number) => {
  */
 export const createArea = async (areaData: AreaCreateRequest) => {
   const response = await apiClient.post('/areas', areaData);
-  return response.data.data;
+  return response.data.data.area;
 };
 
 /**
@@ -38,7 +38,7 @@ export const createArea = async (areaData: AreaCreateRequest) => {
  */
 export const updateArea = async (id: number, areaData: AreaUpdateRequest) => {
   const response = await apiClient.patch(`/areas/${id}`, areaData);
-  return response.data.data;
+  return response.data.data.area;
 };
 
 /**

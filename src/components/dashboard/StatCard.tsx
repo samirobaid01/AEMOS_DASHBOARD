@@ -25,17 +25,74 @@ const StatCard: React.FC<StatCardProps> = ({
   return (
     <Link 
       to={path}
-      className={`flex overflow-hidden rounded-xl border ${borderColor} ${bgColor} shadow-soft hover:shadow-hard transition-all duration-300 transform hover:-translate-y-1`}
+      style={{
+        display: 'flex',
+        overflow: 'hidden',
+        borderRadius: '0.75rem',
+        border: '1px solid',
+        borderColor: '#e5e7eb',
+        backgroundColor: 'white',
+        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+        transition: 'all 0.3s',
+        transform: 'translateY(0)',
+        textDecoration: 'none',
+        height: '100%',
+      }}
+      onMouseOver={(e) => {
+        e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1)';
+        e.currentTarget.style.transform = 'translateY(-4px)';
+        e.currentTarget.style.borderColor = borderColor.replace('border-', '');
+      }}
+      onMouseOut={(e) => {
+        e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
+        e.currentTarget.style.transform = 'translateY(0)';
+        e.currentTarget.style.borderColor = '#e5e7eb';
+      }}
     >
-      <div className={`w-2 ${color}`}></div>
-      <div className="p-5 w-full">
-        <div className="flex items-center">
-          <div className={`flex-shrink-0 rounded-lg p-3 ${color} text-white text-2xl`}>
+      <div style={{ 
+        width: '8px', 
+        backgroundColor: color.replace('bg-', ''),
+      }}></div>
+      <div style={{ 
+        padding: '1.25rem',
+        width: '100%',
+      }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+        }}>
+          <div style={{
+            flexShrink: 0,
+            borderRadius: '0.5rem',
+            padding: '0.625rem',
+            backgroundColor: color.replace('bg-', ''),
+            color: 'white',
+            fontSize: '1.5rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '3rem',
+            height: '3rem',
+          }}>
             {icon}
           </div>
-          <div className="ml-5 flex-1">
-            <h3 className={`text-sm font-medium ${textColor} mb-1`}>{name}</h3>
-            <p className="text-3xl font-bold text-soil-900">{count}</p>
+          <div style={{
+            marginLeft: '1.25rem',
+            flex: 1,
+          }}>
+            <h3 style={{
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              color: '#6B7280',
+              marginTop: 0,
+              marginBottom: '0.5rem',
+            }}>{name}</h3>
+            <p style={{
+              fontSize: 'calc(1.5rem + 0.25vw)',
+              fontWeight: 'bold',
+              color: '#111827',
+              margin: 0,
+            }}>{count}</p>
           </div>
         </div>
       </div>

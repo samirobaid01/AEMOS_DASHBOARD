@@ -13,7 +13,7 @@ function App() {
     <Provider store={store}>
       <Router>
         <Suspense fallback={<LoadingScreen />}>
-          <div className="min-h-screen bg-leaf-50">
+          <div className="h-full w-full">
             <AppRoutes />
           </div>
         </Suspense>

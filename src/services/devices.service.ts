@@ -6,7 +6,7 @@ import type { Device, DeviceCreateRequest, DeviceUpdateRequest, DeviceFilterPara
  */
 export const getDevices = async (params?: DeviceFilterParams) => {
   const response = await apiClient.get('/devices', { params });
-  return response.data.data;
+  return response.data.data.devices;
 };
 
 /**
@@ -14,7 +14,7 @@ export const getDevices = async (params?: DeviceFilterParams) => {
  */
 export const getDeviceById = async (id: number) => {
   const response = await apiClient.get(`/devices/${id}`);
-  return response.data.data;
+  return response.data.data.device;
 };
 
 /**
@@ -22,7 +22,7 @@ export const getDeviceById = async (id: number) => {
  */
 export const createDevice = async (deviceData: DeviceCreateRequest) => {
   const response = await apiClient.post('/devices', deviceData);
-  return response.data.data;
+  return response.data.data.device;
 };
 
 /**
@@ -30,7 +30,7 @@ export const createDevice = async (deviceData: DeviceCreateRequest) => {
  */
 export const updateDevice = async (id: number, deviceData: DeviceUpdateRequest) => {
   const response = await apiClient.patch(`/devices/${id}`, deviceData);
-  return response.data.data;
+  return response.data.data.device;
 };
 
 /**
@@ -46,7 +46,7 @@ export const deleteDevice = async (id: number) => {
  */
 export const getDevicesByOrganizationId = async (organizationId: number) => {
   const response = await apiClient.get('/devices', { params: { organizationId } });
-  return response.data.data;
+  return response.data.data.devices;
 };
 
 const DevicesService = {

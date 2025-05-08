@@ -6,7 +6,7 @@ import type { Sensor, SensorCreateRequest, SensorUpdateRequest, SensorFilterPara
  */
 export const getSensors = async (params?: SensorFilterParams) => {
   const response = await apiClient.get('/sensors', { params });
-  return response.data.data;
+  return response.data.data.sensors;
 };
 
 /**
@@ -14,7 +14,7 @@ export const getSensors = async (params?: SensorFilterParams) => {
  */
 export const getSensorById = async (id: number) => {
   const response = await apiClient.get(`/sensors/${id}`);
-  return response.data.data;
+  return response.data.data.sensor;
 };
 
 /**
@@ -22,7 +22,7 @@ export const getSensorById = async (id: number) => {
  */
 export const createSensor = async (sensorData: SensorCreateRequest) => {
   const response = await apiClient.post('/sensors', sensorData);
-  return response.data.data;
+  return response.data.data.sensor;
 };
 
 /**
@@ -30,7 +30,7 @@ export const createSensor = async (sensorData: SensorCreateRequest) => {
  */
 export const updateSensor = async (id: number, sensorData: SensorUpdateRequest) => {
   const response = await apiClient.patch(`/sensors/${id}`, sensorData);
-  return response.data.data;
+  return response.data.data.sensor;
 };
 
 /**
@@ -46,7 +46,7 @@ export const deleteSensor = async (id: number) => {
  */
 export const getSensorsByAreaId = async (areaId: number) => {
   const response = await apiClient.get('/sensors', { params: { areaId } });
-  return response.data.data;
+  return response.data.data.sensors;
 };
 
 const SensorsService = {
