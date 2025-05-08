@@ -14,7 +14,29 @@ export const getDevices = async (params?: DeviceFilterParams) => {
  */
 export const getDeviceById = async (id: number) => {
   const response = await apiClient.get(`/devices/${id}`);
-  return response.data.data.device;
+  console.log("Full API response:", response);
+  console.log("Device response data:", response.data);
+  
+  const deviceData = response.data.data.device;
+  console.log("Raw device from API:", deviceData);
+  
+  // Map the API response to match the Device interface
+  const mappedDevice: Device = {
+    id: deviceData.id,
+    name: deviceData.name,
+    serialNumber: deviceData.uuid || 'N/A',
+    organizationId: deviceData.organizationId || 1,
+    type: deviceData.type || 'Unknown',
+    status: deviceData.status || false,
+    firmware: deviceData.firmware,
+    description: deviceData.description,
+    configuration: deviceData.configuration || {},
+    createdAt: deviceData.createdAt,
+    updatedAt: deviceData.updatedAt
+  };
+  
+  console.log("Mapped device:", mappedDevice);
+  return mappedDevice;
 };
 
 /**

@@ -20,6 +20,7 @@ export interface DeviceCreateRequest {
   name: string;
   serialNumber: string;
   organizationId: number;
+  areaId?: number;
   type: string;
   status: boolean;
   firmware?: string;
@@ -31,6 +32,7 @@ export interface DeviceUpdateRequest {
   name?: string;
   serialNumber?: string;
   organizationId?: number;
+  areaId?: number;
   type?: string;
   status?: boolean;
   firmware?: string;

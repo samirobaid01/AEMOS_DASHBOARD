@@ -72,7 +72,7 @@ const SensorFilter: React.FC<SensorFilterProps> = ({
             color: '#111827',
             outline: 'none',
           }}
-          placeholder={t('search_sensors')}
+          placeholder={t('common.search')}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           onFocus={(e) => {
@@ -116,7 +116,7 @@ const SensorFilter: React.FC<SensorFilterProps> = ({
             e.target.style.borderColor = '#d1d5db';
           }}
         >
-          <option value="">{t('all_types')}</option>
+          <option value="">{t('common.all')}</option>
           {sensorTypes.map(type => (
             <option key={type} value={type}>{type}</option>
           ))}

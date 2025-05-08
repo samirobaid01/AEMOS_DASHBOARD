@@ -1,13 +1,18 @@
 import React from 'react';
-import { useTranslation } from 'react-i18next';
 
 interface EmptyStateProps {
+  message: string;
+  description: string;
+  actionLabel: string;
   onAddDevice: () => void;
 }
 
-const EmptyState: React.FC<EmptyStateProps> = ({ onAddDevice }) => {
-  const { t } = useTranslation();
-
+const EmptyState: React.FC<EmptyStateProps> = ({ 
+  message,
+  description,
+  actionLabel,
+  onAddDevice 
+}) => {
   const emptyStateStyle = {
     display: 'flex',
     flexDirection: 'column' as const,
@@ -49,7 +54,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({ onAddDevice }) => {
         color: '#111827',
         textAlign: 'center'
       }}>
-        {t('no_devices_found')}
+        {message}
       </h3>
       
       <p style={{
@@ -59,7 +64,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({ onAddDevice }) => {
         maxWidth: '20rem',
         textAlign: 'center'
       }}>
-        {t('no_devices_found_description')}
+        {description}
       </p>
       
       <button 
@@ -83,7 +88,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({ onAddDevice }) => {
           e.currentTarget.style.backgroundColor = '#3b82f6';
         }}
       >
-        {t('add_device')}
+        {actionLabel}
       </button>
     </div>
   );

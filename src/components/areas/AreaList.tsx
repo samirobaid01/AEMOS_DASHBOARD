@@ -80,7 +80,7 @@ const AreaList: React.FC<AreaListProps> = ({
     return (
       <div style={{ padding: isMobile ? '1rem' : '1.5rem 2rem' }}>
         <div style={headerStyle}>
-          <h1 style={titleStyle}>{t('areas')}</h1>
+          <h1 style={titleStyle}>{t('areas.title')}</h1>
           <button
             onClick={onAddArea}
             style={buttonStyle}
@@ -91,7 +91,7 @@ const AreaList: React.FC<AreaListProps> = ({
               e.currentTarget.style.backgroundColor = '#3b82f6';
             }}
           >
-            {t('add_area')}
+            {t('areas.add')}
           </button>
         </div>
         <div style={errorStyle}>
@@ -115,7 +115,7 @@ const AreaList: React.FC<AreaListProps> = ({
   return (
     <div style={{ padding: isMobile ? '1rem' : '1.5rem 2rem' }}>
       <div style={headerStyle}>
-        <h1 style={titleStyle}>{t('areas')}</h1>
+        <h1 style={titleStyle}>{t('areas.title')}</h1>
         <button
           onClick={onAddArea}
           style={buttonStyle}
@@ -137,7 +137,7 @@ const AreaList: React.FC<AreaListProps> = ({
               clipRule="evenodd" 
             />
           </svg>
-          {t('add_area')}
+          {t('areas.add')}
         </button>
       </div>
 
@@ -152,9 +152,9 @@ const AreaList: React.FC<AreaListProps> = ({
 
       {areas.length === 0 ? (
         <EmptyState
-          message={t('no_areas_found')}
-          description={t('no_areas_found_description')}
-          actionLabel={t('add_area')}
+          message={t('areas.no_areas_found')}
+          description={t('areas.no_areas_found_description')}
+          actionLabel={t('areas.add')}
           onAction={onAddArea}
         />
       ) : (

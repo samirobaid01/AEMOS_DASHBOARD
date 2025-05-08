@@ -1,27 +1,30 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import type { AreaCreateRequest } from '../../types/area';
+import type { DeviceCreateRequest } from '../../types/device';
 import type { Organization } from '../../types/organization';
+import type { Area } from '../../types/area';
 import Input from '../../components/common/Input/Input';
 import Button from '../../components/common/Button/Button';
 
-interface AreaCreateProps {
-  formData: AreaCreateRequest;
+interface DeviceCreateProps {
+  formData: DeviceCreateRequest;
   formErrors: Record<string, string>;
   isLoading: boolean;
   error: string | null;
   organizations: Organization[];
+  areas: Area[];
   onSubmit: (e: React.FormEvent) => void;
   onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
   onCancel: () => void;
 }
 
-const AreaCreate: React.FC<AreaCreateProps> = ({
+const DeviceCreate: React.FC<DeviceCreateProps> = ({
   formData,
   formErrors,
   isLoading,
   error,
   organizations,
+  areas,
   onSubmit,
   onChange,
   onCancel
@@ -136,6 +139,12 @@ const AreaCreate: React.FC<AreaCreateProps> = ({
     column: {
       display: 'flex',
       flexDirection: 'column' as const,
+    },
+    twoColumns: {
+      display: 'grid',
+      gridTemplateColumns: '1fr 1fr',
+      gap: '1rem',
+      gridColumn: '1 / -1',
     }
   };
   
@@ -143,12 +152,12 @@ const AreaCreate: React.FC<AreaCreateProps> = ({
     <div style={styles.container}>
       <div style={styles.innerContainer}>
         <div style={styles.header}>
-          <h1 style={styles.title}>{t('new_area')}</h1>
+          <h1 style={styles.title}>{t('new_device')}</h1>
           <Button
             variant="outline"
             onClick={onCancel}
           >
-            {t('common.cancel')}
+            {t('cancel')}
           </Button>
         </div>
         
@@ -164,9 +173,24 @@ const AreaCreate: React.FC<AreaCreateProps> = ({
                   required
                   value={formData.name}
                   onChange={onChange}
-                  label={t('common.name')}
-                  placeholder={t('areas.enter_area_name')}
+                  label={t('devices.name')}
+                  placeholder={t('devices.enter_device_name')}
                   error={formErrors.name}
+                />
+              </div>
+              
+              {/* Serial Number */}
+              <div style={styles.fullWidth}>
+                <Input
+                  id="serialNumber"
+                  name="serialNumber"
+                  type="text"
+                  required
+                  value={formData.serialNumber}
+                  onChange={onChange}
+                  label={t('devices.serial_number')}
+                  placeholder={t('devices.enter_serial_number')}
+                  error={formErrors.serialNumber}
                 />
               </div>
               
@@ -174,7 +198,7 @@ const AreaCreate: React.FC<AreaCreateProps> = ({
               <div style={styles.fullWidth}>
                 <div style={styles.column}>
                   <label htmlFor="organizationId" style={styles.labelText}>
-                    {t('common.organization')}
+                    {t('devices.organization')}
                   </label>
                   <select
                     id="organizationId"
@@ -187,7 +211,7 @@ const AreaCreate: React.FC<AreaCreateProps> = ({
                     onChange={onChange}
                     required
                   >
-                    <option value="">{t('areas.select_organization')}</option>
+                    <option value="">{t('select_organization')}</option>
                     {organizations.map(org => (
                       <option key={org.id} value={org.id}>
                         {org.name}
@@ -200,11 +224,80 @@ const AreaCreate: React.FC<AreaCreateProps> = ({
                 </div>
               </div>
               
+              {/* Area */}
+              <div style={styles.fullWidth}>
+                <div style={styles.column}>
+                  <label htmlFor="areaId" style={styles.labelText}>
+                    {t('devices.area')}
+                  </label>
+                  <select
+                    id="areaId"
+                    name="areaId"
+                    style={styles.select}
+                    value={formData.organizationId || ''}
+                    onChange={onChange}
+                  >
+                    <option value="">{t('select_area')}</option>
+                    {areas
+                      .filter(area => !formData.organizationId || area.organizationId === formData.organizationId)
+                      .map(area => (
+                        <option key={area.id} value={area.id}>
+                          {area.name}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+              </div>
+              
+              {/* Two column section */}
+              <div style={styles.twoColumns}>
+                {/* Type */}
+                <div>
+                  <div style={styles.column}>
+                    <label htmlFor="type" style={styles.labelText}>
+                      {t('devices.device_type')}
+                    </label>
+                    <select
+                      id="type"
+                      name="type"
+                      style={{
+                        ...styles.select,
+                        ...(formErrors.type ? styles.selectError : {})
+                      }}
+                      value={formData.type || ''}
+                      onChange={onChange}
+                      required
+                    >
+                      <option value="">{t('select_device_type')}</option>
+                      <option value="sensor">{t('sensor')}</option>
+                      <option value="gateway">{t('gateway')}</option>
+                      <option value="controller">{t('controller')}</option>
+                    </select>
+                    {formErrors.type && (
+                      <p style={styles.errorText}>{formErrors.type}</p>
+                    )}
+                  </div>
+                </div>
+                
+                {/* Firmware */}
+                <div>
+                  <Input
+                    id="firmware"
+                    name="firmware"
+                    type="text"
+                    value={formData.firmware || ''}
+                    onChange={onChange}
+                    label={t('firmware')}
+                    placeholder={t('enter_firmware_version')}
+                  />
+                </div>
+              </div>
+              
               {/* Description */}
               <div style={styles.fullWidth}>
                 <div style={styles.column}>
                   <label htmlFor="description" style={styles.labelText}>
-                    {t('common.description')}
+                    {t('description')}
                   </label>
                   <textarea
                     id="description"
@@ -213,7 +306,7 @@ const AreaCreate: React.FC<AreaCreateProps> = ({
                     value={formData.description || ''}
                     onChange={onChange}
                     style={styles.textarea}
-                    placeholder={t('areas.enter_area_description')}
+                    placeholder={t('enter_device_description')}
                   />
                 </div>
               </div>
@@ -230,7 +323,7 @@ const AreaCreate: React.FC<AreaCreateProps> = ({
                     style={styles.checkbox}
                   />
                   <label htmlFor="status" style={styles.checkboxLabel}>
-                    {t('common.active')}
+                    {t('active')}
                   </label>
                 </div>
               </div>
@@ -252,7 +345,7 @@ const AreaCreate: React.FC<AreaCreateProps> = ({
                 variant="outline"
                 onClick={onCancel}
               >
-                {t('common.cancel')}
+                {t('cancel')}
               </Button>
               <Button
                 type="submit"
@@ -260,7 +353,7 @@ const AreaCreate: React.FC<AreaCreateProps> = ({
                 isLoading={isLoading}
                 disabled={isLoading}
               >
-                {t('common.create')}
+                {t('create')}
               </Button>
             </div>
           </form>
@@ -270,4 +363,4 @@ const AreaCreate: React.FC<AreaCreateProps> = ({
   );
 };
 
-export default AreaCreate; 
+export default DeviceCreate; 

@@ -210,21 +210,21 @@ const AreaDetails: React.FC<AreaDetailsProps> = ({
             
             <div>
               <h2 style={{ fontSize: '1.125rem', fontWeight: 600, color: '#111827', margin: '0 0 1rem 0' }}>
-                {t('additional_details')}
+                {t('areas.additional_details')}
               </h2>
               
               <div style={{ marginBottom: '1rem' }}>
                 <p style={{ fontSize: '0.875rem', fontWeight: 500, color: '#6b7280', margin: '0 0 0.25rem 0' }}>
-                  {t('description')}
+                  {t('common.description')}
                 </p>
                 <p style={{ fontSize: '1rem', color: '#111827', margin: 0, lineHeight: 1.5 }}>
-                  {area.description || t('no_description')}
+                  {area.description || t('areas.no_description')}
                 </p>
               </div>
               
               <div>
                 <p style={{ fontSize: '0.875rem', fontWeight: 500, color: '#6b7280', margin: '0 0 0.25rem 0' }}>
-                  {t('created_at')}
+                  {t('areas.created_at')}
                 </p>
                 <p style={{ fontSize: '1rem', color: '#111827', margin: 0 }}>
                   {area.createdAt ? new Date(area.createdAt).toLocaleDateString() : '-'}

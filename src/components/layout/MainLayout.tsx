@@ -45,11 +45,12 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   };
 
   const navigation = [
-    { name: t('dashboard'), path: '/dashboard', icon: '🌱' },
-    { name: t('organizations'), path: '/organizations', icon: '🚜' },
-    { name: t('areas'), path: '/areas', icon: '🌾' },
-    { name: t('sensors'), path: '/sensors', icon: '🌡️' },
-    { name: t('devices'), path: '/devices', icon: '📡' },
+    { name: t('navigation.dashboard'), path: '/dashboard', icon: '🌱' },
+    { name: t('navigation.organizations'), path: '/organizations', icon: '🚜' },
+    { name: t('navigation.areas'), path: '/areas', icon: '🌾' },
+    { name: t('navigation.sensors'), path: '/sensors', icon: '🌡️' },
+    { name: t('navigation.devices'), path: '/devices', icon: '📡' },
+    { name: t('navigation.settings'), path: '/settings', icon: '⚙️' },
   ];
 
   const isActive = (path: string) => {
@@ -227,7 +228,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                   <svg style={{ marginRight: '4px', width: '14px', height: '14px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                   </svg>
-                  {t('sign_out')}
+                  {t('auth.logout')}
                 </button>
               </div>
             </div>

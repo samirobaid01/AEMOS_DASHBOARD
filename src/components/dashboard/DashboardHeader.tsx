@@ -1,5 +1,4 @@
 import React from 'react';
-import { useTranslation } from 'react-i18next';
 
 interface DashboardHeaderProps {
   title: string;
@@ -10,8 +9,6 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   title, 
   icon = '🌱' 
 }) => {
-  const { t } = useTranslation();
-
   return (
     <h1 style={{
       fontSize: 'calc(1.5rem + 0.5vw)',
@@ -27,7 +24,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
       <span style={{ 
         fontSize: 'calc(1.25rem + 0.5vw)',
         marginRight: '0.75rem' 
-      }}>{icon}</span> {t(title)}
+      }}>{icon}</span> {title}
     </h1>
   );
 };

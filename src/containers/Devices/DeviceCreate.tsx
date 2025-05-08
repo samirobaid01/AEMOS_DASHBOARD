@@ -185,8 +185,8 @@ const DeviceCreate = () => {
                   required
                   value={formData.name}
                   onChange={handleChange}
-                  label={t('name')}
-                  placeholder={t('enter_device_name')}
+                  label={t('devices.name')}
+                  placeholder={t('devices.enter_device_name')}
                   error={formErrors.name}
                 />
               </div>
@@ -199,8 +199,8 @@ const DeviceCreate = () => {
                   required
                   value={formData.serialNumber}
                   onChange={handleChange}
-                  label={t('serial_number')}
-                  placeholder={t('enter_serial_number')}
+                  label={t('devices.serial_number')}
+                  placeholder={t('devices.enter_serial_number')}
                   error={formErrors.serialNumber}
                 />
               </div>
@@ -212,8 +212,8 @@ const DeviceCreate = () => {
                   type="text"
                   value={formData.firmware || ''}
                   onChange={handleChange}
-                  label={t('firmware')}
-                  placeholder={t('enter_firmware_version')}
+                  label={t('devices.firmware')}
+                  placeholder={t('devices.enter_firmware_version')}
                 />
               </div>
               
@@ -281,7 +281,7 @@ const DeviceCreate = () => {
                     value={formData.description || ''}
                     onChange={handleChange}
                     className="block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                    placeholder={t('enter_device_description')}
+                    placeholder={t('devices.enter_device_description')}
                   />
                 </div>
               </div>
@@ -308,7 +308,7 @@ const DeviceCreate = () => {
                           type="text"
                           value={field.key}
                           onChange={(e) => handleConfigChange(index, 'key', e.target.value)}
-                          placeholder={t('config_key')}
+                          placeholder={t('devices.config_key')}
                           className="block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                         />
                       </div>
@@ -317,7 +317,7 @@ const DeviceCreate = () => {
                           type="text"
                           value={field.value}
                           onChange={(e) => handleConfigChange(index, 'value', e.target.value)}
-                          placeholder={t('config_value')}
+                          placeholder={t('devices.config_value')}
                           className="block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                         />
                       </div>
@@ -370,7 +370,7 @@ const DeviceCreate = () => {
                 variant="outline"
                 onClick={() => organizationId ? navigate(`/organizations/${organizationId}`) : navigate('/devices')}
               >
-                {t('cancel')}
+                {t('common.cancel')}
               </Button>
               <Button
                 type="submit"
@@ -378,7 +378,7 @@ const DeviceCreate = () => {
                 isLoading={isLoading}
                 disabled={isLoading}
               >
-                {t('create')}
+                {t('devices.create')}
               </Button>
             </div>
           </form>

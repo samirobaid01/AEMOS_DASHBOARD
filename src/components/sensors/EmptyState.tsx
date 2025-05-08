@@ -1,5 +1,4 @@
 import React from 'react';
-import { useTranslation } from 'react-i18next';
 
 interface EmptyStateProps {
   message: string;
@@ -16,8 +15,6 @@ const EmptyState: React.FC<EmptyStateProps> = ({
   onAction,
   icon
 }) => {
-  const { t } = useTranslation();
-
   return (
     <div style={{
       display: 'flex',

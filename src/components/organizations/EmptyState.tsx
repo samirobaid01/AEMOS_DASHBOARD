@@ -92,7 +92,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
             e.currentTarget.style.backgroundColor = '#3b82f6';
           }}
         >
-          {actionLabel || t('add_organization')}
+          {actionLabel || t('organizations.add')}
         </button>
       )}
     </div>

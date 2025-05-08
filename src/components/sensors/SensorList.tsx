@@ -80,7 +80,7 @@ const SensorList: React.FC<SensorListProps> = ({
     return (
       <div style={{ padding: isMobile ? '1rem' : '1.5rem 2rem' }}>
         <div style={headerStyle}>
-          <h1 style={titleStyle}>{t('sensors')}</h1>
+          <h1 style={titleStyle}>{t('sensors.title')}</h1>
           <button
             onClick={onAddSensor}
             style={buttonStyle}
@@ -91,7 +91,7 @@ const SensorList: React.FC<SensorListProps> = ({
               e.currentTarget.style.backgroundColor = '#3b82f6';
             }}
           >
-            {t('add_sensor')}
+            {t('sensors.add')}
           </button>
         </div>
         <div style={errorStyle}>
@@ -115,7 +115,7 @@ const SensorList: React.FC<SensorListProps> = ({
   return (
     <div style={{ padding: isMobile ? '1rem' : '1.5rem 2rem' }}>
       <div style={headerStyle}>
-        <h1 style={titleStyle}>{t('sensors')}</h1>
+        <h1 style={titleStyle}>{t('sensors.title')}</h1>
         <button
           onClick={onAddSensor}
           style={buttonStyle}
@@ -137,7 +137,7 @@ const SensorList: React.FC<SensorListProps> = ({
               clipRule="evenodd" 
             />
           </svg>
-          {t('add_sensor')}
+          {t('sensors.add')}
         </button>
       </div>
 
@@ -152,9 +152,9 @@ const SensorList: React.FC<SensorListProps> = ({
 
       {sensors.length === 0 ? (
         <EmptyState
-          message={t('no_sensors_found')}
-          description={t('no_sensors_found_description')}
-          actionLabel={t('add_sensor')}
+          message={t('sensors.noSensors')}
+          description={t('sensors.no_sensors_found_description')}
+          actionLabel={t('sensors.add')}
           onAction={onAddSensor}
         />
       ) : (

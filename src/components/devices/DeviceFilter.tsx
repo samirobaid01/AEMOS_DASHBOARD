@@ -97,7 +97,7 @@ const DeviceFilter: React.FC<DeviceFilterProps> = ({
         <input
           type="text"
           style={inputStyle}
-          placeholder={t('search_devices')}
+          placeholder={t('devices.search')}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           onFocus={(e) => {
@@ -125,7 +125,7 @@ const DeviceFilter: React.FC<DeviceFilterProps> = ({
             e.target.style.borderColor = '#d1d5db';
           }}
         >
-          <option value="">{t('all_types')}</option>
+          <option value="">{t('common.all')}</option>
           {deviceTypes.map(type => (
             <option key={type} value={type}>{type}</option>
           ))}

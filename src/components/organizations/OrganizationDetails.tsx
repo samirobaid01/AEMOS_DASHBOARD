@@ -245,7 +245,7 @@ const OrganizationDetails: React.FC<OrganizationDetailsProps> = ({
               variant="outline"
               onClick={onBack}
             >
-              {t('back_to_organizations')}
+              {t('organizations.back_to_organizations')}
             </Button>
           </div>
         </div>
@@ -258,14 +258,14 @@ const OrganizationDetails: React.FC<OrganizationDetailsProps> = ({
       <div style={styles.container}>
         <div style={{ maxWidth: '48rem', margin: '0 auto' }}>
           <div style={styles.notFoundContainer}>
-            <h3 style={{ fontWeight: 500 }}>{t('organization_not_found')}</h3>
+            <h3 style={{ fontWeight: 500 }}>{t('organizations.organization_not_found')}</h3>
           </div>
           <div style={styles.buttonRow}>
             <Button
               variant="outline"
               onClick={onBack}
             >
-              {t('back_to_organizations')}
+              {t('organizations.back_to_organizations')}
             </Button>
           </div>
         </div>
@@ -284,18 +284,18 @@ const OrganizationDetails: React.FC<OrganizationDetailsProps> = ({
               variant="outline"
               onClick={onBack}
             >
-              {t('back')}
+              {t('common.back')}
             </Button>
             <Link to={`/organizations/${organization.id}/edit`}>
               <Button variant="primary">
-                {t('edit')}
+                {t('common.edit')}
               </Button>
             </Link>
             <Button
               variant="danger"
               onClick={onOpenDeleteModal}
             >
-              {t('delete')}
+              {t('common.delete')}
             </Button>
           </div>
         </div>
@@ -351,7 +351,7 @@ const OrganizationDetails: React.FC<OrganizationDetailsProps> = ({
 
               {organization.detail && (
                 <div style={{ ...styles.detailItem, gridColumn: 'span 2' }}>
-                  <div style={styles.detailLabel}>{t('description')}</div>
+                  <div style={styles.detailLabel}>{t('common.description')}</div>
                   <div style={styles.detailValue}>{organization.detail}</div>
                 </div>
               )}
@@ -361,10 +361,10 @@ const OrganizationDetails: React.FC<OrganizationDetailsProps> = ({
           {/* Areas Section */}
           <div style={styles.cardSection}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-              <h2 style={styles.cardTitle}>{t('areas')}</h2>
+              <h2 style={styles.cardTitle}>{t('areas.title')}</h2>
               <Link to={`/areas/create?organizationId=${organization.id}`}>
                 <Button variant="outline" size="sm">
-                  {t('add_area')}
+                  {t('areas.add')}
                 </Button>
               </Link>
             </div>
@@ -411,7 +411,7 @@ const OrganizationDetails: React.FC<OrganizationDetailsProps> = ({
           {/* Devices Section */}
           <div style={styles.cardSection}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-              <h2 style={styles.cardTitle}>{t('devices')}</h2>
+              <h2 style={styles.cardTitle}>{t('devices.title')}</h2>
               <Link to={`/devices/create?organizationId=${organization.id}`}>
                 <Button variant="outline" size="sm">
                   {t('add_device')}
@@ -499,10 +499,10 @@ const OrganizationDetails: React.FC<OrganizationDetailsProps> = ({
                   </svg>
                 </div>
                 <div>
-                  <h3 style={{ fontSize: '1.125rem', fontWeight: 600, color: '#2d3748' }}>{t('delete_organization')}</h3>
+                  <h3 style={{ fontSize: '1.125rem', fontWeight: 600, color: '#2d3748' }}>{t('organizations.delete')}</h3>
                   <div style={{ marginTop: '0.5rem' }}>
                     <p style={{ fontSize: '0.875rem', color: '#4a5568' }}>
-                      {t('delete_organization_confirm', { name: organization.name })}
+                      {t('organizations.delete_organization_confirm', { name: organization.name })}
                     </p>
                   </div>
                 </div>
@@ -524,14 +524,14 @@ const OrganizationDetails: React.FC<OrganizationDetailsProps> = ({
                 disabled={isDeleting}
                 onClick={onDelete}
               >
-                {t('delete')}
+                {t('common.delete')}
               </Button>
               <Button
                 type="button"
                 variant="outline"
                 onClick={onCloseDeleteModal}
               >
-                {t('cancel')}
+                {t('common.cancel')}
               </Button>
             </div>
           </div>

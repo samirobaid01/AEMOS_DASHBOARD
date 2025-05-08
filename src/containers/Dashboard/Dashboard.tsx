@@ -58,7 +58,7 @@ const Dashboard = () => {
 
   const stats = [
     { 
-      name: t('organizations'), 
+      name: t('common.organizations'), 
       count: organizations.length, 
       path: '/organizations', 
       icon: '🚜', 
@@ -68,7 +68,7 @@ const Dashboard = () => {
       borderColor: 'border-leaf-200' 
     },
     { 
-      name: t('areas'), 
+      name: t('common.areas'), 
       count: areas.length, 
       path: '/areas', 
       icon: '🌾', 
@@ -78,7 +78,7 @@ const Dashboard = () => {
       borderColor: 'border-soil-200' 
     },
     { 
-      name: t('sensors'), 
+      name: t('common.sensors'), 
       count: sensors.length, 
       path: '/sensors', 
       icon: '🌡️', 
@@ -88,7 +88,7 @@ const Dashboard = () => {
       borderColor: 'border-wheat-200' 
     },
     { 
-      name: t('devices'), 
+      name: t('common.devices'), 
       count: devices.length, 
       path: '/devices', 
       icon: '📡', 
@@ -119,7 +119,7 @@ const Dashboard = () => {
       maxWidth: '1400px',
       margin: '0 auto'
     }}>
-      <DashboardHeader title="dashboard" />
+      <DashboardHeader title={t('dashboard.title')} />
       
       <div style={{ 
         display: 'grid',
@@ -149,11 +149,11 @@ const Dashboard = () => {
         marginBottom: '1.5rem'
       }}>
         <EntityList
-          title={t('recent_organizations')}
+          title={t('dashboard.recent_organizations')}
           titleIcon="🚜"
           entities={organizations}
           entityIcon="🚜"
-          emptyMessage={t('no_organizations')}
+          emptyMessage={t('dashboard.no_organizations')}
           basePath="/organizations"
           createPath="/organizations/create"
           detailField="detail"
@@ -162,14 +162,18 @@ const Dashboard = () => {
           dividerColor="divide-leaf-100"
           buttonColor="text-leaf-600"
           buttonHoverColor="text-leaf-700"
+          addNewText={t('common.add_new')}
+          viewAllText={t('common.view_all')}
+          createNewText={t('common.create_new')}
+          noDetailsText={t('common.no_details')}
         />
 
         <EntityList
-          title={t('recent_devices')}
+          title={t('dashboard.recent_devices')}
           titleIcon="📡"
           entities={devices}
           entityIcon="📡"
-          emptyMessage={t('no_devices')}
+          emptyMessage={t('dashboard.no_devices')}
           basePath="/devices"
           createPath="/devices/create"
           detailField="serialNumber"
@@ -178,6 +182,10 @@ const Dashboard = () => {
           dividerColor="divide-sky-100"
           buttonColor="text-sky-600"
           buttonHoverColor="text-sky-700"
+          addNewText={t('common.add_new')}
+          viewAllText={t('common.view_all')}
+          createNewText={t('common.create_new')}
+          noDetailsText={t('common.no_details')}
         />
       </div>
     </div>

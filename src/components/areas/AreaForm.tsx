@@ -229,10 +229,10 @@ const AreaForm: React.FC<AreaFormProps> = ({
         <div style={formStyle}>
           <div style={headerStyle}>
             <h2 style={headerTitleStyle}>
-              {isEditMode ? t('edit_area') : t('add_area')}
+              {isEditMode ? t('areas.edit') : t('areas.add')}
             </h2>
             <p style={headerDescriptionStyle}>
-              {isEditMode ? t('edit_area_description') : t('add_area_description')}
+              {isEditMode ? t('areas.edit_area_description') : t('areas.add_area_description')}
             </p>
           </div>
 
@@ -245,7 +245,7 @@ const AreaForm: React.FC<AreaFormProps> = ({
 
             <div style={fieldGroupStyle}>
               <label htmlFor="name" style={labelStyle}>
-                {t('area_name')} <span style={{ color: '#ef4444' }}>*</span>
+                {t('areas.area_name')} <span style={{ color: '#ef4444' }}>*</span>
               </label>
               <input
                 type="text"
@@ -268,7 +268,7 @@ const AreaForm: React.FC<AreaFormProps> = ({
 
             <div style={fieldGroupStyle}>
               <label htmlFor="organizationId" style={labelStyle}>
-                {t('organization')} <span style={{ color: '#ef4444' }}>*</span>
+                {t('areas.organization')} <span style={{ color: '#ef4444' }}>*</span>
               </label>
               <select
                 id="organizationId"
@@ -287,7 +287,7 @@ const AreaForm: React.FC<AreaFormProps> = ({
                 }}
               >
                 <option value="" disabled>
-                  {t('select_organization')}
+                  {t('areas.select_organization')}
                 </option>
                 {safeOrganizations.map((org) => (
                   <option key={org.id} value={org.id}>
@@ -300,7 +300,7 @@ const AreaForm: React.FC<AreaFormProps> = ({
             {safeParentAreas.length > 0 && (
               <div style={fieldGroupStyle}>
                 <label htmlFor="parentAreaId" style={labelStyle}>
-                  {t('parent_area')}
+                  {t('areas.parent_area')}
                 </label>
                 <select
                   id="parentAreaId"
@@ -317,7 +317,7 @@ const AreaForm: React.FC<AreaFormProps> = ({
                     e.target.style.borderColor = '#d1d5db';
                   }}
                 >
-                  <option value="">{t('no_parent_area')}</option>
+                  <option value="">{t('areas.no_parent_area')}</option>
                   {safeParentAreas.map((parentArea) => (
                     <option key={parentArea.id} value={parentArea.id}>
                       {parentArea.name}
@@ -338,14 +338,14 @@ const AreaForm: React.FC<AreaFormProps> = ({
                   style={checkboxStyle}
                 />
                 <label htmlFor="status" style={{ fontSize: '0.875rem', color: '#374151' }}>
-                  {t('active_area')}
+                  {t('areas.active_area')}
                 </label>
               </div>
             </div>
 
             <div style={fieldGroupStyle}>
               <label htmlFor="description" style={labelStyle}>
-                {t('description')}
+                {t('areas.description')}
               </label>
               <textarea
                 id="description"
@@ -376,7 +376,7 @@ const AreaForm: React.FC<AreaFormProps> = ({
                   e.currentTarget.style.backgroundColor = 'white';
                 }}
               >
-                {t('cancel')}
+                {t('areas.cancel')}
               </button>
               <button
                 type="submit"
@@ -393,7 +393,7 @@ const AreaForm: React.FC<AreaFormProps> = ({
                   }
                 }}
               >
-                {isSubmitting ? t('saving') : isEditMode ? t('update') : t('create')}
+                {isSubmitting ? t('areas.saving') : isEditMode ? t('areas.update') : t('areas.create')}
               </button>
             </div>
           </div>

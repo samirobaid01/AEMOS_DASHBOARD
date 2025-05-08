@@ -1,6 +1,5 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 
 interface Entity {
   id: string | number;
@@ -23,6 +22,10 @@ interface EntityListProps {
   dividerColor: string;
   buttonColor: string;
   buttonHoverColor: string;
+  addNewText: string;
+  viewAllText: string;
+  createNewText: string;
+  noDetailsText: string;
 }
 
 const EntityList: React.FC<EntityListProps> = ({
@@ -39,9 +42,11 @@ const EntityList: React.FC<EntityListProps> = ({
   dividerColor,
   buttonColor,
   buttonHoverColor,
+  addNewText,
+  viewAllText,
+  createNewText,
+  noDetailsText
 }) => {
-  const { t } = useTranslation();
-  
   const headerStyle = {
     backgroundColor: headerColor.replace('bg-', ''),
     color: 'white',
@@ -105,7 +110,7 @@ const EntityList: React.FC<EntityListProps> = ({
               e.currentTarget.style.color = buttonColor.replace('text-', '');
             }}
           >
-            + {t('add_new')}
+            + {addNewText}
           </Link>
         )}
       </div>
@@ -182,7 +187,7 @@ const EntityList: React.FC<EntityListProps> = ({
                         textOverflow: 'ellipsis',
                         whiteSpace: 'nowrap'
                       }}>
-                        {entity[detailField] || t('no_details')}
+                        {entity[detailField] || noDetailsText}
                       </p>
                     )}
                   </div>
@@ -223,7 +228,7 @@ const EntityList: React.FC<EntityListProps> = ({
                   e.currentTarget.style.color = buttonColor.replace('text-', '');
                 }}
               >
-                {t('view_all')}
+                {viewAllText}
                 <svg style={{ marginLeft: '0.25rem', width: '1rem', height: '1rem' }} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                 </svg>
@@ -270,7 +275,7 @@ const EntityList: React.FC<EntityListProps> = ({
               e.currentTarget.style.backgroundColor = headerColor.replace('bg-', '');
             }}
           >
-            {t('create_new')}
+            {createNewText}
           </Link>
         </div>
       )}

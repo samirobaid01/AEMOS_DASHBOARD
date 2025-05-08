@@ -174,7 +174,7 @@ const Settings = () => {
 
   return (
     <div style={containerStyle}>
-      <h1 style={headerStyle}>{t('settings')}</h1>
+      <h1 style={headerStyle}>{t('settings.title')}</h1>
       
       <div style={cardStyle}>
         {/* Language Section */}

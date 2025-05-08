@@ -84,7 +84,7 @@ const AreaListComponent: React.FC<AreaListComponentProps> = ({
     return (
       <div style={{ padding: isMobile ? '1rem' : '1.5rem 2rem' }}>
         <div style={headerStyle}>
-          <h1 style={titleStyle}>{t('areas')}</h1>
+          <h1 style={titleStyle}>{t('areas.title')}</h1>
           <button
             onClick={onAddArea}
             style={buttonStyle}
@@ -119,7 +119,7 @@ const AreaListComponent: React.FC<AreaListComponentProps> = ({
   return (
     <div style={{ padding: isMobile ? '1rem' : '1.5rem 2rem' }}>
       <div style={headerStyle}>
-        <h1 style={titleStyle}>{t('areas')}</h1>
+        <h1 style={titleStyle}>{t('areas.title')}</h1>
         <button
           onClick={onAddArea}
           style={buttonStyle}

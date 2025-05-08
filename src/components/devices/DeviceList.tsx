@@ -74,7 +74,7 @@ const DeviceList: React.FC<DeviceListProps> = ({
   return (
     <div style={{ padding: isMobile ? '1rem' : '1.5rem 2rem' }}>
       <div style={headerStyle}>
-        <h1 style={titleStyle}>{t('devices')}</h1>
+        <h1 style={titleStyle}>{t('devices.title')}</h1>
         <button
           onClick={onAddDevice}
           style={buttonStyle}
@@ -96,7 +96,7 @@ const DeviceList: React.FC<DeviceListProps> = ({
               clipRule="evenodd" 
             />
           </svg>
-          {t('add_device')}
+          {t('devices.add')}
         </button>
       </div>
 
@@ -110,7 +110,12 @@ const DeviceList: React.FC<DeviceListProps> = ({
       />
 
       {filteredDevices.length === 0 ? (
-        <EmptyState onAddDevice={onAddDevice} />
+        <EmptyState 
+          message={t('devices.noDevices')}
+          description={t('devices.no_devices_found_description')}
+          actionLabel={t('devices.add')}
+          onAddDevice={onAddDevice} 
+        />
       ) : (
         <div>
           {filteredDevices.map(device => (

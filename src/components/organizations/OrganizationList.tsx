@@ -84,7 +84,7 @@ const OrganizationList: React.FC<OrganizationListProps> = ({
     return (
       <div style={{ padding: isMobile ? '1rem' : '1.5rem 2rem' }}>
         <div style={headerStyle}>
-          <h1 style={titleStyle}>{t('organizations')}</h1>
+          <h1 style={titleStyle}>{t('organizations.title')}</h1>
           <button
             onClick={onAddOrganization}
             style={buttonStyle}
@@ -95,7 +95,7 @@ const OrganizationList: React.FC<OrganizationListProps> = ({
               e.currentTarget.style.backgroundColor = '#3b82f6';
             }}
           >
-            {t('add_organization')}
+            {t('organizations.add')}
           </button>
         </div>
         <div style={errorStyle}>
@@ -119,7 +119,7 @@ const OrganizationList: React.FC<OrganizationListProps> = ({
   return (
     <div style={{ padding: isMobile ? '1rem' : '1.5rem 2rem' }}>
       <div style={headerStyle}>
-        <h1 style={titleStyle}>{t('organizations')}</h1>
+        <h1 style={titleStyle}>{t('organizations.title')}</h1>
         <button
           onClick={onAddOrganization}
           style={buttonStyle}
@@ -141,7 +141,7 @@ const OrganizationList: React.FC<OrganizationListProps> = ({
               clipRule="evenodd" 
             />
           </svg>
-          {t('add_organization')}
+          {t('organizations.add')}
         </button>
       </div>
 
@@ -157,9 +157,9 @@ const OrganizationList: React.FC<OrganizationListProps> = ({
 
       {filteredOrganizations.length === 0 ? (
         <EmptyState
-          message={t('no_organizations_found')}
-          description={t('no_organizations_found_description')}
-          actionLabel={t('add_organization')}
+          message={t('organizations.no_organizations_found')}
+          description={t('organizations.no_organizations_found_description')}
+          actionLabel={t('organizations.add')}
           onAction={onAddOrganization}
         />
       ) : (
