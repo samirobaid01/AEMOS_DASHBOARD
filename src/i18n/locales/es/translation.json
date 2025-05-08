@@ -240,9 +240,19 @@
     "title": "Configuración",
     "language": "Idioma",
     "theme": "Tema",
+    "dark_mode": "Modo Oscuro",
     "notifications": "Notificaciones",
     "profile": "Perfil",
     "security": "Seguridad",
-    "preferences": "Preferencias"
+    "preferences": "Preferencias",
+    "account": "Cuenta",
+    "change_password": "Cambiar Contraseña",
+    "delete_account": "Eliminar Cuenta",
+    "email_notifications": "Notificaciones por Correo",
+    "email_notifications_desc": "Recibir actualizaciones importantes por correo electrónico",
+    "sms_notifications": "Notificaciones SMS",
+    "sms_notifications_desc": "Recibir alertas SMS para eventos críticos",
+    "app_notifications": "Notificaciones en la Aplicación",
+    "app_notifications_desc": "Recibir notificaciones y alertas en la aplicación"
   }
 } 

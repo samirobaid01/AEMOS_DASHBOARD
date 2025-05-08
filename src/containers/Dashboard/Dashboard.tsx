@@ -7,6 +7,8 @@ import { selectSensors, fetchSensors } from '../../state/slices/sensors.slice';
 import { selectDevices, fetchDevices } from '../../state/slices/devices.slice';
 import { useTranslation } from 'react-i18next';
 import LoadingScreen from '../../components/common/Loading/LoadingScreen';
+import { useTheme } from '../../context/ThemeContext';
+import { useThemeColors } from '../../hooks/useThemeColors';
 
 // Import our reusable components
 import StatCard from '../../components/dashboard/StatCard';
@@ -18,6 +20,8 @@ const Dashboard = () => {
   const dispatch = useDispatch<AppDispatch>();
   const [loading, setLoading] = useState(true);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  const { darkMode } = useTheme();
+  const colors = useThemeColors();
 
   const organizations = useSelector(selectOrganizations);
   const areas = useSelector(selectAreas);
@@ -55,6 +59,19 @@ const Dashboard = () => {
   if (loading) {
     return <LoadingScreen />;
   }
+
+  // Custom styles based on theme
+  const getStatCardStyles = () => {
+    return {
+      backgroundColor: darkMode ? colors.cardBackground : 'white',
+      borderColor: darkMode ? colors.cardBorder : '#e5e7eb',
+      boxShadow: darkMode 
+        ? '0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1)'
+        : '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+      color: darkMode ? colors.textPrimary : '#111827',
+      textColor: darkMode ? colors.textSecondary : '#6B7280',
+    };
+  };
 
   const stats = [
     { 
@@ -114,10 +131,11 @@ const Dashboard = () => {
   return (
     <div style={{ 
       padding: '2rem',
-      backgroundColor: '#f0f9f0',
+      backgroundColor: darkMode ? colors.background : '#f0f9f0',
       minHeight: 'calc(100vh - 60px)',
       maxWidth: '1400px',
-      margin: '0 auto'
+      margin: '0 auto',
+      color: darkMode ? colors.textPrimary : 'inherit'
     }}>
       <DashboardHeader title={t('dashboard.title')} />
       

@@ -1,4 +1,6 @@
 import React from 'react';
+import { useTheme } from '../../context/ThemeContext';
+import { useThemeColors } from '../../hooks/useThemeColors';
 
 interface DashboardHeaderProps {
   title: string;
@@ -9,16 +11,19 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   title, 
   icon = '🌱' 
 }) => {
+  const { darkMode } = useTheme();
+  const colors = useThemeColors();
+
   return (
     <h1 style={{
       fontSize: 'calc(1.5rem + 0.5vw)',
       fontWeight: 'bold',
-      color: '#111827',
+      color: darkMode ? colors.textPrimary : '#111827',
       marginTop: 0,
       marginBottom: 'calc(1.5rem + 1vw)',
       display: 'flex',
       alignItems: 'center',
-      borderBottom: '1px solid #e5e7eb',
+      borderBottom: `1px solid ${darkMode ? colors.border : '#e5e7eb'}`,
       paddingBottom: '1rem'
     }}>
       <span style={{ 

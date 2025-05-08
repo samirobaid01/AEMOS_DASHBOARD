@@ -1,5 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useTheme } from '../../context/ThemeContext';
+import { useThemeColors } from '../../hooks/useThemeColors';
 
 interface Entity {
   id: string | number;
@@ -47,6 +49,9 @@ const EntityList: React.FC<EntityListProps> = ({
   createNewText,
   noDetailsText
 }) => {
+  const { darkMode } = useTheme();
+  const colors = useThemeColors();
+
   const headerStyle = {
     backgroundColor: headerColor.replace('bg-', ''),
     color: 'white',
@@ -66,7 +71,7 @@ const EntityList: React.FC<EntityListProps> = ({
   };
   
   const addButtonStyle = {
-    backgroundColor: 'white',
+    backgroundColor: darkMode ? colors.surfaceBackground : 'white',
     color: buttonColor.replace('text-', ''),
     fontSize: '0.75rem',
     fontWeight: '500',
@@ -75,13 +80,27 @@ const EntityList: React.FC<EntityListProps> = ({
     transition: 'color 0.2s',
     textDecoration: 'none',
   };
+
+  const getItemTextStyle = (isPrimary: boolean) => ({
+    fontSize: isPrimary ? '0.875rem' : '0.75rem',
+    fontWeight: isPrimary ? '600' : '400',
+    color: isPrimary 
+      ? (darkMode ? colors.textPrimary : '#374151') 
+      : (darkMode ? colors.textMuted : '#6B7280'),
+    margin: isPrimary ? 0 : '0.25rem 0 0 0',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap' as const
+  });
   
   return (
     <div style={{
-      backgroundColor: 'white',
-      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+      backgroundColor: darkMode ? colors.cardBackground : 'white',
+      boxShadow: darkMode 
+        ? '0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1)'
+        : '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
       borderRadius: '0.75rem',
-      border: '1px solid #e5e7eb',
+      border: `1px solid ${darkMode ? colors.border : '#e5e7eb'}`,
       overflow: 'hidden',
       height: '100%',
       transition: 'box-shadow 0.3s',
@@ -89,10 +108,14 @@ const EntityList: React.FC<EntityListProps> = ({
       flexDirection: 'column',
     }}
     onMouseOver={(e) => {
-      e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1)';
+      e.currentTarget.style.boxShadow = darkMode
+        ? '0 10px 15px -3px rgba(0, 0, 0, 0.2)'
+        : '0 10px 15px -3px rgba(0, 0, 0, 0.1)';
     }}
     onMouseOut={(e) => {
-      e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
+      e.currentTarget.style.boxShadow = darkMode
+        ? '0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1)'
+        : '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)';
     }}
     >
       <div style={headerStyle}>
@@ -120,7 +143,8 @@ const EntityList: React.FC<EntityListProps> = ({
           padding: '0.75rem 1rem',
           flex: 1,
           display: 'flex',
-          flexDirection: 'column'
+          flexDirection: 'column',
+          backgroundColor: darkMode ? colors.cardBackground : 'white',
         }}>
           <ul style={{ 
             margin: 0,
@@ -132,7 +156,9 @@ const EntityList: React.FC<EntityListProps> = ({
               <li key={entity.id} style={{ 
                 padding: index === 0 ? '0 0 0.75rem 0' : 
                        index === entities.slice(0, 5).length - 1 ? '0.75rem 0 0 0' : '0.75rem 0',
-                borderBottom: index !== entities.slice(0, 5).length - 1 ? `1px solid ${dividerColor.replace('divide-', '')}` : 'none'
+                borderBottom: index !== entities.slice(0, 5).length - 1 
+                  ? `1px solid ${darkMode ? colors.divider : dividerColor.replace('divide-', '')}`
+                  : 'none'
               }}>
                 <Link 
                   to={`${basePath}/${entity.id}`} 
@@ -145,7 +171,9 @@ const EntityList: React.FC<EntityListProps> = ({
                     textDecoration: 'none'
                   }}
                   onMouseOver={(e) => {
-                    e.currentTarget.style.backgroundColor = hoverColor.replace('hover:bg-', '');
+                    e.currentTarget.style.backgroundColor = darkMode 
+                      ? colors.surfaceBackground
+                      : hoverColor.replace('hover:bg-', '');
                   }}
                   onMouseOut={(e) => {
                     e.currentTarget.style.backgroundColor = 'transparent';
@@ -169,24 +197,9 @@ const EntityList: React.FC<EntityListProps> = ({
                     minWidth: 0,
                     flex: 1
                   }}>
-                    <p style={{
-                      fontSize: '0.875rem',
-                      fontWeight: '600',
-                      color: '#374151',
-                      margin: 0,
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap'
-                    }}>{entity.name}</p>
+                    <p style={getItemTextStyle(true)}>{entity.name}</p>
                     {detailField && (
-                      <p style={{
-                        fontSize: '0.75rem',
-                        color: '#6B7280',
-                        margin: '0.25rem 0 0 0',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap'
-                      }}>
+                      <p style={getItemTextStyle(false)}>
                         {entity[detailField] || noDetailsText}
                       </p>
                     )}
@@ -197,7 +210,9 @@ const EntityList: React.FC<EntityListProps> = ({
                     borderRadius: '9999px',
                     height: '0.75rem',
                     width: '0.75rem',
-                    backgroundColor: entity.status ? '#16a34a' : '#ef4444'
+                    backgroundColor: entity.status 
+                      ? (darkMode ? colors.success : '#16a34a')
+                      : (darkMode ? colors.danger : '#ef4444')
                   }}></div>
                 </Link>
               </li>
@@ -206,7 +221,7 @@ const EntityList: React.FC<EntityListProps> = ({
           {entities.length > 5 && (
             <div style={{
               marginTop: '1rem',
-              borderTop: `1px solid ${dividerColor.replace('divide-', '')}`,
+              borderTop: `1px solid ${darkMode ? colors.divider : dividerColor.replace('divide-', '')}`,
               paddingTop: '1rem',
               textAlign: 'right'
             }}>
@@ -243,8 +258,9 @@ const EntityList: React.FC<EntityListProps> = ({
           alignItems: 'center',
           justifyContent: 'center',
           padding: '3rem 1rem',
-          color: '#6B7280',
-          flex: 1
+          color: darkMode ? colors.textMuted : '#6B7280',
+          flex: 1,
+          backgroundColor: darkMode ? colors.cardBackground : 'white',
         }}>
           <span style={{
             fontSize: '3rem',

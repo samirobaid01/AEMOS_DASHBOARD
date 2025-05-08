@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import type { RootState } from '../../state/store';
 import { clearCredentials, selectCurrentUser } from '../../state/slices/auth.slice';
 import type { User } from '../../types/auth';
+import { useTheme } from '../../context/ThemeContext';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -19,6 +20,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const user = useSelector(selectCurrentUser);
   const isMobile = windowWidth < 768;
+  const { darkMode } = useTheme();
 
   // Handle window resize
   useEffect(() => {
@@ -57,17 +59,21 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     return location.pathname.startsWith(path);
   };
 
+  // Theme-aware styles
   const sidebarStyle = {
     position: 'fixed' as const,
     top: 0,
     left: 0,
     bottom: 0,
     width: '260px',
-    backgroundColor: 'white',
-    boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+    backgroundColor: darkMode ? '#111827' : 'white',
+    boxShadow: darkMode 
+      ? '0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px 0 rgba(0, 0, 0, 0.2)'
+      : '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
     zIndex: 40,
     transform: (isMobile && !sidebarOpen) ? 'translateX(-100%)' : 'translateX(0)',
     transition: 'transform 300ms ease-in-out',
+    borderRight: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
   };
 
   const overlayStyle = {
@@ -81,8 +87,29 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     display: (isMobile && sidebarOpen) ? 'block' : 'none',
   };
 
+  const getNavItemStyle = (isActiveItem: boolean) => ({
+    display: 'flex',
+    alignItems: 'center',
+    padding: '12px 16px',
+    borderRadius: '8px',
+    marginBottom: '8px',
+    fontWeight: 500,
+    color: isActiveItem 
+      ? 'white' 
+      : darkMode ? '#d1d5db' : '#4b5563',
+    backgroundColor: isActiveItem 
+      ? '#16a34a' 
+      : 'transparent',
+    transition: 'all 200ms',
+    textDecoration: 'none'
+  });
+
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#f0f9f0' }}>
+    <div style={{ 
+      minHeight: '100vh', 
+      backgroundColor: darkMode ? '#111827' : '#f0f9f0',
+      color: darkMode ? '#f9fafb' : 'inherit'
+    }}>
       {/* Mobile sidebar overlay */}
       <div 
         style={overlayStyle}
@@ -101,7 +128,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             display: 'flex', 
             alignItems: 'center', 
             padding: '16px', 
-            borderBottom: '1px solid #e5e7eb' 
+            borderBottom: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}` 
           }}>
             <span style={{ fontSize: '24px', marginRight: '12px' }}>🌿</span>
             <h1 style={{ 
@@ -109,7 +136,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
               fontWeight: 'bold', 
               color: '#166534' 
             }}>
-              AEMOS <span style={{ color: '#b45309' }}>Agriculture</span>
+              AEMOS <span style={{ color: darkMode ? '#f59e0b' : '#b45309' }}>Agriculture</span>
             </h1>
             
             {/* Mobile close button - only visible on mobile */}
@@ -118,6 +145,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                 type="button"
                 style={{ 
                   marginLeft: 'auto',
+                  color: darkMode ? '#d1d5db' : 'inherit'
                 }}
                 onClick={() => setSidebarOpen(false)}
               >
@@ -138,21 +166,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
               <Link
                 key={item.name}
                 to={item.path}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  padding: '12px 16px',
-                  borderRadius: '8px',
-                  marginBottom: '8px',
-                  fontWeight: 500,
-                  color: isActive(item.path) ? 'white' : '#4b5563',
-                  backgroundColor: isActive(item.path) ? '#16a34a' : 'transparent',
-                  transition: 'all 200ms',
-                  textDecoration: 'none'
-                }}
+                style={getNavItemStyle(isActive(item.path))}
                 onMouseOver={(e) => {
                   if (!isActive(item.path)) {
-                    e.currentTarget.style.backgroundColor = '#f0f9f0';
+                    e.currentTarget.style.backgroundColor = darkMode ? '#374151' : '#f0f9f0';
                   }
                 }}
                 onMouseOut={(e) => {
@@ -179,7 +196,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
           {/* User section */}
           <div style={{ 
-            borderTop: '1px solid #e5e7eb', 
+            borderTop: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`, 
             padding: '16px' 
           }}>
             <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -201,7 +218,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                 <p style={{ 
                   fontSize: '14px', 
                   fontWeight: 500, 
-                  color: '#4b5563',
+                  color: darkMode ? '#d1d5db' : '#4b5563',
                   maxWidth: '160px',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
@@ -240,7 +257,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       <div style={{
         paddingLeft: isMobile ? 0 : '260px',
         minHeight: '100vh',
-        transition: 'padding-left 300ms ease-in-out'
+        transition: 'padding-left 300ms ease-in-out',
+        backgroundColor: darkMode ? '#111827' : '#f0f9f0',
       }}>
         {/* Mobile top bar - only visible on mobile */}
         {isMobile && (
@@ -248,17 +266,20 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             display: 'flex',
             alignItems: 'center',
             height: '64px',
-            backgroundColor: 'white',
-            boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
+            backgroundColor: darkMode ? '#1f2937' : 'white',
+            boxShadow: darkMode 
+              ? '0 1px 3px 0 rgba(0, 0, 0, 0.3)'
+              : '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
             position: 'sticky' as const,
             top: 0,
             zIndex: 10,
+            color: darkMode ? '#d1d5db' : 'inherit'
           }}>
             <button
               type="button"
               style={{
                 padding: '16px',
-                color: '#4b5563'
+                color: darkMode ? '#d1d5db' : '#4b5563'
               }}
               onClick={() => setSidebarOpen(true)}
             >
@@ -269,7 +290,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
               <span style={{ fontSize: '20px', marginRight: '8px' }}>🌿</span>
               <h1 style={{ fontSize: '16px', fontWeight: 'bold', color: '#166534' }}>
-                AEMOS <span style={{ color: '#b45309' }}>Agriculture</span>
+                AEMOS <span style={{ color: darkMode ? '#f59e0b' : '#b45309' }}>Agriculture</span>
               </h1>
             </div>
           </div>

@@ -1,100 +1,106 @@
 import React from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTheme } from '../../context/ThemeContext';
+import { useThemeColors } from '../../hooks/useThemeColors';
 
 interface EmptyStateProps {
-  message?: string;
-  description?: string;
-  actionLabel?: string;
-  onAction?: () => void;
+  message: string;
+  description: string;
+  actionLabel: string;
+  onAction: () => void;
+  icon?: React.ReactNode;
 }
 
 const EmptyState: React.FC<EmptyStateProps> = ({
   message,
   description,
   actionLabel,
-  onAction
+  onAction,
+  icon
 }) => {
-  const { t } = useTranslation();
-
-  const emptyStateStyle = {
-    display: 'flex',
-    flexDirection: 'column' as const,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: '3rem 1rem',
-    backgroundColor: 'white',
-    borderRadius: '0.5rem',
-    boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
-    border: '1px solid #e5e7eb',
-  };
+  const { darkMode } = useTheme();
+  const colors = useThemeColors();
 
   return (
-    <div style={emptyStateStyle}>
-      <svg
-        style={{
-          width: '3rem',
-          height: '3rem',
-          color: '#9ca3af',
-          marginBottom: '1rem'
-        }}
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        aria-hidden="true"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-        />
-      </svg>
+    <div style={{
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '3rem 1rem',
+      backgroundColor: darkMode ? colors.cardBackground : 'white',
+      borderRadius: '0.5rem',
+      boxShadow: darkMode 
+        ? '0 1px 3px 0 rgba(0, 0, 0, 0.2), 0 1px 2px 0 rgba(0, 0, 0, 0.1)'
+        : '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+      border: `1px solid ${darkMode ? colors.border : '#e5e7eb'}`,
+    }}>
+      {icon ? (
+        icon
+      ) : (
+        <svg
+          style={{
+            width: '3rem',
+            height: '3rem',
+            color: darkMode ? colors.textMuted : '#9ca3af',
+            marginBottom: '1rem'
+          }}
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          aria-hidden="true"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"
+          />
+        </svg>
+      )}
       
       <h3 style={{
         marginTop: '0.5rem',
         fontSize: '1rem',
         fontWeight: 500,
-        color: '#111827',
+        color: darkMode ? colors.textPrimary : '#111827',
         textAlign: 'center'
       }}>
-        {message || t('no_organizations_found')}
+        {message}
       </h3>
       
       <p style={{
         marginTop: '0.5rem',
         fontSize: '0.875rem',
-        color: '#6b7280',
+        color: darkMode ? colors.textMuted : '#6b7280',
         maxWidth: '20rem',
         textAlign: 'center'
       }}>
-        {description || t('no_organizations_found_description')}
+        {description}
       </p>
       
-      {onAction && (
-        <button 
-          onClick={onAction}
-          style={{
-            marginTop: '1.5rem',
-            padding: '0.5rem 1rem',
-            backgroundColor: '#3b82f6',
-            color: 'white',
-            borderRadius: '0.375rem',
-            fontSize: '0.875rem',
-            fontWeight: 500,
-            border: 'none',
-            cursor: 'pointer',
-            transition: 'background-color 0.2s',
-          }}
-          onMouseOver={(e) => {
-            e.currentTarget.style.backgroundColor = '#2563eb';
-          }}
-          onMouseOut={(e) => {
-            e.currentTarget.style.backgroundColor = '#3b82f6';
-          }}
-        >
-          {actionLabel || t('organizations.add')}
-        </button>
-      )}
+      <button 
+        onClick={onAction}
+        style={{
+          marginTop: '1.5rem',
+          padding: '0.5rem 1rem',
+          backgroundColor: darkMode ? '#4d7efa' : '#3b82f6',
+          color: 'white',
+          borderRadius: '0.375rem',
+          fontSize: '0.875rem',
+          fontWeight: 500,
+          border: 'none',
+          cursor: 'pointer',
+          transition: 'background-color 0.2s',
+        }}
+        onMouseOver={(e) => {
+          e.currentTarget.style.backgroundColor = darkMode ? '#5d8efa' : '#2563eb';
+        }}
+        onMouseOut={(e) => {
+          e.currentTarget.style.backgroundColor = darkMode ? '#4d7efa' : '#3b82f6';
+        }}
+      >
+        {actionLabel}
+      </button>
     </div>
   );
 };

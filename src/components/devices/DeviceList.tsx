@@ -5,6 +5,8 @@ import DeviceItem from './DeviceItem';
 import DeviceFilter from './DeviceFilter';
 import EmptyState from './EmptyState';
 import ErrorDisplay from './ErrorDisplay';
+import { useTheme } from '../../context/ThemeContext';
+import { useThemeColors } from '../../hooks/useThemeColors';
 
 interface DeviceListProps {
   devices: Device[];
@@ -34,6 +36,8 @@ const DeviceList: React.FC<DeviceListProps> = ({
   windowWidth
 }) => {
   const { t } = useTranslation();
+  const { darkMode } = useTheme();
+  const colors = useThemeColors();
   const isMobile = windowWidth < 768;
 
   const headerStyle = {
@@ -48,14 +52,14 @@ const DeviceList: React.FC<DeviceListProps> = ({
   const titleStyle = {
     fontSize: '1.5rem',
     fontWeight: 600,
-    color: '#111827',
+    color: darkMode ? colors.textPrimary : '#111827',
     margin: 0,
     fontFamily: 'system-ui, -apple-system, sans-serif'
   };
 
   const buttonStyle = {
     padding: '0.5rem 1rem',
-    backgroundColor: '#3b82f6',
+    backgroundColor: darkMode ? '#4d7efa' : '#3b82f6',
     color: 'white',
     border: 'none',
     borderRadius: '0.375rem',
@@ -72,17 +76,20 @@ const DeviceList: React.FC<DeviceListProps> = ({
   }
 
   return (
-    <div style={{ padding: isMobile ? '1rem' : '1.5rem 2rem' }}>
+    <div style={{ 
+      padding: isMobile ? '1rem' : '1.5rem 2rem',
+      backgroundColor: darkMode ? colors.background : 'transparent'
+    }}>
       <div style={headerStyle}>
         <h1 style={titleStyle}>{t('devices.title')}</h1>
         <button
           onClick={onAddDevice}
           style={buttonStyle}
           onMouseOver={(e) => {
-            e.currentTarget.style.backgroundColor = '#2563eb';
+            e.currentTarget.style.backgroundColor = darkMode ? '#5d8efa' : '#2563eb';
           }}
           onMouseOut={(e) => {
-            e.currentTarget.style.backgroundColor = '#3b82f6';
+            e.currentTarget.style.backgroundColor = darkMode ? '#4d7efa' : '#3b82f6';
           }}
         >
           <svg 

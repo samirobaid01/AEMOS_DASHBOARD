@@ -4,6 +4,8 @@ import type { Sensor } from '../../types/sensor';
 import SensorItem from './SensorItem';
 import SensorFilter from './SensorFilter';
 import EmptyState from './EmptyState';
+import { useTheme } from '../../context/ThemeContext';
+import { useThemeColors } from '../../hooks/useThemeColors';
 
 interface SensorListProps {
   sensors: Sensor[];
@@ -31,6 +33,8 @@ const SensorList: React.FC<SensorListProps> = ({
   windowWidth
 }) => {
   const { t } = useTranslation();
+  const { darkMode } = useTheme();
+  const colors = useThemeColors();
   const isMobile = windowWidth < 768;
 
   const headerStyle = {
@@ -45,14 +49,14 @@ const SensorList: React.FC<SensorListProps> = ({
   const titleStyle = {
     fontSize: '1.5rem',
     fontWeight: 600,
-    color: '#111827',
+    color: darkMode ? colors.textPrimary : '#111827',
     margin: 0,
     fontFamily: 'system-ui, -apple-system, sans-serif'
   };
 
   const buttonStyle = {
     padding: '0.5rem 1rem',
-    backgroundColor: '#3b82f6',
+    backgroundColor: darkMode ? '#4d7efa' : '#3b82f6',
     color: 'white',
     border: 'none',
     borderRadius: '0.375rem',
@@ -65,10 +69,10 @@ const SensorList: React.FC<SensorListProps> = ({
   };
 
   const errorStyle = {
-    backgroundColor: '#fee2e2',
+    backgroundColor: darkMode ? colors.dangerBackground : '#fee2e2',
     padding: '1rem',
     borderRadius: '0.375rem',
-    color: '#b91c1c',
+    color: darkMode ? colors.dangerText : '#b91c1c',
     marginBottom: '1.5rem',
     fontSize: '0.875rem',
     fontWeight: 500,
@@ -78,17 +82,20 @@ const SensorList: React.FC<SensorListProps> = ({
 
   if (error) {
     return (
-      <div style={{ padding: isMobile ? '1rem' : '1.5rem 2rem' }}>
+      <div style={{ 
+        padding: isMobile ? '1rem' : '1.5rem 2rem',
+        backgroundColor: darkMode ? colors.background : 'transparent'
+      }}>
         <div style={headerStyle}>
           <h1 style={titleStyle}>{t('sensors.title')}</h1>
           <button
             onClick={onAddSensor}
             style={buttonStyle}
             onMouseOver={(e) => {
-              e.currentTarget.style.backgroundColor = '#2563eb';
+              e.currentTarget.style.backgroundColor = darkMode ? '#5d8efa' : '#2563eb';
             }}
             onMouseOut={(e) => {
-              e.currentTarget.style.backgroundColor = '#3b82f6';
+              e.currentTarget.style.backgroundColor = darkMode ? '#4d7efa' : '#3b82f6';
             }}
           >
             {t('sensors.add')}
@@ -113,17 +120,20 @@ const SensorList: React.FC<SensorListProps> = ({
   }
 
   return (
-    <div style={{ padding: isMobile ? '1rem' : '1.5rem 2rem' }}>
+    <div style={{ 
+      padding: isMobile ? '1rem' : '1.5rem 2rem',
+      backgroundColor: darkMode ? colors.background : 'transparent'
+    }}>
       <div style={headerStyle}>
         <h1 style={titleStyle}>{t('sensors.title')}</h1>
         <button
           onClick={onAddSensor}
           style={buttonStyle}
           onMouseOver={(e) => {
-            e.currentTarget.style.backgroundColor = '#2563eb';
+            e.currentTarget.style.backgroundColor = darkMode ? '#5d8efa' : '#2563eb';
           }}
           onMouseOut={(e) => {
-            e.currentTarget.style.backgroundColor = '#3b82f6';
+            e.currentTarget.style.backgroundColor = darkMode ? '#4d7efa' : '#3b82f6';
           }}
         >
           <svg 

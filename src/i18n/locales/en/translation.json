@@ -240,9 +240,19 @@
     "title": "Settings",
     "language": "Language",
     "theme": "Theme",
+    "dark_mode": "Dark Mode",
     "notifications": "Notifications",
     "profile": "Profile",
     "security": "Security",
-    "preferences": "Preferences"
+    "preferences": "Preferences",
+    "account": "Account",
+    "change_password": "Change Password",
+    "delete_account": "Delete Account",
+    "email_notifications": "Email Notifications",
+    "email_notifications_desc": "Receive important updates via email",
+    "sms_notifications": "SMS Notifications",
+    "sms_notifications_desc": "Receive SMS alerts for critical events",
+    "app_notifications": "App Notifications",
+    "app_notifications_desc": "Receive in-app notifications and alerts"
   }
 } 

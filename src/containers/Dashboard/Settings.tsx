@@ -2,11 +2,12 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import i18n from '../../i18n/i18n';
+import { useTheme } from '../../context/ThemeContext';
 
 const Settings = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
-  const [darkMode, setDarkMode] = useState(false);
+  const { darkMode, toggleDarkMode } = useTheme();
   const [language, setLanguage] = useState(i18n.language || 'en');
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [notifications, setNotifications] = useState({
@@ -37,64 +38,71 @@ const Settings = () => {
     }));
   };
 
-  const handleDarkModeToggle = () => {
-    const newDarkMode = !darkMode;
-    setDarkMode(newDarkMode);
-    if (newDarkMode) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('darkMode', 'true');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('darkMode', 'false');
-    }
+  // Theme styles based on dark mode
+  const getThemeStyles = () => {
+    return {
+      containerStyle: {
+        padding: '1.5rem 1rem',
+        backgroundColor: darkMode ? '#111827' : '#f0f9f0',
+        color: darkMode ? '#f9fafb' : '#1f2937',
+      },
+      headerStyle: {
+        fontSize: '1.5rem',
+        fontWeight: 600,
+        color: darkMode ? '#f9fafb' : '#1f2937',
+        marginBottom: '1.5rem',
+      },
+      cardStyle: {
+        backgroundColor: darkMode ? '#1f2937' : 'white',
+        boxShadow: darkMode 
+          ? '0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1)'
+          : '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+        borderRadius: '0.5rem',
+        overflow: 'hidden',
+        border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
+      },
+      sectionStyle: {
+        padding: '1.5rem',
+        borderBottom: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
+      },
+      sectionTitleStyle: {
+        fontSize: '1.125rem',
+        fontWeight: 500,
+        color: darkMode ? '#f9fafb' : '#1f2937',
+        marginBottom: '1rem',
+      },
+      toggleLabelStyle: {
+        fontSize: '0.875rem',
+        fontWeight: 500,
+        color: darkMode ? '#d1d5db' : '#4b5563',
+        marginRight: '0.5rem',
+      },
+      notificationTitleStyle: {
+        fontSize: '0.875rem',
+        fontWeight: 500,
+        color: darkMode ? '#d1d5db' : '#4b5563',
+      },
+      notificationDescStyle: {
+        fontSize: '0.875rem',
+        color: darkMode ? '#9ca3af' : '#6b7280',
+      },
+    };
   };
 
-  useEffect(() => {
-    // Load user preferences from localStorage
-    const savedDarkMode = localStorage.getItem('darkMode') === 'true';
-    setDarkMode(savedDarkMode);
-    if (savedDarkMode) {
-      document.documentElement.classList.add('dark');
-    }
-  }, []);
-
-  const containerStyle = {
-    padding: '1.5rem 1rem',
-  };
-
-  const headerStyle = {
-    fontSize: '1.5rem',
-    fontWeight: 600,
-    color: '#1f2937',
-    marginBottom: '1.5rem',
-  };
-
-  const cardStyle = {
-    backgroundColor: 'white',
-    boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
-    borderRadius: '0.5rem',
-    overflow: 'hidden',
-  };
-
-  const sectionStyle = {
-    padding: '1.5rem',
-    borderBottom: '1px solid #e5e7eb',
-  };
-
-  const sectionTitleStyle = {
-    fontSize: '1.125rem',
-    fontWeight: 500,
-    color: '#1f2937',
-    marginBottom: '1rem',
-  };
-
+  const styles = getThemeStyles();
+  
+  // Original styles that don't need dark mode logic directly
   const languageButtonStyle = (isActive: boolean) => ({
     padding: '0.5rem 1rem',
     borderRadius: '0.375rem',
     display: 'flex',
     alignItems: 'center',
-    backgroundColor: isActive ? '#3b82f6' : '#f3f4f6',
-    color: isActive ? 'white' : '#1f2937',
+    backgroundColor: isActive 
+      ? '#3b82f6' 
+      : darkMode ? '#374151' : '#f3f4f6',
+    color: isActive 
+      ? 'white' 
+      : darkMode ? '#d1d5db' : '#1f2937',
     cursor: 'pointer',
     transition: 'background-color 0.2s',
   });
@@ -110,13 +118,6 @@ const Settings = () => {
     alignItems: 'center',
   };
 
-  const toggleLabelStyle = {
-    fontSize: '0.875rem',
-    fontWeight: 500,
-    color: '#4b5563',
-    marginRight: '0.5rem',
-  };
-
   const toggleSwitchStyle = (isActive: boolean) => ({
     width: '2.75rem',
     height: '1.5rem',
@@ -125,7 +126,7 @@ const Settings = () => {
     borderRadius: '9999px',
     padding: '0.25rem',
     transition: 'background-color 0.2s',
-    backgroundColor: isActive ? '#3b82f6' : '#d1d5db',
+    backgroundColor: isActive ? '#3b82f6' : darkMode ? '#4b5563' : '#d1d5db',
     cursor: 'pointer',
   });
 
@@ -150,17 +151,6 @@ const Settings = () => {
     flex: 1,
   };
 
-  const notificationTitleStyle = {
-    fontSize: '0.875rem',
-    fontWeight: 500,
-    color: '#4b5563',
-  };
-
-  const notificationDescStyle = {
-    fontSize: '0.875rem',
-    color: '#6b7280',
-  };
-
   const buttonStyle = (colorScheme: 'blue' | 'red') => ({
     padding: '0.5rem 1rem',
     backgroundColor: colorScheme === 'blue' ? '#3b82f6' : '#ef4444',
@@ -173,13 +163,13 @@ const Settings = () => {
   });
 
   return (
-    <div style={containerStyle}>
-      <h1 style={headerStyle}>{t('settings.title')}</h1>
+    <div style={styles.containerStyle}>
+      <h1 style={styles.headerStyle}>{t('settings.title')}</h1>
       
-      <div style={cardStyle}>
+      <div style={styles.cardStyle}>
         {/* Language Section */}
-        <div style={sectionStyle}>
-          <h2 style={sectionTitleStyle}>{t('language')}</h2>
+        <div style={styles.sectionStyle}>
+          <h2 style={styles.sectionTitleStyle}>{t('language')}</h2>
           <div style={languageGridStyle}>
             <button
               type="button"
@@ -199,13 +189,13 @@ const Settings = () => {
         </div>
         
         {/* Theme Section */}
-        <div style={sectionStyle}>
-          <h2 style={sectionTitleStyle}>{t('theme')}</h2>
+        <div style={styles.sectionStyle}>
+          <h2 style={styles.sectionTitleStyle}>{t('theme')}</h2>
           <div style={toggleWrapperStyle}>
-            <span style={toggleLabelStyle}>{t('dark_mode')}</span>
+            <span style={styles.toggleLabelStyle}>{t('dark_mode')}</span>
             <button 
               type="button"
-              onClick={handleDarkModeToggle}
+              onClick={toggleDarkMode}
               style={toggleSwitchStyle(darkMode)}
             >
               <span style={toggleKnobStyle(darkMode)} />
@@ -214,13 +204,13 @@ const Settings = () => {
         </div>
         
         {/* Notifications Section */}
-        <div style={sectionStyle}>
-          <h2 style={sectionTitleStyle}>{t('notifications')}</h2>
+        <div style={styles.sectionStyle}>
+          <h2 style={styles.sectionTitleStyle}>{t('notifications')}</h2>
           <div>
             <div style={notificationItemStyle}>
               <div style={notificationTextWrapperStyle}>
-                <h3 style={notificationTitleStyle}>{t('email_notifications')}</h3>
-                <p style={notificationDescStyle}>{t('email_notifications_desc')}</p>
+                <h3 style={styles.notificationTitleStyle}>{t('email_notifications')}</h3>
+                <p style={styles.notificationDescStyle}>{t('email_notifications_desc')}</p>
               </div>
               <button 
                 type="button"
@@ -232,8 +222,8 @@ const Settings = () => {
             </div>
             <div style={notificationItemStyle}>
               <div style={notificationTextWrapperStyle}>
-                <h3 style={notificationTitleStyle}>{t('sms_notifications')}</h3>
-                <p style={notificationDescStyle}>{t('sms_notifications_desc')}</p>
+                <h3 style={styles.notificationTitleStyle}>{t('sms_notifications')}</h3>
+                <p style={styles.notificationDescStyle}>{t('sms_notifications_desc')}</p>
               </div>
               <button 
                 type="button"
@@ -245,8 +235,8 @@ const Settings = () => {
             </div>
             <div style={notificationItemStyle}>
               <div style={notificationTextWrapperStyle}>
-                <h3 style={notificationTitleStyle}>{t('app_notifications')}</h3>
-                <p style={notificationDescStyle}>{t('app_notifications_desc')}</p>
+                <h3 style={styles.notificationTitleStyle}>{t('app_notifications')}</h3>
+                <p style={styles.notificationDescStyle}>{t('app_notifications_desc')}</p>
               </div>
               <button 
                 type="button"
@@ -260,8 +250,8 @@ const Settings = () => {
         </div>
         
         {/* Account Section */}
-        <div style={sectionStyle}>
-          <h2 style={sectionTitleStyle}>{t('account')}</h2>
+        <div style={styles.sectionStyle}>
+          <h2 style={styles.sectionTitleStyle}>{t('account')}</h2>
           <div style={{ marginTop: '0.75rem' }}>
             <button 
               type="button" 

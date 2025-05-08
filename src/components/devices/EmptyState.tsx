@@ -1,4 +1,6 @@
 import React from 'react';
+import { useTheme } from '../../context/ThemeContext';
+import { useThemeColors } from '../../hooks/useThemeColors';
 
 interface EmptyStateProps {
   message: string;
@@ -13,16 +15,21 @@ const EmptyState: React.FC<EmptyStateProps> = ({
   actionLabel,
   onAddDevice 
 }) => {
+  const { darkMode } = useTheme();
+  const colors = useThemeColors();
+
   const emptyStateStyle = {
     display: 'flex',
     flexDirection: 'column' as const,
     alignItems: 'center',
     justifyContent: 'center',
     padding: '3rem 1rem',
-    backgroundColor: 'white',
+    backgroundColor: darkMode ? colors.cardBackground : 'white',
     borderRadius: '0.5rem',
-    boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
-    border: '1px solid #e5e7eb',
+    boxShadow: darkMode 
+      ? '0 1px 3px 0 rgba(0, 0, 0, 0.2), 0 1px 2px 0 rgba(0, 0, 0, 0.1)'
+      : '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+    border: `1px solid ${darkMode ? colors.border : '#e5e7eb'}`,
   };
 
   return (
@@ -31,7 +38,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
         style={{
           width: '3rem',
           height: '3rem',
-          color: '#9ca3af',
+          color: darkMode ? colors.textMuted : '#9ca3af',
           marginBottom: '1rem'
         }}
         fill="none"
@@ -51,7 +58,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
         marginTop: '0.5rem',
         fontSize: '1rem',
         fontWeight: 500,
-        color: '#111827',
+        color: darkMode ? colors.textPrimary : '#111827',
         textAlign: 'center'
       }}>
         {message}
@@ -60,7 +67,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
       <p style={{
         marginTop: '0.5rem',
         fontSize: '0.875rem',
-        color: '#6b7280',
+        color: darkMode ? colors.textMuted : '#6b7280',
         maxWidth: '20rem',
         textAlign: 'center'
       }}>

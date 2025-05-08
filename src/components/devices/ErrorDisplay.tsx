@@ -1,24 +1,27 @@
 import React from 'react';
+import { useTheme } from '../../context/ThemeContext';
+import { useThemeColors } from '../../hooks/useThemeColors';
 
 interface ErrorDisplayProps {
   errorMessage: string;
 }
 
 const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ errorMessage }) => {
-  const errorStyle = {
-    backgroundColor: '#fee2e2',
-    padding: '1rem',
-    borderRadius: '0.375rem',
-    color: '#b91c1c',
-    marginBottom: '1.5rem',
-    fontSize: '0.875rem',
-    fontWeight: 500,
-    display: 'flex',
-    alignItems: 'center',
-  };
+  const { darkMode } = useTheme();
+  const colors = useThemeColors();
 
   return (
-    <div style={errorStyle}>
+    <div style={{
+      padding: '1rem',
+      borderRadius: '0.5rem',
+      backgroundColor: darkMode ? colors.dangerBackground : '#fee2e2',
+      color: darkMode ? colors.dangerText : '#b91c1c',
+      fontSize: '0.875rem',
+      fontWeight: 500,
+      display: 'flex',
+      alignItems: 'center',
+      marginBottom: '1.5rem',
+    }}>
       <svg 
         style={{ width: '1.25rem', height: '1.25rem', marginRight: '0.5rem' }} 
         fill="currentColor" 

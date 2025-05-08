@@ -1,6 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Sensor, SensorCreateRequest, SensorUpdateRequest } from '../../types/sensor';
+import { useTheme } from '../../context/ThemeContext';
+import { useThemeColors } from '../../hooks/useThemeColors';
 
 interface Area {
   id: number;
@@ -32,6 +34,8 @@ const SensorForm: React.FC<SensorFormProps> = ({
   isEditMode = false,
 }) => {
   const { t } = useTranslation();
+  const { darkMode } = useTheme();
+  const colors = useThemeColors();
   const isMobile = windowWidth < 768;
   const safeAreas = Array.isArray(areas) ? areas : [];
 
@@ -107,29 +111,31 @@ const SensorForm: React.FC<SensorFormProps> = ({
   };
 
   const formStyle = {
-    backgroundColor: 'white',
+    backgroundColor: darkMode ? colors.cardBackground : 'white',
     borderRadius: '0.5rem',
-    boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
-    border: '1px solid #e5e7eb',
+    boxShadow: darkMode 
+      ? '0 1px 3px 0 rgba(0, 0, 0, 0.2), 0 1px 2px 0 rgba(0, 0, 0, 0.1)' 
+      : '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+    border: `1px solid ${darkMode ? colors.border : '#e5e7eb'}`,
     overflow: 'hidden',
   };
 
   const headerStyle = {
-    backgroundColor: '#f9fafb',
+    backgroundColor: darkMode ? colors.surfaceBackground : '#f9fafb',
     padding: '1.5rem',
-    borderBottom: '1px solid #e5e7eb',
+    borderBottom: `1px solid ${darkMode ? colors.border : '#e5e7eb'}`,
   };
 
   const headerTitleStyle = {
     fontSize: '1.25rem',
     fontWeight: 600,
-    color: '#111827',
+    color: darkMode ? colors.textPrimary : '#111827',
     margin: 0,
   };
 
   const headerDescriptionStyle = {
     fontSize: '0.875rem',
-    color: '#6b7280',
+    color: darkMode ? colors.textSecondary : '#6b7280',
     marginTop: '0.5rem',
   };
 
@@ -145,7 +151,7 @@ const SensorForm: React.FC<SensorFormProps> = ({
     display: 'block',
     fontSize: '0.875rem',
     fontWeight: 500,
-    color: '#374151',
+    color: darkMode ? colors.textSecondary : '#374151',
     marginBottom: '0.5rem',
   };
 
@@ -154,11 +160,11 @@ const SensorForm: React.FC<SensorFormProps> = ({
     width: '100%',
     padding: '0.5rem 0.75rem',
     borderRadius: '0.375rem',
-    border: '1px solid #d1d5db',
+    border: `1px solid ${darkMode ? colors.border : '#d1d5db'}`,
     fontSize: '0.875rem',
     lineHeight: 1.5,
-    backgroundColor: 'white',
-    color: '#111827',
+    backgroundColor: darkMode ? colors.background : 'white',
+    color: darkMode ? colors.textPrimary : '#111827',
     outline: 'none',
   };
 
@@ -167,11 +173,11 @@ const SensorForm: React.FC<SensorFormProps> = ({
     width: '100%',
     padding: '0.5rem 0.75rem',
     borderRadius: '0.375rem',
-    border: '1px solid #d1d5db',
+    border: `1px solid ${darkMode ? colors.border : '#d1d5db'}`,
     fontSize: '0.875rem',
     lineHeight: 1.5,
-    backgroundColor: 'white',
-    color: '#111827',
+    backgroundColor: darkMode ? colors.background : 'white',
+    color: darkMode ? colors.textPrimary : '#111827',
     backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
     backgroundPosition: 'right 0.5rem center',
     backgroundRepeat: 'no-repeat',
@@ -188,7 +194,7 @@ const SensorForm: React.FC<SensorFormProps> = ({
     width: '1rem',
     height: '1rem',
     marginRight: '0.5rem',
-    accentColor: '#3b82f6',
+    accentColor: darkMode ? '#4d7efa' : '#3b82f6',
   };
 
   const textareaStyle = {
@@ -196,11 +202,11 @@ const SensorForm: React.FC<SensorFormProps> = ({
     width: '100%',
     padding: '0.5rem 0.75rem',
     borderRadius: '0.375rem',
-    border: '1px solid #d1d5db',
+    border: `1px solid ${darkMode ? colors.border : '#d1d5db'}`,
     fontSize: '0.875rem',
     lineHeight: 1.5,
-    backgroundColor: 'white',
-    color: '#111827',
+    backgroundColor: darkMode ? colors.background : 'white',
+    color: darkMode ? colors.textPrimary : '#111827',
     outline: 'none',
     minHeight: '6rem',
     resize: 'vertical' as const,
@@ -225,14 +231,14 @@ const SensorForm: React.FC<SensorFormProps> = ({
 
   const cancelButtonStyle = {
     ...buttonBaseStyle,
-    backgroundColor: 'white',
-    color: '#4b5563',
-    border: '1px solid #d1d5db',
+    backgroundColor: darkMode ? colors.surfaceBackground : 'white',
+    color: darkMode ? colors.textSecondary : '#4b5563',
+    border: `1px solid ${darkMode ? colors.border : '#d1d5db'}`,
   };
 
   const submitButtonStyle = {
     ...buttonBaseStyle,
-    backgroundColor: '#3b82f6',
+    backgroundColor: darkMode ? '#4d7efa' : '#3b82f6',
     color: 'white',
     border: 'none',
     opacity: isSubmitting ? 0.7 : 1,
@@ -240,8 +246,8 @@ const SensorForm: React.FC<SensorFormProps> = ({
   };
 
   const errorMessageStyle = {
-    backgroundColor: '#fee2e2',
-    color: '#b91c1c',
+    backgroundColor: darkMode ? colors.dangerBackground : '#fee2e2',
+    color: darkMode ? colors.dangerText : '#b91c1c',
     padding: '0.75rem',
     borderRadius: '0.375rem',
     fontSize: '0.875rem',
@@ -257,7 +263,7 @@ const SensorForm: React.FC<SensorFormProps> = ({
   const metadataButtonStyle = {
     ...buttonBaseStyle,
     padding: '0.25rem 0.5rem',
-    backgroundColor: '#3b82f6',
+    backgroundColor: darkMode ? '#4d7efa' : '#3b82f6',
     color: 'white',
     border: 'none',
     marginTop: '0.5rem',
@@ -273,15 +279,18 @@ const SensorForm: React.FC<SensorFormProps> = ({
     alignItems: 'center',
     justifyContent: 'center',
     width: '2rem',
-    backgroundColor: '#fee2e2',
-    color: '#b91c1c',
+    backgroundColor: darkMode ? colors.dangerBackground : '#fee2e2',
+    color: darkMode ? colors.dangerText : '#b91c1c',
     border: 'none',
     borderRadius: '0.375rem',
     cursor: 'pointer',
   };
 
   return (
-    <div style={{ padding: isMobile ? '1rem' : '1.5rem 2rem' }}>
+    <div style={{ 
+      padding: isMobile ? '1rem' : '1.5rem 2rem',
+      backgroundColor: darkMode ? colors.background : 'transparent'  
+    }}>
       <form onSubmit={handleSubmit} style={{ maxWidth: '48rem', margin: '0 auto' }}>
         <div style={formStyle}>
           <div style={headerStyle}>
@@ -303,7 +312,7 @@ const SensorForm: React.FC<SensorFormProps> = ({
             <div style={{ ...fieldGroupStyle, display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '1rem' }}>
               <div>
                 <label htmlFor="name" style={labelStyle}>
-                  {t('sensor_name')} <span style={{ color: '#ef4444' }}>*</span>
+                  {t('sensor_name')} <span style={{ color: darkMode ? '#ef5350' : '#ef4444' }}>*</span>
                 </label>
                 <input
                   type="text"
@@ -314,19 +323,19 @@ const SensorForm: React.FC<SensorFormProps> = ({
                   required
                   style={inputStyle}
                   onFocus={(e) => {
-                    e.target.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.2)';
-                    e.target.style.borderColor = '#3b82f6';
+                    e.target.style.boxShadow = `0 0 0 3px ${darkMode ? 'rgba(77, 126, 250, 0.3)' : 'rgba(59, 130, 246, 0.2)'}`;
+                    e.target.style.borderColor = darkMode ? '#4d7efa' : '#3b82f6';
                   }}
                   onBlur={(e) => {
                     e.target.style.boxShadow = 'none';
-                    e.target.style.borderColor = '#d1d5db';
+                    e.target.style.borderColor = darkMode ? colors.border : '#d1d5db';
                   }}
                 />
               </div>
 
               <div>
                 <label htmlFor="type" style={labelStyle}>
-                  {t('sensor_type')} <span style={{ color: '#ef4444' }}>*</span>
+                  {t('sensor_type')} <span style={{ color: darkMode ? '#ef5350' : '#ef4444' }}>*</span>
                 </label>
                 <input
                   type="text"
@@ -337,12 +346,12 @@ const SensorForm: React.FC<SensorFormProps> = ({
                   required
                   style={inputStyle}
                   onFocus={(e) => {
-                    e.target.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.2)';
-                    e.target.style.borderColor = '#3b82f6';
+                    e.target.style.boxShadow = `0 0 0 3px ${darkMode ? 'rgba(77, 126, 250, 0.3)' : 'rgba(59, 130, 246, 0.2)'}`;
+                    e.target.style.borderColor = darkMode ? '#4d7efa' : '#3b82f6';
                   }}
                   onBlur={(e) => {
                     e.target.style.boxShadow = 'none';
-                    e.target.style.borderColor = '#d1d5db';
+                    e.target.style.borderColor = darkMode ? colors.border : '#d1d5db';
                   }}
                 />
               </div>
@@ -350,7 +359,7 @@ const SensorForm: React.FC<SensorFormProps> = ({
 
             <div style={fieldGroupStyle}>
               <label htmlFor="areaId" style={labelStyle}>
-                {t('area')} <span style={{ color: '#ef4444' }}>*</span>
+                {t('area')} <span style={{ color: darkMode ? '#ef5350' : '#ef4444' }}>*</span>
               </label>
               <select
                 id="areaId"
@@ -360,12 +369,12 @@ const SensorForm: React.FC<SensorFormProps> = ({
                 required
                 style={selectStyle}
                 onFocus={(e) => {
-                  e.target.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.2)';
-                  e.target.style.borderColor = '#3b82f6';
+                  e.target.style.boxShadow = `0 0 0 3px ${darkMode ? 'rgba(77, 126, 250, 0.3)' : 'rgba(59, 130, 246, 0.2)'}`;
+                  e.target.style.borderColor = darkMode ? '#4d7efa' : '#3b82f6';
                 }}
                 onBlur={(e) => {
                   e.target.style.boxShadow = 'none';
-                  e.target.style.borderColor = '#d1d5db';
+                  e.target.style.borderColor = darkMode ? colors.border : '#d1d5db';
                 }}
               >
                 <option value="" disabled>
@@ -389,7 +398,7 @@ const SensorForm: React.FC<SensorFormProps> = ({
                   onChange={handleChange}
                   style={checkboxStyle}
                 />
-                <label htmlFor="status" style={{ fontSize: '0.875rem', color: '#374151' }}>
+                <label htmlFor="status" style={{ fontSize: '0.875rem', color: darkMode ? colors.textSecondary : '#374151' }}>
                   {t('active_sensor')}
                 </label>
               </div>
@@ -406,12 +415,12 @@ const SensorForm: React.FC<SensorFormProps> = ({
                 onChange={handleChange}
                 style={textareaStyle}
                 onFocus={(e) => {
-                  e.target.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.2)';
-                  e.target.style.borderColor = '#3b82f6';
+                  e.target.style.boxShadow = `0 0 0 3px ${darkMode ? 'rgba(77, 126, 250, 0.3)' : 'rgba(59, 130, 246, 0.2)'}`;
+                  e.target.style.borderColor = darkMode ? '#4d7efa' : '#3b82f6';
                 }}
                 onBlur={(e) => {
                   e.target.style.boxShadow = 'none';
-                  e.target.style.borderColor = '#d1d5db';
+                  e.target.style.borderColor = darkMode ? colors.border : '#d1d5db';
                 }}
               />
             </div>
@@ -438,12 +447,12 @@ const SensorForm: React.FC<SensorFormProps> = ({
                     }}
                     style={metadataInputStyle}
                     onFocus={(e) => {
-                      e.target.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.2)';
-                      e.target.style.borderColor = '#3b82f6';
+                      e.target.style.boxShadow = `0 0 0 3px ${darkMode ? 'rgba(77, 126, 250, 0.3)' : 'rgba(59, 130, 246, 0.2)'}`;
+                      e.target.style.borderColor = darkMode ? '#4d7efa' : '#3b82f6';
                     }}
                     onBlur={(e) => {
                       e.target.style.boxShadow = 'none';
-                      e.target.style.borderColor = '#d1d5db';
+                      e.target.style.borderColor = darkMode ? colors.border : '#d1d5db';
                     }}
                   />
                   <input
@@ -453,12 +462,12 @@ const SensorForm: React.FC<SensorFormProps> = ({
                     onChange={(e) => handleMetadataChange(key, e.target.value)}
                     style={metadataInputStyle}
                     onFocus={(e) => {
-                      e.target.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.2)';
-                      e.target.style.borderColor = '#3b82f6';
+                      e.target.style.boxShadow = `0 0 0 3px ${darkMode ? 'rgba(77, 126, 250, 0.3)' : 'rgba(59, 130, 246, 0.2)'}`;
+                      e.target.style.borderColor = darkMode ? '#4d7efa' : '#3b82f6';
                     }}
                     onBlur={(e) => {
                       e.target.style.boxShadow = 'none';
-                      e.target.style.borderColor = '#d1d5db';
+                      e.target.style.borderColor = darkMode ? colors.border : '#d1d5db';
                     }}
                   />
                   <button
@@ -476,10 +485,10 @@ const SensorForm: React.FC<SensorFormProps> = ({
                 onClick={handleAddMetadata}
                 style={metadataButtonStyle}
                 onMouseOver={(e) => {
-                  e.currentTarget.style.backgroundColor = '#2563eb';
+                  e.currentTarget.style.backgroundColor = darkMode ? '#5d8efa' : '#2563eb';
                 }}
                 onMouseOut={(e) => {
-                  e.currentTarget.style.backgroundColor = '#3b82f6';
+                  e.currentTarget.style.backgroundColor = darkMode ? '#4d7efa' : '#3b82f6';
                 }}
               >
                 {t('add_metadata')}
@@ -492,10 +501,10 @@ const SensorForm: React.FC<SensorFormProps> = ({
                 onClick={onCancel}
                 style={cancelButtonStyle}
                 onMouseOver={(e) => {
-                  e.currentTarget.style.backgroundColor = '#f3f4f6';
+                  e.currentTarget.style.backgroundColor = darkMode ? colors.surfaceBackground : '#f3f4f6';
                 }}
                 onMouseOut={(e) => {
-                  e.currentTarget.style.backgroundColor = 'white';
+                  e.currentTarget.style.backgroundColor = darkMode ? colors.surfaceBackground : 'white';
                 }}
               >
                 {t('cancel')}
@@ -506,11 +515,11 @@ const SensorForm: React.FC<SensorFormProps> = ({
                 style={submitButtonStyle}
                 onMouseOver={(e) => {
                   if (!isSubmitting) {
-                    e.currentTarget.style.backgroundColor = '#2563eb';
+                    e.currentTarget.style.backgroundColor = darkMode ? '#5d8efa' : '#2563eb';
                   }
                 }}
                 onMouseOut={(e) => {
-                  e.currentTarget.style.backgroundColor = '#3b82f6';
+                  e.currentTarget.style.backgroundColor = darkMode ? '#4d7efa' : '#3b82f6';
                 }}
               >
                 {isSubmitting

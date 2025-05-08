@@ -1,6 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Sensor } from '../../types/sensor';
+import { useTheme } from '../../context/ThemeContext';
+import { useThemeColors } from '../../hooks/useThemeColors';
 
 interface SensorDetailsProps {
   sensor: Sensor | null;
@@ -22,6 +24,8 @@ const SensorDetails: React.FC<SensorDetailsProps> = ({
   windowWidth
 }) => {
   const { t } = useTranslation();
+  const { darkMode } = useTheme();
+  const colors = useThemeColors();
   const isMobile = windowWidth < 768;
 
   if (!sensor) {
@@ -40,7 +44,7 @@ const SensorDetails: React.FC<SensorDetailsProps> = ({
   const titleStyle = {
     fontSize: '1.5rem',
     fontWeight: 600,
-    color: '#111827',
+    color: darkMode ? colors.textPrimary : '#111827',
     margin: 0,
     fontFamily: 'system-ui, -apple-system, sans-serif'
   };
@@ -55,11 +59,11 @@ const SensorDetails: React.FC<SensorDetailsProps> = ({
   const buttonStyle = (variant: 'primary' | 'secondary' | 'danger') => ({
     padding: '0.5rem 1rem',
     backgroundColor: 
-      variant === 'primary' ? '#3b82f6' : 
-      variant === 'danger' ? '#ef4444' : 
-      'white',
-    color: variant === 'secondary' ? '#4b5563' : 'white',
-    border: variant === 'secondary' ? '1px solid #d1d5db' : 'none',
+      variant === 'primary' ? (darkMode ? '#4d7efa' : '#3b82f6') : 
+      variant === 'danger' ? (darkMode ? '#ef5350' : '#ef4444') : 
+      darkMode ? colors.surfaceBackground : 'white',
+    color: variant === 'secondary' ? darkMode ? colors.textSecondary : '#4b5563' : 'white',
+    border: variant === 'secondary' ? `1px solid ${darkMode ? colors.border : '#d1d5db'}` : 'none',
     borderRadius: '0.375rem',
     fontSize: '0.875rem',
     fontWeight: 500,
@@ -73,7 +77,10 @@ const SensorDetails: React.FC<SensorDetailsProps> = ({
   });
 
   return (
-    <div style={{ padding: isMobile ? '1rem' : '1.5rem 2rem' }}>
+    <div style={{ 
+      padding: isMobile ? '1rem' : '1.5rem 2rem',
+      backgroundColor: darkMode ? colors.background : 'transparent' 
+    }}>
       <div style={headerStyle}>
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <button
@@ -90,13 +97,13 @@ const SensorDetails: React.FC<SensorDetailsProps> = ({
               cursor: 'pointer'
             }}
             onMouseOver={(e) => {
-              e.currentTarget.style.backgroundColor = '#f3f4f6';
+              e.currentTarget.style.backgroundColor = darkMode ? colors.surfaceBackground : '#f3f4f6';
             }}
             onMouseOut={(e) => {
               e.currentTarget.style.backgroundColor = 'transparent';
             }}
           >
-            <svg style={{ width: '1.25rem', height: '1.25rem', color: '#4b5563' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg style={{ width: '1.25rem', height: '1.25rem', color: darkMode ? colors.textSecondary : '#4b5563' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
           </button>
@@ -110,10 +117,10 @@ const SensorDetails: React.FC<SensorDetailsProps> = ({
             onClick={onEdit}
             style={buttonStyle('primary')}
             onMouseOver={(e) => {
-              e.currentTarget.style.backgroundColor = '#2563eb';
+              e.currentTarget.style.backgroundColor = darkMode ? '#5d8efa' : '#2563eb';
             }}
             onMouseOut={(e) => {
-              e.currentTarget.style.backgroundColor = '#3b82f6';
+              e.currentTarget.style.backgroundColor = darkMode ? '#4d7efa' : '#3b82f6';
             }}
           >
             <svg style={{ width: '1rem', height: '1rem', marginRight: '0.375rem' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -125,10 +132,10 @@ const SensorDetails: React.FC<SensorDetailsProps> = ({
             onClick={onDelete}
             style={buttonStyle('danger')}
             onMouseOver={(e) => {
-              e.currentTarget.style.backgroundColor = '#dc2626';
+              e.currentTarget.style.backgroundColor = darkMode ? '#f44336' : '#dc2626';
             }}
             onMouseOut={(e) => {
-              e.currentTarget.style.backgroundColor = '#ef4444';
+              e.currentTarget.style.backgroundColor = darkMode ? '#ef5350' : '#ef4444';
             }}
           >
             <svg style={{ width: '1rem', height: '1rem', marginRight: '0.375rem' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -140,38 +147,40 @@ const SensorDetails: React.FC<SensorDetailsProps> = ({
       </div>
 
       <div style={{
-        backgroundColor: 'white',
+        backgroundColor: darkMode ? colors.cardBackground : 'white',
         borderRadius: '0.5rem',
-        boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
-        border: '1px solid #e5e7eb',
+        boxShadow: darkMode 
+          ? '0 1px 3px 0 rgba(0, 0, 0, 0.2), 0 1px 2px 0 rgba(0, 0, 0, 0.1)' 
+          : '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+        border: `1px solid ${darkMode ? colors.border : '#e5e7eb'}`,
         overflow: 'hidden',
       }}>
         <div style={{ padding: '1.5rem' }}>
           <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '1.5rem' }}>
             <div>
-              <h2 style={{ fontSize: '1.125rem', fontWeight: 600, color: '#111827', margin: '0 0 1rem 0' }}>
+              <h2 style={{ fontSize: '1.125rem', fontWeight: 600, color: darkMode ? colors.textPrimary : '#111827', margin: '0 0 1rem 0' }}>
                 {t('sensor_information')}
               </h2>
               
               <div style={{ marginBottom: '1rem' }}>
-                <p style={{ fontSize: '0.875rem', fontWeight: 500, color: '#6b7280', margin: '0 0 0.25rem 0' }}>
+                <p style={{ fontSize: '0.875rem', fontWeight: 500, color: darkMode ? colors.textSecondary : '#6b7280', margin: '0 0 0.25rem 0' }}>
                   {t('sensor_name')}
                 </p>
-                <p style={{ fontSize: '1rem', color: '#111827', margin: 0 }}>
+                <p style={{ fontSize: '1rem', color: darkMode ? colors.textPrimary : '#111827', margin: 0 }}>
                   {sensor.name}
                 </p>
               </div>
               
               <div style={{ marginBottom: '1rem' }}>
-                <p style={{ fontSize: '0.875rem', fontWeight: 500, color: '#6b7280', margin: '0 0 0.25rem 0' }}>
+                <p style={{ fontSize: '0.875rem', fontWeight: 500, color: darkMode ? colors.textSecondary : '#6b7280', margin: '0 0 0.25rem 0' }}>
                   {t('sensor_type')}
                 </p>
-                <p style={{ fontSize: '1rem', color: '#111827', margin: 0 }}>
+                <p style={{ fontSize: '1rem', color: darkMode ? colors.textPrimary : '#111827', margin: 0 }}>
                   <span style={{
                     display: 'inline-block',
                     fontSize: '0.75rem',
-                    backgroundColor: '#dbeafe',
-                    color: '#1e40af',
+                    backgroundColor: darkMode ? colors.infoBackground : '#dbeafe',
+                    color: darkMode ? colors.infoText : '#1e40af',
                     padding: '0.125rem 0.5rem',
                     borderRadius: '9999px',
                   }}>
@@ -181,7 +190,7 @@ const SensorDetails: React.FC<SensorDetailsProps> = ({
               </div>
               
               <div style={{ marginBottom: '1rem' }}>
-                <p style={{ fontSize: '0.875rem', fontWeight: 500, color: '#6b7280', margin: '0 0 0.25rem 0' }}>
+                <p style={{ fontSize: '0.875rem', fontWeight: 500, color: darkMode ? colors.textSecondary : '#6b7280', margin: '0 0 0.25rem 0' }}>
                   {t('status')}
                 </p>
                 <p style={{ fontSize: '1rem', margin: 0 }}>
@@ -192,8 +201,12 @@ const SensorDetails: React.FC<SensorDetailsProps> = ({
                     borderRadius: '9999px',
                     fontSize: '0.75rem',
                     fontWeight: 500,
-                    backgroundColor: sensor.status ? '#dcfce7' : '#fee2e2',
-                    color: sensor.status ? '#166534' : '#b91c1c',
+                    backgroundColor: sensor.status 
+                      ? darkMode ? colors.successBackground : '#dcfce7' 
+                      : darkMode ? colors.dangerBackground : '#fee2e2',
+                    color: sensor.status 
+                      ? darkMode ? colors.successText : '#166534' 
+                      : darkMode ? colors.dangerText : '#b91c1c',
                   }}>
                     <span style={{
                       width: '0.5rem',
@@ -209,21 +222,21 @@ const SensorDetails: React.FC<SensorDetailsProps> = ({
             </div>
             
             <div>
-              <h2 style={{ fontSize: '1.125rem', fontWeight: 600, color: '#111827', margin: '0 0 1rem 0' }}>
+              <h2 style={{ fontSize: '1.125rem', fontWeight: 600, color: darkMode ? colors.textPrimary : '#111827', margin: '0 0 1rem 0' }}>
                 {t('additional_details')}
               </h2>
               
               {sensor.area && (
                 <div style={{ marginBottom: '1rem' }}>
-                  <p style={{ fontSize: '0.875rem', fontWeight: 500, color: '#6b7280', margin: '0 0 0.25rem 0' }}>
+                  <p style={{ fontSize: '0.875rem', fontWeight: 500, color: darkMode ? colors.textSecondary : '#6b7280', margin: '0 0 0.25rem 0' }}>
                     {t('area')}
                   </p>
-                  <p style={{ fontSize: '1rem', color: '#111827', margin: 0 }}>
+                  <p style={{ fontSize: '1rem', color: darkMode ? colors.textPrimary : '#111827', margin: 0 }}>
                     <span style={{
                       display: 'inline-block',
                       fontSize: '0.75rem',
-                      backgroundColor: '#dcfce7',
-                      color: '#166534',
+                      backgroundColor: darkMode ? colors.successBackground : '#dcfce7',
+                      color: darkMode ? colors.successText : '#166534',
                       padding: '0.125rem 0.5rem',
                       borderRadius: '9999px',
                     }}>
@@ -234,19 +247,19 @@ const SensorDetails: React.FC<SensorDetailsProps> = ({
               )}
               
               <div style={{ marginBottom: '1rem' }}>
-                <p style={{ fontSize: '0.875rem', fontWeight: 500, color: '#6b7280', margin: '0 0 0.25rem 0' }}>
+                <p style={{ fontSize: '0.875rem', fontWeight: 500, color: darkMode ? colors.textSecondary : '#6b7280', margin: '0 0 0.25rem 0' }}>
                   {t('description')}
                 </p>
-                <p style={{ fontSize: '1rem', color: '#111827', margin: 0, lineHeight: 1.5 }}>
+                <p style={{ fontSize: '1rem', color: darkMode ? colors.textPrimary : '#111827', margin: 0, lineHeight: 1.5 }}>
                   {sensor.description || t('no_description')}
                 </p>
               </div>
               
               <div>
-                <p style={{ fontSize: '0.875rem', fontWeight: 500, color: '#6b7280', margin: '0 0 0.25rem 0' }}>
+                <p style={{ fontSize: '0.875rem', fontWeight: 500, color: darkMode ? colors.textSecondary : '#6b7280', margin: '0 0 0.25rem 0' }}>
                   {t('created_at')}
                 </p>
-                <p style={{ fontSize: '1rem', color: '#111827', margin: 0 }}>
+                <p style={{ fontSize: '1rem', color: darkMode ? colors.textPrimary : '#111827', margin: 0 }}>
                   {sensor.createdAt ? new Date(sensor.createdAt).toLocaleDateString() : '-'}
                 </p>
               </div>
@@ -255,11 +268,11 @@ const SensorDetails: React.FC<SensorDetailsProps> = ({
           
           {sensor.metadata && Object.keys(sensor.metadata).length > 0 && (
             <div style={{ marginTop: '2rem' }}>
-              <h2 style={{ fontSize: '1.125rem', fontWeight: 600, color: '#111827', margin: '0 0 1rem 0' }}>
+              <h2 style={{ fontSize: '1.125rem', fontWeight: 600, color: darkMode ? colors.textPrimary : '#111827', margin: '0 0 1rem 0' }}>
                 {t('metadata')}
               </h2>
               <div style={{
-                border: '1px solid #e5e7eb',
+                border: `1px solid ${darkMode ? colors.border : '#e5e7eb'}`,
                 borderRadius: '0.375rem',
                 overflow: 'hidden',
               }}>
@@ -269,16 +282,36 @@ const SensorDetails: React.FC<SensorDetailsProps> = ({
                   fontSize: '0.875rem',
                 }}>
                   <thead>
-                    <tr style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
-                      <th style={{ padding: '0.75rem 1rem', textAlign: 'left', fontWeight: 500, color: '#6b7280' }}>{t('property')}</th>
-                      <th style={{ padding: '0.75rem 1rem', textAlign: 'left', fontWeight: 500, color: '#6b7280' }}>{t('value')}</th>
+                    <tr style={{ 
+                      backgroundColor: darkMode ? colors.surfaceBackground : '#f9fafb', 
+                      borderBottom: `1px solid ${darkMode ? colors.border : '#e5e7eb'}` 
+                    }}>
+                      <th style={{ 
+                        padding: '0.75rem 1rem', 
+                        textAlign: 'left', 
+                        fontWeight: 500, 
+                        color: darkMode ? colors.textSecondary : '#6b7280' 
+                      }}>{t('property')}</th>
+                      <th style={{ 
+                        padding: '0.75rem 1rem', 
+                        textAlign: 'left', 
+                        fontWeight: 500, 
+                        color: darkMode ? colors.textSecondary : '#6b7280' 
+                      }}>{t('value')}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {Object.entries(sensor.metadata).map(([key, value]) => (
-                      <tr key={key} style={{ borderBottom: '1px solid #e5e7eb' }}>
-                        <td style={{ padding: '0.75rem 1rem', fontWeight: 500, color: '#111827' }}>{key}</td>
-                        <td style={{ padding: '0.75rem 1rem', color: '#4b5563' }}>
+                      <tr key={key} style={{ borderBottom: `1px solid ${darkMode ? colors.border : '#e5e7eb'}` }}>
+                        <td style={{ 
+                          padding: '0.75rem 1rem', 
+                          fontWeight: 500, 
+                          color: darkMode ? colors.textPrimary : '#111827' 
+                        }}>{key}</td>
+                        <td style={{ 
+                          padding: '0.75rem 1rem', 
+                          color: darkMode ? colors.textSecondary : '#4b5563' 
+                        }}>
                           {typeof value === 'object' ? JSON.stringify(value) : String(value)}
                         </td>
                       </tr>
