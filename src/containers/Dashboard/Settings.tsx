@@ -10,7 +10,7 @@ const Settings = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const { darkMode, toggleDarkMode } = useTheme();
-  const { isWalkthroughEnabled, toggleWalkthroughEnabled } = useWalkthrough();
+  const { isWalkthroughEnabled, toggleWalkthroughEnabled, resetCompletedWalkthroughs } = useWalkthrough();
   const [language, setLanguage] = useState(i18n.language || 'en');
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [notifications, setNotifications] = useState({
@@ -216,6 +216,27 @@ const Settings = () => {
               onChange={toggleWalkthroughEnabled}
               helperText={t('walkthrough_description')}
             />
+          </div>
+          <div style={{ marginTop: '1rem' }}>
+            <button
+              type="button"
+              onClick={() => {
+                resetCompletedWalkthroughs();
+                alert('Walkthroughs have been reset. You will see them again on your next visit.');
+              }}
+              style={{
+                padding: '0.5rem 1rem',
+                backgroundColor: '#3b82f6',
+                color: 'white',
+                borderRadius: '0.375rem',
+                fontSize: '0.875rem',
+                fontWeight: 500,
+                border: 'none',
+                cursor: 'pointer'
+              }}
+            >
+              Reset Walkthroughs
+            </button>
           </div>
         </div>
         

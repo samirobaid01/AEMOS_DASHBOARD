@@ -1,48 +1,91 @@
 /* Walkthrough highlighting styles */
 .walkthrough-highlight {
-  position: relative;
-  z-index: 1000;
+  position: relative !important;
+  z-index: 1000 !important;
   animation: pulse 2s infinite;
-  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.5);
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.7), 0 0 15px rgba(0, 0, 0, 0.3) !important;
   border-radius: 0.25rem;
+  outline: 2px solid rgba(59, 130, 246, 0.8) !important;
+  transition: all 0.3s ease-in-out;
+  background-color: rgba(255, 255, 255, 1) !important;
+}
+
+.dark .walkthrough-highlight {
+  background-color: rgba(31, 41, 55, 1) !important;
 }
 
 @keyframes pulse {
   0% {
-    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.8), 0 0 15px rgba(0, 0, 0, 0.3);
   }
   70% {
-    box-shadow: 0 0 0 6px rgba(59, 130, 246, 0);
+    box-shadow: 0 0 0 8px rgba(59, 130, 246, 0), 0 0 15px rgba(0, 0, 0, 0.3);
   }
   100% {
-    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0), 0 0 15px rgba(0, 0, 0, 0.3);
   }
 }
 
 /* Dark mode pulse */
 .dark .walkthrough-highlight {
-  box-shadow: 0 0 0 4px rgba(77, 126, 250, 0.5);
+  box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.7), 0 0 15px rgba(0, 0, 0, 0.5) !important;
+  outline: 2px solid rgba(96, 165, 250, 0.8) !important;
 }
 
-@media (prefers-color-scheme: dark) {
-  .walkthrough-highlight {
-    box-shadow: 0 0 0 4px rgba(77, 126, 250, 0.5);
+/* Dark mode pulse animation */
+@keyframes darkPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(96, 165, 250, 0.8), 0 0 15px rgba(0, 0, 0, 0.5);
   }
-  
-  @keyframes pulse {
-    0% {
-      box-shadow: 0 0 0 0 rgba(77, 126, 250, 0.7);
-    }
-    70% {
-      box-shadow: 0 0 0 6px rgba(77, 126, 250, 0);
-    }
-    100% {
-      box-shadow: 0 0 0 0 rgba(77, 126, 250, 0);
-    }
+  70% {
+    box-shadow: 0 0 0 8px rgba(96, 165, 250, 0), 0 0 15px rgba(0, 0, 0, 0.5);
   }
+  100% {
+    box-shadow: 0 0 0 0 rgba(96, 165, 250, 0), 0 0 15px rgba(0, 0, 0, 0.5);
+  }
+}
+
+.dark .walkthrough-highlight {
+  animation: darkPulse 2s infinite;
 }
 
 /* Make sure the overlay allows interaction with highlighted elements */
 .walkthrough-highlight {
   pointer-events: auto !important;
+}
+
+/* Make sure highlighted elements are visible */
+body .walkthrough-highlight {
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: block !important;
+}
+
+/* Fix for z-index issues */
+body .walkthrough-overlay {
+  z-index: 999;
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  pointer-events: auto;
+}
+
+/* Ensure tooltips are readable */
+body .walkthrough-tooltip {
+  z-index: 1001 !important;
+  position: absolute;
+  background-color: white;
+  color: #333;
+  border-radius: 0.375rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3), 0 2px 4px rgba(0, 0, 0, 0.2);
+  padding: 1rem;
+  max-width: 300px;
+  font-size: 0.875rem;
+  border: 1px solid rgba(229, 231, 235, 1);
+}
+
+.dark body .walkthrough-tooltip {
+  background-color: #1f2937;
+  color: #f3f4f6;
+  border: 1px solid rgba(55, 65, 81, 1);
 } 

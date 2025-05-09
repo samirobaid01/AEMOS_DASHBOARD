@@ -4,9 +4,13 @@ import WalkthroughStep from './WalkthroughStep';
 
 interface WalkthroughProps {
   id: string;
+  autoStart?: boolean;
 }
 
-const Walkthrough: React.FC<WalkthroughProps> = ({ id }) => {
+const Walkthrough: React.FC<WalkthroughProps> = ({ 
+  id,
+  autoStart = false // Default to false, let parent components control starting
+}) => {
   const { 
     isWalkthroughActive,
     activeWalkthrough,
@@ -19,9 +23,9 @@ const Walkthrough: React.FC<WalkthroughProps> = ({ id }) => {
     isWalkthroughEnabled
   } = useWalkthrough();
 
+  // Only auto-start if specifically enabled for this walkthrough instance
   useEffect(() => {
-    // Only automatically start if not already seen and if walkthroughs are enabled
-    if (!hasSeenWalkthrough(id) && isWalkthroughEnabled) {
+    if (autoStart && !hasSeenWalkthrough(id) && isWalkthroughEnabled) {
       // Small delay to ensure DOM elements are ready
       const timer = setTimeout(() => {
         startWalkthrough(id);
@@ -29,8 +33,7 @@ const Walkthrough: React.FC<WalkthroughProps> = ({ id }) => {
       
       return () => clearTimeout(timer);
     }
-  // Remove startWalkthrough from dependency array to prevent infinite loop
-  }, [id, hasSeenWalkthrough, isWalkthroughEnabled]);
+  }, [id, hasSeenWalkthrough, isWalkthroughEnabled, autoStart]);
 
   // Don't render anything if walkthrough is not active or not for this ID
   if (!isWalkthroughActive || !activeWalkthrough || activeWalkthrough.id !== id) {

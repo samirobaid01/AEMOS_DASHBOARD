@@ -1,10 +1,5 @@
 /* Dark Mode Styles */
 .dark {
-  /* Apply transition to all elements for smooth theme switching */
-  * {
-    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
-  }
-
   /* Base colors */
   background-color: #111827;
   color: #f9fafb;
@@ -22,6 +17,11 @@
   --card-bg: #1f2937;
   --card-border: #374151;
   --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* Apply transition to all elements in dark mode */
+.dark * {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 /* Theme Transition */

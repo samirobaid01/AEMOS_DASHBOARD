@@ -29,6 +29,7 @@ body {
   gap: 1rem;
 }
 
+/* Media queries should NOT be nested */
 @media (min-width: 640px) {
   .dashboard-grid {
     grid-template-columns: repeat(2, 1fr);

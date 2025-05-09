@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import type { ReactNode } from 'react';
 
 interface WalkthroughStep {
@@ -27,6 +27,7 @@ interface WalkthroughContextType {
   registerWalkthrough: (walkthrough: Walkthrough) => void;
   walkthroughs: Record<string, Walkthrough>;
   hasSeenWalkthrough: (walkthroughId: string) => boolean;
+  resetCompletedWalkthroughs: () => void;
 }
 
 const WalkthroughContext = createContext<WalkthroughContextType | undefined>(undefined);
@@ -53,6 +54,7 @@ export const WalkthroughProvider: React.FC<WalkthroughProviderProps> = ({ childr
   const [activeWalkthrough, setActiveWalkthrough] = useState<Walkthrough | null>(null);
   const [currentStepIndex, setCurrentStepIndex] = useState<number>(0);
   const [isWalkthroughActive, setIsWalkthroughActive] = useState<boolean>(false);
+  const activeWalkthroughRef = useRef<string | null>(null);
   
   // Load completed walkthroughs from localStorage
   const [completedWalkthroughs, setCompletedWalkthroughs] = useState<string[]>(() => {
@@ -70,66 +72,110 @@ export const WalkthroughProvider: React.FC<WalkthroughProviderProps> = ({ childr
     localStorage.setItem('walkthrough_enabled', isWalkthroughEnabled.toString());
   }, [isWalkthroughEnabled]);
   
-  const toggleWalkthroughEnabled = () => {
-    setIsWalkthroughEnabled(prev => !prev);
-  };
+  // Use refs to store stable versions of functions
+  const resetCompletedWalkthroughs = useCallback(() => {
+    setCompletedWalkthroughs([]);
+    localStorage.setItem('completed_walkthroughs', JSON.stringify([]));
+    console.log('Completed walkthroughs reset');
+  }, []);
   
-  const registerWalkthrough = (walkthrough: Walkthrough) => {
-    setWalkthroughs(prev => ({
-      ...prev,
-      [walkthrough.id]: walkthrough
-    }));
-  };
+  const toggleWalkthroughEnabled = useCallback(() => {
+    setIsWalkthroughEnabled(prev => {
+      // If we're turning on walkthroughs, reset the completed walkthroughs
+      if (!prev) {
+        resetCompletedWalkthroughs();
+      }
+      return !prev;
+    });
+  }, [resetCompletedWalkthroughs]);
   
-  const hasSeenWalkthrough = (walkthroughId: string) => {
+  const registerWalkthrough = useCallback((walkthrough: Walkthrough) => {
+    // Check if this walkthrough is already registered to prevent unnecessary updates
+    setWalkthroughs(prev => {
+      if (prev[walkthrough.id]) {
+        // If it's already in the state and nothing changed, return the same state object
+        // to prevent unnecessary rerenders
+        return prev;
+      }
+      return {
+        ...prev,
+        [walkthrough.id]: walkthrough
+      };
+    });
+  }, []);
+  
+  const hasSeenWalkthrough = useCallback((walkthroughId: string) => {
     return completedWalkthroughs.includes(walkthroughId);
-  };
+  }, [completedWalkthroughs]);
   
-  const startWalkthrough = (walkthroughId: string) => {
-    if (!isWalkthroughEnabled || hasSeenWalkthrough(walkthroughId)) {
+  const startWalkthrough = useCallback((walkthroughId: string) => {
+    // Don't start if already active or not enabled
+    if (!isWalkthroughEnabled || hasSeenWalkthrough(walkthroughId) || isWalkthroughActive || activeWalkthroughRef.current === walkthroughId) {
       return;
     }
     
     const walkthrough = walkthroughs[walkthroughId];
-    if (walkthrough && !isWalkthroughActive) {
+    if (walkthrough) {
+      console.log(`Starting walkthrough: ${walkthroughId}`);
+      
+      // Check if the first target element exists before starting
+      const firstStep = walkthrough.steps[0];
+      const firstTarget = document.querySelector(firstStep.target);
+      
+      if (!firstTarget) {
+        console.error(`Cannot start walkthrough: target element not found for selector "${firstStep.target}"`);
+        return;
+      }
+      
+      activeWalkthroughRef.current = walkthroughId;
       setActiveWalkthrough(walkthrough);
       setCurrentStepIndex(0);
       setIsWalkthroughActive(true);
     }
-  };
+  }, [isWalkthroughEnabled, hasSeenWalkthrough, walkthroughs, isWalkthroughActive]);
   
-  const nextStep = () => {
+  const nextStep = useCallback(() => {
     if (activeWalkthrough && currentStepIndex < activeWalkthrough.steps.length - 1) {
       setCurrentStepIndex(prev => prev + 1);
     } else {
-      closeWalkthrough();
+      // If we're at the last step, close the walkthrough
+      if (activeWalkthrough) {
+        setCompletedWalkthroughs(prev => [...prev, activeWalkthrough.id]);
+      }
+      setIsWalkthroughActive(false);
+      setActiveWalkthrough(null);
+      setCurrentStepIndex(0);
+      activeWalkthroughRef.current = null;
     }
-  };
+  }, [activeWalkthrough, currentStepIndex]);
   
-  const prevStep = () => {
+  const prevStep = useCallback(() => {
     if (currentStepIndex > 0) {
       setCurrentStepIndex(prev => prev - 1);
     }
-  };
+  }, [currentStepIndex]);
   
-  const closeWalkthrough = () => {
+  const closeWalkthrough = useCallback(() => {
     if (activeWalkthrough) {
       setCompletedWalkthroughs(prev => [...prev, activeWalkthrough.id]);
     }
     setIsWalkthroughActive(false);
     setActiveWalkthrough(null);
     setCurrentStepIndex(0);
-  };
+    activeWalkthroughRef.current = null;
+  }, [activeWalkthrough]);
   
-  const skipWalkthrough = () => {
+  const skipWalkthrough = useCallback(() => {
     if (activeWalkthrough) {
       setCompletedWalkthroughs(prev => [...prev, activeWalkthrough.id]);
     }
     setIsWalkthroughActive(false);
     setActiveWalkthrough(null);
     setCurrentStepIndex(0);
-  };
+    activeWalkthroughRef.current = null;
+  }, [activeWalkthrough]);
   
+  // Memoize the context value to prevent unnecessary re-renders
   const value = {
     isWalkthroughEnabled,
     toggleWalkthroughEnabled,
@@ -144,6 +190,7 @@ export const WalkthroughProvider: React.FC<WalkthroughProviderProps> = ({ childr
     registerWalkthrough,
     walkthroughs,
     hasSeenWalkthrough,
+    resetCompletedWalkthroughs,
   };
   
   return (
@@ -153,4 +200,5 @@ export const WalkthroughProvider: React.FC<WalkthroughProviderProps> = ({ childr
   );
 };
 
-export default WalkthroughContext; 
+// Need to export as a named export to avoid Fast Refresh issues
+export { WalkthroughContext }; 
