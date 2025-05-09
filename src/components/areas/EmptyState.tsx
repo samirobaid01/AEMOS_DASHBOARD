@@ -1,5 +1,4 @@
 import React from 'react';
-import { useTheme } from '../../context/ThemeContext';
 import { useThemeColors } from '../../hooks/useThemeColors';
 
 interface EmptyStateProps {
@@ -17,7 +16,6 @@ const EmptyState: React.FC<EmptyStateProps> = ({
   onAction,
   icon
 }) => {
-  const { darkMode } = useTheme();
   const colors = useThemeColors();
 
   return (
@@ -27,12 +25,10 @@ const EmptyState: React.FC<EmptyStateProps> = ({
       alignItems: 'center',
       justifyContent: 'center',
       padding: '3rem 1rem',
-      backgroundColor: darkMode ? colors.cardBackground : 'white',
+      backgroundColor: colors.cardBackground,
       borderRadius: '0.5rem',
-      boxShadow: darkMode 
-        ? '0 1px 3px 0 rgba(0, 0, 0, 0.2), 0 1px 2px 0 rgba(0, 0, 0, 0.1)'
-        : '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
-      border: `1px solid ${darkMode ? colors.border : '#e5e7eb'}`,
+      boxShadow: colors.cardShadow,
+      border: `1px solid ${colors.cardBorder}`,
     }}>
       {icon ? (
         icon
@@ -41,7 +37,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
           style={{
             width: '3rem',
             height: '3rem',
-            color: darkMode ? colors.textMuted : '#9ca3af',
+            color: colors.textMuted,
             marginBottom: '1rem'
           }}
           fill="none"
@@ -62,7 +58,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
         marginTop: '0.5rem',
         fontSize: '1rem',
         fontWeight: 500,
-        color: darkMode ? colors.textPrimary : '#111827',
+        color: colors.textPrimary,
         textAlign: 'center'
       }}>
         {message}
@@ -71,7 +67,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
       <p style={{
         marginTop: '0.5rem',
         fontSize: '0.875rem',
-        color: darkMode ? colors.textMuted : '#6b7280',
+        color: colors.textMuted,
         maxWidth: '20rem',
         textAlign: 'center'
       }}>
@@ -83,8 +79,8 @@ const EmptyState: React.FC<EmptyStateProps> = ({
         style={{
           marginTop: '1.5rem',
           padding: '0.5rem 1rem',
-          backgroundColor: darkMode ? '#4d7efa' : '#3b82f6',
-          color: 'white',
+          backgroundColor: colors.buttonPrimary,
+          color: colors.buttonPrimaryText,
           borderRadius: '0.375rem',
           fontSize: '0.875rem',
           fontWeight: 500,
@@ -93,10 +89,10 @@ const EmptyState: React.FC<EmptyStateProps> = ({
           transition: 'background-color 0.2s',
         }}
         onMouseOver={(e) => {
-          e.currentTarget.style.backgroundColor = darkMode ? '#5d8efa' : '#2563eb';
+          e.currentTarget.style.backgroundColor = colors.buttonPrimaryHover;
         }}
         onMouseOut={(e) => {
-          e.currentTarget.style.backgroundColor = darkMode ? '#4d7efa' : '#3b82f6';
+          e.currentTarget.style.backgroundColor = colors.buttonPrimary;
         }}
       >
         {actionLabel}

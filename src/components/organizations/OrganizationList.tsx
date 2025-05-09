@@ -4,6 +4,8 @@ import type { Organization } from '../../types/organization';
 import OrganizationItem from './OrganizationItem';
 import OrganizationFilter from './OrganizationFilter';
 import EmptyState from './EmptyState';
+import { useThemeColors } from '../../hooks/useThemeColors';
+import Button from '../../components/common/Button/Button';
 
 interface OrganizationListProps {
   organizations: Organization[];
@@ -35,6 +37,7 @@ const OrganizationList: React.FC<OrganizationListProps> = ({
   windowWidth
 }) => {
   const { t } = useTranslation();
+  const colors = useThemeColors();
   const isMobile = windowWidth < 768;
 
   const headerStyle = {
@@ -49,30 +52,16 @@ const OrganizationList: React.FC<OrganizationListProps> = ({
   const titleStyle = {
     fontSize: '1.5rem',
     fontWeight: 600,
-    color: '#111827',
+    color: colors.textPrimary,
     margin: 0,
     fontFamily: 'system-ui, -apple-system, sans-serif'
   };
 
-  const buttonStyle = {
-    padding: '0.5rem 1rem',
-    backgroundColor: '#3b82f6',
-    color: 'white',
-    border: 'none',
-    borderRadius: '0.375rem',
-    fontSize: '0.875rem',
-    fontWeight: 500,
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    transition: 'all 0.2s',
-  };
-
   const errorStyle = {
-    backgroundColor: '#fee2e2',
+    backgroundColor: colors.dangerBackground,
     padding: '1rem',
     borderRadius: '0.375rem',
-    color: '#b91c1c',
+    color: colors.dangerText,
     marginBottom: '1.5rem',
     fontSize: '0.875rem',
     fontWeight: 500,
@@ -80,23 +69,32 @@ const OrganizationList: React.FC<OrganizationListProps> = ({
     alignItems: 'center',
   };
 
+  const AddIcon = () => (
+    <svg 
+      style={{ width: '1rem', height: '1rem', marginRight: '0.375rem' }} 
+      fill="currentColor" 
+      viewBox="0 0 20 20"
+    >
+      <path 
+        fillRule="evenodd" 
+        d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" 
+        clipRule="evenodd" 
+      />
+    </svg>
+  );
+
   if (error) {
     return (
       <div style={{ padding: isMobile ? '1rem' : '1.5rem 2rem' }}>
         <div style={headerStyle}>
           <h1 style={titleStyle}>{t('organizations.title')}</h1>
-          <button
+          <Button
+            variant="primary"
             onClick={onAddOrganization}
-            style={buttonStyle}
-            onMouseOver={(e) => {
-              e.currentTarget.style.backgroundColor = '#2563eb';
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.backgroundColor = '#3b82f6';
-            }}
+            leftIcon={<AddIcon />}
           >
             {t('organizations.add')}
-          </button>
+          </Button>
         </div>
         <div style={errorStyle}>
           <svg 
@@ -120,29 +118,13 @@ const OrganizationList: React.FC<OrganizationListProps> = ({
     <div style={{ padding: isMobile ? '1rem' : '1.5rem 2rem' }}>
       <div style={headerStyle}>
         <h1 style={titleStyle}>{t('organizations.title')}</h1>
-        <button
+        <Button
+          variant="primary"
           onClick={onAddOrganization}
-          style={buttonStyle}
-          onMouseOver={(e) => {
-            e.currentTarget.style.backgroundColor = '#2563eb';
-          }}
-          onMouseOut={(e) => {
-            e.currentTarget.style.backgroundColor = '#3b82f6';
-          }}
+          leftIcon={<AddIcon />}
         >
-          <svg 
-            style={{ width: '1rem', height: '1rem', marginRight: '0.375rem' }} 
-            fill="currentColor" 
-            viewBox="0 0 20 20"
-          >
-            <path 
-              fillRule="evenodd" 
-              d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" 
-              clipRule="evenodd" 
-            />
-          </svg>
           {t('organizations.add')}
-        </button>
+        </Button>
       </div>
 
       <OrganizationFilter

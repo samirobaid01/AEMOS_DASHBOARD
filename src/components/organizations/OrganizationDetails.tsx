@@ -5,6 +5,7 @@ import type { Organization } from '../../types/organization';
 import type { Area } from '../../types/area';
 import type { Device } from '../../types/device';
 import Button from '../../components/common/Button/Button';
+import { useThemeColors } from '../../hooks/useThemeColors';
 
 interface OrganizationDetailsProps {
   organization: Organization | null;
@@ -34,6 +35,7 @@ const OrganizationDetails: React.FC<OrganizationDetailsProps> = ({
   onCloseDeleteModal
 }) => {
   const { t } = useTranslation();
+  const colors = useThemeColors();
 
   // Styled components approach with objects
   const styles = {
@@ -53,27 +55,28 @@ const OrganizationDetails: React.FC<OrganizationDetailsProps> = ({
     title: {
       fontSize: '1.5rem',
       fontWeight: 600,
-      color: '#2d3748',
+      color: colors.textPrimary,
     },
     buttonGroup: {
       display: 'flex',
       gap: '0.75rem',
     },
     card: {
-      backgroundColor: '#ffffff',
+      backgroundColor: colors.cardBackground,
       borderRadius: '0.5rem',
-      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+      boxShadow: colors.cardShadow,
+      border: `1px solid ${colors.cardBorder}`,
       overflow: 'hidden',
       marginBottom: '2rem',
     },
     cardSection: {
       padding: '1.5rem',
-      borderBottom: '1px solid #e2e8f0',
+      borderBottom: `1px solid ${colors.border}`,
     },
     cardTitle: {
       fontSize: '1.25rem',
       fontWeight: 600,
-      color: '#2d3748',
+      color: colors.textPrimary,
       marginBottom: '1rem',
     },
     detailsGrid: {
@@ -90,12 +93,12 @@ const OrganizationDetails: React.FC<OrganizationDetailsProps> = ({
     detailLabel: {
       fontSize: '0.875rem',
       fontWeight: 500,
-      color: '#718096',
+      color: colors.textMuted,
       marginBottom: '0.25rem',
     },
     detailValue: {
       fontSize: '1rem',
-      color: '#2d3748',
+      color: colors.textPrimary,
     },
     badge: {
       display: 'inline-flex',
@@ -106,19 +109,19 @@ const OrganizationDetails: React.FC<OrganizationDetailsProps> = ({
       fontWeight: 500,
     },
     badgeSuccess: {
-      backgroundColor: '#c6f6d5',
-      color: '#22543d',
+      backgroundColor: colors.successBackground,
+      color: colors.successText,
     },
     badgeDanger: {
-      backgroundColor: '#fed7d7',
-      color: '#822727',
+      backgroundColor: colors.dangerBackground,
+      color: colors.dangerText,
     },
     listContainer: {
-      borderBottom: '1px solid #e2e8f0',
+      borderBottom: `1px solid ${colors.border}`,
     },
     listItem: {
       padding: '0.75rem 0',
-      borderBottom: '1px solid #e2e8f0',
+      borderBottom: `1px solid ${colors.border}`,
     },
     listItemLink: {
       display: 'flex',
@@ -135,18 +138,18 @@ const OrganizationDetails: React.FC<OrganizationDetailsProps> = ({
     listItemName: {
       fontSize: '0.875rem',
       fontWeight: 500,
-      color: '#2d3748',
+      color: colors.textPrimary,
       marginBottom: '0.25rem',
     },
     listItemDescription: {
       fontSize: '0.75rem',
-      color: '#718096',
+      color: colors.textMuted,
       overflow: 'hidden',
       textOverflow: 'ellipsis',
       whiteSpace: 'nowrap',
     },
     modalOverlay: {
-      position: 'fixed',
+      position: 'fixed' as const,
       top: 0,
       left: 0,
       right: 0,
@@ -158,9 +161,9 @@ const OrganizationDetails: React.FC<OrganizationDetailsProps> = ({
       zIndex: 50,
     },
     modalContainer: {
-      backgroundColor: '#ffffff',
+      backgroundColor: colors.cardBackground,
       borderRadius: '0.5rem',
-      boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+      boxShadow: colors.cardShadow,
       width: '100%',
       maxWidth: '28rem',
       margin: '0 1rem',
@@ -175,23 +178,23 @@ const OrganizationDetails: React.FC<OrganizationDetailsProps> = ({
       width: '3rem',
       height: '3rem',
       borderRadius: '9999px',
-      backgroundColor: '#fed7d7',
-      color: '#e53e3e',
+      backgroundColor: colors.dangerBackground,
+      color: colors.danger,
       marginRight: '1rem',
     },
     modalTitle: {
       fontSize: '1.125rem',
       fontWeight: 600,
-      color: '#2d3748',
+      color: colors.textPrimary,
     },
     modalBody: {
       padding: '0 1.5rem 1.5rem 1.5rem',
       fontSize: '0.875rem',
-      color: '#4a5568',
+      color: colors.textSecondary,
     },
     modalFooter: {
       padding: '1rem 1.5rem',
-      backgroundColor: '#f7fafc',
+      backgroundColor: colors.surfaceBackground,
       display: 'flex',
       justifyContent: 'flex-end',
       gap: '0.75rem',
@@ -199,15 +202,15 @@ const OrganizationDetails: React.FC<OrganizationDetailsProps> = ({
       borderBottomRightRadius: '0.5rem',
     },
     errorContainer: {
-      backgroundColor: '#fed7d7',
-      color: '#822727',
+      backgroundColor: colors.dangerBackground,
+      color: colors.dangerText,
       padding: '1rem',
       borderRadius: '0.5rem',
       marginBottom: '1rem',
     },
     notFoundContainer: {
-      backgroundColor: '#fefcbf',
-      color: '#744210',
+      backgroundColor: colors.warningBackground,
+      color: colors.warningText,
       padding: '1rem',
       borderRadius: '0.5rem',
       marginBottom: '1rem',
@@ -226,7 +229,7 @@ const OrganizationDetails: React.FC<OrganizationDetailsProps> = ({
 
   // Function to handle the hover effect
   const handleAreaLinkHover = (e: React.MouseEvent<HTMLElement>) => {
-    e.currentTarget.style.backgroundColor = '#f7fafc';
+    e.currentTarget.style.backgroundColor = colors.sidebarItemHover;
   };
 
   const handleAreaLinkLeave = (e: React.MouseEvent<HTMLElement>) => {
@@ -380,8 +383,8 @@ const OrganizationDetails: React.FC<OrganizationDetailsProps> = ({
                       onMouseOut={handleAreaLinkLeave}
                     >
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <p style={{ fontSize: '0.875rem', fontWeight: 500, color: '#2d3748' }}>{area.name}</p>
-                        <p style={{ fontSize: '0.75rem', color: '#718096', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <p style={{ fontSize: '0.875rem', fontWeight: 500, color: colors.textPrimary }}>{area.name}</p>
+                        <p style={{ fontSize: '0.75rem', color: colors.textMuted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {area.description || t('no_description')}
                         </p>
                       </div>
@@ -393,8 +396,8 @@ const OrganizationDetails: React.FC<OrganizationDetailsProps> = ({
                           borderRadius: '9999px',
                           fontSize: '0.75rem',
                           fontWeight: 500,
-                          backgroundColor: area.status ? '#c6f6d5' : '#fed7d7',
-                          color: area.status ? '#22543d' : '#822727',
+                          backgroundColor: area.status ? colors.successBackground : colors.dangerBackground,
+                          color: area.status ? colors.successText : colors.dangerText,
                         }}>
                           {area.status ? t('active') : t('inactive')}
                         </span>
@@ -404,7 +407,7 @@ const OrganizationDetails: React.FC<OrganizationDetailsProps> = ({
                 ))}
               </div>
             ) : (
-              <p style={{ fontSize: '0.875rem', color: '#718096' }}>{t('no_areas')}</p>
+              <p style={{ fontSize: '0.875rem', color: colors.textMuted }}>{t('no_areas')}</p>
             )}
           </div>
 
@@ -430,11 +433,11 @@ const OrganizationDetails: React.FC<OrganizationDetailsProps> = ({
                       onMouseOut={handleAreaLinkLeave}
                     >
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <p style={{ fontSize: '0.875rem', fontWeight: 500, color: '#2d3748' }}>{device.name}</p>
-                        <p style={{ fontSize: '0.75rem', color: '#718096' }}>{device.serialNumber}</p>
+                        <p style={{ fontSize: '0.875rem', fontWeight: 500, color: colors.textPrimary }}>{device.name}</p>
+                        <p style={{ fontSize: '0.75rem', color: colors.textMuted }}>{device.serialNumber}</p>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center' }}>
-                        <span style={{ fontSize: '0.75rem', color: '#718096', marginRight: '0.5rem' }}>{device.type}</span>
+                        <span style={{ fontSize: '0.75rem', color: colors.textMuted, marginRight: '0.5rem' }}>{device.type}</span>
                         <span style={{
                           display: 'inline-flex',
                           alignItems: 'center',
@@ -442,8 +445,8 @@ const OrganizationDetails: React.FC<OrganizationDetailsProps> = ({
                           borderRadius: '9999px',
                           fontSize: '0.75rem',
                           fontWeight: 500,
-                          backgroundColor: device.status ? '#c6f6d5' : '#fed7d7',
-                          color: device.status ? '#22543d' : '#822727',
+                          backgroundColor: device.status ? colors.successBackground : colors.dangerBackground,
+                          color: device.status ? colors.successText : colors.dangerText,
                         }}>
                           {device.status ? t('active') : t('inactive')}
                         </span>
@@ -453,7 +456,7 @@ const OrganizationDetails: React.FC<OrganizationDetailsProps> = ({
                 ))}
               </div>
             ) : (
-              <p style={{ fontSize: '0.875rem', color: '#718096' }}>{t('no_devices')}</p>
+              <p style={{ fontSize: '0.875rem', color: colors.textMuted }}>{t('no_devices')}</p>
             )}
           </div>
         </div>
@@ -461,62 +464,26 @@ const OrganizationDetails: React.FC<OrganizationDetailsProps> = ({
 
       {/* Delete Confirmation Modal */}
       {deleteModalOpen && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 50,
-        }}>
-          <div style={{
-            backgroundColor: '#ffffff',
-            borderRadius: '0.5rem',
-            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-            width: '100%',
-            maxWidth: '28rem',
-            margin: '0 1rem',
-          }}>
+        <div style={styles.modalOverlay}>
+          <div style={styles.modalContainer}>
             <div style={{ padding: '1.5rem' }}>
               <div style={{ display: 'flex', alignItems: 'flex-start' }}>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  width: '3rem',
-                  height: '3rem',
-                  borderRadius: '9999px',
-                  backgroundColor: '#fed7d7',
-                  color: '#e53e3e',
-                  marginRight: '1rem',
-                }}>
+                <div style={styles.modalIcon}>
                   <svg style={{ width: '1.5rem', height: '1.5rem' }} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                   </svg>
                 </div>
                 <div>
-                  <h3 style={{ fontSize: '1.125rem', fontWeight: 600, color: '#2d3748' }}>{t('organizations.delete')}</h3>
+                  <h3 style={styles.modalTitle}>{t('organizations.delete')}</h3>
                   <div style={{ marginTop: '0.5rem' }}>
-                    <p style={{ fontSize: '0.875rem', color: '#4a5568' }}>
+                    <p style={{ fontSize: '0.875rem', color: colors.textSecondary }}>
                       {t('organizations.delete_organization_confirm', { name: organization.name })}
                     </p>
                   </div>
                 </div>
               </div>
             </div>
-            <div style={{
-              padding: '1rem 1.5rem',
-              backgroundColor: '#f7fafc',
-              display: 'flex',
-              justifyContent: 'flex-end',
-              gap: '0.75rem',
-              borderBottomLeftRadius: '0.5rem',
-              borderBottomRightRadius: '0.5rem',
-            }}>
+            <div style={styles.modalFooter}>
               <Button
                 type="button"
                 variant="danger"

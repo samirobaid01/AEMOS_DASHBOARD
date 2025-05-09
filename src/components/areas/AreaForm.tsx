@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Area, AreaCreateRequest, AreaUpdateRequest } from '../../types/area';
+import { useThemeColors } from '../../hooks/useThemeColors';
 
 interface Organization {
   id: number;
@@ -42,6 +43,7 @@ const AreaForm: React.FC<AreaFormProps> = ({
   isEditMode = false,
 }) => {
   const { t } = useTranslation();
+  const colors = useThemeColors();
   const isMobile = windowWidth < 768;
   const safeOrganizations = Array.isArray(organizations) ? organizations : [];
   const safeParentAreas = Array.isArray(parentAreas) ? parentAreas : [];
@@ -81,29 +83,29 @@ const AreaForm: React.FC<AreaFormProps> = ({
   };
 
   const formStyle = {
-    backgroundColor: 'white',
+    backgroundColor: colors.cardBackground,
     borderRadius: '0.5rem',
-    boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
-    border: '1px solid #e5e7eb',
+    boxShadow: colors.cardShadow,
+    border: `1px solid ${colors.cardBorder}`,
     overflow: 'hidden',
   };
 
   const headerStyle = {
-    backgroundColor: '#f9fafb',
+    backgroundColor: colors.surfaceBackground,
     padding: '1.5rem',
-    borderBottom: '1px solid #e5e7eb',
+    borderBottom: `1px solid ${colors.border}`,
   };
 
   const headerTitleStyle = {
     fontSize: '1.25rem',
     fontWeight: 600,
-    color: '#111827',
+    color: colors.textPrimary,
     margin: 0,
   };
 
   const headerDescriptionStyle = {
     fontSize: '0.875rem',
-    color: '#6b7280',
+    color: colors.textMuted,
     marginTop: '0.5rem',
   };
 
@@ -119,7 +121,7 @@ const AreaForm: React.FC<AreaFormProps> = ({
     display: 'block',
     fontSize: '0.875rem',
     fontWeight: 500,
-    color: '#374151',
+    color: colors.textSecondary,
     marginBottom: '0.5rem',
   };
 
@@ -128,11 +130,11 @@ const AreaForm: React.FC<AreaFormProps> = ({
     width: '100%',
     padding: '0.5rem 0.75rem',
     borderRadius: '0.375rem',
-    border: '1px solid #d1d5db',
+    border: `1px solid ${colors.border}`,
     fontSize: '0.875rem',
     lineHeight: 1.5,
-    backgroundColor: 'white',
-    color: '#111827',
+    backgroundColor: colors.surfaceBackground,
+    color: colors.textPrimary,
     outline: 'none',
   };
 
@@ -141,11 +143,11 @@ const AreaForm: React.FC<AreaFormProps> = ({
     width: '100%',
     padding: '0.5rem 0.75rem',
     borderRadius: '0.375rem',
-    border: '1px solid #d1d5db',
+    border: `1px solid ${colors.border}`,
     fontSize: '0.875rem',
     lineHeight: 1.5,
-    backgroundColor: 'white',
-    color: '#111827',
+    backgroundColor: colors.surfaceBackground,
+    color: colors.textPrimary,
     backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
     backgroundPosition: 'right 0.5rem center',
     backgroundRepeat: 'no-repeat',
@@ -163,7 +165,7 @@ const AreaForm: React.FC<AreaFormProps> = ({
     width: '1rem',
     height: '1rem',
     marginRight: '0.5rem',
-    accentColor: '#3b82f6',
+    accentColor: colors.buttonPrimary,
   };
 
   const textareaStyle = {
@@ -171,11 +173,11 @@ const AreaForm: React.FC<AreaFormProps> = ({
     width: '100%',
     padding: '0.5rem 0.75rem',
     borderRadius: '0.375rem',
-    border: '1px solid #d1d5db',
+    border: `1px solid ${colors.border}`,
     fontSize: '0.875rem',
     lineHeight: 1.5,
-    backgroundColor: 'white',
-    color: '#111827',
+    backgroundColor: colors.surfaceBackground,
+    color: colors.textPrimary,
     outline: 'none',
     minHeight: '6rem',
     resize: 'vertical' as const,
@@ -200,23 +202,23 @@ const AreaForm: React.FC<AreaFormProps> = ({
 
   const cancelButtonStyle = {
     ...buttonBaseStyle,
-    backgroundColor: 'white',
-    color: '#4b5563',
-    border: '1px solid #d1d5db',
+    backgroundColor: colors.surfaceBackground,
+    color: colors.textSecondary,
+    border: `1px solid ${colors.border}`,
   };
 
   const submitButtonStyle = {
     ...buttonBaseStyle,
-    backgroundColor: '#3b82f6',
-    color: 'white',
+    backgroundColor: colors.buttonPrimary,
+    color: colors.buttonPrimaryText,
     border: 'none',
     opacity: isSubmitting ? 0.7 : 1,
     cursor: isSubmitting ? 'not-allowed' : 'pointer',
   };
 
   const errorMessageStyle = {
-    backgroundColor: '#fee2e2',
-    color: '#b91c1c',
+    backgroundColor: colors.dangerBackground,
+    color: colors.dangerText,
     padding: '0.75rem',
     borderRadius: '0.375rem',
     fontSize: '0.875rem',
@@ -245,7 +247,7 @@ const AreaForm: React.FC<AreaFormProps> = ({
 
             <div style={fieldGroupStyle}>
               <label htmlFor="name" style={labelStyle}>
-                {t('areas.area_name')} <span style={{ color: '#ef4444' }}>*</span>
+                {t('areas.area_name')} <span style={{ color: colors.danger }}>*</span>
               </label>
               <input
                 type="text"
@@ -257,18 +259,18 @@ const AreaForm: React.FC<AreaFormProps> = ({
                 style={inputStyle}
                 onFocus={(e) => {
                   e.target.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.2)';
-                  e.target.style.borderColor = '#3b82f6';
+                  e.target.style.borderColor = colors.primary;
                 }}
                 onBlur={(e) => {
                   e.target.style.boxShadow = 'none';
-                  e.target.style.borderColor = '#d1d5db';
+                  e.target.style.borderColor = colors.border;
                 }}
               />
             </div>
 
             <div style={fieldGroupStyle}>
               <label htmlFor="organizationId" style={labelStyle}>
-                {t('areas.organization')} <span style={{ color: '#ef4444' }}>*</span>
+                {t('areas.organization')} <span style={{ color: colors.danger }}>*</span>
               </label>
               <select
                 id="organizationId"
@@ -279,11 +281,11 @@ const AreaForm: React.FC<AreaFormProps> = ({
                 style={selectStyle}
                 onFocus={(e) => {
                   e.target.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.2)';
-                  e.target.style.borderColor = '#3b82f6';
+                  e.target.style.borderColor = colors.primary;
                 }}
                 onBlur={(e) => {
                   e.target.style.boxShadow = 'none';
-                  e.target.style.borderColor = '#d1d5db';
+                  e.target.style.borderColor = colors.border;
                 }}
               >
                 <option value="" disabled>
@@ -310,11 +312,11 @@ const AreaForm: React.FC<AreaFormProps> = ({
                   style={selectStyle}
                   onFocus={(e) => {
                     e.target.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.2)';
-                    e.target.style.borderColor = '#3b82f6';
+                    e.target.style.borderColor = colors.primary;
                   }}
                   onBlur={(e) => {
                     e.target.style.boxShadow = 'none';
-                    e.target.style.borderColor = '#d1d5db';
+                    e.target.style.borderColor = colors.border;
                   }}
                 >
                   <option value="">{t('areas.no_parent_area')}</option>
@@ -337,7 +339,7 @@ const AreaForm: React.FC<AreaFormProps> = ({
                   onChange={handleChange}
                   style={checkboxStyle}
                 />
-                <label htmlFor="status" style={{ fontSize: '0.875rem', color: '#374151' }}>
+                <label htmlFor="status" style={{ fontSize: '0.875rem', color: colors.textPrimary }}>
                   {t('areas.active_area')}
                 </label>
               </div>
@@ -355,11 +357,11 @@ const AreaForm: React.FC<AreaFormProps> = ({
                 style={textareaStyle}
                 onFocus={(e) => {
                   e.target.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.2)';
-                  e.target.style.borderColor = '#3b82f6';
+                  e.target.style.borderColor = colors.primary;
                 }}
                 onBlur={(e) => {
                   e.target.style.boxShadow = 'none';
-                  e.target.style.borderColor = '#d1d5db';
+                  e.target.style.borderColor = colors.border;
                 }}
               />
             </div>
@@ -370,10 +372,10 @@ const AreaForm: React.FC<AreaFormProps> = ({
                 onClick={onCancel}
                 style={cancelButtonStyle}
                 onMouseOver={(e) => {
-                  e.currentTarget.style.backgroundColor = '#f3f4f6';
+                  e.currentTarget.style.backgroundColor = colors.sidebarItemHover;
                 }}
                 onMouseOut={(e) => {
-                  e.currentTarget.style.backgroundColor = 'white';
+                  e.currentTarget.style.backgroundColor = colors.surfaceBackground;
                 }}
               >
                 {t('areas.cancel')}
@@ -384,12 +386,12 @@ const AreaForm: React.FC<AreaFormProps> = ({
                 style={submitButtonStyle}
                 onMouseOver={(e) => {
                   if (!isSubmitting) {
-                    e.currentTarget.style.backgroundColor = '#2563eb';
+                    e.currentTarget.style.backgroundColor = colors.buttonPrimaryHover;
                   }
                 }}
                 onMouseOut={(e) => {
                   if (!isSubmitting) {
-                    e.currentTarget.style.backgroundColor = '#3b82f6';
+                    e.currentTarget.style.backgroundColor = colors.buttonPrimary;
                   }
                 }}
               >

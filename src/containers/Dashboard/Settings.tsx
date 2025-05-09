@@ -3,11 +3,14 @@ import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import i18n from '../../i18n/i18n';
 import { useTheme } from '../../context/ThemeContext';
+import { useWalkthrough } from '../../context/WalkthroughContext';
+import Toggle from '../../components/common/Toggle';
 
 const Settings = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const { darkMode, toggleDarkMode } = useTheme();
+  const { isWalkthroughEnabled, toggleWalkthroughEnabled } = useWalkthrough();
   const [language, setLanguage] = useState(i18n.language || 'en');
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [notifications, setNotifications] = useState({
@@ -200,6 +203,19 @@ const Settings = () => {
             >
               <span style={toggleKnobStyle(darkMode)} />
             </button>
+          </div>
+        </div>
+        
+        {/* Walkthrough Section */}
+        <div style={styles.sectionStyle}>
+          <h2 style={styles.sectionTitleStyle}>{t('walkthrough')}</h2>
+          <div style={toggleWrapperStyle}>
+            <Toggle 
+              label={t('enable_walkthrough')}
+              isChecked={isWalkthroughEnabled}
+              onChange={toggleWalkthroughEnabled}
+              helperText={t('walkthrough_description')}
+            />
           </div>
         </div>
         

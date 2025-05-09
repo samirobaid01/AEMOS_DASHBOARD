@@ -27,6 +27,14 @@ const StatCard: React.FC<StatCardProps> = ({
   const { darkMode } = useTheme();
   const colors = useThemeColors();
 
+  const getBackgroundColor = () => {
+    return darkMode ? colors.cardBackground : 'white';
+  };
+
+  const getBorderColor = () => {
+    return `border-${darkMode ? colors.border : '#e5e7eb'}`;
+  };
+
   return (
     <Link 
       to={path}
@@ -35,8 +43,8 @@ const StatCard: React.FC<StatCardProps> = ({
         overflow: 'hidden',
         borderRadius: '0.75rem',
         border: '1px solid',
-        borderColor: darkMode ? colors.border : '#e5e7eb',
-        backgroundColor: darkMode ? colors.cardBackground : 'white',
+        borderColor: getBorderColor(),
+        backgroundColor: getBackgroundColor(),
         boxShadow: darkMode 
           ? '0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1)'
           : '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
@@ -59,8 +67,10 @@ const StatCard: React.FC<StatCardProps> = ({
           ? '0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1)'
           : '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)';
         e.currentTarget.style.transform = 'translateY(0)';
-        e.currentTarget.style.borderColor = darkMode ? colors.border : '#e5e7eb';
+        e.currentTarget.style.borderColor = getBorderColor();
       }}
+      className={`p-6 rounded-lg shadow ${getBackgroundColor()} ${getBorderColor()}`}
+      data-walkthrough="stat-card"
     >
       <div style={{ 
         width: '8px', 

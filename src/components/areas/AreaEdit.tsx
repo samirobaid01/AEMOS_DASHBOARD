@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import type { AreaUpdateRequest } from '../../types/area';
 import Input from '../../components/common/Input/Input';
 import Button from '../../components/common/Button/Button';
+import { useThemeColors } from '../../hooks/useThemeColors';
 
 interface AreaEditProps {
   formData: AreaUpdateRequest;
@@ -28,6 +29,7 @@ const AreaEdit: React.FC<AreaEditProps> = ({
   onCancel
 }) => {
   const { t } = useTranslation();
+  const colors = useThemeColors();
 
   const styles = {
     container: {
@@ -50,13 +52,14 @@ const AreaEdit: React.FC<AreaEditProps> = ({
     title: {
       fontSize: '1.5rem',
       fontWeight: 600,
-      color: '#2d3748',
+      color: colors.textPrimary,
       margin: 0,
     },
     card: {
-      backgroundColor: '#ffffff',
+      backgroundColor: colors.cardBackground,
       borderRadius: '0.5rem',
-      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+      boxShadow: colors.cardShadow,
+      border: `1px solid ${colors.cardBorder}`,
       overflow: 'hidden',
     },
     form: {
@@ -78,7 +81,7 @@ const AreaEdit: React.FC<AreaEditProps> = ({
       display: 'block',
       fontSize: '0.875rem',
       fontWeight: 500,
-      color: '#4a5568',
+      color: colors.textSecondary,
       marginBottom: '0.5rem',
     },
     textarea: {
@@ -86,7 +89,9 @@ const AreaEdit: React.FC<AreaEditProps> = ({
       minHeight: '6rem',
       padding: '0.5rem 0.75rem',
       borderRadius: '0.375rem',
-      border: '1px solid #cbd5e0',
+      border: `1px solid ${colors.border}`,
+      backgroundColor: colors.surfaceBackground,
+      color: colors.textPrimary,
       fontSize: '0.875rem',
       resize: 'vertical' as const,
     },
@@ -102,11 +107,11 @@ const AreaEdit: React.FC<AreaEditProps> = ({
     },
     checkboxLabel: {
       fontSize: '0.875rem',
-      color: '#4a5568',
+      color: colors.textPrimary,
     },
     errorContainer: {
-      backgroundColor: '#fed7d7',
-      color: '#822727',
+      backgroundColor: colors.dangerBackground,
+      color: colors.dangerText,
       padding: '1rem',
       borderRadius: '0.375rem',
       marginBottom: '1.5rem',
@@ -123,7 +128,7 @@ const AreaEdit: React.FC<AreaEditProps> = ({
       flexDirection: 'column' as const,
     },
     highlight: {
-      color: '#2b6cb0',
+      color: colors.info,
       fontWeight: 600 as const
     }
   };
@@ -199,7 +204,7 @@ const AreaEdit: React.FC<AreaEditProps> = ({
               <div style={styles.errorContainer}>
                 <div style={{ display: 'flex', alignItems: 'center' }}>
                   <div>
-                    <h3 style={{ fontSize: '0.875rem', fontWeight: 500 }}>{error}</h3>
+                    <h3 style={{ fontSize: '0.875rem', fontWeight: 500, color: colors.dangerText }}>{error}</h3>
                   </div>
                 </div>
               </div>

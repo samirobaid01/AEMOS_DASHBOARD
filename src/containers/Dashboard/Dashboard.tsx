@@ -14,6 +14,7 @@ import { useThemeColors } from '../../hooks/useThemeColors';
 import StatCard from '../../components/dashboard/StatCard';
 import EntityList from '../../components/dashboard/EntityList';
 import DashboardHeader from '../../components/dashboard/DashboardHeader';
+import DashboardWalkthrough from '../../components/dashboard/DashboardWalkthrough';
 
 const Dashboard = () => {
   const { t } = useTranslation();
@@ -206,6 +207,8 @@ const Dashboard = () => {
           noDetailsText={t('common.no_details')}
         />
       </div>
+
+      <DashboardWalkthrough />
     </div>
   );
 };

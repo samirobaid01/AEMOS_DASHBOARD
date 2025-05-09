@@ -1,5 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { useThemeColors } from '../../hooks/useThemeColors';
 
 interface AreaFilterProps {
   searchTerm: string;
@@ -19,6 +20,7 @@ const AreaFilter: React.FC<AreaFilterProps> = ({
   windowWidth
 }) => {
   const { t } = useTranslation();
+  const colors = useThemeColors();
   const isMobile = windowWidth < 768;
 
   return (
@@ -44,7 +46,7 @@ const AreaFilter: React.FC<AreaFilterProps> = ({
             style={{
               width: '1.25rem',
               height: '1.25rem',
-              color: '#9ca3af'
+              color: colors.textMuted
             }}
             xmlns="http://www.w3.org/2000/svg" 
             viewBox="0 0 20 20" 
@@ -65,11 +67,11 @@ const AreaFilter: React.FC<AreaFilterProps> = ({
             width: '100%',
             padding: '0.5rem 0.75rem 0.5rem 2.5rem',
             borderRadius: '0.375rem',
-            border: '1px solid #d1d5db',
+            border: `1px solid ${colors.border}`,
             fontSize: '0.875rem',
             lineHeight: 1.5,
-            backgroundColor: 'white',
-            color: '#111827',
+            backgroundColor: colors.surfaceBackground,
+            color: colors.textPrimary,
             outline: 'none',
           }}
           placeholder={t('search_areas')}
@@ -77,11 +79,11 @@ const AreaFilter: React.FC<AreaFilterProps> = ({
           onChange={(e) => setSearchTerm(e.target.value)}
           onFocus={(e) => {
             e.target.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.2)';
-            e.target.style.borderColor = '#3b82f6';
+            e.target.style.borderColor = colors.primary;
           }}
           onBlur={(e) => {
             e.target.style.boxShadow = 'none';
-            e.target.style.borderColor = '#d1d5db';
+            e.target.style.borderColor = colors.border;
           }}
         />
       </div>
@@ -94,11 +96,11 @@ const AreaFilter: React.FC<AreaFilterProps> = ({
               width: '100%',
               padding: '0.5rem 0.75rem',
               borderRadius: '0.375rem',
-              border: '1px solid #d1d5db',
+              border: `1px solid ${colors.border}`,
               fontSize: '0.875rem',
               lineHeight: 1.5,
-              backgroundColor: 'white',
-              color: '#111827',
+              backgroundColor: colors.surfaceBackground,
+              color: colors.textPrimary,
               appearance: 'none',
               backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
               backgroundPosition: 'right 0.5rem center',
@@ -110,11 +112,11 @@ const AreaFilter: React.FC<AreaFilterProps> = ({
             onChange={(e) => setOrganizationFilter(e.target.value)}
             onFocus={(e) => {
               e.target.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.2)';
-              e.target.style.borderColor = '#3b82f6';
+              e.target.style.borderColor = colors.primary;
             }}
             onBlur={(e) => {
               e.target.style.boxShadow = 'none';
-              e.target.style.borderColor = '#d1d5db';
+              e.target.style.borderColor = colors.border;
             }}
           >
             <option value="">{t('all_organizations')}</option>

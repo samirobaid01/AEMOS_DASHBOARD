@@ -1,5 +1,5 @@
 /* Dark Mode Styles */
-.dark-mode {
+.dark {
   /* Apply transition to all elements for smooth theme switching */
   * {
     transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
@@ -31,65 +31,65 @@ input, select, textarea, button, a, span, p, h1, h2, h3, h4, h5, h6 {
 }
 
 /* Dark Mode Specific Element Styles */
-.dark-mode button.primary {
+.dark button.primary {
   background-color: #3b82f6;
   color: white;
 }
 
-.dark-mode .sidebar {
+.dark .sidebar {
   background-color: #111827;
   border-color: #374151;
 }
 
-.dark-mode .card, 
-.dark-mode .panel {
+.dark .card, 
+.dark .panel {
   background-color: #1f2937;
   border-color: #374151;
   box-shadow: var(--card-shadow);
 }
 
-.dark-mode input, 
-.dark-mode select, 
-.dark-mode textarea {
+.dark input, 
+.dark select, 
+.dark textarea {
   background-color: #374151;
   border-color: #4b5563;
   color: #f9fafb;
 }
 
-.dark-mode input::placeholder {
+.dark input::placeholder {
   color: #9ca3af;
 }
 
-.dark-mode .table th {
+.dark .table th {
   background-color: #1f2937;
   color: #d1d5db;
 }
 
-.dark-mode .table td {
+.dark .table td {
   border-color: #374151;
 }
 
-.dark-mode .table tr:hover {
+.dark .table tr:hover {
   background-color: #374151;
 }
 
 /* Status indicators */
-.dark-mode .status-success {
+.dark .status-success {
   background-color: #064e3b;
   color: #d1fae5;
 }
 
-.dark-mode .status-danger {
+.dark .status-danger {
   background-color: #7f1d1d;
   color: #fee2e2;
 }
 
-.dark-mode .status-warning {
+.dark .status-warning {
   background-color: #78350f;
   color: #fef3c7;
 }
 
-.dark-mode .status-info {
+.dark .status-info {
   background-color: #1e3a8a;
   color: #dbeafe;
 } 

@@ -4,6 +4,7 @@ import type { Area } from '../../types/area';
 import AreaItem from './AreaItem';
 import AreaFilter from './AreaFilter';
 import EmptyState from './EmptyState';
+import { useThemeColors } from '../../hooks/useThemeColors';
 
 interface AreaListProps {
   areas: Area[];
@@ -31,6 +32,7 @@ const AreaList: React.FC<AreaListProps> = ({
   windowWidth
 }) => {
   const { t } = useTranslation();
+  const colors = useThemeColors();
   const isMobile = windowWidth < 768;
 
   const headerStyle = {
@@ -45,15 +47,15 @@ const AreaList: React.FC<AreaListProps> = ({
   const titleStyle = {
     fontSize: '1.5rem',
     fontWeight: 600,
-    color: '#111827',
+    color: colors.textPrimary,
     margin: 0,
     fontFamily: 'system-ui, -apple-system, sans-serif'
   };
 
   const buttonStyle = {
     padding: '0.5rem 1rem',
-    backgroundColor: '#3b82f6',
-    color: 'white',
+    backgroundColor: colors.buttonPrimary,
+    color: colors.buttonPrimaryText,
     border: 'none',
     borderRadius: '0.375rem',
     fontSize: '0.875rem',
@@ -65,10 +67,10 @@ const AreaList: React.FC<AreaListProps> = ({
   };
 
   const errorStyle = {
-    backgroundColor: '#fee2e2',
+    backgroundColor: colors.dangerBackground,
     padding: '1rem',
     borderRadius: '0.375rem',
-    color: '#b91c1c',
+    color: colors.dangerText,
     marginBottom: '1.5rem',
     fontSize: '0.875rem',
     fontWeight: 500,
@@ -85,10 +87,10 @@ const AreaList: React.FC<AreaListProps> = ({
             onClick={onAddArea}
             style={buttonStyle}
             onMouseOver={(e) => {
-              e.currentTarget.style.backgroundColor = '#2563eb';
+              e.currentTarget.style.backgroundColor = colors.buttonPrimaryHover;
             }}
             onMouseOut={(e) => {
-              e.currentTarget.style.backgroundColor = '#3b82f6';
+              e.currentTarget.style.backgroundColor = colors.buttonPrimary;
             }}
           >
             {t('areas.add')}
@@ -120,10 +122,10 @@ const AreaList: React.FC<AreaListProps> = ({
           onClick={onAddArea}
           style={buttonStyle}
           onMouseOver={(e) => {
-            e.currentTarget.style.backgroundColor = '#2563eb';
+            e.currentTarget.style.backgroundColor = colors.buttonPrimaryHover;
           }}
           onMouseOut={(e) => {
-            e.currentTarget.style.backgroundColor = '#3b82f6';
+            e.currentTarget.style.backgroundColor = colors.buttonPrimary;
           }}
         >
           <svg 

@@ -4,6 +4,7 @@ import type { AreaCreateRequest } from '../../types/area';
 import type { Organization } from '../../types/organization';
 import Input from '../../components/common/Input/Input';
 import Button from '../../components/common/Button/Button';
+import { useThemeColors } from '../../hooks/useThemeColors';
 
 interface AreaCreateProps {
   formData: AreaCreateRequest;
@@ -27,6 +28,7 @@ const AreaCreate: React.FC<AreaCreateProps> = ({
   onCancel
 }) => {
   const { t } = useTranslation();
+  const colors = useThemeColors();
   
   const styles = {
     container: {
@@ -49,13 +51,14 @@ const AreaCreate: React.FC<AreaCreateProps> = ({
     title: {
       fontSize: '1.5rem',
       fontWeight: 600,
-      color: '#2d3748',
+      color: colors.textPrimary,
       margin: 0,
     },
     card: {
-      backgroundColor: '#ffffff',
+      backgroundColor: colors.cardBackground,
       borderRadius: '0.5rem',
-      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+      boxShadow: colors.cardShadow,
+      border: `1px solid ${colors.cardBorder}`,
       overflow: 'hidden',
     },
     form: {
@@ -77,7 +80,7 @@ const AreaCreate: React.FC<AreaCreateProps> = ({
       display: 'block',
       fontSize: '0.875rem',
       fontWeight: 500,
-      color: '#4a5568',
+      color: colors.textSecondary,
       marginBottom: '0.5rem',
     },
     textarea: {
@@ -85,7 +88,7 @@ const AreaCreate: React.FC<AreaCreateProps> = ({
       minHeight: '6rem',
       padding: '0.5rem 0.75rem',
       borderRadius: '0.375rem',
-      border: '1px solid #cbd5e0',
+      border: `1px solid ${colors.border}`,
       fontSize: '0.875rem',
       resize: 'vertical' as const,
     },
@@ -93,15 +96,15 @@ const AreaCreate: React.FC<AreaCreateProps> = ({
       width: '100%',
       padding: '0.5rem 0.75rem',
       borderRadius: '0.375rem',
-      border: '1px solid #cbd5e0',
+      border: `1px solid ${colors.border}`,
       fontSize: '0.875rem',
-      backgroundColor: '#ffffff',
+      backgroundColor: colors.surfaceBackground,
     },
     selectError: {
-      border: '1px solid #fc8181',
+      border: `1px solid ${colors.danger}`,
     },
     errorText: {
-      color: '#e53e3e',
+      color: colors.danger,
       fontSize: '0.75rem',
       marginTop: '0.25rem',
     },
@@ -117,11 +120,11 @@ const AreaCreate: React.FC<AreaCreateProps> = ({
     },
     checkboxLabel: {
       fontSize: '0.875rem',
-      color: '#4a5568',
+      color: colors.textPrimary,
     },
     errorContainer: {
-      backgroundColor: '#fed7d7',
-      color: '#822727',
+      backgroundColor: colors.dangerBackground,
+      color: colors.dangerText,
       padding: '1rem',
       borderRadius: '0.375rem',
       marginBottom: '1.5rem',
@@ -240,7 +243,7 @@ const AreaCreate: React.FC<AreaCreateProps> = ({
               <div style={styles.errorContainer}>
                 <div style={{ display: 'flex', alignItems: 'center' }}>
                   <div>
-                    <h3 style={{ fontSize: '0.875rem', fontWeight: 500 }}>{error}</h3>
+                    <h3 style={{ fontSize: '0.875rem', fontWeight: 500, color: colors.dangerText }}>{error}</h3>
                   </div>
                 </div>
               </div>
