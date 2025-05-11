@@ -13,6 +13,14 @@ export interface Sensor {
     name: string;
     organizationId: number;
   };
+  TelemetryData?: TelemetryVariable[];
+}
+
+export interface TelemetryVariable {
+  id: number;
+  variableName: string;
+  datatype: string;
+  sensorId: number;
 }
 
 export interface SensorCreateRequest {

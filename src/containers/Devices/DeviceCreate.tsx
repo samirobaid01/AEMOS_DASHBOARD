@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import type { AppDispatch } from '../../state/store';
 import { createDevice, selectDevicesLoading, selectDevicesError } from '../../state/slices/devices.slice';
 import { fetchOrganizations, selectOrganizations } from '../../state/slices/organizations.slice';
+import { fetchAreas, selectAreas } from '../../state/slices/areas.slice';
 import type { DeviceCreateRequest } from '../../types/device';
 import Input from '../../components/common/Input/Input';
 import Button from '../../components/common/Button/Button';
@@ -19,11 +20,13 @@ const DeviceCreate = () => {
   const isLoading = useSelector(selectDevicesLoading);
   const error = useSelector(selectDevicesError);
   const organizations = useSelector(selectOrganizations);
+  const areas = useSelector(selectAreas);
   
   const [formData, setFormData] = useState<DeviceCreateRequest>({
     name: '',
     serialNumber: '',
     organizationId: organizationId ? parseInt(organizationId, 10) : 0,
+    areaId: 0,
     type: '',
     status: true,
     firmware: '',
@@ -39,6 +42,7 @@ const DeviceCreate = () => {
   
   useEffect(() => {
     dispatch(fetchOrganizations());
+    dispatch(fetchAreas());
   }, [dispatch]);
   
   useEffect(() => {
@@ -49,6 +53,13 @@ const DeviceCreate = () => {
       }));
     }
   }, [organizationId]);
+  
+  useEffect(() => {
+    if (formData.organizationId) {
+      // You could also dispatch an action to fetch areas by organization ID
+      // dispatch(fetchAreasByOrganizationId(formData.organizationId));
+    }
+  }, [dispatch, formData.organizationId]);
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -61,11 +72,19 @@ const DeviceCreate = () => {
       return;
     }
     
-    if (name === 'organizationId') {
+    if (name === 'organizationId' || name === 'areaId') {
       setFormData(prev => ({
         ...prev,
-        [name]: parseInt(value, 10),
+        [name]: value ? parseInt(value, 10) : 0,
       }));
+      
+      if (name === 'organizationId') {
+        setFormData(prev => ({
+          ...prev,
+          areaId: 0
+        }));
+      }
+      
       return;
     }
     
@@ -134,6 +153,10 @@ const DeviceCreate = () => {
     
     if (!formData.type.trim()) {
       errors.type = t('type_required');
+    }
+    
+    if (formData.organizationId && !formData.areaId) {
+      errors.areaId = t('devices.area_required');
     }
     
     setFormErrors(errors);
@@ -266,6 +289,31 @@ const DeviceCreate = () => {
                 </select>
                 {formErrors.organizationId && (
                   <p className="mt-2 text-sm text-red-600">{formErrors.organizationId}</p>
+                )}
+              </div>
+              
+              <div className="sm:col-span-3">
+                <label htmlFor="areaId" className="block text-sm font-medium text-gray-700 mb-1">
+                  {t('devices.area')}
+                </label>
+                <select
+                  id="areaId"
+                  name="areaId"
+                  className="block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                  value={formData.areaId || ''}
+                  onChange={handleChange}
+                >
+                  <option value="">{t('devices.select_area')}</option>
+                  {areas
+                    .filter(area => !formData.organizationId || area.organizationId === formData.organizationId)
+                    .map(area => (
+                      <option key={area.id} value={area.id}>
+                        {area.name}
+                      </option>
+                    ))}
+                </select>
+                {formErrors.areaId && (
+                  <p className="mt-2 text-sm text-red-600">{formErrors.areaId}</p>
                 )}
               </div>
               
