@@ -9,9 +9,11 @@ import {
   selectDevicesLoading,
   selectDevicesError
 } from '../../state/slices/devices.slice';
-import { fetchOrganizations } from '../../state/slices/organizations.slice';
+import { fetchOrganizations, selectOrganizations } from '../../state/slices/organizations.slice';
+import { fetchAreas, selectAreas } from '../../state/slices/areas.slice';
 import type { DeviceUpdateRequest } from '../../types/device';
 import DeviceEditComponent from '../../components/devices/DeviceEdit';
+import { useTranslation } from 'react-i18next';
 
 const DeviceEdit = () => {
   const { id } = useParams<{ id: string }>();
@@ -20,6 +22,9 @@ const DeviceEdit = () => {
   const device = useSelector(selectSelectedDevice);
   const isLoading = useSelector(selectDevicesLoading);
   const error = useSelector(selectDevicesError);
+  const organizations = useSelector(selectOrganizations);
+  const areas = useSelector(selectAreas);
+  const { t } = useTranslation();
   
   const [formData, setFormData] = useState<DeviceUpdateRequest>({
     name: '',
@@ -27,7 +32,9 @@ const DeviceEdit = () => {
     status: true,
     firmware: '',
     description: '',
-    configuration: {}
+    configuration: {},
+    areaId: 0,
+    organizationId: 0
   });
   
   const [configFields, setConfigFields] = useState<{ key: string; value: string }[]>([
@@ -41,6 +48,7 @@ const DeviceEdit = () => {
     if (id) {
       dispatch(fetchDeviceById(parseInt(id, 10)));
       dispatch(fetchOrganizations());
+      dispatch(fetchAreas());
     }
   }, [dispatch, id]);
   
@@ -52,7 +60,9 @@ const DeviceEdit = () => {
         status: device.status,
         firmware: device.firmware || '',
         description: device.description || '',
-        configuration: device.configuration || {}
+        configuration: device.configuration || {},
+        areaId: device.areaId || 0,
+        organizationId: device.organizationId || 0
       });
       
       // Convert configuration object to array for form fields
@@ -76,6 +86,24 @@ const DeviceEdit = () => {
         ...prev,
         [name]: (e.target as HTMLInputElement).checked,
       }));
+      return;
+    }
+    
+    // Handle numeric fields like organizationId and areaId
+    if (name === 'organizationId' || name === 'areaId') {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value ? parseInt(value, 10) : 0,
+      }));
+      
+      // Reset areaId when organization changes
+      if (name === 'organizationId') {
+        setFormData(prev => ({
+          ...prev,
+          areaId: 0
+        }));
+      }
+      
       return;
     }
     
@@ -138,6 +166,11 @@ const DeviceEdit = () => {
       errors.type = 'Type is required';
     }
     
+    // Add area validation if we have an organization selected
+    if (formData.organizationId && !formData.areaId) {
+      errors.areaId = t('devices.area_required');
+    }
+    
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -192,6 +225,8 @@ const DeviceEdit = () => {
       onConfigChange={handleConfigChange}
       onAddConfigField={addConfigField}
       onRemoveConfigField={removeConfigField}
+      organizations={organizations}
+      areas={areas}
     />
   );
 };

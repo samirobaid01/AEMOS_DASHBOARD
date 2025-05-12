@@ -6,6 +6,9 @@ import PublicRoute from './PublicRoute';
 import { lazy, Suspense } from 'react';
 import LoadingScreen from '../components/common/Loading/LoadingScreen';
 
+// Debug Tools
+const SocketTester = lazy(() => import('../components/common/SocketTester'));
+
 // Auth
 const Login = lazy(() => import('../containers/Auth/Login'));
 const Signup = lazy(() => import('../containers/Auth/Signup'));
@@ -252,6 +255,16 @@ const AppRoutes = () => {
           element={
             <PrivateRoute>
               <Settings />
+            </PrivateRoute>
+          }
+        />
+        
+        {/* Debug Tools */}
+        <Route
+          path="/debug/socket-tester"
+          element={
+            <PrivateRoute>
+              <SocketTester />
             </PrivateRoute>
           }
         />

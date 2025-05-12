@@ -3,6 +3,7 @@ export interface Device {
   name: string;
   serialNumber: string;
   organizationId: number;
+  areaId?: number;
   type: string;
   status: boolean;
   firmware?: string;
@@ -13,6 +14,11 @@ export interface Device {
   organization?: {
     id: number;
     name: string;
+  };
+  area?: {
+    id: number;
+    name: string;
+    organizationId: number;
   };
 }
 
@@ -31,7 +37,7 @@ export interface DeviceCreateRequest {
 export interface DeviceUpdateRequest {
   name?: string;
   serialNumber?: string;
-  organizationId?: number;
+  organizationId: number;
   areaId?: number;
   type?: string;
   status?: boolean;

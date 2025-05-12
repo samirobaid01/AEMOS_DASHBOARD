@@ -194,62 +194,71 @@ const DeviceCreate: React.FC<DeviceCreateProps> = ({
                 />
               </div>
               
-              {/* Organization */}
-              <div style={styles.fullWidth}>
-                <div style={styles.column}>
-                  <label htmlFor="organizationId" style={styles.labelText}>
-                    {t('devices.organization')}
-                  </label>
-                  <select
-                    id="organizationId"
-                    name="organizationId"
-                    style={{
-                      ...styles.select,
-                      ...(formErrors.organizationId ? styles.selectError : {})
-                    }}
-                    value={formData.organizationId || ''}
-                    onChange={onChange}
-                    required
-                  >
-                    <option value="">{t('select_organization')}</option>
-                    {organizations.map(org => (
-                      <option key={org.id} value={org.id}>
-                        {org.name}
-                      </option>
-                    ))}
-                  </select>
-                  {formErrors.organizationId && (
-                    <p style={styles.errorText}>{formErrors.organizationId}</p>
-                  )}
-                </div>
-              </div>
-              
-              {/* Area */}
-              <div style={styles.fullWidth}>
-                <div style={styles.column}>
-                  <label htmlFor="areaId" style={styles.labelText}>
-                    {t('devices.area')}
-                  </label>
-                  <select
-                    id="areaId"
-                    name="areaId"
-                    style={styles.select}
-                    value={formData.organizationId || ''}
-                    onChange={onChange}
-                  >
-                    <option value="">{t('select_area')}</option>
-                    {areas
-                      .filter(area => !formData.organizationId || area.organizationId === formData.organizationId)
-                      .map(area => (
-                        <option key={area.id} value={area.id}>
-                          {area.name}
+              {/* Two column section for Organization and Area */}
+              <div style={styles.twoColumns}>
+                {/* Organization */}
+                <div>
+                  <div style={styles.column}>
+                    <label htmlFor="organizationId" style={styles.labelText}>
+                      {t('devices.organization')}
+                    </label>
+                    <select
+                      id="organizationId"
+                      name="organizationId"
+                      style={{
+                        ...styles.select,
+                        ...(formErrors.organizationId ? styles.selectError : {})
+                      }}
+                      value={formData.organizationId || ''}
+                      onChange={onChange}
+                      required
+                    >
+                      <option value="">{t('select_organization')}</option>
+                      {organizations.map(org => (
+                        <option key={org.id} value={org.id}>
+                          {org.name}
                         </option>
                       ))}
-                  </select>
+                    </select>
+                    {formErrors.organizationId && (
+                      <p style={styles.errorText}>{formErrors.organizationId}</p>
+                    )}
+                  </div>
+                </div>
+                
+                {/* Area */}
+                <div>
+                  <div style={styles.column}>
+                    <label htmlFor="areaId" style={styles.labelText}>
+                      {t('devices.area')}
+                    </label>
+                    <select
+                      id="areaId"
+                      name="areaId"
+                      style={{
+                        ...styles.select,
+                        ...(formErrors.areaId ? styles.selectError : {})
+                      }}
+                      value={formData.areaId || ''}
+                      onChange={onChange}
+                    >
+                      <option value="">{t('select_area')}</option>
+                      {areas
+                        .filter(area => !formData.organizationId || area.organizationId === formData.organizationId)
+                        .map(area => (
+                          <option key={area.id} value={area.id}>
+                            {area.name}
+                          </option>
+                        ))}
+                    </select>
+                    {formErrors.areaId && (
+                      <p style={styles.errorText}>{formErrors.areaId}</p>
+                    )}
+                  </div>
                 </div>
               </div>
               
-              {/* Two column section */}
+              {/* Two column section for Type and Firmware */}
               <div style={styles.twoColumns}>
                 {/* Type */}
                 <div>

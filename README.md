@@ -17,6 +17,7 @@ AEMOS Agriculture Dashboard is a comprehensive agricultural monitoring system de
 - **Dark Mode Support**: Fully customizable light and dark themes
 - **Guided Tours**: Interactive walkthroughs to help users learn the platform
 - **Multi-language Support**: Internationalization ready with i18n
+- **Real-time Updates**: Socket.io integration for live telemetry data
 
 ## Technologies
 
