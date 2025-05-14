@@ -98,6 +98,8 @@
     "enter_zip_code": "Introduzca el código postal",
     "zip_code": "Código Postal",
     "contact_number": "Número de Contacto",
+    "your_organizations": "Sus Organizaciones",
+    "select_organization": "Seleccionar Organización",
     "form": {
       "nameLabel": "Nombre de la Organización",
       "namePlaceholder": "Introduzca el nombre de la organización",
@@ -252,7 +254,10 @@
     "add_new": "Añadir Nuevo",
     "create_new": "Crear Nuevo",
     "view_all": "Ver Todo",
-    "no_details": "Sin detalles"
+    "no_details": "Sin detalles",
+    "permission_denied": "Permiso Denegado",
+    "no_access_permission": "No tienes permiso para acceder a este recurso.",
+    "go_to_dashboard": "Ir al Panel Principal"
   },
   "errors": {
     "notFound": "Página no encontrada",

@@ -98,6 +98,8 @@
     "enter_zip_code": "Enter ZIP code",
     "zip_code": "ZIP Code",
     "contact_number": "Contact Number",
+    "your_organizations": "Your Organizations",
+    "select_organization": "Select Organization",
     "form": {
       "nameLabel": "Organization Name",
       "namePlaceholder": "Enter organization name",
@@ -252,7 +254,10 @@
     "add_new": "Add New",
     "create_new": "Create New",
     "view_all": "View All",
-    "no_details": "No details"
+    "no_details": "No details",
+    "permission_denied": "Permission Denied",
+    "no_access_permission": "You don't have permission to access this resource.",
+    "go_to_dashboard": "Go to Dashboard"
   },
   "errors": {
     "notFound": "Page not found",

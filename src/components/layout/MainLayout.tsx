@@ -6,6 +6,7 @@ import type { RootState } from '../../state/store';
 import { clearCredentials, selectCurrentUser } from '../../state/slices/auth.slice';
 import type { User } from '../../types/auth';
 import { useTheme } from '../../context/ThemeContext';
+import OrganizationSelector from '../common/OrganizationSelector/OrganizationSelector';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -293,6 +294,28 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                 AEMOS <span style={{ color: darkMode ? '#f59e0b' : '#b45309' }}>Agriculture</span>
               </h1>
             </div>
+            
+            {/* Organization Selector for Mobile */}
+            <div style={{ padding: '0 16px' }}>
+              <OrganizationSelector />
+            </div>
+          </div>
+        )}
+
+        {/* Desktop header with organization selector - only visible on desktop */}
+        {!isMobile && (
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'flex-end',
+            height: '64px',
+            padding: '0 32px',
+            backgroundColor: 'transparent',
+            position: 'sticky' as const,
+            top: 0,
+            zIndex: 10,
+          }}>
+            <OrganizationSelector />
           </div>
         )}
 

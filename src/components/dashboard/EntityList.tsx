@@ -163,6 +163,11 @@ const EntityList: React.FC<EntityListProps> = ({
               }}>
                 <Link 
                   to={`${basePath}/${entity.id}`} 
+                  onClick={(e) => {
+                    console.log(`EntityList: Clicked on entity ${entity.name} (ID: ${entity.id})`);
+                    console.log(`EntityList: Navigating to ${basePath}/${entity.id}`);
+                    // Let the link work normally
+                  }}
                   style={{
                     display: 'flex',
                     alignItems: 'center',

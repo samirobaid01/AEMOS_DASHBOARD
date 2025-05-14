@@ -9,6 +9,8 @@ export interface User {
   notifyByMessage?: boolean;
   smsNumber?: string;
   detail?: string;
+  permissions?: string[]; // Array of permission strings like "organization.view", "area.create", etc.
+  roles?: string[]; // User roles
   // Add other user properties as needed
 }
 
@@ -44,4 +46,5 @@ export interface AuthState {
   refreshToken: string | null;
   loading: boolean;
   error: string | null;
+  selectedOrganizationId: number | null;
 } 

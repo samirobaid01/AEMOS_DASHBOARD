@@ -5,6 +5,9 @@ import type { RootState } from '../store';
 import * as authService from '../../services/auth.service';
 import { TOKEN_STORAGE_KEY, REFRESH_TOKEN_STORAGE_KEY } from '../../config';
 
+// Storage key for selected organization
+const SELECTED_ORG_KEY = 'selected_organization_id';
+
 // Initial state
 const initialState: AuthState = {
   isAuthenticated: false,
@@ -13,6 +16,7 @@ const initialState: AuthState = {
   refreshToken: null,
   loading: false,
   error: null,
+  selectedOrganizationId: null,
 };
 
 // Async thunks
@@ -66,17 +70,34 @@ export const fetchUserProfile = createAsyncThunk(
 const checkInitialAuth = () => {
   const token = localStorage.getItem(TOKEN_STORAGE_KEY);
   const refreshToken = localStorage.getItem(REFRESH_TOKEN_STORAGE_KEY);
+  const selectedOrganizationId = localStorage.getItem(SELECTED_ORG_KEY);
+  const userJson = localStorage.getItem('user');
+  let user = null;
+  
+  try {
+    if (userJson) {
+      user = JSON.parse(userJson);
+      console.log('Auth slice: Loaded user from localStorage:', user);
+    }
+  } catch (error) {
+    console.error('Failed to parse user from localStorage:', error);
+  }
+  
   if (token && refreshToken) {
     return {
       isAuthenticated: true,
       token,
       refreshToken,
+      user,
+      selectedOrganizationId: selectedOrganizationId ? parseInt(selectedOrganizationId, 10) : null,
     };
   }
   return {
     isAuthenticated: false,
     token: null,
     refreshToken: null,
+    user: null,
+    selectedOrganizationId: null,
   };
 };
 
@@ -104,8 +125,18 @@ const authSlice = createSlice({
       state.token = null;
       state.refreshToken = null;
       state.isAuthenticated = false;
+      state.selectedOrganizationId = null;
       localStorage.removeItem(TOKEN_STORAGE_KEY);
       localStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY);
+      localStorage.removeItem(SELECTED_ORG_KEY);
+    },
+    updateUser: (state, action: PayloadAction<User>) => {
+      console.log('Auth slice: updateUser action received', action.payload);
+      state.user = action.payload;
+    },
+    setSelectedOrganization: (state, action: PayloadAction<number>) => {
+      state.selectedOrganizationId = action.payload;
+      localStorage.setItem(SELECTED_ORG_KEY, action.payload.toString());
     },
   },
   extraReducers: (builder) => {
@@ -149,6 +180,7 @@ const authSlice = createSlice({
       state.token = null;
       state.refreshToken = null;
       state.isAuthenticated = false;
+      state.selectedOrganizationId = null;
     });
     
     // Fetch User Profile
@@ -167,12 +199,20 @@ const authSlice = createSlice({
   },
 });
 
-export const { setCredentials, clearCredentials } = authSlice.actions;
+export const { setCredentials, clearCredentials, setSelectedOrganization, updateUser } = authSlice.actions;
 
 // Selectors with type assertions
 export const selectCurrentUser = (state: RootState) => (state as any).auth.user as User | null;
 export const selectIsAuthenticated = (state: RootState) => (state as any).auth.isAuthenticated as boolean;
 export const selectAuthLoading = (state: RootState) => (state as any).auth.loading as boolean;
 export const selectAuthError = (state: RootState) => (state as any).auth.error as string | null;
+export const selectSelectedOrganizationId = (state: RootState) => (state as any).auth.selectedOrganizationId as number | null;
+
+// Permission check helper
+export const hasPermission = (state: RootState, permission: string): boolean => {
+  const user = selectCurrentUser(state);
+  if (!user || !user.permissions) return false;
+  return user.permissions.includes(permission);
+};
 
 export default authSlice.reducer; 

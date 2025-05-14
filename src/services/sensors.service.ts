@@ -1,11 +1,13 @@
 import apiClient from './api/apiClient';
 import type { Sensor, SensorCreateRequest, SensorUpdateRequest, SensorFilterParams } from '../types/sensor';
+import { withOrganizationId } from './api/organizationContext';
 
 /**
  * Get all sensors with optional filters
  */
 export const getSensors = async (params?: SensorFilterParams) => {
-  const response = await apiClient.get('/sensors', { params });
+  const enhancedParams = withOrganizationId(params);
+  const response = await apiClient.get('/sensors', { params: enhancedParams });
   return response.data.data.sensors;
 };
 
@@ -13,7 +15,8 @@ export const getSensors = async (params?: SensorFilterParams) => {
  * Get sensor by ID
  */
 export const getSensorById = async (id: number) => {
-  const response = await apiClient.get(`/sensors/${id}`);
+  const params = withOrganizationId();
+  const response = await apiClient.get(`/sensors/${id}`, { params });
   return response.data.data.sensor;
 };
 
@@ -21,7 +24,8 @@ export const getSensorById = async (id: number) => {
  * Create new sensor
  */
 export const createSensor = async (sensorData: SensorCreateRequest) => {
-  const response = await apiClient.post('/sensors', sensorData);
+  const params = withOrganizationId();
+  const response = await apiClient.post('/sensors', sensorData, { params });
   return response.data.data.sensor;
 };
 
@@ -29,7 +33,8 @@ export const createSensor = async (sensorData: SensorCreateRequest) => {
  * Update sensor
  */
 export const updateSensor = async (id: number, sensorData: SensorUpdateRequest) => {
-  const response = await apiClient.patch(`/sensors/${id}`, sensorData);
+  const params = withOrganizationId();
+  const response = await apiClient.patch(`/sensors/${id}`, sensorData, { params });
   return response.data.data.sensor;
 };
 
@@ -37,7 +42,8 @@ export const updateSensor = async (id: number, sensorData: SensorUpdateRequest) 
  * Delete sensor
  */
 export const deleteSensor = async (id: number) => {
-  const response = await apiClient.delete(`/sensors/${id}`);
+  const params = withOrganizationId();
+  const response = await apiClient.delete(`/sensors/${id}`, { params });
   return response.data;
 };
 
@@ -45,7 +51,8 @@ export const deleteSensor = async (id: number) => {
  * Get sensors by area ID
  */
 export const getSensorsByAreaId = async (areaId: number) => {
-  const response = await apiClient.get('/sensors', { params: { areaId } });
+  const params = withOrganizationId({ areaId });
+  const response = await apiClient.get('/sensors', { params });
   return response.data.data.sensors;
 };
 
