@@ -7,6 +7,7 @@ import { fetchAreas, selectAreas } from '../../state/slices/areas.slice';
 import type { SensorCreateRequest, SensorUpdateRequest } from '../../types/sensor';
 import SensorForm from '../../components/sensors/SensorForm';
 import LoadingScreen from '../../components/common/Loading/LoadingScreen';
+import { selectSelectedOrganization } from '../../state/slices/organizations.slice';
 
 const SensorCreate = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -15,7 +16,7 @@ const SensorCreate = () => {
   const areaId = searchParams.get('areaId');
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+  const organization = useSelector(selectSelectedOrganization);
   const isLoading = useSelector(selectSensorsLoading);
   const error = useSelector(selectSensorsError);
   const areas = useSelector(selectAreas) || [];
@@ -38,7 +39,11 @@ const SensorCreate = () => {
   // Handle form submission
   const handleSubmit = async (data: SensorCreateRequest | SensorUpdateRequest) => {
     // Create a properly typed SensorCreateRequest
+    if (!organization?.id) {
+      throw new Error('Organization ID is required to create a sensor.');
+    }
     const formData: SensorCreateRequest = {
+      organizationId: parseInt(organization.id.toString(), 10),
       name: data.name || '',
       areaId: data.areaId || (areaId ? parseInt(areaId, 10) : 0),
       type: data.type || '',

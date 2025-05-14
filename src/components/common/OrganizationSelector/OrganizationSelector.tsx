@@ -114,6 +114,7 @@ const OrganizationSelector: React.FC = () => {
   const showDropdownControls = organizations.length > 1;
 
   const handleSelectOrganization = (organizationId: number) => {
+    console.log('OrganizationSelector: Selecting organization:', organizationId);
     dispatch(setSelectedOrganization(organizationId));
     setIsOpen(false);
   };

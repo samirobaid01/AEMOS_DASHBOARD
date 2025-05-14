@@ -30,6 +30,7 @@ export interface OrganizationCreateRequest {
 }
 
 export interface OrganizationUpdateRequest {
+  organizationId: number;
   name?: string;
   parentId?: number | null;
   status?: boolean;

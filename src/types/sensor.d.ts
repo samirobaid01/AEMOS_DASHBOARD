@@ -24,6 +24,7 @@ export interface TelemetryVariable {
 }
 
 export interface SensorCreateRequest {
+  organizationId: number;
   name: string;
   areaId: number;
   type: string;
@@ -33,6 +34,7 @@ export interface SensorCreateRequest {
 }
 
 export interface SensorUpdateRequest {
+  organizationId: number;
   name?: string;
   areaId?: number;
   type?: string;

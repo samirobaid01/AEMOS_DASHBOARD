@@ -2,22 +2,27 @@ import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import type { AppDispatch } from '../../state/store';
-import { fetchAreas, selectAreas, selectAreasLoading, selectAreasError } from '../../state/slices/areas.slice';
+import { fetchAreas, selectAreas, selectAreasLoading, selectAreasError, selectSelectedArea } from '../../state/slices/areas.slice';
 import LoadingScreen from '../../components/common/Loading/LoadingScreen';
 import { AreaList } from '../../components/areas';
+import { selectSelectedOrganizationId } from '../../state/slices/auth.slice';
 
 const AreaListContainer = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const areasData = useSelector(selectAreas);
   const isLoading = useSelector(selectAreasLoading);
+  const organization = useSelector(selectSelectedOrganizationId);
   const error = useSelector(selectAreasError);
+  const selectedArea = useSelector(selectSelectedArea);
   const [searchTerm, setSearchTerm] = useState('');
   const [organizationFilter, setOrganizationFilter] = useState<string>('');
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   
   // Handle window resize
   useEffect(() => {
+
+    console.log('selectedArea', selectedArea);
     const handleResize = () => {
       setWindowWidth(window.innerWidth);
     };
@@ -30,8 +35,13 @@ const AreaListContainer = () => {
   const areas = Array.isArray(areasData) ? areasData : [];
   
   useEffect(() => {
-    dispatch(fetchAreas());
-  }, [dispatch]);
+    if(organization) {
+      console.log('organization for which areas are fetched', organization);
+      dispatch(fetchAreas({ organizationId: parseInt(organization.toString(), 10) }));
+    } else {
+      dispatch(fetchAreas());
+    }
+  }, [dispatch,organization]);
   
   // Apply defensive check before filtering
   const filteredAreas = areas.filter(area => {
@@ -62,7 +72,7 @@ const AreaListContainer = () => {
   
   return (
     <AreaList
-      areas={areas}
+      areas={selectedArea ? [selectedArea] : areas}
       isLoading={isLoading}
       error={error}
       searchTerm={searchTerm}

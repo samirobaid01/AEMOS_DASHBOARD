@@ -78,6 +78,7 @@ const organizationsSlice = createSlice({
       state.selectedOrganization = null;
     },
     setSelectedOrganization: (state, action: PayloadAction<Organization>) => {
+      console.log('Organizations Slice: setSelectedOrganization action received', action.payload);
       state.selectedOrganization = action.payload;
     },
   },

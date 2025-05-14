@@ -7,6 +7,7 @@ import { TOKEN_STORAGE_KEY, REFRESH_TOKEN_STORAGE_KEY } from '../../config';
 
 // Storage key for selected organization
 const SELECTED_ORG_KEY = 'selected_organization_id';
+const USER_STORAGE_KEY = 'user';
 
 // Initial state
 const initialState: AuthState = {
@@ -71,13 +72,17 @@ const checkInitialAuth = () => {
   const token = localStorage.getItem(TOKEN_STORAGE_KEY);
   const refreshToken = localStorage.getItem(REFRESH_TOKEN_STORAGE_KEY);
   const selectedOrganizationId = localStorage.getItem(SELECTED_ORG_KEY);
-  const userJson = localStorage.getItem('user');
+  const userJson = localStorage.getItem(USER_STORAGE_KEY);
   let user = null;
   
   try {
     if (userJson) {
       user = JSON.parse(userJson);
       console.log('Auth slice: Loaded user from localStorage:', user);
+      console.log('Auth slice: User permissions from localStorage:', user?.permissions);
+      console.log('Auth slice: User roles from localStorage:', user?.roles);
+    } else {
+      console.log('Auth slice: No user found in localStorage');
     }
   } catch (error) {
     console.error('Failed to parse user from localStorage:', error);
@@ -107,6 +112,19 @@ const authInitialState = {
   ...checkInitialAuth(),
 };
 
+// Helper to save user to localStorage
+const saveUserToLocalStorage = (user: User | null) => {
+  if (user) {
+    localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
+    console.log('Auth slice: Saved user to localStorage:', user);
+    console.log('Auth slice: User permissions saved:', user?.permissions);
+    console.log('Auth slice: User roles saved:', user?.roles);
+  } else {
+    localStorage.removeItem(USER_STORAGE_KEY);
+    console.log('Auth slice: Removed user from localStorage');
+  }
+};
+
 // Slice
 const authSlice = createSlice({
   name: 'auth',
@@ -119,6 +137,7 @@ const authSlice = createSlice({
       state.isAuthenticated = true;
       localStorage.setItem(TOKEN_STORAGE_KEY, action.payload.token);
       localStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, action.payload.refreshToken);
+      saveUserToLocalStorage(action.payload.user);
     },
     clearCredentials: (state) => {
       state.user = null;
@@ -129,12 +148,15 @@ const authSlice = createSlice({
       localStorage.removeItem(TOKEN_STORAGE_KEY);
       localStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY);
       localStorage.removeItem(SELECTED_ORG_KEY);
+      saveUserToLocalStorage(null);
     },
     updateUser: (state, action: PayloadAction<User>) => {
       console.log('Auth slice: updateUser action received', action.payload);
       state.user = action.payload;
+      saveUserToLocalStorage(action.payload);
     },
     setSelectedOrganization: (state, action: PayloadAction<number>) => {
+      console.log('Auth slice: setSelectedOrganization action received', action.payload);
       state.selectedOrganizationId = action.payload;
       localStorage.setItem(SELECTED_ORG_KEY, action.payload.toString());
     },
@@ -151,6 +173,8 @@ const authSlice = createSlice({
       state.token = action.payload.token;
       state.refreshToken = action.payload.refreshToken;
       state.isAuthenticated = true;
+      // Save user to localStorage on successful login
+      saveUserToLocalStorage(action.payload.user);
     });
     builder.addCase(login.rejected, (state, action) => {
       state.loading = false;
@@ -168,6 +192,8 @@ const authSlice = createSlice({
       state.token = action.payload.token;
       state.refreshToken = action.payload.refreshToken;
       state.isAuthenticated = true;
+      // Save user to localStorage on successful signup
+      saveUserToLocalStorage(action.payload.user);
     });
     builder.addCase(signup.rejected, (state, action) => {
       state.loading = false;
@@ -181,6 +207,8 @@ const authSlice = createSlice({
       state.refreshToken = null;
       state.isAuthenticated = false;
       state.selectedOrganizationId = null;
+      // Remove user from localStorage on logout
+      saveUserToLocalStorage(null);
     });
     
     // Fetch User Profile
@@ -191,6 +219,8 @@ const authSlice = createSlice({
     builder.addCase(fetchUserProfile.fulfilled, (state, action) => {
       state.loading = false;
       state.user = action.payload;
+      // Save updated user profile to localStorage
+      saveUserToLocalStorage(action.payload);
     });
     builder.addCase(fetchUserProfile.rejected, (state, action) => {
       state.loading = false;
