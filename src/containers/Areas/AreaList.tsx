@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import type { AppDispatch } from '../../state/store';
-import { fetchAreas, selectAreas, selectAreasLoading, selectAreasError, selectSelectedArea } from '../../state/slices/areas.slice';
+import { fetchAreas, selectAreas, selectAreasLoading, selectAreasError, selectSelectedArea, fetchAreasByOrganizationId } from '../../state/slices/areas.slice';
 import LoadingScreen from '../../components/common/Loading/LoadingScreen';
 import { AreaList } from '../../components/areas';
 import { selectSelectedOrganizationId } from '../../state/slices/auth.slice';
@@ -37,7 +37,9 @@ const AreaListContainer = () => {
   useEffect(() => {
     if(organization) {
       console.log('organization for which areas are fetched', organization);
-      dispatch(fetchAreas({ organizationId: parseInt(organization.toString(), 10) }));
+      //dispatch(fetchAreas({ organizationId: parseInt(organization.toString(), 10) }));
+      const resp = dispatch(fetchAreasByOrganizationId(parseInt(organization.toString(), 10)));
+      console.log('resp after fetching areas by organization', resp);
     } else {
       dispatch(fetchAreas());
     }
