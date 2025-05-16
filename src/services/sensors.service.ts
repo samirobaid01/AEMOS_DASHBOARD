@@ -21,6 +21,16 @@ export const getSensorById = async (id: number) => {
 };
 
 /**
+ * Get sensors by organization ID
+ */
+export const getSensorsByOrganizationId = async (organizationId: number) => {
+  const params = withOrganizationId({ organizationId });
+  const response = await apiClient.get(`/sensors/organization/${organizationId}`, { params });
+  console.log('response from getSensorsByOrganizationId', response.data.data.sensors);
+  return response.data.data.sensors;
+};
+
+/**
  * Create new sensor
  */
 export const createSensor = async (sensorData: SensorCreateRequest) => {

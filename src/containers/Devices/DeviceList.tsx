@@ -5,11 +5,14 @@ import type { AppDispatch } from '../../state/store';
 import { fetchDevices, selectDevices, selectDevicesLoading, selectDevicesError } from '../../state/slices/devices.slice';
 import LoadingScreen from '../../components/common/Loading/LoadingScreen';
 import DeviceList from '../../components/devices/DeviceList';
+import { selectSelectedOrganizationId } from '../../state/slices/auth.slice';
+import { fetchDevicesByOrganizationId } from '../../state/slices/devices.slice';
 
 const DeviceListContainer = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const devicesData = useSelector(selectDevices);
+  const selectedOrganizationId = useSelector(selectSelectedOrganizationId);
   const isLoading = useSelector(selectDevicesLoading);
   const error = useSelector(selectDevicesError);
   const [searchTerm, setSearchTerm] = useState('');
@@ -30,8 +33,12 @@ const DeviceListContainer = () => {
   const devices = Array.isArray(devicesData) ? devicesData : [];
   
   useEffect(() => {
-    dispatch(fetchDevices());
-  }, [dispatch]);
+    if(selectedOrganizationId){
+      dispatch(fetchDevicesByOrganizationId(parseInt(selectedOrganizationId.toString(), 10)));
+    }else{
+      dispatch(fetchDevices());
+    }
+  }, [dispatch, selectedOrganizationId]);
   
   // Apply defensive check before filtering
   const filteredDevices = devices.filter(device => {
