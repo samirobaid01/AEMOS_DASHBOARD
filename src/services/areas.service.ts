@@ -1,19 +1,22 @@
 import apiClient from './api/apiClient';
 import type { Area, AreaCreateRequest, AreaUpdateRequest, AreaFilterParams } from '../types/area';
+import { withOrganizationId } from './api/organizationContext';
 
 /**
  * Get all areas with optional filters
  */
 export const getAreas = async (params?: AreaFilterParams) => {
-  const response = await apiClient.get('/areas', { params });
+  const enhancedParams = withOrganizationId(params);
+  const response = await apiClient.get('/areas', { params: enhancedParams });
   return response.data.data.areas;
 };
 
 /**
  * Get area by ID
  */
-export const getAreaById = async (id: number) => {
-  const response = await apiClient.get(`/areas/${id}`);
+export const getAreaById = async (id: number, params?: Record<string, any>) => {
+  const enhancedParams = withOrganizationId(params);
+  const response = await apiClient.get(`/areas/${id}`, { params: enhancedParams });
   return response.data.data.area;
 };
 
@@ -21,7 +24,8 @@ export const getAreaById = async (id: number) => {
  * Get areas by organization ID
  */
 export const getAreasByOrganizationId = async (organizationId: number) => {
-  const response = await apiClient.get(`/areas/organization/${organizationId}`);
+  const params = { organizationId };
+  const response = await apiClient.get(`/areas/organization/${organizationId}`, { params });
   return response.data.data.areas;
 };
 
@@ -29,7 +33,8 @@ export const getAreasByOrganizationId = async (organizationId: number) => {
  * Create new area
  */
 export const createArea = async (areaData: AreaCreateRequest) => {
-  const response = await apiClient.post('/areas', areaData);
+  const params = withOrganizationId();
+  const response = await apiClient.post('/areas', areaData, { params });
   return response.data.data.area;
 };
 
@@ -37,7 +42,8 @@ export const createArea = async (areaData: AreaCreateRequest) => {
  * Update area
  */
 export const updateArea = async (id: number, areaData: AreaUpdateRequest) => {
-  const response = await apiClient.patch(`/areas/${id}`, areaData);
+  const params = withOrganizationId();
+  const response = await apiClient.patch(`/areas/${id}`, areaData, { params });
   return response.data.data.area;
 };
 
@@ -45,7 +51,8 @@ export const updateArea = async (id: number, areaData: AreaUpdateRequest) => {
  * Delete area
  */
 export const deleteArea = async (id: number) => {
-  const response = await apiClient.delete(`/areas/${id}`);
+  const params = withOrganizationId();
+  const response = await apiClient.delete(`/areas/${id}`, { params });
   return response.data;
 };
 

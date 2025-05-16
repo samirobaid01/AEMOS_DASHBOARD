@@ -27,8 +27,9 @@ const AreaEdit = () => {
   
   const [formData, setFormData] = useState<AreaUpdateRequest>({
     name: '',
+    organizationId: 0,
     description: '',
-    status: true,
+    status: "pending",
   });
   
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
@@ -45,6 +46,7 @@ const AreaEdit = () => {
     if (area) {
       setFormData({
         name: area.name,
+        organizationId: area.organizationId,
         description: area.description || '',
         status: area.status,
       });

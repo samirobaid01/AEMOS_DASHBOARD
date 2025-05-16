@@ -96,7 +96,7 @@ const AppRoutes = () => {
         <Route
           path="/organizations"
           element={
-            <PrivateRoute>
+            <PrivateRoute requiredPermission="organization.view">
               <OrganizationList />
             </PrivateRoute>
           }
@@ -105,7 +105,7 @@ const AppRoutes = () => {
         <Route
           path="/organizations/create"
           element={
-            <PrivateRoute>
+            <PrivateRoute requiredPermission="organization.create">
               <OrganizationCreate />
             </PrivateRoute>
           }
@@ -114,7 +114,7 @@ const AppRoutes = () => {
         <Route
           path="/organizations/:id"
           element={
-            <PrivateRoute>
+            <PrivateRoute requiredPermission="organization.view">
               <OrganizationDetails />
             </PrivateRoute>
           }
@@ -123,7 +123,7 @@ const AppRoutes = () => {
         <Route
           path="/organizations/:id/edit"
           element={
-            <PrivateRoute>
+            <PrivateRoute requiredPermission="organization.update">
               <OrganizationEdit />
             </PrivateRoute>
           }
@@ -133,7 +133,7 @@ const AppRoutes = () => {
         <Route
           path="/areas"
           element={
-            <PrivateRoute>
+            <PrivateRoute requiredPermission="area.view">
               <AreaList />
             </PrivateRoute>
           }
@@ -142,7 +142,7 @@ const AppRoutes = () => {
         <Route
           path="/areas/create"
           element={
-            <PrivateRoute>
+            <PrivateRoute requiredPermission="area.create">
               <AreaCreate />
             </PrivateRoute>
           }
@@ -151,7 +151,7 @@ const AppRoutes = () => {
         <Route
           path="/areas/:id"
           element={
-            <PrivateRoute>
+            <PrivateRoute requiredPermission="area.view">
               <AreaDetails />
             </PrivateRoute>
           }
@@ -160,7 +160,7 @@ const AppRoutes = () => {
         <Route
           path="/areas/:id/edit"
           element={
-            <PrivateRoute>
+            <PrivateRoute requiredPermission="area.update">
               <AreaEdit />
             </PrivateRoute>
           }
@@ -170,7 +170,7 @@ const AppRoutes = () => {
         <Route
           path="/sensors"
           element={
-            <PrivateRoute>
+            <PrivateRoute requiredPermission="sensor.view">
               <SensorList />
             </PrivateRoute>
           }
@@ -179,7 +179,7 @@ const AppRoutes = () => {
         <Route
           path="/sensors/create"
           element={
-            <PrivateRoute>
+            <PrivateRoute requiredPermission="sensor.create">
               <SensorCreate />
             </PrivateRoute>
           }
@@ -188,7 +188,7 @@ const AppRoutes = () => {
         <Route
           path="/sensors/:id"
           element={
-            <PrivateRoute>
+            <PrivateRoute requiredPermission="sensor.view">
               <SensorDetails />
             </PrivateRoute>
           }
@@ -197,7 +197,7 @@ const AppRoutes = () => {
         <Route
           path="/sensors/:id/edit"
           element={
-            <PrivateRoute>
+            <PrivateRoute requiredPermission="sensor.update">
               <SensorEdit />
             </PrivateRoute>
           }
@@ -207,7 +207,7 @@ const AppRoutes = () => {
         <Route
           path="/devices"
           element={
-            <PrivateRoute>
+            <PrivateRoute requiredPermission="device.view">
               <DeviceList />
             </PrivateRoute>
           }
@@ -216,7 +216,7 @@ const AppRoutes = () => {
         <Route
           path="/devices/create"
           element={
-            <PrivateRoute>
+            <PrivateRoute requiredPermission="device.create">
               <DeviceCreate />
             </PrivateRoute>
           }
@@ -225,7 +225,7 @@ const AppRoutes = () => {
         <Route
           path="/devices/:id"
           element={
-            <PrivateRoute>
+            <PrivateRoute requiredPermission="device.view">
               <DeviceDetails />
             </PrivateRoute>
           }
@@ -234,7 +234,7 @@ const AppRoutes = () => {
         <Route
           path="/devices/:id/edit"
           element={
-            <PrivateRoute>
+            <PrivateRoute requiredPermission="device.update">
               <DeviceEdit />
             </PrivateRoute>
           }

@@ -1,5 +1,7 @@
 import React, { forwardRef } from 'react';
 import { twMerge } from 'tailwind-merge';
+import { useTheme } from '../../../context/ThemeContext';
+import { useThemeColors } from '../../../hooks/useThemeColors';
 
 export interface SelectOption {
   value: string | number;
@@ -30,6 +32,9 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
     },
     ref
   ) => {
+    const { darkMode } = useTheme();
+    const colors = useThemeColors();
+
     const selectId = id || `select-${Math.random().toString(36).substring(2, 9)}`;
 
     const baseClasses = 'block w-full px-4 py-2.5 sm:py-3 border-2 rounded-lg shadow-sm appearance-none focus:outline-none transition-all duration-200 text-base sm:text-sm backdrop-blur-sm';
@@ -61,6 +66,23 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
         : (document.documentElement.classList.contains('dark') ? '#374151' : '#d1d5db');
     };
 
+    const selectStyle = {
+      display: 'block',
+      width: '100%',
+      padding: '0.5rem 0.75rem',
+      borderRadius: '0.375rem',
+      border: `1px solid ${darkMode ? colors.border : '#d1d5db'}`,
+      fontSize: '0.875rem',
+      lineHeight: 1.5,
+      backgroundColor: darkMode ? colors.background : 'white',
+      color: darkMode ? colors.textPrimary : '#111827',
+      backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+      backgroundPosition: 'right 0.5rem center',
+      backgroundRepeat: 'no-repeat',
+      backgroundSize: '1.5rem 1.5rem',
+      outline: 'none',
+    } as React.CSSProperties;
+
     return (
       <div className={`${fullWidth ? 'w-full' : ''} max-w-full space-y-1.5`}>
         {label && (
@@ -73,14 +95,14 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
           <select
             ref={ref}
             id={selectId}
-            className={selectClasses}
+            style={selectStyle}
             aria-invalid={!!error}
             aria-describedby={error ? `${selectId}-error` : helperText ? `${selectId}-helper` : undefined}
             onFocus={handleFocus}
             onBlur={handleBlur}
-            style={{
-              backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`
-            }}
+            // style={{
+            //   backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`
+            // }}
             {...props}
           >
             {options.map((option) => (

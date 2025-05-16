@@ -1,7 +1,8 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useTheme } from '../../context/ThemeContext';
 import { useThemeColors } from '../../hooks/useThemeColors';
+import usePermissions from '../../hooks/usePermissions';
 
 interface StatCardProps {
   name: string;
@@ -26,6 +27,8 @@ const StatCard: React.FC<StatCardProps> = ({
 }) => {
   const { darkMode } = useTheme();
   const colors = useThemeColors();
+  const navigate = useNavigate();
+  const { hasPermission } = usePermissions();
 
   const getBackgroundColor = () => {
     return darkMode ? colors.cardBackground : 'white';
@@ -35,9 +38,45 @@ const StatCard: React.FC<StatCardProps> = ({
     return `border-${darkMode ? colors.border : '#e5e7eb'}`;
   };
 
+  // Handle click and check permissions
+  const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    
+    console.log(`StatCard: Trying to navigate to: ${path}`);
+    
+    // Check for required permissions based on path
+    let requiredPermission = null;
+    
+    if (path === '/organizations') {
+      requiredPermission = 'organization.view';
+    } else if (path === '/areas') {
+      requiredPermission = 'area.view';
+    } else if (path === '/devices') {
+      requiredPermission = 'device.view';
+    } else if (path === '/sensors') {
+      requiredPermission = 'sensor.view';
+    }
+    
+    if (requiredPermission) {
+      console.log(`StatCard: Checking permission: ${requiredPermission}`);
+      const hasAccess = hasPermission(requiredPermission);
+      console.log(`StatCard: Has access: ${hasAccess}`);
+      
+      if (!hasAccess) {
+        console.log(`StatCard: Permission denied for ${path}`);
+        alert(`You don't have permission to access ${name}. Required permission: ${requiredPermission}`);
+        return;
+      }
+    }
+    
+    // If we have permission or no permission check is needed, navigate
+    console.log(`StatCard: Navigating to ${path}`);
+    navigate(path);
+  };
+
   return (
-    <Link 
-      to={path}
+    <div 
+      onClick={handleClick}
       style={{
         display: 'flex',
         overflow: 'hidden',
@@ -52,6 +91,7 @@ const StatCard: React.FC<StatCardProps> = ({
         transform: 'translateY(0)',
         textDecoration: 'none',
         height: '100%',
+        cursor: 'pointer',
       }}
       onMouseOver={(e) => {
         e.currentTarget.style.boxShadow = darkMode 
@@ -119,7 +159,7 @@ const StatCard: React.FC<StatCardProps> = ({
           </div>
         </div>
       </div>
-    </Link>
+    </div>
   );
 };
 

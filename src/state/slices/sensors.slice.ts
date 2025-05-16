@@ -46,6 +46,17 @@ export const fetchSensorsByAreaId = createAsyncThunk(
   }
 );
 
+export const fetchSensorsByOrganizationId = createAsyncThunk(
+  'sensors/fetchByOrganizationId',
+  async (organizationId: number, { rejectWithValue }) => {
+    try {
+      return await sensorsService.getSensorsByOrganizationId(organizationId);
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch sensors by organization');
+    }
+  }
+);
+
 export const createSensor = createAsyncThunk(
   'sensors/create',
   async (sensorData: SensorCreateRequest, { rejectWithValue }) => {
@@ -103,6 +114,20 @@ const sensorsSlice = createSlice({
       state.sensors = action.payload;
     });
     builder.addCase(fetchSensors.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload as string;
+    });
+
+    // Fetch Sensors By Organization ID
+    builder.addCase(fetchSensorsByOrganizationId.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+    });
+    builder.addCase(fetchSensorsByOrganizationId.fulfilled, (state, action) => {
+      state.loading = false;
+      state.sensors = action.payload;
+    });
+    builder.addCase(fetchSensorsByOrganizationId.rejected, (state, action) => {
       state.loading = false;
       state.error = action.payload as string;
     });

@@ -1,5 +1,6 @@
 import apiClient from './api/apiClient';
 import type { Organization, OrganizationCreateRequest, OrganizationUpdateRequest, OrganizationFilterParams } from '../types/organization';
+import { store } from '../state/store';
 
 /**
  * Get all organizations with optional filters
@@ -13,7 +14,11 @@ export const getOrganizations = async (params?: OrganizationFilterParams) => {
  * Get organization by ID
  */
 export const getOrganizationById = async (id: number) => {
-  const response = await apiClient.get(`/organizations/${id}`);
+  const state = store.getState();
+  const organizationId = id;
+  const response = await apiClient.get(`/organizations/${id}`, {
+    params: { organizationId }
+  });
   return response.data.data.organization;
 };
 
@@ -29,7 +34,10 @@ export const createOrganization = async (organizationData: OrganizationCreateReq
  * Update organization
  */
 export const updateOrganization = async (id: number, organizationData: OrganizationUpdateRequest) => {
-  const response = await apiClient.patch(`/organizations/${id}`, organizationData);
+  const organizationId = id;
+  const response = await apiClient.patch(`/organizations/${id}`, organizationData, {
+    params: { organizationId }
+  });
   return response.data.data.organization;
 };
 
@@ -37,7 +45,10 @@ export const updateOrganization = async (id: number, organizationData: Organizat
  * Delete organization
  */
 export const deleteOrganization = async (id: number) => {
-  const response = await apiClient.delete(`/organizations/${id}`);
+  const organizationId = id;
+  const response = await apiClient.delete(`/organizations/${id}`, {
+    params: { organizationId }
+  });
   return response.data;
 };
 

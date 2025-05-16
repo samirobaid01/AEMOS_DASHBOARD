@@ -40,6 +40,7 @@ const SensorForm: React.FC<SensorFormProps> = ({
   const safeAreas = Array.isArray(areas) ? areas : [];
 
   const [formData, setFormData] = React.useState<SensorCreateRequest | SensorUpdateRequest>({
+    organizationId: 0,
     name: sensor?.name || '',
     areaId: sensor?.areaId || (safeAreas.length > 0 ? safeAreas[0].id : 0),
     type: sensor?.type || '',
@@ -295,10 +296,10 @@ const SensorForm: React.FC<SensorFormProps> = ({
         <div style={formStyle}>
           <div style={headerStyle}>
             <h2 style={headerTitleStyle}>
-              {isEditMode ? t('edit_sensor') : t('add_sensor')}
+              {isEditMode ? t('sensors.edit') : t('sensors.add')}
             </h2>
             <p style={headerDescriptionStyle}>
-              {isEditMode ? t('edit_sensor_description') : t('add_sensor_description')}
+              {isEditMode ? t('sensors.editSensorDescription') : t('sensors.addSensorDescription')}
             </p>
           </div>
 
@@ -312,7 +313,7 @@ const SensorForm: React.FC<SensorFormProps> = ({
             <div style={{ ...fieldGroupStyle, display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '1rem' }}>
               <div>
                 <label htmlFor="name" style={labelStyle}>
-                  {t('sensor_name')} <span style={{ color: darkMode ? '#ef5350' : '#ef4444' }}>*</span>
+                  {t('sensors.name')} <span style={{ color: darkMode ? '#ef5350' : '#ef4444' }}>*</span>
                 </label>
                 <input
                   type="text"
@@ -335,7 +336,7 @@ const SensorForm: React.FC<SensorFormProps> = ({
 
               <div>
                 <label htmlFor="type" style={labelStyle}>
-                  {t('sensor_type')} <span style={{ color: darkMode ? '#ef5350' : '#ef4444' }}>*</span>
+                  {t('sensors.type')} <span style={{ color: darkMode ? '#ef5350' : '#ef4444' }}>*</span>
                 </label>
                 <input
                   type="text"
@@ -359,7 +360,7 @@ const SensorForm: React.FC<SensorFormProps> = ({
 
             <div style={fieldGroupStyle}>
               <label htmlFor="areaId" style={labelStyle}>
-                {t('area')} <span style={{ color: darkMode ? '#ef5350' : '#ef4444' }}>*</span>
+                {t('sensors.area')} <span style={{ color: darkMode ? '#ef5350' : '#ef4444' }}>*</span>
               </label>
               <select
                 id="areaId"
@@ -378,7 +379,7 @@ const SensorForm: React.FC<SensorFormProps> = ({
                 }}
               >
                 <option value="" disabled>
-                  {t('select_area')}
+                  {t('sensors.selectArea')}
                 </option>
                 {Array.isArray(safeAreas) ? safeAreas.map((area) => (
                   <option key={area.id} value={area.id}>
@@ -399,14 +400,14 @@ const SensorForm: React.FC<SensorFormProps> = ({
                   style={checkboxStyle}
                 />
                 <label htmlFor="status" style={{ fontSize: '0.875rem', color: darkMode ? colors.textSecondary : '#374151' }}>
-                  {t('active_sensor')}
+                  {t('sensors.active')}
                 </label>
               </div>
             </div>
 
             <div style={fieldGroupStyle}>
               <label htmlFor="description" style={labelStyle}>
-                {t('description')}
+                {t('sensors.description')}
               </label>
               <textarea
                 id="description"
@@ -426,7 +427,7 @@ const SensorForm: React.FC<SensorFormProps> = ({
             </div>
 
             <div style={fieldGroupStyle}>
-              <label style={labelStyle}>{t('metadata')}</label>
+              <label style={labelStyle}>{t('sensors.metadata')}</label>
               
               {Object.entries(formData.metadata || {}).map(([key, value], index) => (
                 <div key={index} style={metadataItemStyle}>
@@ -491,7 +492,7 @@ const SensorForm: React.FC<SensorFormProps> = ({
                   e.currentTarget.style.backgroundColor = darkMode ? '#4d7efa' : '#3b82f6';
                 }}
               >
-                {t('add_metadata')}
+                {t('sensors.addMetadata')}
               </button>
             </div>
 
@@ -507,7 +508,7 @@ const SensorForm: React.FC<SensorFormProps> = ({
                   e.currentTarget.style.backgroundColor = darkMode ? colors.surfaceBackground : 'white';
                 }}
               >
-                {t('cancel')}
+                {t('common.cancel')}
               </button>
               <button
                 type="submit"
@@ -527,8 +528,8 @@ const SensorForm: React.FC<SensorFormProps> = ({
                     ? t('updating')
                     : t('creating')
                   : isEditMode
-                  ? t('update_sensor')
-                  : t('create_sensor')
+                  ? t('common.update')
+                  : t('common.create_new')
                 }
               </button>
             </div>
