@@ -1,11 +1,13 @@
 import apiClient from './api/apiClient';
 import type { Device, DeviceCreateRequest, DeviceUpdateRequest, DeviceFilterParams } from '../types/device';
+import { withOrganizationId } from './api/organizationContext';
 
 /**
  * Get all devices with optional filters
  */
 export const getDevices = async (params?: DeviceFilterParams) => {
-  const response = await apiClient.get('/devices', { params });
+  const enhancedParams = withOrganizationId(params);
+  const response = await apiClient.get('/devices', { params: enhancedParams });
   return response.data.data.devices;
 };
 
@@ -13,7 +15,8 @@ export const getDevices = async (params?: DeviceFilterParams) => {
  * Get device by ID
  */
 export const getDeviceById = async (id: number) => {
-  const response = await apiClient.get(`/devices/${id}`);
+  const params = withOrganizationId();
+  const response = await apiClient.get(`/devices/${id}`, { params });
   console.log("Full API response:", response);
   console.log("Device response data:", response.data);
   
@@ -43,7 +46,8 @@ export const getDeviceById = async (id: number) => {
  * Create new device
  */
 export const createDevice = async (deviceData: DeviceCreateRequest) => {
-  const response = await apiClient.post('/devices', deviceData);
+  const params = withOrganizationId();
+  const response = await apiClient.post('/devices', deviceData, { params });
   return response.data.data.device;
 };
 
@@ -51,7 +55,8 @@ export const createDevice = async (deviceData: DeviceCreateRequest) => {
  * Update device
  */
 export const updateDevice = async (id: number, deviceData: DeviceUpdateRequest) => {
-  const response = await apiClient.patch(`/devices/${id}`, deviceData);
+  const params = withOrganizationId();
+  const response = await apiClient.patch(`/devices/${id}`, deviceData, { params });
   return response.data.data.device;
 };
 
@@ -59,7 +64,8 @@ export const updateDevice = async (id: number, deviceData: DeviceUpdateRequest) 
  * Delete device
  */
 export const deleteDevice = async (id: number) => {
-  const response = await apiClient.delete(`/devices/${id}`);
+  const params = withOrganizationId();
+  const response = await apiClient.delete(`/devices/${id}`, { params });
   return response.data;
 };
 
@@ -67,7 +73,8 @@ export const deleteDevice = async (id: number) => {
  * Get devices by organization ID
  */
 export const getDevicesByOrganizationId = async (organizationId: number) => {
-  const response = await apiClient.get('/devices', { params: { organizationId } });
+  const params = { organizationId };
+  const response = await apiClient.get('/devices', { params });
   return response.data.data.devices;
 };
 

@@ -13,11 +13,13 @@ import { fetchAreas, selectAreas } from '../../state/slices/areas.slice';
 import type { SensorUpdateRequest } from '../../types/sensor';
 import SensorForm from '../../components/sensors/SensorForm';
 import LoadingScreen from '../../components/common/Loading/LoadingScreen';
+import { selectSelectedOrganization } from '../../state/slices/organizations.slice';
 
 const SensorEdit = () => {
   const { id } = useParams<{ id: string }>();
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
+  const organization = useSelector(selectSelectedOrganization);
   const sensor = useSelector(selectSelectedSensor);
   const areas = useSelector(selectAreas) || [];
   const isLoading = useSelector(selectSensorsLoading);
@@ -46,7 +48,12 @@ const SensorEdit = () => {
   // Handle form submission
   const handleSubmit = async (data: SensorUpdateRequest) => {
     if (!id) return;
-    
+    if(organization) {
+      data.organizationId = parseInt(organization.id.toString(), 10);
+    } else {
+      return;
+    }
+    console.log('sensor edit data', data);
     // Ensure required fields are set
     if (!data.name || !data.type) {
       return;

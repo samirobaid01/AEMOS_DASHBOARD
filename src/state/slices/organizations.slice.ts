@@ -78,20 +78,24 @@ const organizationsSlice = createSlice({
       state.selectedOrganization = null;
     },
     setSelectedOrganization: (state, action: PayloadAction<Organization>) => {
+      console.log('Organizations Slice: setSelectedOrganization action received', action.payload);
       state.selectedOrganization = action.payload;
     },
   },
   extraReducers: (builder) => {
     // Fetch Organizations
     builder.addCase(fetchOrganizations.pending, (state) => {
+      console.log('Organizations: Fetch pending');
       state.loading = true;
       state.error = null;
     });
     builder.addCase(fetchOrganizations.fulfilled, (state, action) => {
+      console.log('Organizations: Fetch fulfilled', action.payload);
       state.loading = false;
       state.organizations = action.payload;
     });
     builder.addCase(fetchOrganizations.rejected, (state, action) => {
+      console.log('Organizations: Fetch rejected', action.payload);
       state.loading = false;
       state.error = action.payload as string;
     });

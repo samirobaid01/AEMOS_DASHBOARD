@@ -15,6 +15,7 @@ import StatCard from '../../components/dashboard/StatCard';
 import EntityList from '../../components/dashboard/EntityList';
 import DashboardHeader from '../../components/dashboard/DashboardHeader';
 import DashboardWalkthrough from '../../components/dashboard/DashboardWalkthrough';
+import AdminTools from '../../components/dashboard/AdminTools';
 
 const Dashboard = () => {
   const { t } = useTranslation();
@@ -139,6 +140,8 @@ const Dashboard = () => {
       color: darkMode ? colors.textPrimary : 'inherit'
     }}>
       <DashboardHeader title={t('dashboard.title')} />
+      
+      <AdminTools />
       
       <div style={{ 
         display: 'grid',

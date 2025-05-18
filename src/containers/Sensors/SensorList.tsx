@@ -2,16 +2,17 @@ import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import type { AppDispatch } from '../../state/store';
-import { fetchSensors, selectSensors, selectSensorsLoading, selectSensorsError } from '../../state/slices/sensors.slice';
+import { fetchSensors, selectSensors, selectSensorsLoading, selectSensorsError, fetchSensorsByOrganizationId } from '../../state/slices/sensors.slice';
 import LoadingScreen from '../../components/common/Loading/LoadingScreen';
 import SensorListComponent from '../../components/sensors/SensorList';
 import type { Sensor } from '../../types/sensor';
-
+import { selectSelectedOrganizationId } from '../../state/slices/auth.slice';
 const SensorList = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const sensors = useSelector(selectSensors) || [];
   const isLoading = useSelector(selectSensorsLoading);
+  const selectedOrganizationId = useSelector(selectSelectedOrganizationId);
   const error = useSelector(selectSensorsError);
   const [searchTerm, setSearchTerm] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('');
@@ -29,10 +30,20 @@ const SensorList = () => {
   
   // Fetch sensors
   useEffect(() => {
-    dispatch(fetchSensors());
-    console.log("viewing sensors list");
-    console.log(sensors.length);
-  }, [dispatch]);
+    console.log('SensorList selectedOrganizationId', selectedOrganizationId);
+    if(selectedOrganizationId){
+      dispatch(fetchSensorsByOrganizationId(parseInt(selectedOrganizationId.toString(), 10)));
+    }else{
+      dispatch(fetchSensors());
+    }
+  }, [dispatch, selectedOrganizationId]);
+  
+  // Log sensors when they update
+  useEffect(() => {
+    if (sensors.length > 0) {
+      console.log("Sensors updated:", sensors.length);
+    }
+  }, [sensors]);
   
   // Filter sensors based on search term and type filter
   const filteredSensors = Array.isArray(sensors) 
@@ -64,7 +75,7 @@ const SensorList = () => {
   
   return (
     <SensorListComponent
-      sensors={filteredSensors}
+      sensors={sensors}
       isLoading={isLoading}
       error={error}
       searchTerm={searchTerm}

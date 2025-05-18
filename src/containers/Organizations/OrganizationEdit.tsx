@@ -22,6 +22,7 @@ const OrganizationEdit = () => {
   const error = useSelector(selectOrganizationsError);
   
   const [formData, setFormData] = useState<OrganizationUpdateRequest>({
+    organizationId: 0,
     name: '',
     status: true,
     detail: '',
@@ -44,6 +45,7 @@ const OrganizationEdit = () => {
   useEffect(() => {
     if (organization) {
       setFormData({
+        organizationId: organization.id,
         name: organization.name,
         status: organization.status,
         detail: organization.detail || '',
@@ -101,7 +103,7 @@ const OrganizationEdit = () => {
       const resultAction = await dispatch(
         updateOrganization({
           id: parseInt(id, 10),
-          organizationData: formData
+          organizationData: formData,
         })
       );
       

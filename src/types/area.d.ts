@@ -3,7 +3,7 @@ export interface Area {
   name: string;
   organizationId: number;
   description?: string;
-  status: boolean;
+  status: string;
   createdAt?: string;
   updatedAt?: string;
   organization?: {
@@ -16,14 +16,14 @@ export interface AreaCreateRequest {
   name: string;
   organizationId: number;
   description?: string;
-  status: boolean;
+  status: string;
 }
 
 export interface AreaUpdateRequest {
   name?: string;
-  organizationId?: number;
+  organizationId: number;
   description?: string;
-  status?: boolean;
+  status?: string;
 }
 
 export interface AreaState {
