@@ -10,6 +10,7 @@ import {
   deleteDevice
 } from '../../state/slices/devices.slice';
 import { fetchOrganizationById, selectSelectedOrganization } from '../../state/slices/organizations.slice';
+import { fetchAreaById, selectSelectedArea } from '../../state/slices/areas.slice';
 import DeviceDetailsComponent from '../../components/devices/DeviceDetails';
 
 const DeviceDetails = () => {
@@ -18,6 +19,7 @@ const DeviceDetails = () => {
   const navigate = useNavigate();
   const device = useSelector(selectSelectedDevice);
   const organization = useSelector(selectSelectedOrganization);
+  const area = useSelector(selectSelectedArea);
   const isLoading = useSelector(selectDevicesLoading);
   const error = useSelector(selectDevicesError);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -26,28 +28,18 @@ const DeviceDetails = () => {
   useEffect(() => {
     if (id) {
       const deviceId = parseInt(id, 10);
-      console.log("Fetching device with ID:", deviceId);
       dispatch(fetchDeviceById(deviceId));
     }
   }, [dispatch, id]);
 
   useEffect(() => {
-    console.log("Device updated:", device);
-    console.log("Missing fields check:", {
-      hasSerialNumber: Boolean(device?.serialNumber),
-      hasType: Boolean(device?.type),
-      hasOrganizationId: Boolean(device?.organizationId),
-    });
-    
     if (device?.organizationId) {
-      console.log("Fetching organization with ID:", device.organizationId);
       dispatch(fetchOrganizationById(device.organizationId));
     }
+    if (device?.areaId) {
+      dispatch(fetchAreaById(device.areaId));
+    }
   }, [dispatch, device]);
-
-  useEffect(() => {
-    console.log("Organization updated:", organization);
-  }, [organization]);
 
   const handleDelete = async () => {
     if (!id) return;
@@ -71,13 +63,18 @@ const DeviceDetails = () => {
   };
 
   const handleNavigateBack = () => {
-    navigate('/devices');
+    if (device?.organizationId) {
+      navigate(`/organizations/${device.organizationId}`);
+    } else {
+      navigate('/devices');
+    }
   };
 
   return (
     <DeviceDetailsComponent
       device={device}
       organization={organization}
+      area={area}
       isLoading={isLoading}
       error={error}
       isDeleting={isDeleting}

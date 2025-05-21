@@ -14,6 +14,7 @@ import { fetchAreas, selectAreas } from '../../state/slices/areas.slice';
 import type { DeviceUpdateRequest } from '../../types/device';
 import DeviceEditComponent from '../../components/devices/DeviceEdit';
 import { useTranslation } from 'react-i18next';
+import { ALLOWED_STATUSES } from '../../constants/device';
 
 const DeviceEdit = () => {
   const { id } = useParams<{ id: string }>();
@@ -28,18 +29,21 @@ const DeviceEdit = () => {
   
   const [formData, setFormData] = useState<DeviceUpdateRequest>({
     name: '',
-    type: '',
-    status: true,
-    firmware: '',
     description: '',
-    configuration: {},
-    areaId: 0,
+    status: 'pending',
+    deviceType: 'actuator',
+    controlType: 'binary',
+    minValue: null,
+    maxValue: null,
+    defaultState: '',
+    communicationProtocol: undefined,
+    isCritical: false,
+    metadata: {},
+    capabilities: {},
+    areaId: undefined,
+    controlModes: '',
     organizationId: 0
   });
-  
-  const [configFields, setConfigFields] = useState<{ key: string; value: string }[]>([
-    { key: '', value: '' }
-  ]);
   
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -56,25 +60,21 @@ const DeviceEdit = () => {
     if (device) {
       setFormData({
         name: device.name,
-        type: device.type,
+        description: device.description,
         status: device.status,
-        firmware: device.firmware || '',
-        description: device.description || '',
-        configuration: device.configuration || {},
-        areaId: device.areaId || 0,
-        organizationId: device.organizationId || 0
+        deviceType: device.deviceType,
+        controlType: device.controlType,
+        minValue: device.minValue,
+        maxValue: device.maxValue,
+        defaultState: device.defaultState,
+        communicationProtocol: device.communicationProtocol,
+        isCritical: device.isCritical,
+        metadata: device.metadata || {},
+        capabilities: device.capabilities || {},
+        areaId: device.areaId,
+        controlModes: device.controlModes || '',
+        organizationId: device.organizationId
       });
-      
-      // Convert configuration object to array for form fields
-      const configArray = Object.entries(device.configuration || {}).map(
-        ([key, value]) => ({ key, value: String(value) })
-      );
-      
-      if (configArray.length === 0) {
-        configArray.push({ key: '', value: '' });
-      }
-      
-      setConfigFields(configArray);
     }
   }, [device]);
   
@@ -89,18 +89,16 @@ const DeviceEdit = () => {
       return;
     }
     
-    // Handle numeric fields like organizationId and areaId
     if (name === 'organizationId' || name === 'areaId') {
       setFormData(prev => ({
         ...prev,
-        [name]: value ? parseInt(value, 10) : 0,
+        [name]: value ? parseInt(value, 10) : undefined,
       }));
       
-      // Reset areaId when organization changes
       if (name === 'organizationId') {
         setFormData(prev => ({
           ...prev,
-          areaId: 0
+          areaId: undefined
         }));
       }
       
@@ -112,46 +110,25 @@ const DeviceEdit = () => {
       [name]: value,
     }));
   };
-  
-  const handleConfigChange = (index: number, field: 'key' | 'value', value: string) => {
-    const updatedFields = [...configFields];
-    updatedFields[index][field] = value;
-    setConfigFields(updatedFields);
-    
-    // Update formData.configuration object
-    const configuration: Record<string, string> = {};
-    updatedFields.forEach(field => {
-      if (field.key.trim()) {
-        configuration[field.key] = field.value;
-      }
-    });
-    
+
+  const handleMetadataChange = (metadata: Record<string, any>) => {
     setFormData(prev => ({
       ...prev,
-      configuration
+      metadata
     }));
   };
-  
-  const addConfigField = () => {
-    setConfigFields([...configFields, { key: '', value: '' }]);
-  };
-  
-  const removeConfigField = (index: number) => {
-    const updatedFields = [...configFields];
-    updatedFields.splice(index, 1);
-    setConfigFields(updatedFields);
-    
-    // Update formData.configuration object
-    const configuration: Record<string, string> = {};
-    updatedFields.forEach(field => {
-      if (field.key.trim()) {
-        configuration[field.key] = field.value;
-      }
-    });
-    
+
+  const handleCapabilitiesChange = (capabilities: Record<string, any>) => {
     setFormData(prev => ({
       ...prev,
-      configuration
+      capabilities
+    }));
+  };
+
+  const handleControlModesChange = (modes: string[]) => {
+    setFormData(prev => ({
+      ...prev,
+      controlModes: modes.join(',')
     }));
   };
   
@@ -159,14 +136,17 @@ const DeviceEdit = () => {
     const errors: Record<string, string> = {};
     
     if (!formData.name?.trim()) {
-      errors.name = 'Name is required';
+      errors.name = t('name_required');
     }
     
-    if (!formData.type?.trim()) {
-      errors.type = 'Type is required';
+    if (!formData.deviceType) {
+      errors.deviceType = t('deviceType_required');
+    }
+
+    if (!formData.controlType) {
+      errors.controlType = t('controlType_required');
     }
     
-    // Add area validation if we have an organization selected
     if (formData.organizationId && !formData.areaId) {
       errors.areaId = t('devices.area_required');
     }
@@ -214,7 +194,6 @@ const DeviceEdit = () => {
     <DeviceEditComponent
       formData={formData}
       formErrors={formErrors}
-      configFields={configFields}
       isLoading={isLoading}
       isSubmitting={isSubmitting}
       error={error}
@@ -222,9 +201,9 @@ const DeviceEdit = () => {
       onCancel={handleCancel}
       onSubmit={handleSubmit}
       onChange={handleChange}
-      onConfigChange={handleConfigChange}
-      onAddConfigField={addConfigField}
-      onRemoveConfigField={removeConfigField}
+      onMetadataChange={handleMetadataChange}
+      onCapabilitiesChange={handleCapabilitiesChange}
+      onControlModesChange={handleControlModesChange}
       organizations={organizations}
       areas={areas}
     />

@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Device } from '../../types/device';
+import type { DeviceType } from '../../constants/device';
 import DeviceItem from './DeviceItem';
 import DeviceFilter from './DeviceFilter';
 import EmptyState from './EmptyState';
@@ -13,9 +14,9 @@ interface DeviceListProps {
   filteredDevices: Device[];
   searchTerm: string;
   setSearchTerm: (term: string) => void;
-  typeFilter: string;
-  setTypeFilter: (filter: string) => void;
-  deviceTypes: string[];
+  typeFilter: DeviceType | '';
+  setTypeFilter: (filter: DeviceType | '') => void;
+  deviceTypes: DeviceType[];
   onAddDevice: () => void;
   isLoading: boolean;
   error: string | null;
@@ -40,51 +41,67 @@ const DeviceList: React.FC<DeviceListProps> = ({
   const colors = useThemeColors();
   const isMobile = windowWidth < 768;
 
-  const headerStyle = {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: isMobile ? 'flex-start' : 'center',
-    flexDirection: isMobile ? 'column' as const : 'row' as const,
-    marginBottom: '1.5rem',
-    gap: isMobile ? '1rem' : '0'
-  };
-
-  const titleStyle = {
-    fontSize: '1.5rem',
-    fontWeight: 600,
-    color: darkMode ? colors.textPrimary : '#111827',
-    margin: 0,
-    fontFamily: 'system-ui, -apple-system, sans-serif'
-  };
-
-  const buttonStyle = {
-    padding: '0.5rem 1rem',
-    backgroundColor: darkMode ? '#4d7efa' : '#3b82f6',
-    color: 'white',
-    border: 'none',
-    borderRadius: '0.375rem',
-    fontSize: '0.875rem',
-    fontWeight: 500,
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    transition: 'all 0.2s',
-  };
-
   if (error) {
-    return <ErrorDisplay errorMessage={error} />;
+    return (
+      <div className="p-4 sm:p-6 lg:p-8">
+        <ErrorDisplay errorMessage={error} />
+      </div>
+    );
+  }
+
+  if (isLoading && devices.length === 0) {
+    return (
+      <div className="p-4 sm:p-6 lg:p-8">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/4 mb-4"></div>
+          <div className="space-y-3">
+            <div className="h-20 bg-gray-200 dark:bg-gray-700 rounded"></div>
+            <div className="h-20 bg-gray-200 dark:bg-gray-700 rounded"></div>
+            <div className="h-20 bg-gray-200 dark:bg-gray-700 rounded"></div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div style={{ 
+    <div style={{
       padding: isMobile ? '1rem' : '1.5rem 2rem',
       backgroundColor: darkMode ? colors.background : 'transparent'
     }}>
-      <div style={headerStyle}>
-        <h1 style={titleStyle}>{t('devices.title')}</h1>
+      <div style={{
+        display: 'flex',
+        flexDirection: isMobile ? 'column' as const : 'row' as const,
+        justifyContent: 'space-between',
+        alignItems: isMobile ? 'flex-start' : 'center',
+        marginBottom: '1.5rem',
+        gap: isMobile ? '1rem' : '0'
+      }}>
+        <h1 style={{
+          fontSize: '1.5rem',
+          fontWeight: 600,
+          color: darkMode ? colors.textPrimary : '#111827',
+          margin: 0
+        }}>
+          {t('devices.title')}
+        </h1>
         <button
           onClick={onAddDevice}
-          style={buttonStyle}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            padding: '0.5rem 1rem',
+            backgroundColor: darkMode ? '#4d7efa' : '#3b82f6',
+            color: 'white',
+            border: 'none',
+            borderRadius: '0.375rem',
+            fontSize: '0.875rem',
+            fontWeight: 500,
+            cursor: 'pointer',
+            transition: 'all 0.2s',
+            width: isMobile ? '100%' : 'auto',
+            justifyContent: 'center'
+          }}
           onMouseOver={(e) => {
             e.currentTarget.style.backgroundColor = darkMode ? '#5d8efa' : '#2563eb';
           }}
@@ -93,7 +110,7 @@ const DeviceList: React.FC<DeviceListProps> = ({
           }}
         >
           <svg 
-            style={{ width: '1rem', height: '1rem', marginRight: '0.375rem' }} 
+            style={{ width: '1rem', height: '1rem', marginRight: '0.375rem' }}
             fill="currentColor" 
             viewBox="0 0 20 20"
           >
@@ -118,13 +135,16 @@ const DeviceList: React.FC<DeviceListProps> = ({
 
       {filteredDevices.length === 0 ? (
         <EmptyState 
-          message={t('devices.noDevices')}
-          description={t('devices.no_devices_found_description')}
+          message={searchTerm || typeFilter ? t('devices.noDevicesFound') : t('devices.noDevices')}
+          description={searchTerm || typeFilter 
+            ? t('devices.noDevicesFoundWithFilters')
+            : t('devices.noDevicesDescription')
+          }
           actionLabel={t('devices.add')}
           onAddDevice={onAddDevice} 
         />
       ) : (
-        <div>
+        <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '1rem' }}>
           {filteredDevices.map(device => (
             <DeviceItem 
               key={device.id} 
