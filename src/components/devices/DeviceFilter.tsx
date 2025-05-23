@@ -118,7 +118,7 @@ const DeviceFilter: React.FC<DeviceFilterProps> = ({
           <option value="">{t('common.all')}</option>
           {deviceTypes.map((type) => (
             <option key={type} value={type}>
-              {t(`devices.types.${type}`)}
+              {type}
             </option>
           ))}
         </select>

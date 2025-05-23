@@ -5,6 +5,7 @@ import type {
   CommunicationProtocol,
   ControlMode 
 } from '../constants/device';
+import type { DeviceState as DeviceStateType } from '../state/slices/deviceDetails.slice';
 
 export interface Device {
   id: number;
@@ -26,6 +27,7 @@ export interface Device {
   controlModes?: string;
   createdAt: string;
   updatedAt: string;
+  states: DeviceStateType[];
 }
 
 export interface DeviceCreateRequest {

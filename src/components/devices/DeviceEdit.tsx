@@ -284,7 +284,7 @@ const DeviceEdit: React.FC<DeviceEditProps> = ({
                   <option value="">{t("devices.selectDeviceType")}</option>
                   {ALLOWED_DEVICE_TYPES.map(type => (
                     <option key={type} value={type}>
-                      {t(`devices.types.${type}`)}
+                      {type}
                     </option>
                   ))}
                 </select>

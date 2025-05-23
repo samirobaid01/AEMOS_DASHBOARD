@@ -3,13 +3,15 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import type { AppDispatch } from '../../state/store';
 import {
-  fetchDeviceById,
-  selectSelectedDevice,
-  selectDevicesLoading,
-  selectDevicesError,
-  deleteDevice
-} from '../../state/slices/devices.slice';
-import { fetchOrganizationById, selectSelectedOrganization } from '../../state/slices/organizations.slice';
+  fetchDeviceDetails,
+  updateDeviceState,
+  selectDeviceDetails,
+  selectDeviceDetailsLoading,
+  selectDeviceDetailsError,
+  clearDeviceDetails
+} from '../../state/slices/deviceDetails.slice';
+import { selectSelectedOrganization } from '../../state/slices/organizations.slice';
+import { selectSelectedOrganizationId } from '../../state/slices/auth.slice';
 import { fetchAreaById, selectSelectedArea } from '../../state/slices/areas.slice';
 import DeviceDetailsComponent from '../../components/devices/DeviceDetails';
 
@@ -17,42 +19,61 @@ const DeviceDetails = () => {
   const { id } = useParams<{ id: string }>();
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
-  const device = useSelector(selectSelectedDevice);
+  
+  const device = useSelector(selectDeviceDetails);
   const organization = useSelector(selectSelectedOrganization);
+  const organizationId = useSelector(selectSelectedOrganizationId);
   const area = useSelector(selectSelectedArea);
-  const isLoading = useSelector(selectDevicesLoading);
-  const error = useSelector(selectDevicesError);
+  const isLoading = useSelector(selectDeviceDetailsLoading);
+  const error = useSelector(selectDeviceDetailsError);
+  
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
-    if (id) {
-      const deviceId = parseInt(id, 10);
-      dispatch(fetchDeviceById(deviceId));
+    if (id && organizationId) {
+     dispatch(fetchDeviceDetails({ 
+        deviceId: parseInt(id, 10),
+        organizationId 
+      }));
     }
-  }, [dispatch, id]);
+    
+    return () => {
+      dispatch(clearDeviceDetails());
+    };
+  }, [dispatch, id, organizationId]);
 
+  // Fetch area data when device changes
   useEffect(() => {
-    if (device?.organizationId) {
-      dispatch(fetchOrganizationById(device.organizationId));
-    }
     if (device?.areaId) {
       dispatch(fetchAreaById(device.areaId));
     }
-  }, [dispatch, device]);
+  }, [dispatch, device?.areaId]);
+
+  const handleStateChange = async (stateId: number, value: string) => {
+    if (!id || !organizationId) return;
+    
+    try {
+      await dispatch(updateDeviceState({
+        deviceId: parseInt(id, 10),
+        stateId,
+        value,
+        organizationId
+      })).unwrap();
+    } catch (error) {
+      console.error('Error updating device state:', error);
+    }
+  };
 
   const handleDelete = async () => {
     if (!id) return;
     
     setIsDeleting(true);
     try {
-      const resultAction = await dispatch(deleteDevice(parseInt(id, 10)));
-      if (deleteDevice.fulfilled.match(resultAction)) {
-        if (device?.organizationId) {
-          navigate(`/organizations/${device.organizationId}`);
-        } else {
-          navigate('/devices');
-        }
+      if (organizationId) {
+        navigate(`/organizations/${organizationId}/devices`);
+      } else {
+        navigate('/devices');
       }
     } catch (error) {
       console.error('Error deleting device:', error);
@@ -63,8 +84,8 @@ const DeviceDetails = () => {
   };
 
   const handleNavigateBack = () => {
-    if (device?.organizationId) {
-      navigate(`/organizations/${device.organizationId}`);
+    if (organizationId) {
+      navigate(`/organizations/${organizationId}/devices`);
     } else {
       navigate('/devices');
     }
@@ -83,6 +104,7 @@ const DeviceDetails = () => {
       onOpenDeleteModal={() => setDeleteModalOpen(true)}
       onCloseDeleteModal={() => setDeleteModalOpen(false)}
       onNavigateBack={handleNavigateBack}
+      onStateChange={handleStateChange}
     />
   );
 };

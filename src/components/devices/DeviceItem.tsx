@@ -138,7 +138,7 @@ const DeviceItem: React.FC<DeviceItemProps> = ({ device, isMobile }) => {
               borderRadius: '9999px',
               display: 'inline-block'
             }}>
-              {t(`devices.types.${device.deviceType}`)}
+              {device.deviceType}
             </span>
 
             <span style={{
@@ -149,7 +149,7 @@ const DeviceItem: React.FC<DeviceItemProps> = ({ device, isMobile }) => {
               borderRadius: '9999px',
               display: 'inline-block'
             }}>
-              {t(`devices.controlTypes.${device.controlType}`)}
+              {device.controlType}
             </span>
 
             {device.communicationProtocol && (

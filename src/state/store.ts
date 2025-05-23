@@ -5,6 +5,7 @@ import areasReducer from './slices/areas.slice';
 import sensorsReducer from './slices/sensors.slice';
 import devicesReducer from './slices/devices.slice';
 import deviceStatesReducer from './slices/deviceStates.slice';
+import deviceDetailsReducer from './slices/deviceDetails.slice';
 // Import other reducers as they are created
 // import devicesReducer from './slices/devices.slice';
 
@@ -16,6 +17,7 @@ const rootReducer = {
   sensors: sensorsReducer,
   devices: devicesReducer,
   deviceStates: deviceStatesReducer,
+  deviceDetails: deviceDetailsReducer,
   // Add other reducers as they are created
   // devices: devicesReducer,
 };

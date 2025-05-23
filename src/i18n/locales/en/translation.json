@@ -231,7 +231,15 @@
     "controlType": "Control Type",
     "controlModes": "Control Modes",
     "capabilities": "Capabilities",
-    "metadata": "Metadata"
+    "metadata": "Metadata",
+    "statuses": {
+      "active": "Active",
+      "pending": "Pending",
+      "inactive": "Inactive",
+      "offline": "Offline",
+      "online": "Online",
+      "maintenance": "Maintenance"
+    }
   },
   "common": {
     "save": "Save",
