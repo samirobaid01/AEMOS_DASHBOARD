@@ -147,11 +147,7 @@ const DeviceCreateContainer = () => {
     try {
       const resultAction = await dispatch(createDevice(formData));
       if (createDevice.fulfilled.match(resultAction)) {
-        if (organizationId) {
-          navigate(`/organizations/${organizationId}`);
-        } else {
-          navigate('/devices');
-        }
+        return resultAction.payload;
       }
     } catch (error) {
       console.error('Error creating device:', error);
@@ -159,6 +155,14 @@ const DeviceCreateContainer = () => {
   };
 
   const handleCancel = () => {
+    if (organizationId) {
+      navigate(`/organizations/${organizationId}`);
+    } else {
+      navigate('/devices');
+    }
+  };
+
+  const handleComplete = () => {
     if (organizationId) {
       navigate(`/organizations/${organizationId}`);
     } else {
@@ -180,6 +184,7 @@ const DeviceCreateContainer = () => {
       onCapabilitiesChange={handleCapabilitiesChange}
       onControlModesChange={handleControlModesChange}
       onCancel={handleCancel}
+      onComplete={handleComplete}
     />
   );
 };

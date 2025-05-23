@@ -82,7 +82,7 @@ const DeviceFilter: React.FC<DeviceFilterProps> = ({
         <input
           id="deviceSearch"
           type="text"
-          placeholder={t('devices.search_placeholder')}
+          placeholder={t('devices.searchDevice')}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           style={inputStyle}

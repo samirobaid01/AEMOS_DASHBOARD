@@ -221,7 +221,17 @@
     "configKey": "Configuration Key",
     "configValue": "Configuration Value",
     "addField": "Add Field",
-    "areaRequired": "Area is required"
+    "areaRequired": "Area is required",
+    "searchDevice": "Search device",
+    "selectProtocol": "Select protocol",
+    "defaultState": "Default State",
+    "controlmode": "Control Mode",
+    "isCritical": "Is Critical",
+    "deviceType": "Device Type",
+    "controlType": "Control Type",
+    "controlModes": "Control Modes",
+    "capabilities": "Capabilities",
+    "metadata": "Metadata"
   },
   "common": {
     "save": "Save",
@@ -262,7 +272,8 @@
     "no_details": "No details",
     "permission_denied": "Permission Denied",
     "no_access_permission": "You don't have permission to access this resource.",
-    "go_to_dashboard": "Go to Dashboard"
+    "go_to_dashboard": "Go to Dashboard",
+    "addField": "Add Field"
   },
   "errors": {
     "notFound": "Page not found",

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { DeviceCreateRequest } from "../../types/device";
 import type { Organization } from "../../types/organization";
@@ -17,6 +17,9 @@ import {
   METADATA_SUGGESTED_KEYS,
   CAPABILITIES_SUGGESTED_KEYS
 } from "../../constants/device";
+import { useDispatch, useSelector } from 'react-redux';
+import { createDeviceState, selectDeviceStatesLoading, selectDeviceStatesError } from '../../state/slices/deviceStates.slice';
+import type { AppDispatch } from '../../state/store';
 
 interface DeviceCreateProps {
   formData: DeviceCreateRequest;
@@ -25,7 +28,7 @@ interface DeviceCreateProps {
   error: string | null;
   organizations: Organization[];
   areas: Area[];
-  onSubmit: (e: React.FormEvent) => void;
+  onSubmit: (e: React.FormEvent) => Promise<{ id: number } | undefined>;
   onChange: (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => void;
@@ -33,6 +36,16 @@ interface DeviceCreateProps {
   onCapabilitiesChange: (capabilities: Record<string, any>) => void;
   onControlModesChange: (modes: string[]) => void;
   onCancel: () => void;
+  onComplete?: () => void;
+}
+
+const ALLOWED_DATA_TYPES = ['string', 'number', 'boolean', 'array', 'object'];
+
+interface DeviceState {
+  stateName: string;
+  dataType: string;
+  defaultValue: string;
+  allowedValues: string[];
 }
 
 const DeviceCreate: React.FC<DeviceCreateProps> = ({
@@ -48,11 +61,24 @@ const DeviceCreate: React.FC<DeviceCreateProps> = ({
   onCapabilitiesChange,
   onControlModesChange,
   onCancel,
+  onComplete,
 }) => {
   const { t } = useTranslation();
   const { darkMode } = useTheme();
   const colors = useThemeColors();
+  const dispatch = useDispatch<AppDispatch>();
+  const statesLoading = useSelector(selectDeviceStatesLoading);
+  const statesError = useSelector(selectDeviceStatesError);
   const isMobile = window.innerWidth < 768;
+
+  const [showStateForm, setShowStateForm] = useState(false);
+  const [createdDeviceId, setCreatedDeviceId] = useState<number | null>(null);
+  const [deviceState, setDeviceState] = useState<DeviceState>({
+    stateName: '',
+    dataType: '',
+    defaultValue: '',
+    allowedValues: ['']
+  });
 
   const formStyle = {
     backgroundColor: darkMode ? colors.cardBackground : 'white',
@@ -186,6 +212,47 @@ const DeviceCreate: React.FC<DeviceCreateProps> = ({
     onControlModesChange(selectedModes);
   };
 
+  const handleDeviceSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const result = await onSubmit(e);
+    if (result?.id) {
+      setCreatedDeviceId(result.id);
+      setShowStateForm(true);
+    }
+  };
+
+  const handleStateSubmit = async () => {
+    if (!createdDeviceId) return;
+
+    try {
+      await dispatch(createDeviceState({
+        deviceId: createdDeviceId,
+        state: deviceState
+      })).unwrap();
+
+      // Reset form
+      setDeviceState({
+        stateName: '',
+        dataType: '',
+        defaultValue: '',
+        allowedValues: ['']
+      });
+    } catch (error) {
+      console.error('Error creating device state:', error);
+    }
+  };
+
+  const handleFinish = async () => {
+    if (!createdDeviceId) return;
+
+    try {
+      await handleStateSubmit();
+      onComplete?.();
+    } catch (error) {
+      console.error('Error finishing device creation:', error);
+    }
+  };
+
   return (
     <div style={{ 
       padding: isMobile ? '1rem' : '1.5rem 2rem',
@@ -202,7 +269,7 @@ const DeviceCreate: React.FC<DeviceCreateProps> = ({
             </p>
           </div>
 
-          <form onSubmit={onSubmit} style={bodyStyle}>
+          <form onSubmit={handleDeviceSubmit} style={bodyStyle}>
             {error && (
               <div style={{
                 backgroundColor: darkMode ? colors.dangerBackground : '#fee2e2',
@@ -260,7 +327,7 @@ const DeviceCreate: React.FC<DeviceCreateProps> = ({
                   <option value="">{t("devices.selectDeviceType")}</option>
                   {ALLOWED_DEVICE_TYPES.map(type => (
                     <option key={type} value={type}>
-                      {t(`devices.types.${type}`)}
+                      {type}
                     </option>
                   ))}
                 </select>
@@ -296,7 +363,7 @@ const DeviceCreate: React.FC<DeviceCreateProps> = ({
                   <option value="">{t("devices.selectControlType")}</option>
                   {ALLOWED_CONTROL_TYPES.map(type => (
                     <option key={type} value={type}>
-                      {t(`devices.controlTypes.${type}`)}
+                      {type}
                     </option>
                   ))}
                 </select>
@@ -313,7 +380,7 @@ const DeviceCreate: React.FC<DeviceCreateProps> = ({
 
               <div style={fieldGroupStyle}>
                 <label htmlFor="communicationProtocol" style={labelStyle}>
-                  {t("devices.protocol")}
+                  {t("devices.selectProtocol")}
                 </label>
                 <select
                   id="communicationProtocol"
@@ -325,7 +392,7 @@ const DeviceCreate: React.FC<DeviceCreateProps> = ({
                   <option value="">{t("devices.selectProtocol")}</option>
                   {ALLOWED_PROTOCOLS.map(protocol => (
                     <option key={protocol} value={protocol}>
-                      {t(`devices.protocols.${protocol}`)}
+                      {protocol}
                     </option>
                   ))}
                 </select>
@@ -351,7 +418,7 @@ const DeviceCreate: React.FC<DeviceCreateProps> = ({
                 >
                   {ALLOWED_STATUSES.map(status => (
                     <option key={status} value={status}>
-                      {t(`devices.statuses.${status}`)}
+                      {status}
                     </option>
                   ))}
                 </select>
@@ -534,7 +601,7 @@ const DeviceCreate: React.FC<DeviceCreateProps> = ({
               >
                 {CONTROL_MODES.map(mode => (
                   <option key={mode} value={mode}>
-                    {t(`devices.modes.${mode}`)}
+                    {mode}
                   </option>
                 ))}
               </select>
@@ -620,12 +687,191 @@ const DeviceCreate: React.FC<DeviceCreateProps> = ({
                   }
                 }}
               >
-                {isLoading ? t("creating") : t("create")}
+                {isLoading ? t("creating") : t("next")}
               </button>
             </div>
           </form>
         </div>
       </div>
+
+      {showStateForm && (
+        <>
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            zIndex: 1000
+          }} onClick={() => setShowStateForm(false)} />
+          <div style={{
+            position: 'fixed',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            backgroundColor: darkMode ? colors.cardBackground : 'white',
+            padding: '2rem',
+            borderRadius: '0.5rem',
+            width: isMobile ? '90%' : '40%',
+            zIndex: 1001
+          }}>
+            <h3 style={{
+              fontSize: '1.25rem',
+              fontWeight: 600,
+              color: darkMode ? colors.textPrimary : '#111827',
+              marginBottom: '1.5rem'
+            }}>
+              {t("devices.addState")}
+            </h3>
+
+            {statesError && (
+              <div style={{
+                backgroundColor: darkMode ? colors.dangerBackground : '#fee2e2',
+                color: darkMode ? colors.dangerText : '#b91c1c',
+                padding: '0.75rem',
+                borderRadius: '0.375rem',
+                fontSize: '0.875rem',
+                marginBottom: '1.5rem'
+              }}>
+                {statesError}
+              </div>
+            )}
+
+            <div style={fieldGroupStyle}>
+              <label htmlFor="stateName" style={labelStyle}>
+                {t("devices.stateName")}
+              </label>
+              <input
+                type="text"
+                id="stateName"
+                value={deviceState.stateName}
+                onChange={(e) => setDeviceState(prev => ({ ...prev, stateName: e.target.value }))}
+                style={inputStyle}
+              />
+            </div>
+
+            <div style={fieldGroupStyle}>
+              <label htmlFor="dataType" style={labelStyle}>
+                {t("devices.dataType")}
+              </label>
+              <select
+                id="dataType"
+                value={deviceState.dataType}
+                onChange={(e) => setDeviceState(prev => ({ ...prev, dataType: e.target.value }))}
+                style={selectStyle}
+              >
+                <option value="">{t("devices.selectDataType")}</option>
+                {ALLOWED_DATA_TYPES.map(type => (
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div style={fieldGroupStyle}>
+              <label htmlFor="defaultValue" style={labelStyle}>
+                {t("devices.defaultValue")}
+              </label>
+              <input
+                type="text"
+                id="defaultValue"
+                value={deviceState.defaultValue}
+                onChange={(e) => setDeviceState(prev => ({ ...prev, defaultValue: e.target.value }))}
+                style={inputStyle}
+              />
+            </div>
+
+            <div style={fieldGroupStyle}>
+              <label style={labelStyle}>
+                {t("devices.allowedValues")}
+              </label>
+              {deviceState.allowedValues.map((value, index) => (
+                <div key={index} style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                  <input
+                    type="text"
+                    value={value}
+                    onChange={(e) => {
+                      const allowedValues = deviceState.allowedValues.map((v, i) => i === index ? e.target.value : v);
+                      setDeviceState(prev => ({ ...prev, allowedValues }));
+                    }}
+                    style={{ ...inputStyle, flex: 1 }}
+                  />
+                  {deviceState.allowedValues.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const allowedValues = deviceState.allowedValues.filter((_, i) => i !== index);
+                        setDeviceState(prev => ({ ...prev, allowedValues }));
+                      }}
+                      style={{
+                        padding: '0.5rem',
+                        backgroundColor: darkMode ? colors.dangerBackground : '#fee2e2',
+                        color: darkMode ? colors.dangerText : '#b91c1c',
+                        border: 'none',
+                        borderRadius: '0.375rem',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      ×
+                    </button>
+                  )}
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={() => {
+                  setDeviceState(prev => ({ ...prev, allowedValues: [...prev.allowedValues, ''] }));
+                }}
+                style={{
+                  ...buttonStyle('secondary'),
+                  width: 'auto',
+                  padding: '0.25rem 0.5rem',
+                  marginTop: '0.5rem'
+                }}
+              >
+                + {t("devices.addAllowedValue")}
+              </button>
+            </div>
+
+            <div style={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              gap: '0.75rem',
+              marginTop: '2rem'
+            }}>
+              <button
+                type="button"
+                onClick={() => setShowStateForm(false)}
+                style={buttonStyle('secondary')}
+              >
+                {t("cancel")}
+              </button>
+              <button
+                type="button"
+                onClick={handleStateSubmit}
+                disabled={statesLoading}
+                style={buttonStyle('primary')}
+              >
+                {statesLoading ? t("devices.adding") : t("devices.addState")}
+              </button>
+              <button
+                type="button"
+                onClick={handleFinish}
+                disabled={statesLoading}
+                style={{
+                  ...buttonStyle('primary'),
+                  backgroundColor: darkMode ? colors.successBackground : '#dcfce7',
+                  color: darkMode ? colors.successText : '#166534'
+                }}
+              >
+                {statesLoading ? t("devices.finishing") : t("devices.finish")}
+              </button>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };

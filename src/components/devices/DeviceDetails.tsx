@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import LoadingScreen from '../common/Loading/LoadingScreen';
@@ -8,6 +9,8 @@ import type { Area } from '../../types/area';
 import type { DeviceStatus } from '../../constants/device';
 import { useTheme } from '../../context/ThemeContext';
 import { useThemeColors } from '../../hooks/useThemeColors';
+import { fetchDeviceStates, selectDeviceStates, selectDeviceStatesLoading, selectDeviceStatesError } from '../../state/slices/deviceStates.slice';
+import type { AppDispatch } from '../../state/store';
 
 interface DeviceDetailsProps {
   device: Device | null;
@@ -21,6 +24,16 @@ interface DeviceDetailsProps {
   onOpenDeleteModal: () => void;
   onCloseDeleteModal: () => void;
   onNavigateBack: () => void;
+}
+
+interface DeviceState {
+  id: number;
+  stateName: string;
+  dataType: string;
+  defaultValue: string;
+  allowedValues: string[];
+  createdAt: string;
+  updatedAt: string;
 }
 
 const DeviceDetails: React.FC<DeviceDetailsProps> = ({
@@ -39,6 +52,10 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({
   const { t } = useTranslation();
   const { darkMode } = useTheme();
   const colors = useThemeColors();
+  const dispatch = useDispatch<AppDispatch>();
+  const deviceStates = useSelector(selectDeviceStates);
+  const statesLoading = useSelector(selectDeviceStatesLoading);
+  const statesError = useSelector(selectDeviceStatesError);
   const isMobile = window.innerWidth < 768;
 
   const containerStyle = {
@@ -221,6 +238,12 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({
     justifyContent: 'center',
     marginBottom: '1rem'
   };
+
+  useEffect(() => {
+    if (device?.id && device?.organizationId) {
+      dispatch(fetchDeviceStates({ deviceId: device.id, organizationId: device.organizationId }));
+    }
+  }, [dispatch, device?.id, device?.organizationId]);
 
   if (isLoading) {
     return <LoadingScreen />;
@@ -573,6 +596,99 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({
                   </div>
                 ))}
               </div>
+            </div>
+          )}
+
+          {/* Device States */}
+          {(deviceStates.length > 0 || statesLoading || statesError) && (
+            <div style={sectionStyle}>
+              <h3 style={sectionTitleStyle}>{t('devices.states')}</h3>
+              
+              {statesLoading ? (
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  padding: '2rem'
+                }}>
+                  <div style={{
+                    border: '4px solid',
+                    borderColor: `${darkMode ? colors.border : '#e5e7eb'} transparent ${darkMode ? colors.border : '#e5e7eb'} transparent`,
+                    borderRadius: '50%',
+                    width: '2rem',
+                    height: '2rem',
+                    animation: 'spin 1s linear infinite'
+                  }} />
+                </div>
+              ) : statesError ? (
+                <div style={{
+                  backgroundColor: darkMode ? colors.dangerBackground : '#fee2e2',
+                  color: darkMode ? colors.dangerText : '#b91c1c',
+                  padding: '0.75rem',
+                  borderRadius: '0.375rem',
+                  fontSize: '0.875rem'
+                }}>
+                  {statesError}
+                </div>
+              ) : (
+                <div style={gridStyle}>
+                  {deviceStates.map(state => (
+                    <div key={state.id} style={{
+                      backgroundColor: darkMode ? colors.surfaceBackground : '#f9fafb',
+                      borderRadius: '0.5rem',
+                      padding: '1rem',
+                      border: `1px solid ${darkMode ? colors.border : '#e5e7eb'}`
+                    }}>
+                      <div style={{ marginBottom: '0.5rem' }}>
+                        <p style={labelStyle}>{t('devices.stateName')}</p>
+                        <p style={valueStyle}>{state.stateName}</p>
+                      </div>
+
+                      <div style={{ marginBottom: '0.5rem' }}>
+                        <p style={labelStyle}>{t('devices.dataType')}</p>
+                        <p style={valueStyle}>
+                          <span style={{
+                            display: 'inline-block',
+                            padding: '0.25rem 0.75rem',
+                            backgroundColor: darkMode ? colors.infoBackground : '#dbeafe',
+                            color: darkMode ? colors.infoText : '#1e40af',
+                            borderRadius: '9999px',
+                            fontSize: '0.75rem'
+                          }}>
+                            {state.dataType}
+                          </span>
+                        </p>
+                      </div>
+
+                      <div style={{ marginBottom: '0.5rem' }}>
+                        <p style={labelStyle}>{t('devices.defaultValue')}</p>
+                        <p style={valueStyle}>{state.defaultValue}</p>
+                      </div>
+
+                      <div>
+                        <p style={labelStyle}>{t('devices.allowedValues')}</p>
+                        <div style={{
+                          display: 'flex',
+                          flexWrap: 'wrap' as const,
+                          gap: '0.5rem'
+                        }}>
+                          {state.allowedValues.map((value, index) => (
+                            <span key={index} style={{
+                              display: 'inline-block',
+                              padding: '0.25rem 0.75rem',
+                              backgroundColor: darkMode ? colors.successBackground : '#dcfce7',
+                              color: darkMode ? colors.successText : '#166534',
+                              borderRadius: '9999px',
+                              fontSize: '0.75rem'
+                            }}>
+                              {value}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>
