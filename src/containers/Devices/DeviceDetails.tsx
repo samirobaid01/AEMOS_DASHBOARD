@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import type { AppDispatch, RootState } from '../../state/store';
@@ -11,6 +11,7 @@ import {
   clearDeviceDetails,
   updateDeviceStateLocally
 } from '../../state/slices/deviceDetails.slice';
+import { createDeviceStateInstance } from '../../state/slices/deviceStateInstances.slice';
 import { selectSelectedOrganization } from '../../state/slices/organizations.slice';
 import { selectSelectedOrganizationId } from '../../state/slices/auth.slice';
 import { fetchAreaById, selectSelectedArea } from '../../state/slices/areas.slice';
@@ -18,6 +19,14 @@ import DeviceDetailsComponent from '../../components/devices/DeviceDetails';
 import { io } from 'socket.io-client';
 import type { DeviceStateNotification } from '../../hooks/useDeviceStateSocket';
 import { API_URL } from '../../config';
+
+interface SelectedState {
+  id: number;
+  name: string;
+  value: string;
+  defaultValue: string;
+  allowedValues: string[];
+}
 
 const DeviceDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -37,6 +46,8 @@ const DeviceDetails = () => {
   const socketRef = useRef<any>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [socketError, setSocketError] = useState<Error | null>(null);
+  const [selectedState, setSelectedState] = useState<SelectedState | null>(null);
+  const [isStateUpdating, setIsStateUpdating] = useState(false);
 
   // Handle notifications
   const handleNotification = useCallback((notification: DeviceStateNotification) => {
@@ -129,7 +140,7 @@ const DeviceDetails = () => {
 
   useEffect(() => {
     if (id && organizationId) {
-     dispatch(fetchDeviceDetails({ 
+      dispatch(fetchDeviceDetails({ 
         deviceId: parseInt(id, 10),
         organizationId 
       }));
@@ -140,25 +151,43 @@ const DeviceDetails = () => {
     };
   }, [dispatch, id, organizationId]);
 
-  // Fetch area data when device changes
   useEffect(() => {
     if (device?.areaId) {
       dispatch(fetchAreaById(device.areaId));
     }
   }, [dispatch, device?.areaId]);
 
-  const handleStateChange = async (stateId: number, value: string) => {
-    if (!id || !organizationId) return;
-    
+  const handleStateButtonClick = (state: any) => {
+    setSelectedState({
+      id: state.id,
+      name: state.stateName,
+      value: state.instances[0]?.value || state.defaultValue,
+      defaultValue: state.defaultValue,
+      allowedValues: JSON.parse(state.allowedValues)
+    });
+  };
+
+  const handleStateModalClose = () => {
+    setSelectedState(null);
+  };
+
+  const handleStateModalSave = async (value: string) => {
+    if (!selectedState || !device?.uuid) return;
+
+    setIsStateUpdating(true);
     try {
-      await dispatch(updateDeviceState({
-        deviceId: parseInt(id, 10),
-        stateId,
+      await dispatch(createDeviceStateInstance({
+        deviceUuid: device.uuid,
+        stateName: selectedState.name,
         value,
-        organizationId
+        initiatedBy: 'user'
       })).unwrap();
+
+      setSelectedState(null);
     } catch (error) {
       console.error('Error updating device state:', error);
+    } finally {
+      setIsStateUpdating(false);
     }
   };
 
@@ -201,7 +230,11 @@ const DeviceDetails = () => {
       onOpenDeleteModal={() => setDeleteModalOpen(true)}
       onCloseDeleteModal={() => setDeleteModalOpen(false)}
       onNavigateBack={handleNavigateBack}
-      onStateChange={handleStateChange}
+      onStateButtonClick={handleStateButtonClick}
+      selectedState={selectedState}
+      onStateModalClose={handleStateModalClose}
+      onStateModalSave={handleStateModalSave}
+      isStateUpdating={isStateUpdating}
       isSocketConnected={isConnected}
       socketError={socketError}
     />

@@ -16,6 +16,8 @@ import StateDropdown from '../common/Select/StateDropdown';
 import { API_URL } from '../../config';
 import { useDeviceStateSocket } from '../../hooks/useDeviceStateSocket';
 import type { DeviceStateNotification } from '../../hooks/useDeviceStateSocket';
+import Button from '../common/Button/Button';
+import DeviceStateModal from './DeviceStateModal';
 
 interface DeviceDetailsProps {
   device: Device | null;
@@ -29,7 +31,17 @@ interface DeviceDetailsProps {
   onOpenDeleteModal: () => void;
   onCloseDeleteModal: () => void;
   onNavigateBack: () => void;
-  onStateChange: (stateId: number, value: string) => void;
+  onStateButtonClick: (state: any) => void;
+  selectedState: {
+    id: number;
+    name: string;
+    value: string;
+    defaultValue: string;
+    allowedValues: string[];
+  } | null;
+  onStateModalClose: () => void;
+  onStateModalSave: (value: string) => void;
+  isStateUpdating: boolean;
   isSocketConnected: boolean;
   socketError: Error | null;
 }
@@ -56,7 +68,11 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({
   onOpenDeleteModal,
   onCloseDeleteModal,
   onNavigateBack,
-  onStateChange,
+  onStateButtonClick,
+  selectedState,
+  onStateModalClose,
+  onStateModalSave,
+  isStateUpdating,
   isSocketConnected,
   socketError
 }) => {
@@ -417,15 +433,36 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({
 
             return (
               <div key={state.id} style={stateCardStyle}>
-                <StateDropdown
-                  id={`state-${state.id}`}
-                  name={`state-${state.id}`}
-                  label={state.stateName}
-                  value={currentValue}
-                  defaultValue={state.defaultValue}
-                  allowedValues={allowedValues}
-                  onChange={(e) => onStateChange(state.id, e.target.value)}
-                />
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: '0.5rem'
+                }}>
+                  <span style={{
+                    fontSize: '0.875rem',
+                    fontWeight: 500,
+                    color: darkMode ? colors.textPrimary : '#111827'
+                  }}>
+                    {state.stateName}
+                  </span>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => onStateButtonClick(state)}
+                  >
+                    {t('change')}
+                  </Button>
+                </div>
+                <div style={{
+                  padding: '0.5rem',
+                  backgroundColor: darkMode ? colors.surfaceBackground : '#f3f4f6',
+                  borderRadius: '0.375rem',
+                  fontSize: '0.875rem',
+                  color: darkMode ? colors.textSecondary : '#4b5563'
+                }}>
+                  {currentValue}
+                </div>
               </div>
             );
           })}
@@ -849,6 +886,19 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({
             </div>
           </div>
         </div>
+      )}
+
+      {selectedState && (
+        <DeviceStateModal
+          isOpen={!!selectedState}
+          onClose={onStateModalClose}
+          stateName={selectedState.name}
+          currentValue={selectedState.value}
+          defaultValue={selectedState.defaultValue}
+          allowedValues={selectedState.allowedValues}
+          onSave={onStateModalSave}
+          isLoading={isStateUpdating}
+        />
       )}
     </div>
   );
