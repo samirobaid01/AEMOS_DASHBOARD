@@ -8,6 +8,7 @@ import LoadingScreen from '../components/common/Loading/LoadingScreen';
 
 // Debug Tools
 const SocketTester = lazy(() => import('../components/common/SocketTester'));
+const DeviceStateTest = lazy(() => import('../components/common/DeviceStateTest'));
 
 // Auth
 const Login = lazy(() => import('../containers/Auth/Login'));
@@ -265,6 +266,14 @@ const AppRoutes = () => {
           element={
             <PrivateRoute>
               <SocketTester />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/debug/device-state-test"
+          element={
+            <PrivateRoute>
+              <DeviceStateTest />
             </PrivateRoute>
           }
         />

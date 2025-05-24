@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import type { PayloadAction } from '@reduxjs/toolkit';
 import type { RootState } from '../store';
 import deviceDetailsService from '../../services/deviceDetails.service';
 import type { 
@@ -9,13 +10,13 @@ import type {
 } from '../../constants/device';
 
 export interface DeviceStateInstance {
-  id: number;
-  deviceStateId: number;
+  id?: number;
+  deviceStateId?: number;
   value: string;
-  fromTimestamp: string;
-  toTimestamp: string | null;
-  initiatedBy: string;
-  initiatorId: number;
+  fromTimestamp?: string;
+  toTimestamp?: string | null;
+  initiatedBy?: string;
+  initiatorId?: number;
 }
 
 export interface DeviceState {
@@ -96,6 +97,27 @@ const deviceDetailsSlice = createSlice({
       state.data = null;
       state.error = null;
     },
+    updateDeviceStateLocally: (state, action: PayloadAction<{ stateId: number; value: string }>) => {
+      if (state.data?.states) {
+        const { stateId, value } = action.payload;
+        const stateIndex = state.data.states.findIndex(s => s.id === stateId);
+        if (stateIndex !== -1) {
+          // Update the state's current value
+          if (!state.data.states[stateIndex].instances) {
+            state.data.states[stateIndex].instances = [];
+          }
+          if (state.data.states[stateIndex].instances.length === 0) {
+            state.data.states[stateIndex].instances.push({
+              value,
+              fromTimestamp: new Date().toISOString()
+            });
+          } else {
+            state.data.states[stateIndex].instances[0].value = value;
+            state.data.states[stateIndex].instances[0].fromTimestamp = new Date().toISOString();
+          }
+        }
+      }
+    }
   },
   extraReducers: (builder) => {
     builder
@@ -125,7 +147,7 @@ const deviceDetailsSlice = createSlice({
   },
 });
 
-export const { clearDeviceDetails } = deviceDetailsSlice.actions;
+export const { clearDeviceDetails, updateDeviceStateLocally } = deviceDetailsSlice.actions;
 
 export const selectDeviceDetails = (state: RootState) => state.deviceDetails.data;
 export const selectDeviceDetailsLoading = (state: RootState) => state.deviceDetails.loading;

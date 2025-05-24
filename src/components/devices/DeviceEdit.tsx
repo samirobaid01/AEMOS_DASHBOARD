@@ -349,7 +349,7 @@ const DeviceEdit: React.FC<DeviceEditProps> = ({
                   <option value="">{t("devices.selectProtocol")}</option>
                   {ALLOWED_PROTOCOLS.map(protocol => (
                     <option key={protocol} value={protocol}>
-                      {t(`devices.protocols.${protocol}`)}
+                      {protocol}
                     </option>
                   ))}
                 </select>

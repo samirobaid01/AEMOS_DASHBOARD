@@ -10,8 +10,12 @@ import type { DeviceStatus } from '../../constants/device';
 import { useTheme } from '../../context/ThemeContext';
 import { useThemeColors } from '../../hooks/useThemeColors';
 import { fetchDeviceStates, selectDeviceStates, selectDeviceStatesLoading, selectDeviceStatesError } from '../../state/slices/deviceStates.slice';
+import type { RootState } from '../../state/store';
 import type { AppDispatch } from '../../state/store';
 import StateDropdown from '../common/Select/StateDropdown';
+import { API_URL } from '../../config';
+import { useDeviceStateSocket } from '../../hooks/useDeviceStateSocket';
+import type { DeviceStateNotification } from '../../hooks/useDeviceStateSocket';
 
 interface DeviceDetailsProps {
   device: Device | null;
@@ -26,6 +30,8 @@ interface DeviceDetailsProps {
   onCloseDeleteModal: () => void;
   onNavigateBack: () => void;
   onStateChange: (stateId: number, value: string) => void;
+  isSocketConnected: boolean;
+  socketError: Error | null;
 }
 
 interface DeviceState {
@@ -50,7 +56,9 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({
   onOpenDeleteModal,
   onCloseDeleteModal,
   onNavigateBack,
-  onStateChange
+  onStateChange,
+  isSocketConnected,
+  socketError
 }) => {
   const { t } = useTranslation();
   const { darkMode } = useTheme();
@@ -59,8 +67,10 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({
   const deviceStates = useSelector(selectDeviceStates);
   const statesLoading = useSelector(selectDeviceStatesLoading);
   const statesError = useSelector(selectDeviceStatesError);
+  const authToken = useSelector((state: RootState) => state.auth.token);
   const isMobile = window.innerWidth < 768;
 
+  // Remove socket connection since we're getting it from props now
   const containerStyle = {
     padding: isMobile ? '1rem' : '1.5rem 2rem',
     backgroundColor: darkMode ? colors.background : 'transparent'
@@ -333,7 +343,73 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({
 
     return (
       <div style={cardStyle}>
-        <h2 style={sectionTitleStyle}>{t('device_states')}</h2>
+        <div style={{ 
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '1rem',
+          padding: '1.5rem 1.5rem 0'
+        }}>
+          <h2 style={sectionTitleStyle}>
+            {t('device_states')}
+            {isSocketConnected && (
+              <span style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                marginLeft: '0.75rem',
+                fontSize: '0.75rem',
+                fontWeight: 500,
+                color: darkMode ? colors.successText : '#166534',
+              }}>
+                <span style={{
+                  width: '0.5rem',
+                  height: '0.5rem',
+                  borderRadius: '50%',
+                  backgroundColor: '#16a34a',
+                  marginRight: '0.375rem',
+                  animation: 'pulse 2s infinite',
+                }}></span>
+                {t('live')}
+              </span>
+            )}
+          </h2>
+          
+          <Link to={`/debug/device-state-test`} style={{ textDecoration: 'none' }}>
+            <button
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                padding: '0.5rem 0.75rem',
+                backgroundColor: darkMode ? colors.infoBackground : '#dbeafe',
+                color: darkMode ? colors.infoText : '#1e40af',
+                border: 'none',
+                borderRadius: '0.375rem',
+                fontSize: '0.75rem',
+                fontWeight: 500,
+                cursor: 'pointer',
+              }}
+            >
+              <svg style={{ width: '0.875rem', height: '0.875rem', marginRight: '0.375rem' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              {t('debug_device_state')}
+            </button>
+          </Link>
+        </div>
+
+        {socketError && (
+          <div style={{
+            margin: '0 1.5rem 1rem',
+            padding: '0.75rem',
+            backgroundColor: darkMode ? colors.dangerBackground : '#fee2e2',
+            color: darkMode ? colors.dangerText : '#b91c1c',
+            borderRadius: '0.375rem',
+            fontSize: '0.875rem'
+          }}>
+            {socketError.message}
+          </div>
+        )}
+
         <div style={statesGridStyle}>
           {device.states.map((state) => {
             const allowedValues = JSON.parse(state.allowedValues);
@@ -354,6 +430,46 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({
             );
           })}
         </div>
+      </div>
+    );
+  };
+
+  const renderNotifications = () => {
+    return (
+      <div style={cardStyle}>
+        <h2 style={sectionTitleStyle}>{t('device_states')}
+          {isSocketConnected && (
+            <span style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              marginLeft: '0.75rem',
+              fontSize: '0.75rem',
+              fontWeight: 500,
+              color: darkMode ? colors.successText : '#166534',
+            }}>
+              <span style={{
+                width: '0.5rem',
+                height: '0.5rem',
+                borderRadius: '50%',
+                backgroundColor: '#16a34a',
+                marginRight: '0.375rem',
+                animation: 'pulse 2s infinite',
+              }}></span>
+              {t('live')}
+            </span>
+          )}
+        </h2>
+        {socketError && (
+          <div style={{
+            padding: '0.75rem',
+            marginTop: '1rem',
+            backgroundColor: darkMode ? colors.dangerBackground : '#fee2e2',
+            color: darkMode ? colors.dangerText : '#b91c1c',
+            borderRadius: '0.375rem',
+          }}>
+            {socketError.message}
+          </div>
+        )}
       </div>
     );
   };
@@ -649,6 +765,7 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({
           )}
 
           {renderDeviceStates()}
+          {renderNotifications()}
         </div>
       </div>
 

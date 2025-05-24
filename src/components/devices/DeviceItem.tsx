@@ -161,7 +161,7 @@ const DeviceItem: React.FC<DeviceItemProps> = ({ device, isMobile }) => {
                 borderRadius: '9999px',
                 display: 'inline-block'
               }}>
-                {t(`devices.protocols.${device.communicationProtocol}`)}
+                {device.communicationProtocol}
               </span>
             )}
           </div>

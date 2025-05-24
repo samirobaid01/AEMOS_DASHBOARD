@@ -224,6 +224,7 @@
     "areaRequired": "Area is required",
     "searchDevice": "Search device",
     "selectProtocol": "Select protocol",
+    "protocol": "Protocol",
     "defaultState": "Default State",
     "controlmode": "Control Mode",
     "isCritical": "Is Critical",
@@ -239,7 +240,8 @@
       "offline": "Offline",
       "online": "Online",
       "maintenance": "Maintenance"
-    }
+    },
+    "telemetryStates": "Telemetry States"
   },
   "common": {
     "save": "Save",
