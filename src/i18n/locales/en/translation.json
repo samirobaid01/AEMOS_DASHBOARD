@@ -199,7 +199,6 @@
     "actions": "Actions",
     "confirmDelete": "Are you sure you want to delete this device?",
     "noDevices": "No devices found",
-    "newDevice": "New Device",
     "backToDevices": "Back to Devices",
     "deviceNotFound": "Device not found",
     "deviceDetails": "Device Details",
@@ -231,8 +230,20 @@
     "deviceType": "Device Type",
     "controlType": "Control Type",
     "controlModes": "Control Modes",
-    "capabilities": "Capabilities",
-    "metadata": "Metadata",
+    "capabilities":{
+      "title":"Device Capabilities",
+      "key":"key",
+      "value":"value"
+    },
+    "metadata":{
+      "title":"Device Meta Data",
+      "key":"Key",
+      "value": "Value"
+    },
+    "newDevice":{
+      "new":"New Device",
+      "newDeviceDescription":"Device Description"
+    },
     "statuses": {
       "active": "Active",
       "pending": "Pending",
@@ -240,6 +251,13 @@
       "offline": "Offline",
       "online": "Online",
       "maintenance": "Maintenance"
+    },
+    "detail":{
+      "deviceDetails":"Device Details",
+      "deviceStatus":"Device status",
+      "changeStatus":"Change status",
+      "socketDebug": "Debug sockets",
+      "selectNewStatus":"Select new status"
     },
     "telemetryStates": "Telemetry States"
   },

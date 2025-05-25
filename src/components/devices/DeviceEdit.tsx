@@ -558,7 +558,7 @@ const DeviceEdit: React.FC<DeviceEditProps> = ({
               >
                 {CONTROL_MODES.map(mode => (
                   <option key={mode} value={mode}>
-                    {t(`devices.modes.${mode}`)}
+                    {mode}
                   </option>
                 ))}
               </select>

@@ -367,7 +367,7 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({
           padding: '1.5rem 1.5rem 0'
         }}>
           <h2 style={sectionTitleStyle}>
-            {t('device_states')}
+            {t('devices.detail.deviceStatus')}
             {isSocketConnected && (
               <span style={{
                 display: 'inline-flex',
@@ -408,7 +408,7 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({
               <svg style={{ width: '0.875rem', height: '0.875rem', marginRight: '0.375rem' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
-              {t('debug_device_state')}
+              {t('devices.detail.socketDebug')}
             </button>
           </Link>
         </div>
@@ -471,45 +471,45 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({
     );
   };
 
-  const renderNotifications = () => {
-    return (
-      <div style={cardStyle}>
-        <h2 style={sectionTitleStyle}>{t('device_states')}
-          {isSocketConnected && (
-            <span style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              marginLeft: '0.75rem',
-              fontSize: '0.75rem',
-              fontWeight: 500,
-              color: darkMode ? colors.successText : '#166534',
-            }}>
-              <span style={{
-                width: '0.5rem',
-                height: '0.5rem',
-                borderRadius: '50%',
-                backgroundColor: '#16a34a',
-                marginRight: '0.375rem',
-                animation: 'pulse 2s infinite',
-              }}></span>
-              {t('live')}
-            </span>
-          )}
-        </h2>
-        {socketError && (
-          <div style={{
-            padding: '0.75rem',
-            marginTop: '1rem',
-            backgroundColor: darkMode ? colors.dangerBackground : '#fee2e2',
-            color: darkMode ? colors.dangerText : '#b91c1c',
-            borderRadius: '0.375rem',
-          }}>
-            {socketError.message}
-          </div>
-        )}
-      </div>
-    );
-  };
+  // const renderNotifications = () => {
+  //   return (
+  //     <div style={cardStyle}>
+  //       <h2 style={sectionTitleStyle}>{t('device_states')}
+  //         {isSocketConnected && (
+  //           <span style={{
+  //             display: 'inline-flex',
+  //             alignItems: 'center',
+  //             marginLeft: '0.75rem',
+  //             fontSize: '0.75rem',
+  //             fontWeight: 500,
+  //             color: darkMode ? colors.successText : '#166534',
+  //           }}>
+  //             <span style={{
+  //               width: '0.5rem',
+  //               height: '0.5rem',
+  //               borderRadius: '50%',
+  //               backgroundColor: '#16a34a',
+  //               marginRight: '0.375rem',
+  //               animation: 'pulse 2s infinite',
+  //             }}></span>
+  //             {t('live')}
+  //           </span>
+  //         )}
+  //       </h2>
+  //       {socketError && (
+  //         <div style={{
+  //           padding: '0.75rem',
+  //           marginTop: '1rem',
+  //           backgroundColor: darkMode ? colors.dangerBackground : '#fee2e2',
+  //           color: darkMode ? colors.dangerText : '#b91c1c',
+  //           borderRadius: '0.375rem',
+  //         }}>
+  //           {socketError.message}
+  //         </div>
+  //       )}
+  //     </div>
+  //   );
+  // };
 
   return (
     <div style={containerStyle}>
@@ -749,7 +749,7 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({
                         fontSize: '0.75rem'
                       }}
                     >
-                      {t(`devices.modes.${mode}`)}
+                      {mode}
                     </span>
                   ))}
                 </div>
@@ -802,7 +802,7 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({
           )}
 
           {renderDeviceStates()}
-          {renderNotifications()}
+          {/* {renderNotifications()} */}
         </div>
       </div>
 

@@ -262,10 +262,10 @@ const DeviceCreate: React.FC<DeviceCreateProps> = ({
         <div style={formStyle}>
           <div style={headerStyle}>
             <h2 style={headerTitleStyle}>
-              {t('devices.newDevice')}
+              {t('devices.newDevice.new')}
             </h2>
             <p style={headerDescriptionStyle}>
-              {t('devices.newDeviceDescription')}
+              {t('devices.newDevice.newDeviceDescription')}
             </p>
           </div>
 
@@ -630,9 +630,9 @@ const DeviceCreate: React.FC<DeviceCreateProps> = ({
               <DynamicKeyValueInput
                 pairs={Object.entries(formData.metadata || {}).map(([key, value]) => ({ key, value }))}
                 onChange={onMetadataChange}
-                label={t("devices.metadata")}
-                keyPlaceholder={t("devices.metadataKey")}
-                valuePlaceholder={t("devices.metadataValue")}
+                label={t("devices.metadata.title")}
+                keyPlaceholder={t("devices.metadata.key")}
+                valuePlaceholder={t("devices.metadata.value")}
                 predefinedKeys={METADATA_SUGGESTED_KEYS}
                 error={formErrors.metadata}
               />
@@ -642,9 +642,9 @@ const DeviceCreate: React.FC<DeviceCreateProps> = ({
               <DynamicKeyValueInput
                 pairs={Object.entries(formData.capabilities || {}).map(([key, value]) => ({ key, value }))}
                 onChange={onCapabilitiesChange}
-                label={t("devices.capabilities")}
-                keyPlaceholder={t("devices.capabilityKey")}
-                valuePlaceholder={t("devices.capabilityValue")}
+                label={t("devices.capabilities.title")}
+                keyPlaceholder={t("devices.capabilities.key")}
+                valuePlaceholder={t("devices.capabilities.value")}
                 predefinedKeys={CAPABILITIES_SUGGESTED_KEYS}
                 error={formErrors.capabilities}
               />
