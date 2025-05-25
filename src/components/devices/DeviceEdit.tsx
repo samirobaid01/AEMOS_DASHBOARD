@@ -219,7 +219,7 @@ const DeviceEdit: React.FC<DeviceEditProps> = ({
         <div style={formStyle}>
           <div style={headerStyle}>
             <h2 style={headerTitleStyle}>
-              {t('edit_device')} - {deviceName}
+              {t('devices.edit')} - {deviceName}
             </h2>
             <p style={headerDescriptionStyle}>
               {t('devices.editDeviceDescription')}
@@ -320,7 +320,7 @@ const DeviceEdit: React.FC<DeviceEditProps> = ({
                   <option value="">{t("devices.selectControlType")}</option>
                   {ALLOWED_CONTROL_TYPES.map(type => (
                     <option key={type} value={type}>
-                      {t(`devices.controlTypes.${type}`)}
+                      {type}
                     </option>
                   ))}
                 </select>
@@ -587,9 +587,9 @@ const DeviceEdit: React.FC<DeviceEditProps> = ({
               <DynamicKeyValueInput
                 pairs={Object.entries(formData.metadata || {}).map(([key, value]) => ({ key, value }))}
                 onChange={onMetadataChange}
-                label={t("devices.metadata")}
-                keyPlaceholder={t("devices.metadataKey")}
-                valuePlaceholder={t("devices.metadataValue")}
+                label={t("devices.metadata.title")}
+                keyPlaceholder={t("devices.metadata.key")}
+                valuePlaceholder={t("devices.metadata.value")}
                 predefinedKeys={METADATA_SUGGESTED_KEYS}
                 error={formErrors.metadata}
               />
@@ -599,9 +599,9 @@ const DeviceEdit: React.FC<DeviceEditProps> = ({
               <DynamicKeyValueInput
                 pairs={Object.entries(formData.capabilities || {}).map(([key, value]) => ({ key, value }))}
                 onChange={onCapabilitiesChange}
-                label={t("devices.capabilities")}
-                keyPlaceholder={t("devices.capabilityKey")}
-                valuePlaceholder={t("devices.capabilityValue")}
+                label={t("devices.capabilities.title")}
+                keyPlaceholder={t("devices.capability.key")}
+                valuePlaceholder={t("devices.capability.value")}
                 predefinedKeys={CAPABILITIES_SUGGESTED_KEYS}
                 error={formErrors.capabilities}
               />

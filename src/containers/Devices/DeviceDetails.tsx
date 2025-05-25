@@ -9,12 +9,13 @@ import {
   selectDeviceDetailsLoading,
   selectDeviceDetailsError,
   clearDeviceDetails,
-  updateDeviceStateLocally
+  updateDeviceStateLocally,
 } from '../../state/slices/deviceDetails.slice';
 import { createDeviceStateInstance } from '../../state/slices/deviceStateInstances.slice';
 import { selectSelectedOrganization } from '../../state/slices/organizations.slice';
 import { selectSelectedOrganizationId } from '../../state/slices/auth.slice';
 import { fetchAreaById, selectSelectedArea } from '../../state/slices/areas.slice';
+import { deleteDevice } from '../../state/slices/devices.slice';
 import DeviceDetailsComponent from '../../components/devices/DeviceDetails';
 import { io } from 'socket.io-client';
 import type { DeviceStateNotification } from '../../hooks/useDeviceStateSocket';
@@ -196,11 +197,12 @@ const DeviceDetails = () => {
     
     setIsDeleting(true);
     try {
-      if (organizationId) {
-        navigate(`/organizations/${organizationId}/devices`);
-      } else {
+      await dispatch(deleteDevice(parseInt(id, 10))).unwrap();
+      // if (organizationId) {
+      //   navigate(`/organizations/${organizationId}/devices`);
+      // } else {
         navigate('/devices');
-      }
+      // }
     } catch (error) {
       console.error('Error deleting device:', error);
     } finally {

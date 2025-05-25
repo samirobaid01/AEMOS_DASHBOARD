@@ -835,14 +835,14 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({
                 color: darkMode ? colors.textPrimary : '#111827',
                 marginBottom: '0.5rem'
               }}>
-                {t('delete_device')}
+                {t('devices.deleteDevice')}
               </h3>
               <p style={{
                 fontSize: '0.875rem',
                 color: darkMode ? colors.textSecondary : '#6b7280',
                 marginBottom: '1.5rem'
               }}>
-                {t('delete_device_confirm', { name: device.name })}
+                {t('devices.deleteDeviceConfirm', { name: device.name })}
               </p>
             </div>
             <div style={{
