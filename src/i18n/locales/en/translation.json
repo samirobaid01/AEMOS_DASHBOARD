@@ -230,6 +230,18 @@
     "deviceType": "Device Type",
     "controlType": "Control Type",
     "controlModes": "Control Modes",
+    "deviceState":{
+      "addState":"Define States for Device",
+      "stateName":"State Name",
+      "dataType":"Data Type",
+      "defaultValue":"Default Value",
+      "allowedValue":"Allowed Values",
+      "addValues": "Add Values",
+      "inProgress":"In Progress",
+      "addButton": "Add",
+      "finishButton":"Finish",
+      "cancelButton":"Cancel"
+    },
     "capabilities":{
       "title":"Device Capabilities",
       "key":"key",

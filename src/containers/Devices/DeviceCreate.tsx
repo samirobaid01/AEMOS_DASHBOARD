@@ -147,7 +147,7 @@ const DeviceCreateContainer = () => {
     try {
       const resultAction = await dispatch(createDevice(formData));
       if (createDevice.fulfilled.match(resultAction)) {
-        return resultAction.payload;
+        return resultAction.payload.data.device;
       }
     } catch (error) {
       console.error('Error creating device:', error);

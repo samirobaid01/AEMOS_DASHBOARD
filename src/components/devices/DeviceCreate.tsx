@@ -213,8 +213,10 @@ const DeviceCreate: React.FC<DeviceCreateProps> = ({
   };
 
   const handleDeviceSubmit = async (e: React.FormEvent) => {
+    console.log("submitting create device request");
     e.preventDefault();
     const result = await onSubmit(e);
+    console.log(result);
     if (result?.id) {
       setCreatedDeviceId(result.id);
       setShowStateForm(true);
@@ -722,7 +724,7 @@ const DeviceCreate: React.FC<DeviceCreateProps> = ({
               color: darkMode ? colors.textPrimary : '#111827',
               marginBottom: '1.5rem'
             }}>
-              {t("devices.addState")}
+              {t("devices.deviceState.addState")}
             </h3>
 
             {statesError && (
@@ -740,7 +742,7 @@ const DeviceCreate: React.FC<DeviceCreateProps> = ({
 
             <div style={fieldGroupStyle}>
               <label htmlFor="stateName" style={labelStyle}>
-                {t("devices.stateName")}
+                {t("devices.deviceState.stateName")}
               </label>
               <input
                 type="text"
@@ -753,7 +755,7 @@ const DeviceCreate: React.FC<DeviceCreateProps> = ({
 
             <div style={fieldGroupStyle}>
               <label htmlFor="dataType" style={labelStyle}>
-                {t("devices.dataType")}
+                {t("devices.deviceState.dataType")}
               </label>
               <select
                 id="dataType"
@@ -761,7 +763,7 @@ const DeviceCreate: React.FC<DeviceCreateProps> = ({
                 onChange={(e) => setDeviceState(prev => ({ ...prev, dataType: e.target.value }))}
                 style={selectStyle}
               >
-                <option value="">{t("devices.selectDataType")}</option>
+                <option value="">{t("devices.deviceState.dataType")}</option>
                 {ALLOWED_DATA_TYPES.map(type => (
                   <option key={type} value={type}>
                     {type}
@@ -772,7 +774,7 @@ const DeviceCreate: React.FC<DeviceCreateProps> = ({
 
             <div style={fieldGroupStyle}>
               <label htmlFor="defaultValue" style={labelStyle}>
-                {t("devices.defaultValue")}
+                {t("devices.deviceState.defaultValue")}
               </label>
               <input
                 type="text"
@@ -785,7 +787,7 @@ const DeviceCreate: React.FC<DeviceCreateProps> = ({
 
             <div style={fieldGroupStyle}>
               <label style={labelStyle}>
-                {t("devices.allowedValues")}
+                {t("devices.deviceState.allowedValue")}
               </label>
               {deviceState.allowedValues.map((value, index) => (
                 <div key={index} style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
@@ -831,7 +833,7 @@ const DeviceCreate: React.FC<DeviceCreateProps> = ({
                   marginTop: '0.5rem'
                 }}
               >
-                + {t("devices.addAllowedValue")}
+                + {t("devices.deviceState.addValues")}
               </button>
             </div>
 
@@ -846,7 +848,7 @@ const DeviceCreate: React.FC<DeviceCreateProps> = ({
                 onClick={() => setShowStateForm(false)}
                 style={buttonStyle('secondary')}
               >
-                {t("cancel")}
+                {t("devices.deviceState.cancelButton")}
               </button>
               <button
                 type="button"
@@ -854,7 +856,7 @@ const DeviceCreate: React.FC<DeviceCreateProps> = ({
                 disabled={statesLoading}
                 style={buttonStyle('primary')}
               >
-                {statesLoading ? t("devices.adding") : t("devices.addState")}
+                {statesLoading ? t("devices.deviceState.inProgress") : t("devices.deviceState.addButton")}
               </button>
               <button
                 type="button"
@@ -866,7 +868,7 @@ const DeviceCreate: React.FC<DeviceCreateProps> = ({
                   color: darkMode ? colors.successText : '#166534'
                 }}
               >
-                {statesLoading ? t("devices.finishing") : t("devices.finish")}
+                {statesLoading ? t("devices.deviceState.inProgress") : t("devices.deviceState.finishButton")}
               </button>
             </div>
           </div>
