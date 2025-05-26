@@ -585,8 +585,17 @@ const DeviceEdit: React.FC<DeviceEditProps> = ({
 
             <div style={fieldGroupStyle}>
               <DynamicKeyValueInput
-                pairs={Object.entries(formData.metadata || {}).map(([key, value]) => ({ key, value }))}
-                onChange={onMetadataChange}
+                pairs={Object.entries(formData.metadata || {}).map(([key, value], index) => ({ key, value }))}
+                onChange={(pairs) => {
+                  console.log('Metadata pairs update:', pairs);
+                  const metadata = pairs.reduce((acc, { key, value }) => {
+                    if (key.trim()) {
+                      acc[key.trim()] = value;
+                    }
+                    return acc;
+                  }, {} as Record<string, any>);
+                  onMetadataChange(metadata);
+                }}
                 label={t("devices.metadata.title")}
                 keyPlaceholder={t("devices.metadata.key")}
                 valuePlaceholder={t("devices.metadata.value")}
@@ -597,8 +606,17 @@ const DeviceEdit: React.FC<DeviceEditProps> = ({
 
             <div style={fieldGroupStyle}>
               <DynamicKeyValueInput
-                pairs={Object.entries(formData.capabilities || {}).map(([key, value]) => ({ key, value }))}
-                onChange={onCapabilitiesChange}
+                pairs={Object.entries(formData.capabilities || {}).map(([key, value], index) => ({ key, value }))}
+                onChange={(pairs) => {
+                  console.log('Capabilities pairs update:', pairs);
+                  const capabilities = pairs.reduce((acc, { key, value }) => {
+                    if (key.trim()) {
+                      acc[key.trim()] = value;
+                    }
+                    return acc;
+                  }, {} as Record<string, any>);
+                  onCapabilitiesChange(capabilities);
+                }}
                 label={t("devices.capabilities.title")}
                 keyPlaceholder={t("devices.capability.key")}
                 valuePlaceholder={t("devices.capability.value")}

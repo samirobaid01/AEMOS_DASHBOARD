@@ -192,16 +192,22 @@ const DeviceCreate: React.FC<DeviceCreateProps> = ({
   });
 
   const handleMetadataChange = (pairs: { key: string; value: any }[]) => {
+    console.log('Handling metadata change:', pairs);
     const metadata = pairs.reduce((acc, { key, value }) => {
-      if (key) acc[key] = value;
+      if (key.trim()) {
+        acc[key.trim()] = value;
+      }
       return acc;
     }, {} as Record<string, any>);
     onMetadataChange(metadata);
   };
 
   const handleCapabilitiesChange = (pairs: { key: string; value: any }[]) => {
+    console.log('Handling capabilities change:', pairs);
     const capabilities = pairs.reduce((acc, { key, value }) => {
-      if (key) acc[key] = value;
+      if (key.trim()) {
+        acc[key.trim()] = value;
+      }
       return acc;
     }, {} as Record<string, any>);
     onCapabilitiesChange(capabilities);
@@ -631,7 +637,18 @@ const DeviceCreate: React.FC<DeviceCreateProps> = ({
             <div style={fieldGroupStyle}>
               <DynamicKeyValueInput
                 pairs={Object.entries(formData.metadata || {}).map(([key, value]) => ({ key, value }))}
-                onChange={onMetadataChange}
+                onChange={(pairs) => {
+                  console.log('Metadata pairs update in DeviceCreate:', pairs);
+                  // Convert pairs to metadata object, preserving empty pairs
+                  const metadata = pairs.reduce((acc, pair) => {
+                    // Include all pairs, even empty ones
+                    acc[pair.key || ''] = pair.value;
+                    return acc;
+                  }, {} as Record<string, any>);
+                  
+                  console.log('Processed metadata:', metadata);
+                  onMetadataChange(metadata);
+                }}
                 label={t("devices.metadata.title")}
                 keyPlaceholder={t("devices.metadata.key")}
                 valuePlaceholder={t("devices.metadata.value")}
@@ -643,7 +660,18 @@ const DeviceCreate: React.FC<DeviceCreateProps> = ({
             <div style={fieldGroupStyle}>
               <DynamicKeyValueInput
                 pairs={Object.entries(formData.capabilities || {}).map(([key, value]) => ({ key, value }))}
-                onChange={onCapabilitiesChange}
+                onChange={(pairs) => {
+                  console.log('Capabilities pairs update in DeviceCreate:', pairs);
+                  // Convert pairs to capabilities object, preserving empty pairs
+                  const capabilities = pairs.reduce((acc, pair) => {
+                    // Include all pairs, even empty ones
+                    acc[pair.key || ''] = pair.value;
+                    return acc;
+                  }, {} as Record<string, any>);
+                  
+                  console.log('Processed capabilities:', capabilities);
+                  onCapabilitiesChange(capabilities);
+                }}
                 label={t("devices.capabilities.title")}
                 keyPlaceholder={t("devices.capabilities.key")}
                 valuePlaceholder={t("devices.capabilities.value")}

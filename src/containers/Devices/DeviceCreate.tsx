@@ -90,16 +90,18 @@ const DeviceCreateContainer = () => {
   };
 
   const handleMetadataChange = (metadata: Record<string, any>) => {
+    console.log('Container handling metadata change:', metadata);
     setFormData(prev => ({
       ...prev,
-      metadata
+      metadata: metadata
     }));
   };
 
   const handleCapabilitiesChange = (capabilities: Record<string, any>) => {
+    console.log('Container handling capabilities change:', capabilities);
     setFormData(prev => ({
       ...prev,
-      capabilities
+      capabilities: capabilities
     }));
   };
 
