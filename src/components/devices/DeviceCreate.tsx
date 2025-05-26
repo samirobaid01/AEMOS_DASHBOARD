@@ -362,7 +362,7 @@ const DeviceCreate: React.FC<DeviceCreateProps> = ({
                   required
                   style={selectStyle}
                 >
-                  <option value="">{t("devices.selectControlType")}</option>
+                  <option value="">{t("devices.selectControlMode")}</option>
                   {ALLOWED_CONTROL_TYPES.map(type => (
                     <option key={type} value={type}>
                       {type}

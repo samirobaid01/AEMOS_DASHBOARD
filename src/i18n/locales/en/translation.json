@@ -230,6 +230,8 @@
     "deviceType": "Device Type",
     "controlType": "Control Type",
     "controlModes": "Control Modes",
+    "selectDeviceType": "Select device type",
+    "selectControlMode": "Select control mode",
     "deviceState":{
       "addState":"Define States for Device",
       "stateName":"State Name",
