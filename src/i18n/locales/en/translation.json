@@ -233,6 +233,8 @@
     "selectDeviceType": "Select device type",
     "selectControlMode": "Select control mode",
     "deviceState":{
+      "title":"Device States",
+      "description":"Description",
       "addState":"Define States for Device",
       "stateName":"State Name",
       "dataType":"Data Type",
@@ -242,7 +244,14 @@
       "inProgress":"In Progress",
       "addButton": "Add",
       "finishButton":"Finish",
-      "cancelButton":"Cancel"
+      "cancelButton":"Cancel",
+      "allowedValues":"Allowed Values",
+      "active":"Active",
+      "inactive":"Inactive",
+      "suspended":"Suspended",
+      "editState":"Edit State",
+      "deactivate":"Deactivate",
+      "edit":"Edit"
     },
     "capabilities":{
       "title":"Device Capabilities",

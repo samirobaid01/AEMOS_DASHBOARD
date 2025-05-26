@@ -68,7 +68,7 @@ const DeviceListContainer = () => {
   return (
     <DeviceList
       devices={devices}
-      filteredDevices={filteredDevices}
+      filteredDevices={filteredDevices.filter(device => device.status=="active" || device.status=="pending")}
       searchTerm={searchTerm}
       setSearchTerm={setSearchTerm}
       typeFilter={typeFilter}

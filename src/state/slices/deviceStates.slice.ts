@@ -4,12 +4,18 @@ import * as deviceStatesService from '../../services/deviceStates.service';
 
 export interface DeviceState {
   id: number;
+  deviceId?: number;
   stateName: string;
   dataType: string;
   defaultValue: string;
   allowedValues: string[];
   createdAt: string;
   updatedAt: string;
+  status?: 'active' | 'inactive' | 'suspended';
+  device?: {
+    name: string;
+    uuid: string;
+  };
 }
 
 interface DeviceStatesState {
@@ -28,8 +34,12 @@ export const fetchDeviceStates = createAsyncThunk(
   'deviceStates/fetchByDeviceId',
   async ({ deviceId, organizationId }: { deviceId: number; organizationId: number }, { rejectWithValue }) => {
     try {
-      return await deviceStatesService.getDeviceStates(deviceId, organizationId);
+      console.log('DeviceStates: Making API call', { deviceId, organizationId });
+      const result = await deviceStatesService.getDeviceStates(deviceId, organizationId);
+      console.log('DeviceStates: API response', result);
+      return result;
     } catch (error: any) {
+      console.error('DeviceStates: API error', error);
       return rejectWithValue(error.response?.data?.message || 'Failed to fetch device states');
     }
   }
@@ -46,6 +56,36 @@ export const createDeviceState = createAsyncThunk(
   }
 );
 
+export const updateDeviceState = createAsyncThunk(
+  'deviceStates/update',
+  async ({ 
+    deviceId, 
+    stateId, 
+    state 
+  }: { 
+    deviceId: number; 
+    stateId: number; 
+    state: Partial<Omit<DeviceState, 'id' | 'createdAt' | 'updatedAt'>>
+  }, { rejectWithValue }) => {
+    try {
+      return await deviceStatesService.updateDeviceState(deviceId, stateId, state);
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to update device state');
+    }
+  }
+);
+
+export const deactivateDeviceState = createAsyncThunk(
+  'deviceStates/deactivate',
+  async ({ deviceId, stateId }: { deviceId: number; stateId: number }, { rejectWithValue }) => {
+    try {
+      return await deviceStatesService.deactivateDeviceState(deviceId, stateId);
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to deactivate device state');
+    }
+  }
+);
+
 const deviceStatesSlice = createSlice({
   name: 'deviceStates',
   initialState,
@@ -58,14 +98,18 @@ const deviceStatesSlice = createSlice({
   extraReducers: (builder) => {
     // Fetch Device States
     builder.addCase(fetchDeviceStates.pending, (state) => {
+      console.log('DeviceStates: Fetch pending');
       state.loading = true;
       state.error = null;
     });
     builder.addCase(fetchDeviceStates.fulfilled, (state, action) => {
+      console.log('DeviceStates: Fetch fulfilled, updating state with payload:', action.payload);
       state.loading = false;
       state.states = action.payload;
+      console.log('DeviceStates: State updated, new states:', state.states);
     });
     builder.addCase(fetchDeviceStates.rejected, (state, action) => {
+      console.log('DeviceStates: Fetch rejected', action.payload);
       state.loading = false;
       state.error = action.payload as string;
     });
@@ -76,10 +120,45 @@ const deviceStatesSlice = createSlice({
       state.error = null;
     });
     builder.addCase(createDeviceState.fulfilled, (state, action) => {
+      console.log('DeviceStates: Create fulfilled, adding state:', action.payload);
       state.loading = false;
       state.states.push(action.payload);
     });
     builder.addCase(createDeviceState.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload as string;
+    });
+
+    // Update Device State
+    builder.addCase(updateDeviceState.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+    });
+    builder.addCase(updateDeviceState.fulfilled, (state, action) => {
+      console.log('DeviceStates: Update fulfilled, updating state:', action.payload);
+      state.loading = false;
+      const index = state.states.findIndex(s => s.id === action.payload.id);
+      if (index !== -1) {
+        state.states[index] = action.payload;
+      }
+    });
+    builder.addCase(updateDeviceState.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload as string;
+    });
+
+    // Deactivate Device State
+    builder.addCase(deactivateDeviceState.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+    });
+    builder.addCase(deactivateDeviceState.fulfilled, (state, action) => {
+      state.loading = false;
+      if (action.payload.success) {
+        state.states = state.states.filter(s => s.id !== action.payload.stateId);
+      }
+    });
+    builder.addCase(deactivateDeviceState.rejected, (state, action) => {
       state.loading = false;
       state.error = action.payload as string;
     });

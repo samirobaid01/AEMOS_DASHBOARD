@@ -3,8 +3,6 @@ import { useTranslation } from "react-i18next";
 import type { DeviceCreateRequest } from "../../types/device";
 import type { Organization } from "../../types/organization";
 import type { Area } from "../../types/area";
-import Input from "../common/Input/Input";
-import Button from "../common/Button/Button";
 import { useTheme } from "../../context/ThemeContext";
 import { useThemeColors } from "../../hooks/useThemeColors";
 import DynamicKeyValueInput from "../common/DynamicKeyValueInput/DynamicKeyValueInput";
