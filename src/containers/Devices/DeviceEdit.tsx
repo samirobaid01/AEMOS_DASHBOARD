@@ -9,10 +9,22 @@ import {
   selectDevicesLoading,
   selectDevicesError
 } from '../../state/slices/devices.slice';
+import {
+  fetchDeviceStates,
+  createDeviceState,
+  updateDeviceState,
+  deactivateDeviceState,
+  selectDeviceStates,
+  selectDeviceStatesLoading,
+  selectDeviceStatesError
+} from '../../state/slices/deviceStates.slice';
 import { fetchOrganizations, selectOrganizations } from '../../state/slices/organizations.slice';
 import { fetchAreas, selectAreas } from '../../state/slices/areas.slice';
+import { selectSelectedOrganizationId } from '../../state/slices/auth.slice';
 import type { DeviceUpdateRequest } from '../../types/device';
+import type { DeviceState } from '../../state/slices/deviceStates.slice';
 import DeviceEditComponent from '../../components/devices/DeviceEdit';
+import DeviceStateManager from '../../components/devices/DeviceStateManager';
 import { useTranslation } from 'react-i18next';
 
 const DeviceEdit = () => {
@@ -24,59 +36,110 @@ const DeviceEdit = () => {
   const error = useSelector(selectDevicesError);
   const organizations = useSelector(selectOrganizations);
   const areas = useSelector(selectAreas);
+  const states = useSelector(selectDeviceStates) || [];
+  const statesLoading = useSelector(selectDeviceStatesLoading);
+  const statesError = useSelector(selectDeviceStatesError);
+  const organizationId = useSelector(selectSelectedOrganizationId);
   const { t } = useTranslation();
+  
+  // Debug logging for initial state
+  useEffect(() => {
+    console.log('DeviceEdit: Initial mount', {
+      id,
+      organizationId,
+      device: !!device,
+      statesCount: states.length,
+      statesLoading,
+      statesError
+    });
+  }, []);
   
   const [formData, setFormData] = useState<DeviceUpdateRequest>({
     name: '',
-    type: '',
-    status: true,
-    firmware: '',
     description: '',
-    configuration: {},
-    areaId: 0,
+    status: 'pending',
+    deviceType: 'actuator',
+    controlType: 'binary',
+    minValue: null,
+    maxValue: null,
+    defaultState: '',
+    communicationProtocol: undefined,
+    isCritical: false,
+    metadata: {},
+    capabilities: {},
+    areaId: undefined,
+    controlModes: '',
     organizationId: 0
   });
-  
-  const [configFields, setConfigFields] = useState<{ key: string; value: string }[]>([
-    { key: '', value: '' }
-  ]);
   
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   useEffect(() => {
-    if (id) {
+    if (id && organizationId) {
+      console.log('DeviceEdit: Fetching data', { id, organizationId });
+      
       dispatch(fetchDeviceById(parseInt(id, 10)));
       dispatch(fetchOrganizations());
       dispatch(fetchAreas());
+      
+      console.log('DeviceEdit: Fetching states', {
+        deviceId: parseInt(id, 10),
+        organizationId
+      });
+      
+      dispatch(fetchDeviceStates({ 
+        deviceId: parseInt(id, 10), 
+        organizationId 
+      }));
     }
-  }, [dispatch, id]);
+  }, [dispatch, id, organizationId]);
+
+  // Debug logging for states changes
+  useEffect(() => {
+    console.log('DeviceEdit: States updated', {
+      statesCount: states.length,
+      states,
+      statesLoading,
+      statesError
+    });
+  }, [states, statesLoading, statesError]);
+
+  // Debug logging for device changes
+  useEffect(() => {
+    console.log('DeviceEdit: Device updated', {
+      deviceId: device?.id,
+      deviceName: device?.name,
+      deviceStates: device?.states
+    });
+  }, [device]);
   
   useEffect(() => {
     if (device) {
-      setFormData({
-        name: device.name,
-        type: device.type,
-        status: device.status,
-        firmware: device.firmware || '',
-        description: device.description || '',
-        configuration: device.configuration || {},
-        areaId: device.areaId || 0,
-        organizationId: device.organizationId || 0
+      console.log('DeviceEdit: Setting form data', {
+        deviceId: device.id,
+        organizationId
       });
       
-      // Convert configuration object to array for form fields
-      const configArray = Object.entries(device.configuration || {}).map(
-        ([key, value]) => ({ key, value: String(value) })
-      );
-      
-      if (configArray.length === 0) {
-        configArray.push({ key: '', value: '' });
-      }
-      
-      setConfigFields(configArray);
+      setFormData({
+        name: device.name,
+        description: device.description,
+        status: device.status,
+        deviceType: device.deviceType,
+        controlType: device.controlType,
+        minValue: device.minValue,
+        maxValue: device.maxValue,
+        defaultState: device.defaultState,
+        communicationProtocol: device.communicationProtocol,
+        isCritical: device.isCritical,
+        metadata: device.metadata || {},
+        capabilities: device.capabilities || {},
+        areaId: device.areaId,
+        controlModes: device.controlModes || '',
+        organizationId: organizationId || 0
+      });
     }
-  }, [device]);
+  }, [device, organizationId]);
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -89,18 +152,16 @@ const DeviceEdit = () => {
       return;
     }
     
-    // Handle numeric fields like organizationId and areaId
     if (name === 'organizationId' || name === 'areaId') {
       setFormData(prev => ({
         ...prev,
-        [name]: value ? parseInt(value, 10) : 0,
+        [name]: value ? parseInt(value, 10) : undefined,
       }));
       
-      // Reset areaId when organization changes
       if (name === 'organizationId') {
         setFormData(prev => ({
           ...prev,
-          areaId: 0
+          areaId: undefined
         }));
       }
       
@@ -112,61 +173,108 @@ const DeviceEdit = () => {
       [name]: value,
     }));
   };
-  
-  const handleConfigChange = (index: number, field: 'key' | 'value', value: string) => {
-    const updatedFields = [...configFields];
-    updatedFields[index][field] = value;
-    setConfigFields(updatedFields);
-    
-    // Update formData.configuration object
-    const configuration: Record<string, string> = {};
-    updatedFields.forEach(field => {
-      if (field.key.trim()) {
-        configuration[field.key] = field.value;
-      }
-    });
-    
+
+  const handleMetadataChange = (metadata: Record<string, any>) => {
     setFormData(prev => ({
       ...prev,
-      configuration
+      metadata
     }));
   };
-  
-  const addConfigField = () => {
-    setConfigFields([...configFields, { key: '', value: '' }]);
-  };
-  
-  const removeConfigField = (index: number) => {
-    const updatedFields = [...configFields];
-    updatedFields.splice(index, 1);
-    setConfigFields(updatedFields);
-    
-    // Update formData.configuration object
-    const configuration: Record<string, string> = {};
-    updatedFields.forEach(field => {
-      if (field.key.trim()) {
-        configuration[field.key] = field.value;
-      }
-    });
-    
+
+  const handleCapabilitiesChange = (capabilities: Record<string, any>) => {
     setFormData(prev => ({
       ...prev,
-      configuration
+      capabilities
     }));
+  };
+
+  const handleControlModesChange = (modes: string[]) => {
+    setFormData(prev => ({
+      ...prev,
+      controlModes: modes.join(',')
+    }));
+  };
+
+  const handleAddState = async (state: Omit<DeviceState, 'id' | 'createdAt' | 'updatedAt'>) => {
+    if (!id || !organizationId) return;
+    
+    console.log('DeviceEdit: Adding state', {
+      deviceId: id,
+      organizationId,
+      state
+    });
+    
+    try {
+      const result = await dispatch(createDeviceState({
+        deviceId: parseInt(id, 10),
+        state
+      })).unwrap();
+      
+      console.log('DeviceEdit: State added successfully', result);
+    } catch (error) {
+      console.error('DeviceEdit: Error creating device state:', error);
+    }
+  };
+
+  const handleUpdateState = async (stateId: number, state: Partial<Omit<DeviceState, 'id' | 'createdAt' | 'updatedAt'>>) => {
+    if (!id || !organizationId) return;
+    
+    console.log('DeviceEdit: Updating state', {
+      deviceId: id,
+      stateId,
+      organizationId,
+      state
+    });
+    
+    try {
+      const result = await dispatch(updateDeviceState({
+        deviceId: parseInt(id, 10),
+        stateId,
+        state
+      })).unwrap();
+      
+      console.log('DeviceEdit: State updated successfully', result);
+    } catch (error) {
+      console.error('DeviceEdit: Error updating device state:', error);
+    }
+  };
+
+  const handleDeactivateState = async (stateId: number) => {
+    if (!id || !organizationId) return;
+    
+    console.log('DeviceEdit: Deactivating state', {
+      deviceId: id,
+      stateId,
+      organizationId
+    });
+    
+    try {
+      const result = await dispatch(deactivateDeviceState({
+        deviceId: parseInt(id, 10),
+        stateId
+      })).unwrap();
+      
+      console.log('DeviceEdit: State deactivated successfully', result);
+    } catch (error) {
+      console.error('DeviceEdit: Error deactivating device state:', error);
+    }
   };
   
   const validateForm = (): boolean => {
     const errors: Record<string, string> = {};
     
     if (!formData.name?.trim()) {
-      errors.name = 'Name is required';
+      errors.name = t('name_required');
     }
     
-    if (!formData.type?.trim()) {
-      errors.type = 'Type is required';
+    if (!formData.deviceType) {
+      errors.deviceType = t('deviceType_required');
+    }
+
+    if (!formData.controlType) {
+      errors.controlType = t('controlType_required');
     }
     
-    // Add area validation if we have an organization selected
     if (formData.organizationId && !formData.areaId) {
       errors.areaId = t('devices.area_required');
     }
@@ -178,7 +286,7 @@ const DeviceEdit = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!validateForm() || !id) {
+    if (!validateForm() || !id || !organizationId) {
       return;
     }
     
@@ -196,7 +304,7 @@ const DeviceEdit = () => {
         navigate(`/devices/${id}`);
       }
     } catch (error) {
-      console.error('Error updating device:', error);
+      console.error('DeviceEdit: Error updating device:', error);
     } finally {
       setIsSubmitting(false);
     }
@@ -209,25 +317,63 @@ const DeviceEdit = () => {
       navigate('/devices');
     }
   };
+
+  if (!organizationId) {
+    console.log('DeviceEdit: No organization selected');
+    return (
+      <div style={{ padding: '1.5rem' }}>
+        <div style={{ 
+          backgroundColor: '#fef3c7', 
+          color: '#92400e',
+          padding: '1rem',
+          borderRadius: '0.5rem',
+          marginBottom: '1rem'
+        }}>
+          {t('organizations.select_organization_first')}
+        </div>
+      </div>
+    );
+  }
+
+  console.log('DeviceEdit: Rendering', {
+    hasDevice: !!device,
+    statesCount: states.length,
+    isLoading,
+    statesLoading,
+    error,
+    statesError
+  });
   
   return (
-    <DeviceEditComponent
-      formData={formData}
-      formErrors={formErrors}
-      configFields={configFields}
-      isLoading={isLoading}
-      isSubmitting={isSubmitting}
-      error={error}
-      deviceName={device?.name}
-      onCancel={handleCancel}
-      onSubmit={handleSubmit}
-      onChange={handleChange}
-      onConfigChange={handleConfigChange}
-      onAddConfigField={addConfigField}
-      onRemoveConfigField={removeConfigField}
-      organizations={organizations}
-      areas={areas}
-    />
+    <div style={{ padding: '1.5rem' }}>
+      <DeviceEditComponent
+        formData={formData}
+        formErrors={formErrors}
+        isLoading={isLoading}
+        isSubmitting={isSubmitting}
+        error={error}
+        deviceName={device?.name}
+        onCancel={handleCancel}
+        onSubmit={handleSubmit}
+        onChange={handleChange}
+        onMetadataChange={handleMetadataChange}
+        onCapabilitiesChange={handleCapabilitiesChange}
+        onControlModesChange={handleControlModesChange}
+        organizations={organizations}
+        areas={areas}
+      />
+      
+      {device && (
+        <DeviceStateManager
+          states={states}
+          onAddState={handleAddState}
+          onUpdateState={handleUpdateState}
+          onDeactivateState={handleDeactivateState}
+          isLoading={statesLoading}
+          error={statesError}
+        />
+      )}
+    </div>
   );
 };
 

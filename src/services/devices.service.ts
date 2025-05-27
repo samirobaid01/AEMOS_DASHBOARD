@@ -17,51 +17,56 @@ export const getDevices = async (params?: DeviceFilterParams) => {
 export const getDeviceById = async (id: number) => {
   const params = withOrganizationId();
   const response = await apiClient.get(`/devices/${id}`, { params });
-  console.log("Full API response:", response);
-  console.log("Device response data:", response.data);
   
   const deviceData = response.data.data.device;
-  console.log("Raw device from API:", deviceData);
   
   // Map the API response to match the Device interface
   const mappedDevice: Device = {
     id: deviceData.id,
     name: deviceData.name,
-    serialNumber: deviceData.uuid || 'N/A',
-    organizationId: deviceData.organizationId || 1,
-    type: deviceData.type || 'Unknown',
-    status: deviceData.status || false,
-    firmware: deviceData.firmware,
     description: deviceData.description,
-    configuration: deviceData.configuration || {},
+    status: deviceData.status || 'inactive',
+    uuid: deviceData.uuid,
+    organizationId: deviceData.organizationId,
+    deviceType: deviceData.deviceType || 'actuator',
+    controlType: deviceData.controlType || 'binary',
+    minValue: deviceData.minValue,
+    maxValue: deviceData.maxValue,
+    defaultState: deviceData.defaultState,
+    communicationProtocol: deviceData.communicationProtocol,
+    isCritical: deviceData.isCritical || false,
+    metadata: deviceData.metadata || {},
+    capabilities: deviceData.capabilities || {},
+    areaId: deviceData.areaId,
+    controlModes: deviceData.controlModes,
     createdAt: deviceData.createdAt,
-    updatedAt: deviceData.updatedAt
+    updatedAt: deviceData.updatedAt,
+    states: deviceData.states || []
   };
   
-  console.log("Mapped device:", mappedDevice);
   return mappedDevice;
 };
 
 /**
- * Create new device
+ * Create a new device
  */
 export const createDevice = async (deviceData: DeviceCreateRequest) => {
-  const params = withOrganizationId();
-  const response = await apiClient.post('/devices', deviceData, { params });
-  return response.data.data.device;
+  const enhancedData = withOrganizationId(deviceData);
+  const response = await apiClient.post('/devices', enhancedData);
+  return response.data;
 };
 
 /**
- * Update device
+ * Update an existing device
  */
 export const updateDevice = async (id: number, deviceData: DeviceUpdateRequest) => {
-  const params = withOrganizationId();
-  const response = await apiClient.patch(`/devices/${id}`, deviceData, { params });
-  return response.data.data.device;
+  const enhancedData = withOrganizationId(deviceData);
+  const response = await apiClient.patch(`/devices/${id}`, enhancedData);
+  return response.data;
 };
 
 /**
- * Delete device
+ * Delete a device
  */
 export const deleteDevice = async (id: number) => {
   const params = withOrganizationId();

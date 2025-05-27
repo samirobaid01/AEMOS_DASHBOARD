@@ -1,6 +1,5 @@
 import React from 'react';
 import { useTheme } from '../../context/ThemeContext';
-import { useThemeColors } from '../../hooks/useThemeColors';
 
 interface ErrorDisplayProps {
   errorMessage: string;
@@ -8,22 +7,16 @@ interface ErrorDisplayProps {
 
 const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ errorMessage }) => {
   const { darkMode } = useTheme();
-  const colors = useThemeColors();
 
   return (
-    <div style={{
-      padding: '1rem',
-      borderRadius: '0.5rem',
-      backgroundColor: darkMode ? colors.dangerBackground : '#fee2e2',
-      color: darkMode ? colors.dangerText : '#b91c1c',
-      fontSize: '0.875rem',
-      fontWeight: 500,
-      display: 'flex',
-      alignItems: 'center',
-      marginBottom: '1.5rem',
-    }}>
+    <div className={`
+      flex items-center p-4 mb-6 rounded-lg text-sm font-medium
+      ${darkMode 
+        ? 'bg-red-900/50 text-red-300 border border-red-800' 
+        : 'bg-red-50 text-red-700 border border-red-100'}
+    `}>
       <svg 
-        style={{ width: '1.25rem', height: '1.25rem', marginRight: '0.5rem' }} 
+        className="w-5 h-5 mr-2 flex-shrink-0" 
         fill="currentColor" 
         viewBox="0 0 20 20"
       >
@@ -33,7 +26,7 @@ const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ errorMessage }) => {
           clipRule="evenodd" 
         />
       </svg>
-      {errorMessage}
+      <span className="flex-1">{errorMessage}</span>
     </div>
   );
 };

@@ -1,14 +1,28 @@
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import LoadingScreen from '../common/Loading/LoadingScreen';
-import Button from '../common/Button/Button';
 import type { Device } from '../../types/device';
 import type { Organization } from '../../types/organization';
+import type { Area } from '../../types/area';
+import type { DeviceStatus } from '../../constants/device';
+import { useTheme } from '../../context/ThemeContext';
+import { useThemeColors } from '../../hooks/useThemeColors';
+import { fetchDeviceStates, selectDeviceStates, selectDeviceStatesLoading, selectDeviceStatesError } from '../../state/slices/deviceStates.slice';
+import type { RootState } from '../../state/store';
+import type { AppDispatch } from '../../state/store';
+import StateDropdown from '../common/Select/StateDropdown';
+import { API_URL } from '../../config';
+import { useDeviceStateSocket } from '../../hooks/useDeviceStateSocket';
+import type { DeviceStateNotification } from '../../hooks/useDeviceStateSocket';
+import Button from '../common/Button/Button';
+import DeviceStateModal from './DeviceStateModal';
 
 interface DeviceDetailsProps {
   device: Device | null;
   organization: Organization | null;
+  area: Area | null;
   isLoading: boolean;
   error: string | null;
   isDeleting: boolean;
@@ -17,11 +31,35 @@ interface DeviceDetailsProps {
   onOpenDeleteModal: () => void;
   onCloseDeleteModal: () => void;
   onNavigateBack: () => void;
+  onStateButtonClick: (state: any) => void;
+  selectedState: {
+    id: number;
+    name: string;
+    value: string;
+    defaultValue: string;
+    allowedValues: string[];
+  } | null;
+  onStateModalClose: () => void;
+  onStateModalSave: (value: string) => void;
+  isStateUpdating: boolean;
+  isSocketConnected: boolean;
+  socketError: Error | null;
+}
+
+interface DeviceState {
+  id: number;
+  stateName: string;
+  dataType: string;
+  defaultValue: string;
+  allowedValues: string[];
+  createdAt: string;
+  updatedAt: string;
 }
 
 const DeviceDetails: React.FC<DeviceDetailsProps> = ({
   device,
   organization,
+  area,
   isLoading,
   error,
   isDeleting,
@@ -29,9 +67,226 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({
   onDelete,
   onOpenDeleteModal,
   onCloseDeleteModal,
-  onNavigateBack
+  onNavigateBack,
+  onStateButtonClick,
+  selectedState,
+  onStateModalClose,
+  onStateModalSave,
+  isStateUpdating,
+  isSocketConnected,
+  socketError
 }) => {
   const { t } = useTranslation();
+  const { darkMode } = useTheme();
+  const colors = useThemeColors();
+  const dispatch = useDispatch<AppDispatch>();
+  const deviceStates = useSelector(selectDeviceStates);
+  const statesLoading = useSelector(selectDeviceStatesLoading);
+  const statesError = useSelector(selectDeviceStatesError);
+  const authToken = useSelector((state: RootState) => state.auth.token);
+  const isMobile = window.innerWidth < 768;
+
+  // Remove socket connection since we're getting it from props now
+  const containerStyle = {
+    padding: isMobile ? '1rem' : '1.5rem 2rem',
+    backgroundColor: darkMode ? colors.background : 'transparent'
+  };
+
+  const contentContainerStyle = {
+    maxWidth: '48rem',
+    margin: '0 auto'
+  };
+
+  const headerStyle = {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: isMobile ? 'flex-start' as const : 'center' as const,
+    flexDirection: isMobile ? 'column' as const : 'row' as const,
+    marginBottom: '1.5rem',
+    gap: isMobile ? '1rem' : '0'
+  };
+
+  const titleStyle = {
+    fontSize: '1.5rem',
+    fontWeight: 600,
+    color: darkMode ? colors.textPrimary : '#111827',
+    margin: 0
+  };
+
+  const buttonGroupStyle = {
+    display: 'flex',
+    gap: '0.5rem',
+    flexWrap: isMobile ? 'wrap' as const : 'nowrap' as const,
+    width: isMobile ? '100%' : 'auto'
+  };
+
+  const buttonStyle = (variant: 'primary' | 'secondary' | 'danger') => ({
+    padding: '0.5rem 1rem',
+    backgroundColor:
+      variant === 'primary'
+        ? darkMode
+          ? '#4d7efa'
+          : '#3b82f6'
+        : variant === 'danger'
+        ? darkMode
+          ? '#ef5350'
+          : '#ef4444'
+        : darkMode
+        ? colors.surfaceBackground
+        : 'white',
+    color:
+      variant === 'secondary'
+        ? darkMode
+          ? colors.textSecondary
+          : '#4b5563'
+        : 'white',
+    border:
+      variant === 'secondary'
+        ? `1px solid ${darkMode ? colors.border : '#d1d5db'}`
+        : 'none',
+    borderRadius: '0.375rem',
+    fontSize: '0.875rem',
+    fontWeight: 500,
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    transition: 'all 0.2s',
+    flexGrow: isMobile ? 1 : 0,
+    minWidth: isMobile ? '0' : '5rem',
+    textDecoration: 'none'
+  });
+
+  const cardStyle = {
+    backgroundColor: darkMode ? colors.cardBackground : 'white',
+    borderRadius: '0.5rem',
+    boxShadow: darkMode
+      ? '0 1px 3px 0 rgba(0, 0, 0, 0.2), 0 1px 2px 0 rgba(0, 0, 0, 0.1)'
+      : '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+    border: `1px solid ${darkMode ? colors.border : '#e5e7eb'}`,
+    overflow: 'hidden'
+  };
+
+  const sectionStyle = {
+    padding: '1.5rem',
+    borderBottom: `1px solid ${darkMode ? colors.border : '#e5e7eb'}`
+  };
+
+  const sectionTitleStyle = {
+    fontSize: '1.125rem',
+    fontWeight: 600,
+    color: darkMode ? colors.textPrimary : '#111827',
+    marginBottom: '1rem'
+  };
+
+  const gridStyle = {
+    display: 'grid',
+    gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
+    gap: '1.5rem'
+  };
+
+  const labelStyle = {
+    fontSize: '0.875rem',
+    fontWeight: 500,
+    color: darkMode ? colors.textSecondary : '#6b7280',
+    marginBottom: '0.25rem'
+  };
+
+  const valueStyle = {
+    fontSize: '1rem',
+    color: darkMode ? colors.textPrimary : '#111827'
+  };
+
+  const getStatusBadgeStyle = (status: DeviceStatus) => {
+    const colors = {
+      active: {
+        bg: darkMode ? 'rgba(52, 211, 153, 0.2)' : '#dcfce7',
+        text: darkMode ? '#34d399' : '#166534',
+        dot: '#16a34a'
+      },
+      inactive: {
+        bg: darkMode ? 'rgba(239, 68, 68, 0.2)' : '#fee2e2',
+        text: darkMode ? '#ef4444' : '#b91c1c',
+        dot: '#ef4444'
+      },
+      pending: {
+        bg: darkMode ? 'rgba(234, 179, 8, 0.2)' : '#fef3c7',
+        text: darkMode ? '#eab308' : '#92400e',
+        dot: '#eab308'
+      }
+    };
+
+    return {
+      display: 'inline-flex',
+      alignItems: 'center',
+      padding: '0.25rem 0.625rem',
+      borderRadius: '9999px',
+      fontSize: '0.75rem',
+      fontWeight: 500,
+      backgroundColor: colors[status].bg,
+      color: colors[status].text,
+      dot: {
+        width: '0.5rem',
+        height: '0.5rem',
+        borderRadius: '50%',
+        backgroundColor: colors[status].dot,
+        marginRight: '0.375rem'
+      }
+    };
+  };
+
+  const modalOverlayStyle = {
+    position: 'fixed' as const,
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.75)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '1rem'
+  };
+
+  const modalStyle = {
+    backgroundColor: darkMode ? colors.cardBackground : 'white',
+    borderRadius: '0.5rem',
+    padding: '1.5rem',
+    width: '100%',
+    maxWidth: '28rem',
+    position: 'relative' as const
+  };
+
+  const modalIconStyle = {
+    width: '2.5rem',
+    height: '2.5rem',
+    backgroundColor: darkMode ? 'rgba(239, 68, 68, 0.2)' : '#fee2e2',
+    borderRadius: '50%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: '1rem'
+  };
+
+  const statesGridStyle = {
+    display: 'grid',
+    gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(250px, 1fr))',
+    gap: '1rem',
+    padding: '1.5rem',
+  };
+
+  const stateCardStyle = {
+    backgroundColor: darkMode ? colors.surfaceBackground : '#f9fafb',
+    borderRadius: '0.5rem',
+    padding: '1rem',
+    border: `1px solid ${darkMode ? colors.border : '#e5e7eb'}`
+  };
+
+  useEffect(() => {
+    if (device?.id && device?.organizationId) {
+      dispatch(fetchDeviceStates({ deviceId: device.id, organizationId: device.organizationId }));
+    }
+  }, [dispatch, device?.id, device?.organizationId]);
 
   if (isLoading) {
     return <LoadingScreen />;
@@ -39,19 +294,29 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({
 
   if (error) {
     return (
-      <div className="py-6 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-3xl mx-auto">
-          <div className="bg-red-50 p-4 rounded-md">
-            <h3 className="text-sm font-medium text-red-800">{error}</h3>
+      <div style={containerStyle}>
+        <div style={contentContainerStyle}>
+          <div style={{
+            backgroundColor: darkMode ? colors.dangerBackground : '#fee2e2',
+            color: darkMode ? colors.dangerText : '#b91c1c',
+            padding: '1rem',
+            borderRadius: '0.5rem',
+            marginBottom: '1rem'
+          }}>
+            {error}
           </div>
-          <div className="mt-4">
-            <Button
-              variant="outline"
-              onClick={onNavigateBack}
-            >
-              {t('back_to_devices')}
-            </Button>
-          </div>
+          <button
+            onClick={onNavigateBack}
+            style={buttonStyle('secondary')}
+            onMouseOver={(e) => {
+              e.currentTarget.style.backgroundColor = darkMode ? 'rgba(0, 0, 0, 0.1)' : '#f9fafb';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.backgroundColor = darkMode ? colors.surfaceBackground : 'white';
+            }}
+          >
+            {t('back_to_devices')}
+          </button>
         </div>
       </div>
     );
@@ -59,187 +324,581 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({
 
   if (!device) {
     return (
-      <div className="py-6 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-3xl mx-auto">
-          <div className="bg-yellow-50 p-4 rounded-md">
-            <h3 className="text-sm font-medium text-yellow-800">{t('device_not_found')}</h3>
+      <div style={containerStyle}>
+        <div style={contentContainerStyle}>
+          <div style={{
+            backgroundColor: darkMode ? colors.warningBackground : '#fef3c7',
+            color: darkMode ? colors.warningText : '#92400e',
+            padding: '1rem',
+            borderRadius: '0.5rem',
+            marginBottom: '1rem'
+          }}>
+            {t('devices.deviceNotFound')}
           </div>
-          <div className="mt-4">
-            <Button
-              variant="outline"
-              onClick={onNavigateBack}
-            >
-              {t('back_to_devices')}
-            </Button>
-          </div>
+          <button
+            onClick={onNavigateBack}
+            style={buttonStyle('secondary')}
+            onMouseOver={(e) => {
+              e.currentTarget.style.backgroundColor = darkMode ? 'rgba(0, 0, 0, 0.1)' : '#f9fafb';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.backgroundColor = darkMode ? colors.surfaceBackground : 'white';
+            }}
+          >
+            {t('devices.backToDevices')}
+          </button>
         </div>
       </div>
     );
   }
 
+  const renderDeviceStates = () => {
+    if (!device.states || device.states.length === 0) {
+      return null;
+    }
+
+    return (
+      <div style={cardStyle}>
+        <div style={{ 
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '1rem',
+          padding: '1.5rem 1.5rem 0'
+        }}>
+          <h2 style={sectionTitleStyle}>
+            {t('devices.detail.deviceStatus')}
+            {isSocketConnected && (
+              <span style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                marginLeft: '0.75rem',
+                fontSize: '0.75rem',
+                fontWeight: 500,
+                color: darkMode ? colors.successText : '#166534',
+              }}>
+                <span style={{
+                  width: '0.5rem',
+                  height: '0.5rem',
+                  borderRadius: '50%',
+                  backgroundColor: '#16a34a',
+                  marginRight: '0.375rem',
+                  animation: 'pulse 2s infinite',
+                }}></span>
+                {t('live')}
+              </span>
+            )}
+          </h2>
+          
+          <Link to={`/debug/device-state-test`} style={{ textDecoration: 'none' }}>
+            <button
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                padding: '0.5rem 0.75rem',
+                backgroundColor: darkMode ? colors.infoBackground : '#dbeafe',
+                color: darkMode ? colors.infoText : '#1e40af',
+                border: 'none',
+                borderRadius: '0.375rem',
+                fontSize: '0.75rem',
+                fontWeight: 500,
+                cursor: 'pointer',
+              }}
+            >
+              <svg style={{ width: '0.875rem', height: '0.875rem', marginRight: '0.375rem' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              {t('devices.detail.socketDebug')}
+            </button>
+          </Link>
+        </div>
+
+        {socketError && (
+          <div style={{
+            margin: '0 1.5rem 1rem',
+            padding: '0.75rem',
+            backgroundColor: darkMode ? colors.dangerBackground : '#fee2e2',
+            color: darkMode ? colors.dangerText : '#b91c1c',
+            borderRadius: '0.375rem',
+            fontSize: '0.875rem'
+          }}>
+            {socketError.message}
+          </div>
+        )}
+
+        <div style={statesGridStyle}>
+          {device.states.map((state) => {
+            const allowedValues = JSON.parse(state.allowedValues);
+            const currentValue = state.instances[0]?.value || state.defaultValue;
+
+            return (
+              <div key={state.id} style={stateCardStyle}>
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: '0.5rem'
+                }}>
+                  <span style={{
+                    fontSize: '0.875rem',
+                    fontWeight: 500,
+                    color: darkMode ? colors.textPrimary : '#111827'
+                  }}>
+                    {state.stateName}
+                  </span>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => onStateButtonClick(state)}
+                  >
+                    {t('change')}
+                  </Button>
+                </div>
+                <div style={{
+                  padding: '0.5rem',
+                  backgroundColor: darkMode ? colors.surfaceBackground : '#f3f4f6',
+                  borderRadius: '0.375rem',
+                  fontSize: '0.875rem',
+                  color: darkMode ? colors.textSecondary : '#4b5563'
+                }}>
+                  {currentValue}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
+  // const renderNotifications = () => {
+  //   return (
+  //     <div style={cardStyle}>
+  //       <h2 style={sectionTitleStyle}>{t('device_states')}
+  //         {isSocketConnected && (
+  //           <span style={{
+  //             display: 'inline-flex',
+  //             alignItems: 'center',
+  //             marginLeft: '0.75rem',
+  //             fontSize: '0.75rem',
+  //             fontWeight: 500,
+  //             color: darkMode ? colors.successText : '#166534',
+  //           }}>
+  //             <span style={{
+  //               width: '0.5rem',
+  //               height: '0.5rem',
+  //               borderRadius: '50%',
+  //               backgroundColor: '#16a34a',
+  //               marginRight: '0.375rem',
+  //               animation: 'pulse 2s infinite',
+  //             }}></span>
+  //             {t('live')}
+  //           </span>
+  //         )}
+  //       </h2>
+  //       {socketError && (
+  //         <div style={{
+  //           padding: '0.75rem',
+  //           marginTop: '1rem',
+  //           backgroundColor: darkMode ? colors.dangerBackground : '#fee2e2',
+  //           color: darkMode ? colors.dangerText : '#b91c1c',
+  //           borderRadius: '0.375rem',
+  //         }}>
+  //           {socketError.message}
+  //         </div>
+  //       )}
+  //     </div>
+  //   );
+  // };
+
   return (
-    <div className="py-6 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-semibold text-gray-900">{device.name}</h1>
-          <div className="flex space-x-3">
-            <Button
-              variant="outline"
+    <div style={containerStyle}>
+      <div style={contentContainerStyle}>
+        <div style={headerStyle}>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <button
               onClick={onNavigateBack}
+              style={{
+                backgroundColor: 'transparent',
+                border: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginRight: '0.75rem',
+                padding: '0.5rem',
+                borderRadius: '0.375rem',
+                cursor: 'pointer'
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.backgroundColor = darkMode ? colors.surfaceBackground : '#f3f4f6';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+              }}
             >
-              {t('back')}
-            </Button>
-            <Link to={`/devices/${device.id}/edit`}>
-              <Button variant="primary">
-                {t('edit')}
-              </Button>
+              <svg
+                style={{
+                  width: '1.25rem',
+                  height: '1.25rem',
+                  color: darkMode ? colors.textSecondary : '#4b5563'
+                }}
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                />
+              </svg>
+            </button>
+            <h1 style={titleStyle}>{device.name}</h1>
+          </div>
+
+          <div style={buttonGroupStyle}>
+            <Link
+              to={`/devices/${device.id}/edit`}
+              style={buttonStyle('primary')}
+              onMouseOver={(e) => {
+                e.currentTarget.style.backgroundColor = darkMode ? '#5d8efa' : '#2563eb';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.backgroundColor = darkMode ? '#4d7efa' : '#3b82f6';
+              }}
+            >
+              <svg
+                style={{ width: '1rem', height: '1rem', marginRight: '0.375rem' }}
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                />
+              </svg>
+              {t('edit')}
             </Link>
-            <Button
-              variant="danger"
+            <button
               onClick={onOpenDeleteModal}
+              style={buttonStyle('danger')}
+              onMouseOver={(e) => {
+                e.currentTarget.style.backgroundColor = darkMode ? '#f44336' : '#dc2626';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.backgroundColor = darkMode ? '#ef5350' : '#ef4444';
+              }}
             >
+              <svg
+                style={{ width: '1rem', height: '1rem', marginRight: '0.375rem' }}
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                />
+              </svg>
               {t('delete')}
-            </Button>
+            </button>
           </div>
         </div>
 
-        <div className="bg-white shadow rounded-lg overflow-hidden">
-          {/* Device Details */}
-          <div className="p-6">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">{t('device_details')}</h2>
-            <dl className="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
+        <div style={cardStyle}>
+          <div style={sectionStyle}>
+            <h2 style={sectionTitleStyle}>{t('device_details')}</h2>
+            <div style={gridStyle}>
               <div>
-                <dt className="text-sm font-medium text-gray-500">{t('type')}</dt>
-                <dd className="mt-1 text-sm text-gray-900">
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-blue-100 text-blue-800">
-                    {device.type}
-                  </span>
-                </dd>
-              </div>
-              
-              <div>
-                <dt className="text-sm font-medium text-gray-500">{t('status')}</dt>
-                <dd className="mt-1">
-                  <span
-                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      device.status
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-red-100 text-red-800'
-                    }`}
-                  >
-                    {device.status ? t('active') : t('inactive')}
-                  </span>
-                </dd>
-              </div>
-              
-              <div>
-                <dt className="text-sm font-medium text-gray-500">{t('serial_number')}</dt>
-                <dd className="mt-1 text-sm text-gray-900">{device.serialNumber}</dd>
-              </div>
-              
-              {device.firmware && (
-                <div>
-                  <dt className="text-sm font-medium text-gray-500">{t('firmware')}</dt>
-                  <dd className="mt-1 text-sm text-gray-900">{device.firmware}</dd>
+                <div style={{ marginBottom: '1rem' }}>
+                  <p style={labelStyle}>{t('devices.deviceType')}</p>
+                  <p style={valueStyle}>
+                    <span style={{
+                      display: 'inline-block',
+                      padding: '0.25rem 0.75rem',
+                      backgroundColor: darkMode ? colors.infoBackground : '#dbeafe',
+                      color: darkMode ? colors.infoText : '#1e40af',
+                      borderRadius: '9999px',
+                      fontSize: '0.75rem'
+                    }}>
+                      {device.deviceType}
+                    </span>
+                  </p>
                 </div>
-              )}
-              
+
+                <div style={{ marginBottom: '1rem' }}>
+                  <p style={labelStyle}>{t('devices.status')}</p>
+                  <p style={valueStyle}>
+                    <span style={getStatusBadgeStyle(device.status)}>
+                      <span style={getStatusBadgeStyle(device.status).dot}></span>
+                      {t(`devices.statuses.${device.status}`)}
+                    </span>
+                  </p>
+                </div>
+
+                <div style={{ marginBottom: '1rem' }}>
+                  <p style={labelStyle}>{t('devices.controlType')}</p>
+                  <p style={valueStyle}>
+                    {device.controlType}
+                  </p>
+                </div>
+
+                {device.communicationProtocol && (
+                  <div style={{ marginBottom: '1rem' }}>
+                    <p style={labelStyle}>{t('devices.protocol')}</p>
+                    <p style={valueStyle}>
+                      {t(`devices.protocols.${device.communicationProtocol}`)}
+                    </p>
+                  </div>
+                )}
+              </div>
+
               <div>
-                <dt className="text-sm font-medium text-gray-500">{t('organization')}</dt>
-                <dd className="mt-1 text-sm text-gray-900">
-                  {organization ? (
-                    <Link 
-                      to={`/organizations/${device.organizationId}`}
-                      className="text-blue-600 hover:text-blue-800"
+                <div style={{ marginBottom: '1rem' }}>
+                  <p style={labelStyle}>{t('devices.organization')}</p>
+                  <p style={valueStyle}>
+                    {organization ? (
+                      <Link
+                        to={`/organizations/${device.organizationId}`}
+                        style={{
+                          color: darkMode ? '#4d7efa' : '#3b82f6',
+                          textDecoration: 'none'
+                        }}
+                        onMouseOver={(e) => {
+                          e.currentTarget.style.color = darkMode ? '#5d8efa' : '#2563eb';
+                        }}
+                        onMouseOut={(e) => {
+                          e.currentTarget.style.color = darkMode ? '#4d7efa' : '#3b82f6';
+                        }}
+                      >
+                        {organization.name}
+                      </Link>
+                    ) : (
+                      t('not_available')
+                    )}
+                  </p>
+                </div>
+
+                {area && (
+                  <div style={{ marginBottom: '1rem' }}>
+                    <p style={labelStyle}>{t('devices.area')}</p>
+                    <p style={valueStyle}>
+                      <span style={{
+                        display: 'inline-block',
+                        padding: '0.25rem 0.75rem',
+                        backgroundColor: darkMode ? colors.successBackground : '#dcfce7',
+                        color: darkMode ? colors.successText : '#166534',
+                        borderRadius: '9999px',
+                        fontSize: '0.75rem'
+                      }}>
+                        {area.name}
+                      </span>
+                    </p>
+                  </div>
+                )}
+
+                <div style={{ marginBottom: '1rem' }}>
+                  <p style={labelStyle}>{t('devices.isCritical')}</p>
+                  <p style={valueStyle}>
+                    <span style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      padding: '0.25rem 0.75rem',
+                      backgroundColor: device.isCritical
+                        ? (darkMode ? colors.dangerBackground : '#fee2e2')
+                        : (darkMode ? colors.surfaceBackground : '#f3f4f6'),
+                      color: device.isCritical
+                        ? (darkMode ? colors.dangerText : '#b91c1c')
+                        : (darkMode ? colors.textSecondary : '#4b5563'),
+                      borderRadius: '9999px',
+                      fontSize: '0.75rem'
+                    }}>
+                      {device.isCritical ? t('yes') : t('no')}
+                    </span>
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {device.description && (
+              <div style={{ marginTop: '1rem' }}>
+                <p style={labelStyle}>{t('devices.description')}</p>
+                <p style={valueStyle}>{device.description}</p>
+              </div>
+            )}
+
+            {device.controlModes && (
+              <div style={{ marginTop: '1rem' }}>
+                <p style={labelStyle}>{t('devices.controlModes')}</p>
+                <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: '0.5rem' }}>
+                  {device.controlModes.split(',').map(mode => (
+                    <span
+                      key={mode}
+                      style={{
+                        display: 'inline-block',
+                        padding: '0.25rem 0.75rem',
+                        backgroundColor: darkMode ? colors.infoBackground : '#dbeafe',
+                        color: darkMode ? colors.infoText : '#1e40af',
+                        borderRadius: '9999px',
+                        fontSize: '0.75rem'
+                      }}
                     >
-                      {organization.name}
-                    </Link>
-                  ) : (
-                    t('not_available')
-                  )}
-                </dd>
+                      {mode}
+                    </span>
+                  ))}
+                </div>
               </div>
+            )}
 
-              {device.description && (
-                <div className="sm:col-span-2">
-                  <dt className="text-sm font-medium text-gray-500">{t('description')}</dt>
-                  <dd className="mt-1 text-sm text-gray-900">{device.description}</dd>
-                </div>
-              )}
+            {device.controlType === 'range' && (
+              <div style={{ marginTop: '1rem' }}>
+                <p style={labelStyle}>{t('devices.range')}</p>
+                <p style={valueStyle}>{device.minValue} - {device.maxValue}</p>
+              </div>
+            )}
 
-              {Object.keys(device.configuration || {}).length > 0 && (
-                <div className="sm:col-span-2">
-                  <dt className="text-sm font-medium text-gray-500 mb-2">{t('configuration')}</dt>
-                  <dd className="mt-1">
-                    <div className="bg-gray-50 rounded-md p-4">
-                      <dl className="grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2">
-                        {Object.entries(device.configuration || {}).map(([key, value]) => (
-                          <div key={key}>
-                            <dt className="text-xs font-medium text-gray-500">{key}</dt>
-                            <dd className="mt-1 text-sm text-gray-900">{value}</dd>
-                          </div>
-                        ))}
-                      </dl>
-                    </div>
-                  </dd>
-                </div>
-              )}
-            </dl>
+            {device.defaultState && (
+              <div style={{ marginTop: '1rem' }}>
+                <p style={labelStyle}>{t('devices.defaultState')}</p>
+                <p style={valueStyle}>{device.defaultState}</p>
+              </div>
+            )}
           </div>
+
+          {Object.keys(device.metadata || {}).length > 0 && (
+            <div style={sectionStyle}>
+              <h3 style={sectionTitleStyle}>{t('devices.metadata')}</h3>
+              <div style={gridStyle}>
+                {Object.entries(device.metadata || {}).map(([key, value]) => (
+                  <div key={key}>
+                    <p style={labelStyle}>{key}</p>
+                    <p style={valueStyle}>{String(value)}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {Object.keys(device.capabilities || {}).length > 0 && (
+            <div style={sectionStyle}>
+              <h3 style={sectionTitleStyle}>{t('devices.capabilities')}</h3>
+              <div style={gridStyle}>
+                {Object.entries(device.capabilities || {}).map(([key, value]) => (
+                  <div key={key}>
+                    <p style={labelStyle}>{key}</p>
+                    <p style={valueStyle}>
+                      {Array.isArray(value) ? value.join(', ') : String(value)}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {renderDeviceStates()}
+          {/* {renderNotifications()} */}
         </div>
       </div>
 
-      {/* Delete Confirmation Modal */}
       {deleteModalOpen && (
-        <div className="fixed z-10 inset-0 overflow-y-auto">
-          <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div className="fixed inset-0 transition-opacity" aria-hidden="true">
-              <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
+        <div style={modalOverlayStyle}>
+          <div style={modalStyle}>
+            <div style={{ textAlign: 'center' as const }}>
+              <div style={modalIconStyle}>
+                <svg
+                  style={{
+                    width: '1.5rem',
+                    height: '1.5rem',
+                    color: darkMode ? '#ef5350' : '#ef4444'
+                  }}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                  />
+                </svg>
+              </div>
+              <h3 style={{
+                fontSize: '1.25rem',
+                fontWeight: 600,
+                color: darkMode ? colors.textPrimary : '#111827',
+                marginBottom: '0.5rem'
+              }}>
+                {t('devices.deleteDevice')}
+              </h3>
+              <p style={{
+                fontSize: '0.875rem',
+                color: darkMode ? colors.textSecondary : '#6b7280',
+                marginBottom: '1.5rem'
+              }}>
+                {t('devices.deleteDeviceConfirm', { name: device.name })}
+              </p>
             </div>
-
-            <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-
-            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                <div className="sm:flex sm:items-start">
-                  <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
-                    <svg className="h-6 w-6 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                    </svg>
-                  </div>
-                  <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                    <h3 className="text-lg font-medium text-gray-900">{t('delete_device')}</h3>
-                    <div className="mt-2">
-                      <p className="text-sm text-gray-500">
-                        {t('delete_device_confirm', { name: device.name })}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                <Button
-                  type="button"
-                  variant="danger"
-                  isLoading={isDeleting}
-                  disabled={isDeleting}
-                  onClick={onDelete}
-                  className="w-full sm:w-auto sm:ml-3"
-                >
-                  {t('delete')}
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={onCloseDeleteModal}
-                  className="mt-3 w-full sm:mt-0 sm:w-auto"
-                >
-                  {t('cancel')}
-                </Button>
-              </div>
+            <div style={{
+              display: 'flex',
+              gap: '0.5rem',
+              justifyContent: 'flex-end'
+            }}>
+              <button
+                onClick={onCloseDeleteModal}
+                style={buttonStyle('secondary')}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.backgroundColor = darkMode ? 'rgba(0, 0, 0, 0.1)' : '#f9fafb';
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.backgroundColor = darkMode ? colors.surfaceBackground : 'white';
+                }}
+              >
+                {t('cancel')}
+              </button>
+              <button
+                onClick={onDelete}
+                disabled={isDeleting}
+                style={{
+                  ...buttonStyle('danger'),
+                  opacity: isDeleting ? 0.7 : 1,
+                  cursor: isDeleting ? 'not-allowed' : 'pointer'
+                }}
+                onMouseOver={(e) => {
+                  if (!isDeleting) {
+                    e.currentTarget.style.backgroundColor = darkMode ? '#f44336' : '#dc2626';
+                  }
+                }}
+                onMouseOut={(e) => {
+                  if (!isDeleting) {
+                    e.currentTarget.style.backgroundColor = darkMode ? '#ef5350' : '#ef4444';
+                  }
+                }}
+              >
+                {isDeleting ? t('deleting') : t('delete')}
+              </button>
             </div>
           </div>
         </div>
+      )}
+
+      {selectedState && (
+        <DeviceStateModal
+          isOpen={!!selectedState}
+          onClose={onStateModalClose}
+          stateName={selectedState.name}
+          currentValue={selectedState.value}
+          defaultValue={selectedState.defaultValue}
+          allowedValues={selectedState.allowedValues}
+          onSave={onStateModalSave}
+          isLoading={isStateUpdating}
+        />
       )}
     </div>
   );

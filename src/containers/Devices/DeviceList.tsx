@@ -7,6 +7,7 @@ import LoadingScreen from '../../components/common/Loading/LoadingScreen';
 import DeviceList from '../../components/devices/DeviceList';
 import { selectSelectedOrganizationId } from '../../state/slices/auth.slice';
 import { fetchDevicesByOrganizationId } from '../../state/slices/devices.slice';
+import type { DeviceType } from '../../constants/device';
 
 const DeviceListContainer = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -16,7 +17,7 @@ const DeviceListContainer = () => {
   const isLoading = useSelector(selectDevicesLoading);
   const error = useSelector(selectDevicesError);
   const [searchTerm, setSearchTerm] = useState('');
-  const [typeFilter, setTypeFilter] = useState<string>('');
+  const [typeFilter, setTypeFilter] = useState<DeviceType | ''>('');
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   
   // Handle window resize
@@ -44,17 +45,17 @@ const DeviceListContainer = () => {
   const filteredDevices = devices.filter(device => {
     const matchesSearch = 
       device.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      device.serialNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      // device.serialNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (device.description && device.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      device.type.toLowerCase().includes(searchTerm.toLowerCase());
+      device.deviceType.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const matchesType = typeFilter === '' || device.type === typeFilter;
+    const matchesType = typeFilter === '' || device.deviceType === typeFilter;
     
     return matchesSearch && matchesType;
   });
   
   // Get unique device types for filter
-  const deviceTypes = Array.from(new Set(devices.map(device => device.type)));
+  const deviceTypes = Array.from(new Set(devices.map(device => device.deviceType))) as DeviceType[];
   
   if (isLoading && devices.length === 0) {
     return <LoadingScreen />;
@@ -67,7 +68,7 @@ const DeviceListContainer = () => {
   return (
     <DeviceList
       devices={devices}
-      filteredDevices={filteredDevices}
+      filteredDevices={filteredDevices.filter(device => device.status=="active" || device.status=="pending")}
       searchTerm={searchTerm}
       setSearchTerm={setSearchTerm}
       typeFilter={typeFilter}
