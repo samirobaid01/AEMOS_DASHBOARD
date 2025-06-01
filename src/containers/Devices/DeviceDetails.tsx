@@ -1,7 +1,7 @@
-import { useEffect, useState, useCallback, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import type { AppDispatch, RootState } from '../../state/store';
+import { useEffect, useState, useCallback, useRef } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import type { AppDispatch, RootState } from "../../state/store";
 import {
   fetchDeviceDetails,
   updateDeviceState,
@@ -10,16 +10,19 @@ import {
   selectDeviceDetailsError,
   clearDeviceDetails,
   updateDeviceStateLocally,
-} from '../../state/slices/deviceDetails.slice';
-import { createDeviceStateInstance } from '../../state/slices/deviceStateInstances.slice';
-import { selectSelectedOrganization } from '../../state/slices/organizations.slice';
-import { selectSelectedOrganizationId } from '../../state/slices/auth.slice';
-import { fetchAreaById, selectSelectedArea } from '../../state/slices/areas.slice';
-import { deleteDevice } from '../../state/slices/devices.slice';
-import DeviceDetailsComponent from '../../components/devices/DeviceDetails';
-import { io } from 'socket.io-client';
-import type { DeviceStateNotification } from '../../hooks/useDeviceStateSocket';
-import { API_URL } from '../../config';
+} from "../../state/slices/deviceDetails.slice";
+import { createDeviceStateInstance } from "../../state/slices/deviceStateInstances.slice";
+import { selectSelectedOrganization } from "../../state/slices/organizations.slice";
+import { selectSelectedOrganizationId } from "../../state/slices/auth.slice";
+import {
+  fetchAreaById,
+  selectSelectedArea,
+} from "../../state/slices/areas.slice";
+import { deleteDevice } from "../../state/slices/devices.slice";
+import DeviceDetailsComponent from "../../components/devices/DeviceDetails";
+import type { DeviceStateNotification } from "../../hooks/useDeviceStateSocket";
+import { useDeviceStateSocket } from "../../hooks/useDeviceStateSocket";
+import { API_URL } from "../../config";
 
 interface SelectedState {
   id: number;
@@ -33,120 +36,126 @@ const DeviceDetails = () => {
   const { id } = useParams<{ id: string }>();
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
-  
+
   const device = useSelector(selectDeviceDetails);
   const organization = useSelector(selectSelectedOrganization);
   const organizationId = useSelector(selectSelectedOrganizationId);
-  const authToken = useSelector((state: RootState) => state.auth.token) || '';
+  const authToken = useSelector((state: RootState) => state.auth.token) || "";
   const area = useSelector(selectSelectedArea);
   const isLoading = useSelector(selectDeviceDetailsLoading);
   const error = useSelector(selectDeviceDetailsError);
-  
+
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const socketRef = useRef<any>(null);
-  const [isConnected, setIsConnected] = useState(false);
-  const [socketError, setSocketError] = useState<Error | null>(null);
-  const [selectedState, setSelectedState] = useState<SelectedState | null>(null);
+  const [selectedState, setSelectedState] = useState<SelectedState | null>(
+    null
+  );
   const [isStateUpdating, setIsStateUpdating] = useState(false);
 
+  const previousDeviceUuid = useRef("");
+  const previousAuthToken = useRef("");
+  const isComponentMounted = useRef(true);
+
+  // Set mounted flag
+  useEffect(() => {
+    isComponentMounted.current = true;
+    return () => {
+      isComponentMounted.current = false;
+    };
+  }, []);
+
   // Handle notifications
-  const handleNotification = useCallback((notification: DeviceStateNotification) => {
-    if (!device?.uuid || !notification.metadata) return;
+  const handleNotification = useCallback(
+    (notification: DeviceStateNotification) => {
+      // Return early if component is unmounting or no device
+      if (!device?.uuid || !notification.metadata) return;
 
-    console.log('[DeviceDetails] Received notification:', {
-      deviceUuid: notification.metadata.deviceUuid,
-      currentDeviceUuid: device.uuid,
-      stateName: notification.metadata.stateName,
-      newValue: notification.metadata.newValue
-    });
+      // Check if the notification is for this device
+      if (notification.metadata.deviceUuid !== device.uuid) {
+        return;
+      }
 
-    if (notification.metadata.deviceUuid !== device.uuid) {
-      return;
-    }
+      console.log("[DeviceDetails] Received notification:", {
+        deviceUuid: notification.metadata.deviceUuid,
+        currentDeviceUuid: device.uuid,
+        stateName: notification.metadata.stateName,
+        newValue: notification.metadata.newValue,
+      });
 
-    const state = device.states.find(s => s.stateName === notification.metadata.stateName);
-    if (!state) return;
+      const state = device.states.find(
+        (s) => s.stateName === notification.metadata.stateName
+      );
+      if (!state) return;
 
-    dispatch(updateDeviceStateLocally({
-      stateId: state.id,
-      value: notification.metadata.newValue
-    }));
-  }, [device, dispatch]);
+      dispatch(
+        updateDeviceStateLocally({
+          stateId: state.id,
+          value: notification.metadata.newValue,
+        })
+      );
+    },
+    [device, dispatch]
+  );
+
+  // Use the optimized socket hook
+  const {
+    isConnected,
+    lastError: socketError,
+    connect,
+    joinDeviceUuidRoom,
+    disconnect,
+  } = useDeviceStateSocket({
+    serverUrl: API_URL.replace("/api/v1/", ""),
+    authToken,
+    deviceUuid: device?.uuid || "",
+    onNotification: handleNotification,
+    onConnectionChange: (connected) => {
+      console.log("[DeviceDetails] Socket connection status:", connected);
+    },
+  });
+
+  // Main cleanup effect
+  useEffect(() => {
+    return () => {
+      console.log("[DeviceDetails] Component unmounting - cleaning up socket");
+      disconnect();
+    };
+  }, []); // Empty dependency array to run only on unmount
 
   // Handle socket connection
   useEffect(() => {
-    if (!device?.uuid || !authToken) {
-      return;
+    if (!authToken || !device?.uuid) return;
+
+    const deviceUuid = device.uuid;
+    const currentAuthToken = authToken;
+
+    console.log("[DeviceDetails] Initializing socket connection");
+    connect();
+
+    if (isConnected) {
+      console.log("[DeviceDetails] Joining device UUID room:", deviceUuid);
+      joinDeviceUuidRoom(deviceUuid);
     }
 
-    try {
-      // Create socket instance
-      const socket = io(API_URL.replace('/api/v1/', ''), {
-        path: '/socket.io',
-        transports: ['websocket', 'polling'],
-        reconnection: true,
-        reconnectionAttempts: 10,
-        reconnectionDelay: 1000,
-        auth: { token: authToken }
-      });
-
-      // Store socket reference
-      socketRef.current = socket;
-
-      // Set up event handlers
-      socket.on('connect', () => {
-        console.log('[DeviceDetails] Socket connected:', socket.id);
-        setIsConnected(true);
-        
-        // Join device room
-        const room = `device-uuid-${device.uuid}`;
-        console.log('[DeviceDetails] Joining room:', room);
-        socket.emit('join', room);
-      });
-
-      socket.on('disconnect', () => {
-        console.log('[DeviceDetails] Socket disconnected');
-        setIsConnected(false);
-      });
-
-      socket.on('device-state-change', handleNotification);
-
-      socket.on('connect_error', (error: Error) => {
-        console.error('[DeviceDetails] Socket connection error:', error);
-        setSocketError(error);
-      });
-
-      // Connect socket
-      console.log('[DeviceDetails] Initializing socket connection');
-      socket.connect();
-
-      // Cleanup
-      return () => {
-        console.log('[DeviceDetails] Cleaning up socket connection');
-        socket.off('connect');
-        socket.off('disconnect');
-        socket.off('device-state-change');
-        socket.off('connect_error');
-        socket.disconnect();
-        socketRef.current = null;
-        setIsConnected(false);
-        setSocketError(null);
-      };
-    } catch (error) {
-      console.error('[DeviceDetails] Socket setup error:', error);
-      setSocketError(error instanceof Error ? error : new Error('Failed to setup socket'));
-    }
-  }, [device?.uuid, authToken, handleNotification]);
+    return () => {
+      // Cleanup if auth token or device changes
+      if (deviceUuid !== device?.uuid || currentAuthToken !== authToken) {
+        console.log("[DeviceDetails] Auth/Device changed - cleaning up socket");
+        disconnect();
+      }
+    };
+  }, [authToken, device?.uuid, isConnected]);
 
   useEffect(() => {
     if (id && organizationId) {
-      dispatch(fetchDeviceDetails({ 
-        deviceId: parseInt(id, 10),
-        organizationId 
-      }));
+      dispatch(
+        fetchDeviceDetails({
+          deviceId: parseInt(id, 10),
+          organizationId,
+        })
+      );
     }
-    
+
     return () => {
       dispatch(clearDeviceDetails());
     };
@@ -164,7 +173,7 @@ const DeviceDetails = () => {
       name: state.stateName,
       value: state.instances[0]?.value || state.defaultValue,
       defaultValue: state.defaultValue,
-      allowedValues: JSON.parse(state.allowedValues)
+      allowedValues: JSON.parse(state.allowedValues),
     });
   };
 
@@ -177,16 +186,18 @@ const DeviceDetails = () => {
 
     setIsStateUpdating(true);
     try {
-      await dispatch(createDeviceStateInstance({
-        deviceUuid: device.uuid,
-        stateName: selectedState.name,
-        value,
-        initiatedBy: 'user'
-      })).unwrap();
+      await dispatch(
+        createDeviceStateInstance({
+          deviceUuid: device.uuid,
+          stateName: selectedState.name,
+          value,
+          initiatedBy: "user",
+        })
+      ).unwrap();
 
       setSelectedState(null);
     } catch (error) {
-      console.error('Error updating device state:', error);
+      console.error("Error updating device state:", error);
     } finally {
       setIsStateUpdating(false);
     }
@@ -194,17 +205,17 @@ const DeviceDetails = () => {
 
   const handleDelete = async () => {
     if (!id) return;
-    
+
     setIsDeleting(true);
     try {
       await dispatch(deleteDevice(parseInt(id, 10))).unwrap();
       // if (organizationId) {
       //   navigate(`/organizations/${organizationId}/devices`);
       // } else {
-        navigate('/devices');
+      navigate("/devices");
       // }
     } catch (error) {
-      console.error('Error deleting device:', error);
+      console.error("Error deleting device:", error);
     } finally {
       setIsDeleting(false);
       setDeleteModalOpen(false);
@@ -215,7 +226,7 @@ const DeviceDetails = () => {
     if (organizationId) {
       navigate(`/organizations/${organizationId}/devices`);
     } else {
-      navigate('/devices');
+      navigate("/devices");
     }
   };
 
@@ -243,4 +254,4 @@ const DeviceDetails = () => {
   );
 };
 
-export default DeviceDetails; 
+export default DeviceDetails;
