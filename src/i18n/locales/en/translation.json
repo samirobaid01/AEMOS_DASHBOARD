@@ -325,7 +325,8 @@
     "permission_denied": "Permission Denied",
     "no_access_permission": "You don't have permission to access this resource.",
     "go_to_dashboard": "Go to Dashboard",
-    "addField": "Add Field"
+    "addField": "Add Field",
+    "thisActionCannotBeUndone": "This action cannot be undone"
   },
   "errors": {
     "notFound": "Page not found",
@@ -367,6 +368,10 @@
     "noRules": "No rules found",
     "noRuleFound": "No rules match your search criteria. Try clearing filters or add a new rule.",
     "searchRule": "Search rule",
+    "deleteConfirmation": "Delete Rule Chain",
+    "deleteConfirmationMessage": "Are you sure you want to delete {{name}}?",
+    "deleteSuccess": "Rule chain deleted successfully",
+    "deleteError": "Failed to delete rule chain",
     "ruleNode":{
       "title":"Rule Nodes",
       "editNode":"Edit Node",
@@ -374,7 +379,8 @@
       "sourceType":"Source Type",
       "save":"Save",
       "cancel":"Cancel",
-      "nodeType":"Node Type"
+      "nodeType":"Node Type",
+      "nodeNotFound":"Node not found"
     }
   }
 } 
