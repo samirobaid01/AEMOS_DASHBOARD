@@ -1,16 +1,21 @@
-import React from 'react';
+import React, { useState } from 'react';
 import type { RuleChain } from '../../types/ruleEngine';
 import { useTheme } from '../../context/ThemeContext';
 import { useThemeColors } from '../../hooks/useThemeColors';
 import { useTranslation } from 'react-i18next';
+import { useRuleEnginePermissions } from '../../hooks/useRuleEnginePermissions';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { deleteRule } from '../../state/slices/ruleEngine.slice';
+import { toastService } from '../../services/toastService';
+import type { AppDispatch } from '../../state/store';
+import Modal from '../../components/common/Modal/Modal';
 
 interface RuleDetailsProps {
   rule: RuleChain | null;
   isLoading: boolean;
   error?: string | null;
   onBack?: () => void;
-  onEdit?: () => void;
-  onDelete?: () => void;
   windowWidth?: number;
 }
 
@@ -19,14 +24,41 @@ const RuleDetails: React.FC<RuleDetailsProps> = ({
   isLoading, 
   error,
   onBack,
-  onEdit,
-  onDelete,
   windowWidth = window.innerWidth
 }) => {
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const { t } = useTranslation();
   const { darkMode } = useTheme();
   const colors = useThemeColors();
   const isMobile = windowWidth < 768;
+  const navigate = useNavigate();
+  const dispatch = useDispatch<AppDispatch>();
+  const { canUpdate, canDelete } = useRuleEnginePermissions();
+
+  const handleEdit = () => {
+    if (rule) {
+      navigate(`/rule-engine/${rule.id}/edit`);
+    }
+  };
+
+  const handleDeleteClick = () => {
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    try {
+      if (!rule) return;
+      
+      await dispatch(deleteRule(rule.id)).unwrap();
+      toastService.success(t('ruleEngine.deleteSuccess'));
+      setShowDeleteModal(false);
+      navigate('/rule-engine');
+    } catch (error) {
+      toastService.error(t('ruleEngine.deleteError'));
+      console.error('Failed to delete rule chain:', error);
+      setShowDeleteModal(false);
+    }
+  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -76,21 +108,14 @@ const RuleDetails: React.FC<RuleDetailsProps> = ({
     width: isMobile ? '100%' : 'auto',
   };
 
-  const buttonStyle = (variant: 'primary' | 'secondary' | 'danger') => ({
+  const buttonStyle = (variant: 'primary' | 'danger') => ({
     padding: '0.5rem 1rem',
     backgroundColor:
       variant === 'primary'
         ? darkMode ? '#4d7efa' : '#3b82f6'
-        : variant === 'danger'
-        ? darkMode ? '#ef5350' : '#ef4444'
-        : darkMode ? colors.surfaceBackground : 'white',
-    color:
-      variant === 'secondary'
-        ? darkMode ? colors.textSecondary : '#4b5563'
-        : 'white',
-    border: variant === 'secondary'
-      ? `1px solid ${darkMode ? colors.border : '#d1d5db'}`
-      : 'none',
+        : darkMode ? '#ef5350' : '#ef4444',
+    color: 'white',
+    border: 'none',
     borderRadius: '0.375rem',
     fontSize: '0.875rem',
     fontWeight: 500,
@@ -136,6 +161,59 @@ const RuleDetails: React.FC<RuleDetailsProps> = ({
     color: darkMode ? colors.textPrimary : '#111827',
     border: `1px solid ${darkMode ? colors.border : '#e5e7eb'}`,
   };
+
+  const deleteModalFooter = (
+    <>
+      <button
+        onClick={() => setShowDeleteModal(false)}
+        style={{
+          padding: '0.5rem 1rem',
+          backgroundColor: darkMode ? colors.surfaceBackground : 'white',
+          color: darkMode ? colors.textSecondary : '#4b5563',
+          border: `1px solid ${darkMode ? colors.border : '#d1d5db'}`,
+          borderRadius: '0.375rem',
+          fontSize: '0.875rem',
+          fontWeight: 500,
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          transition: 'all 0.2s',
+        }}
+        onMouseOver={(e) => {
+          e.currentTarget.style.backgroundColor = darkMode ? colors.background : '#f3f4f6';
+        }}
+        onMouseOut={(e) => {
+          e.currentTarget.style.backgroundColor = darkMode ? colors.surfaceBackground : 'white';
+        }}
+      >
+        {t('common.cancel')}
+      </button>
+      <button
+        onClick={handleConfirmDelete}
+        style={{
+          padding: '0.5rem 1rem',
+          backgroundColor: darkMode ? '#ef5350' : '#ef4444',
+          color: 'white',
+          border: 'none',
+          borderRadius: '0.375rem',
+          fontSize: '0.875rem',
+          fontWeight: 500,
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          transition: 'all 0.2s',
+        }}
+        onMouseOver={(e) => {
+          e.currentTarget.style.backgroundColor = darkMode ? '#f44336' : '#dc2626';
+        }}
+        onMouseOut={(e) => {
+          e.currentTarget.style.backgroundColor = darkMode ? '#ef5350' : '#ef4444';
+        }}
+      >
+        {t('common.delete')}
+      </button>
+    </>
+  );
 
   if (isLoading) {
     return (
@@ -213,11 +291,11 @@ const RuleDetails: React.FC<RuleDetailsProps> = ({
           <h1 style={titleStyle}>{rule.name}</h1>
         </div>
 
-        {(onEdit || onDelete) && (
+        {(canUpdate || canDelete) && (
           <div style={buttonGroupStyle}>
-            {onEdit && (
+            {canUpdate && (
               <button
-                onClick={onEdit}
+                onClick={handleEdit}
                 style={buttonStyle('primary')}
                 onMouseOver={(e) => {
                   e.currentTarget.style.backgroundColor = darkMode ? '#5d8efa' : '#2563eb';
@@ -226,15 +304,25 @@ const RuleDetails: React.FC<RuleDetailsProps> = ({
                   e.currentTarget.style.backgroundColor = darkMode ? '#4d7efa' : '#3b82f6';
                 }}
               >
-                <svg style={{ width: '1rem', height: '1rem', marginRight: '0.375rem' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                <svg
+                  style={{ width: '1rem', height: '1rem', marginRight: '0.375rem' }}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                  />
                 </svg>
                 {t('common.edit')}
               </button>
             )}
-            {onDelete && (
+            {canDelete && (
               <button
-                onClick={onDelete}
+                onClick={handleDeleteClick}
                 style={buttonStyle('danger')}
                 onMouseOver={(e) => {
                   e.currentTarget.style.backgroundColor = darkMode ? '#f44336' : '#dc2626';
@@ -243,8 +331,18 @@ const RuleDetails: React.FC<RuleDetailsProps> = ({
                   e.currentTarget.style.backgroundColor = darkMode ? '#ef5350' : '#ef4444';
                 }}
               >
-                <svg style={{ width: '1rem', height: '1rem', marginRight: '0.375rem' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                <svg
+                  style={{ width: '1rem', height: '1rem', marginRight: '0.375rem' }}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                  />
                 </svg>
                 {t('common.delete')}
               </button>
@@ -328,6 +426,27 @@ const RuleDetails: React.FC<RuleDetailsProps> = ({
           )}
         </div>
       </div>
+
+      <Modal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        title={t('ruleEngine.deleteConfirmation')}
+        footer={deleteModalFooter}
+      >
+        <p style={{
+          color: darkMode ? colors.textPrimary : '#111827',
+          margin: '0 0 1rem 0',
+        }}>
+          {t('ruleEngine.deleteConfirmationMessage', { name: rule?.name })}
+        </p>
+        <p style={{
+          color: darkMode ? colors.dangerText : '#dc2626',
+          margin: '0',
+          fontSize: '0.875rem',
+        }}>
+          {t('common.thisActionCannotBeUndone')}
+        </p>
+      </Modal>
     </div>
   );
 };

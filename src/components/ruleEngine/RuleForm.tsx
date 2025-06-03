@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
-import * as yup from 'yup';
 import {
   TextField,
   Button,
@@ -17,11 +15,7 @@ import NodeDialog from './NodeDialog';
 import { useTheme } from '../../context/ThemeContext';
 import { useThemeColors } from '../../hooks/useThemeColors';
 import { useTranslation } from 'react-i18next';
-
-const schema = yup.object().shape({
-  name: yup.string().required('Name is required'),
-  description: yup.string().required('Description is required'),
-});
+import { ruleFormResolver } from '../../containers/RuleEngine/RuleEdit';
 
 interface RuleFormProps {
   initialData?: RuleChain;
@@ -93,7 +87,7 @@ const RuleForm: React.FC<RuleFormProps> = ({
     handleSubmit,
     formState: { errors },
   } = useForm({
-    resolver: yupResolver(schema),
+    resolver: ruleFormResolver,
     defaultValues: {
       name: initialData?.name || '',
       description: initialData?.description || '',

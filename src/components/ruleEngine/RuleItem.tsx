@@ -26,7 +26,6 @@ const RuleItem: React.FC<RuleItemProps> = ({ rule, windowWidth }) => {
   const { t } = useTranslation();
   const { darkMode } = useTheme();
   const colors = useThemeColors();
-  const isMobile = windowWidth < 768;
 
   React.useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
