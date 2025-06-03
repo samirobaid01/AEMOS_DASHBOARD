@@ -42,6 +42,12 @@ const DeviceCreate = lazy(() => import('../containers/Devices/DeviceCreate'));
 const DeviceEdit = lazy(() => import('../containers/Devices/DeviceEdit'));
 const DeviceDetails = lazy(() => import('../containers/Devices/DeviceDetails'));
 
+// Rule Engine
+const RuleList = lazy(() => import('../containers/RuleEngine/RuleList'));
+const RuleCreate = lazy(() => import('../containers/RuleEngine/RuleCreate'));
+const RuleEdit = lazy(() => import('../containers/RuleEngine/RuleEdit'));
+const RuleDetails = lazy(() => import('../containers/RuleEngine/RuleDetails'));
+
 // Profile and Settings
 const Profile = lazy(() => import('../containers/Auth/Profile'));
 const Settings = lazy(() => import('../containers/Dashboard/Settings'));
@@ -238,6 +244,51 @@ const AppRoutes = () => {
             <PrivateRoute requiredPermission="device.update">
               <DeviceEdit />
             </PrivateRoute>
+          }
+        />
+
+        {/* Rule Engine */}
+        <Route
+          path="/rule-engine"
+          element={
+            <Suspense fallback={<LoadingScreen />}>
+              <PrivateRoute requiredPermission="rule.view">
+                <RuleList />
+              </PrivateRoute>
+            </Suspense>
+          }
+        />
+        
+        <Route
+          path="/rule-engine/create"
+          element={
+            <Suspense fallback={<LoadingScreen />}>
+              <PrivateRoute requiredPermission="rule.create">
+                <RuleCreate />
+              </PrivateRoute>
+            </Suspense>
+          }
+        />
+        
+        <Route
+          path="/rule-engine/:id"
+          element={
+            <Suspense fallback={<LoadingScreen />}>
+              <PrivateRoute requiredPermission="rule.view">
+                <RuleDetails />
+              </PrivateRoute>
+            </Suspense>
+          }
+        />
+        
+        <Route
+          path="/rule-engine/:id/edit"
+          element={
+            <Suspense fallback={<LoadingScreen />}>
+              <PrivateRoute requiredPermission="rule.update">
+                <RuleEdit />
+              </PrivateRoute>
+            </Suspense>
           }
         />
         

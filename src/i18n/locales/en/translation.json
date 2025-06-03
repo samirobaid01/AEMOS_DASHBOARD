@@ -48,6 +48,7 @@
     "areas": "Areas",
     "sensors": "Sensors",
     "devices": "Devices",
+    "rules": "Rules",
     "settings": "Settings",
     "profile": "Profile"
   },
@@ -352,5 +353,28 @@
     "sms_notifications_desc": "Receive SMS alerts for critical events",
     "app_notifications": "App Notifications",
     "app_notifications_desc": "Receive in-app notifications and alerts"
+  },
+  "ruleEngine": {
+    "title": "Rule Engine",
+    "add": "Add Rule",
+    "createRuleChain": "Create Rule Chain",
+    "ruleChainName": "Rule Chain Name",
+    "ruleChainDescription": "Rule Chain Description",
+    "saving": "Saving...",
+    "updateRuleChain": "Update Rule Chain",
+    "edit": "Edit Rule",
+    "delete": "Delete Rule",
+    "noRules": "No rules found",
+    "noRuleFound": "No rules match your search criteria. Try clearing filters or add a new rule.",
+    "searchRule": "Search rule",
+    "ruleNode":{
+      "title":"Rule Nodes",
+      "editNode":"Edit Node",
+      "addNode":"Add Node",
+      "sourceType":"Source Type",
+      "save":"Save",
+      "cancel":"Cancel",
+      "nodeType":"Node Type"
+    }
   }
 } 

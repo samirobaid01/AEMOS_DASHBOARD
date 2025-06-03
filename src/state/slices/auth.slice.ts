@@ -1,13 +1,14 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSelector } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import type { AuthState, LoginRequest, LoginResponse, SignupRequest, User } from '../../types/auth';
 import type { RootState } from '../store';
 import * as authService from '../../services/auth.service';
 import { TOKEN_STORAGE_KEY, REFRESH_TOKEN_STORAGE_KEY } from '../../config';
 
-// Storage key for selected organization
-const SELECTED_ORG_KEY = 'selected_organization_id';
+// Constants for localStorage keys
 const USER_STORAGE_KEY = 'user';
+const SELECTED_ORG_KEY = 'organizationId';
 
 // Initial state
 const initialState: AuthState = {
@@ -18,6 +19,7 @@ const initialState: AuthState = {
   loading: false,
   error: null,
   selectedOrganizationId: null,
+  permissions: [],
 };
 
 // Async thunks
@@ -78,24 +80,23 @@ const checkInitialAuth = () => {
   try {
     if (userJson) {
       user = JSON.parse(userJson);
-      console.log('Auth slice: Loaded user from localStorage:', user);
-      console.log('Auth slice: User permissions from localStorage:', user?.permissions);
-      console.log('Auth slice: User roles from localStorage:', user?.roles);
-    } else {
-      console.log('Auth slice: No user found in localStorage');
+      console.log('Auth slice: Initial auth check - User permissions:', user?.permissions);
     }
   } catch (error) {
     console.error('Failed to parse user from localStorage:', error);
   }
   
   if (token && refreshToken) {
-    return {
+    const authState = {
       isAuthenticated: true,
       token,
       refreshToken,
       user,
       selectedOrganizationId: selectedOrganizationId ? parseInt(selectedOrganizationId, 10) : null,
+      permissions: user?.permissions || [],
     };
+    console.log('Auth slice: Initial auth state:', authState);
+    return authState;
   }
   return {
     isAuthenticated: false,
@@ -103,6 +104,7 @@ const checkInitialAuth = () => {
     refreshToken: null,
     user: null,
     selectedOrganizationId: null,
+    permissions: [],
   };
 };
 
@@ -116,12 +118,9 @@ const authInitialState = {
 const saveUserToLocalStorage = (user: User | null) => {
   if (user) {
     localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
-    console.log('Auth slice: Saved user to localStorage:', user);
-    console.log('Auth slice: User permissions saved:', user?.permissions);
-    console.log('Auth slice: User roles saved:', user?.roles);
+    console.log('Auth slice: Saving user permissions to localStorage:', user?.permissions);
   } else {
     localStorage.removeItem(USER_STORAGE_KEY);
-    console.log('Auth slice: Removed user from localStorage');
   }
 };
 
@@ -135,6 +134,8 @@ const authSlice = createSlice({
       state.token = action.payload.token;
       state.refreshToken = action.payload.refreshToken;
       state.isAuthenticated = true;
+      state.permissions = action.payload.user?.permissions || [];
+      console.log('Auth slice: Setting credentials with permissions:', state.permissions);
       localStorage.setItem(TOKEN_STORAGE_KEY, action.payload.token);
       localStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, action.payload.refreshToken);
       saveUserToLocalStorage(action.payload.user);
@@ -145,20 +146,28 @@ const authSlice = createSlice({
       state.refreshToken = null;
       state.isAuthenticated = false;
       state.selectedOrganizationId = null;
+      state.permissions = [];
       localStorage.removeItem(TOKEN_STORAGE_KEY);
       localStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY);
       localStorage.removeItem(SELECTED_ORG_KEY);
       saveUserToLocalStorage(null);
     },
     updateUser: (state, action: PayloadAction<User>) => {
-      console.log('Auth slice: updateUser action received', action.payload);
       state.user = action.payload;
+      state.permissions = action.payload?.permissions || [];
+      console.log('Auth slice: Updating user with permissions:', state.permissions);
       saveUserToLocalStorage(action.payload);
     },
     setSelectedOrganization: (state, action: PayloadAction<number>) => {
       console.log('Auth slice: setSelectedOrganization action received', action.payload);
       state.selectedOrganizationId = action.payload;
       localStorage.setItem(SELECTED_ORG_KEY, action.payload.toString());
+    },
+    setError: (state, action: PayloadAction<string>) => {
+      state.error = action.payload;
+    },
+    clearError: (state) => {
+      state.error = null;
     },
   },
   extraReducers: (builder) => {
@@ -173,8 +182,13 @@ const authSlice = createSlice({
       state.token = action.payload.token;
       state.refreshToken = action.payload.refreshToken;
       state.isAuthenticated = true;
+      state.permissions = action.payload.permissions || [];
+      console.log('Auth slice: Login fulfilled with permissions:', action.payload.permissions);
       // Save user to localStorage on successful login
-      saveUserToLocalStorage(action.payload.user);
+      saveUserToLocalStorage({
+        ...action.payload.user,
+        permissions: action.payload.permissions
+      });
     });
     builder.addCase(login.rejected, (state, action) => {
       state.loading = false;
@@ -192,8 +206,13 @@ const authSlice = createSlice({
       state.token = action.payload.token;
       state.refreshToken = action.payload.refreshToken;
       state.isAuthenticated = true;
+      state.permissions = action.payload.permissions || [];
+      console.log('Auth slice: Signup fulfilled with permissions:', action.payload.permissions);
       // Save user to localStorage on successful signup
-      saveUserToLocalStorage(action.payload.user);
+      saveUserToLocalStorage({
+        ...action.payload.user,
+        permissions: action.payload.permissions
+      });
     });
     builder.addCase(signup.rejected, (state, action) => {
       state.loading = false;
@@ -229,20 +248,43 @@ const authSlice = createSlice({
   },
 });
 
-export const { setCredentials, clearCredentials, setSelectedOrganization, updateUser } = authSlice.actions;
+export const { setCredentials, clearCredentials, setSelectedOrganization, updateUser, setError, clearError } = authSlice.actions;
 
-// Selectors with type assertions
-export const selectCurrentUser = (state: RootState) => (state as any).auth.user as User | null;
-export const selectIsAuthenticated = (state: RootState) => (state as any).auth.isAuthenticated as boolean;
-export const selectAuthLoading = (state: RootState) => (state as any).auth.loading as boolean;
-export const selectAuthError = (state: RootState) => (state as any).auth.error as string | null;
-export const selectSelectedOrganizationId = (state: RootState) => (state as any).auth.selectedOrganizationId as number | null;
+// Selectors
+const selectAuth = (state: RootState) => state.auth;
+
+export const selectCurrentUser = createSelector(
+  [selectAuth],
+  (auth) => auth.user
+);
+
+export const selectSelectedOrganizationId = createSelector(
+  [selectAuth],
+  (auth) => auth.selectedOrganizationId
+);
+
+export const selectIsAuthenticated = createSelector(
+  [selectAuth],
+  (auth) => auth.isAuthenticated
+);
+
+export const selectAuthLoading = createSelector(
+  [selectAuth],
+  (auth) => auth.loading
+);
+
+export const selectAuthError = createSelector(
+  [selectAuth],
+  (auth) => auth.error
+);
 
 // Permission check helper
-export const hasPermission = (state: RootState, permission: string): boolean => {
-  const user = selectCurrentUser(state);
-  if (!user || !user.permissions) return false;
-  return user.permissions.includes(permission);
-};
+export const hasPermission = createSelector(
+  [selectCurrentUser, (_state: RootState, permission: string) => permission],
+  (user, permission): boolean => {
+    if (!user || !user.permissions) return false;
+    return user.permissions.includes(permission);
+  }
+);
 
 export default authSlice.reducer; 

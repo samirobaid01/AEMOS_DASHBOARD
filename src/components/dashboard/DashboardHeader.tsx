@@ -2,6 +2,10 @@ import React from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import { useThemeColors } from '../../hooks/useThemeColors';
 import WalkthroughTrigger from '../common/Walkthrough/WalkthroughTrigger';
+// import { useRuleEnginePermissions } from '../../hooks/useRuleEnginePermissions';
+// import { Link } from 'react-router-dom';
+// import MenuItem from '@mui/material/MenuItem';
+// import RuleIcon from '@mui/icons-material/Rule';
 
 interface DashboardHeaderProps {
   title: string;
@@ -16,6 +20,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
 }) => {
   const { darkMode } = useTheme();
   const colors = useThemeColors();
+  // const { hasAnyPermission: hasRuleEnginePermission } = useRuleEnginePermissions();
 
   return (
     <div 
@@ -48,6 +53,16 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           label="Tour"
           iconOnly={false}
         />
+        {/* {hasRuleEnginePermission && (
+          <MenuItem
+            component={Link}
+            to="/rule-engine"
+            sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+          >
+            <RuleIcon fontSize="small" />
+            Rule Engine
+          </MenuItem>
+        )} */}
       </div>
     </div>
   );

@@ -14,21 +14,22 @@ const AdminTools: React.FC = () => {
     'organization.view', 'organization.create', 'organization.update', 'organization.delete',
     'area.view', 'area.create', 'area.update', 'area.delete',
     'device.view', 'device.create', 'device.update', 'device.delete',
-    'sensor.view', 'sensor.create', 'sensor.update', 'sensor.delete'
+    'sensor.view', 'sensor.create', 'sensor.update', 'sensor.delete',
+    'rule.view', 'rule.create', 'rule.update', 'rule.delete'
   ];
 
   // Initialize user with permissions if needed
   useEffect(() => {
-    // If user exists but has no permissions, auto-assign them on first load
-    if (user && (!user.permissions || user.permissions.length === 0)) {
-      console.log('AdminTools: User has no permissions, auto-assigning');
-      const updatedUser = {
-        ...user,
-        permissions: allPermissions,
-        roles: [...(user.roles || []), 'SystemAdmin']
-      };
-      dispatch(updateUser(updatedUser));
-    }
+    // Disabled auto-assignment since permissions come from login response
+    // if (user && (!user.permissions || user.permissions.length === 0)) {
+    //   console.log('AdminTools: User has no permissions, auto-assigning');
+    //   const updatedUser = {
+    //     ...user,
+    //     permissions: allPermissions,
+    //     roles: [...(user.roles || []), 'SystemAdmin']
+    //   };
+    //   dispatch(updateUser(updatedUser));
+    // }
   }, [user, dispatch]);
 
   // Make user a system admin

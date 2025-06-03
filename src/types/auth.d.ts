@@ -37,6 +37,8 @@ export interface LoginResponse {
   user: User;
   token: string;
   refreshToken: string;
+  permissions: string[];
+  roles: string[];
 }
 
 export interface AuthState {
@@ -47,4 +49,5 @@ export interface AuthState {
   loading: boolean;
   error: string | null;
   selectedOrganizationId: number | null;
+  permissions: string[];
 } 
