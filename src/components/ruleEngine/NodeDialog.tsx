@@ -293,7 +293,7 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
     // Set up getData before adding event listeners
     (div as any).getData = () => {
       const currentValue = value.value;
-      return {
+      const data = {
         sourceType: sourceType.value,
         UUID: uuidSelect.value,
         key: key.value,
@@ -302,12 +302,17 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
           ? (isNaN(currentValue as any) ? currentValue : Number(currentValue))
           : null
       };
+      console.log('Condition getData:', data);
+      return data;
     };
 
     // Add event listeners with proper update chain
     sourceType.addEventListener('change', async () => {
       console.log('Source type changed:', sourceType.value);
       await updateUUIDsAndKeys();
+      if (!isInitializing) {
+        generateJSON(false);
+      }
     });
     
     uuidSelect.addEventListener('change', async () => {
@@ -316,6 +321,9 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
         await updateSensorKeys(uuidSelect.value);
       } else {
         updateDeviceKeys(uuidSelect.value);
+      }
+      if (!isInitializing) {
+        generateJSON(false);
       }
     });
 
@@ -384,6 +392,7 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
     topBar.appendChild(removeGroup);
 
     const container = document.createElement('div');
+    container.className = 'expressions-container';
     const controls = document.createElement('div');
     controls.className = 'controls';
 
@@ -415,10 +424,18 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
     div.appendChild(controls);
 
     (div as any).getData = () => {
-      const expressions = Array.from(container.children).map(child => (child as any).getData());
-      return expressions.length === 1 && !container.children[0].classList.contains('group')
-        ? expressions[0]
-        : { type: logicType.value, expressions };
+      const expressions = Array.from(container.children).map(child => {
+        const data = (child as any).getData();
+        console.log('Group child expression data:', data);
+        return data;
+      }).filter(data => data !== null && data !== undefined);
+
+      const result = {
+        type: logicType.value,
+        expressions: expressions
+      };
+      console.log('Group getData result:', result);
+      return result;
     };
 
     logicType.addEventListener('change', () => generateJSON(false));
@@ -433,13 +450,14 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
     if (!builderRef.current || !builderRef.current.firstChild) return;
     try {
       const data = (builderRef.current.firstChild as any).getData();
-      const outputData = JSON.stringify({ expressions: Array.isArray(data) ? data : [data] }, null, 2);
+      const expressions = Array.isArray(data.expressions) ? data.expressions : [data];
+      const outputData = JSON.stringify({ expressions }, null, 2);
       console.log('Generating JSON:', outputData);
       setOutput(outputData);
       
       // Only trigger save if explicitly requested
       if (shouldSave && onSave) {
-        onSave({ expressions: Array.isArray(data) ? data : [data] });
+        onSave({ expressions });
       }
     } catch (error) {
       console.error('Error generating JSON:', error);
@@ -464,13 +482,10 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
             const root = await createGroupNode('AND');
             if (root && builderRef.current) {
               builderRef.current.appendChild(root);
-              const container = root.querySelector('.group > div') as HTMLDivElement;
-              if (container) {
-                await createConditionNode(container, true);
-              }
+              // Remove the automatic creation of first condition
+              isInitializedRef.current = true;
             }
           }
-          isInitializedRef.current = true;
         } catch (error) {
           console.error('Error initializing:', error);
         }
