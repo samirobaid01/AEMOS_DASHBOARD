@@ -12,6 +12,7 @@ import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import EditIcon from '@mui/icons-material/Edit';
 import type { RuleChain } from '../../types/ruleEngine';
 import NodeDialog from './NodeDialog';
+import type { ConditionData, GroupData } from './NodeDialog';
 import { useTheme } from '../../context/ThemeContext';
 import { useThemeColors } from '../../hooks/useThemeColors';
 import { useTranslation } from 'react-i18next';
@@ -50,37 +51,105 @@ const RuleForm: React.FC<RuleFormProps> = ({
   const colors = useThemeColors();
   const { t } = useTranslation();
   const [nodes, setNodes] = useState<NodeFormData[]>(() => {
-    console.log('RuleForm - Initialization Data:', {
-      initialData,
-      nodes: initialData?.nodes,
-      hasNodes: !!initialData?.nodes,
-    });
-
     if (!initialData?.nodes) {
-      console.log('RuleForm - No nodes found, returning empty array');
       return [];
     }
-
-    console.log('RuleForm - Processing nodes:', initialData.nodes);
-    return initialData.nodes.map((node) => {
-      console.log('RuleForm - Processing node:', node);
-      return {
-        type: node.type,
-        config: JSON.parse(node.config),
-      };
-    });
+    return initialData.nodes.map((node) => ({
+      type: node.type,
+      config: JSON.parse(node.config),
+    }));
   });
-
-  // Add effect to log when props change
-  useEffect(() => {
-    console.log('RuleForm - Props updated:', {
-      initialData,
-      isLoading,
-    });
-  }, [initialData, isLoading]);
 
   const [isNodeDialogOpen, setIsNodeDialogOpen] = useState(false);
   const [currentNodeIndex, setCurrentNodeIndex] = useState<number | null>(null);
+
+  const handleNodeDialogOpen = (index: number | null) => {
+    console.log('Opening node dialog with index:', index);
+    setCurrentNodeIndex(index);
+    setIsNodeDialogOpen(true);
+  };
+
+  const handleNodeDialogClose = () => {
+    console.log('Closing node dialog');
+    setIsNodeDialogOpen(false);
+    setCurrentNodeIndex(null);
+  };
+
+  const handleNodeSave = (data: { expressions: Array<ConditionData | GroupData> }) => {
+    console.log('Saving node data:', data);
+    if (!data.expressions.length) {
+      console.log('No expressions to save');
+      return;
+    }
+
+    // Check if it's just an empty AND group
+    if (data.expressions.length === 1 && 
+        'type' in data.expressions[0] && 
+        data.expressions[0].type === 'AND' && 
+        data.expressions[0].expressions.length === 0) {
+      console.log('Empty AND group, not saving');
+      return;
+    }
+
+    const expression = data.expressions[0];
+    let nodeData: NodeFormData;
+
+    if ('sourceType' in expression) {
+      // It's a ConditionData
+      nodeData = {
+        type: 'filter',
+        config: {
+          sourceType: expression.sourceType === 'sensor' ? 'sensor' : undefined,
+          UUID: expression.UUID,
+          key: expression.key,
+          operator: expression.operator as '>' | '<' | '=' | '>=',
+          value: typeof expression.value === 'number' ? expression.value : undefined
+        }
+      };
+    } else {
+      // It's a GroupData
+      nodeData = {
+        type: 'action',
+        config: {
+          type: 'DEVICE_COMMAND',
+          command: {
+            deviceUuid: '',
+            stateName: '',
+            value: '',
+            initiatedBy: 'device'
+          }
+        }
+      };
+    }
+    
+    console.log('Processed node data:', nodeData);
+    if (currentNodeIndex === null) {
+      setNodes(prev => [...prev, nodeData]);
+    } else {
+      setNodes(prev => {
+        const newNodes = [...prev];
+        newNodes[currentNodeIndex] = nodeData;
+        return newNodes;
+      });
+    }
+  };
+
+  const handleNodeDelete = (index: number) => {
+    setNodes(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleMainFormSubmit = async (data: any) => {
+    const formattedNodes = nodes.map((node, index) => ({
+      type: node.type,
+      config: JSON.stringify(node.config),
+      nextNodeId: index < nodes.length - 1 ? index + 1 : null,
+    }));
+
+    await onSubmit({
+      ...data,
+      nodes: formattedNodes,
+    });
+  };
 
   const {
     control,
@@ -93,44 +162,6 @@ const RuleForm: React.FC<RuleFormProps> = ({
       description: initialData?.description || '',
     },
   });
-
-  const handleNodeDialogOpen = (index: number | null) => {
-    setCurrentNodeIndex(index);
-    setIsNodeDialogOpen(true);
-  };
-
-  const handleNodeDialogClose = () => {
-    setIsNodeDialogOpen(false);
-    setCurrentNodeIndex(null);
-  };
-
-  const handleNodeSave = (nodeData: NodeFormData) => {
-    if (currentNodeIndex === null) {
-      setNodes([...nodes, nodeData]);
-    } else {
-      const newNodes = [...nodes];
-      newNodes[currentNodeIndex] = nodeData;
-      setNodes(newNodes);
-    }
-    handleNodeDialogClose();
-  };
-
-  const handleNodeDelete = (index: number) => {
-    setNodes(nodes.filter((_, i) => i !== index));
-  };
-
-  const handleFormSubmit = async (data: any) => {
-    const formattedNodes = nodes.map((node, index) => ({
-      type: node.type,
-      config: JSON.stringify(node.config),
-      nextNodeId: index < nodes.length - 1 ? index + 1 : null,
-    }));
-
-    await onSubmit({
-      ...data,
-      nodes: formattedNodes,
-    });
-  };
 
   const formStyle = {
     backgroundColor: darkMode ? colors.cardBackground : 'white',
@@ -187,7 +218,14 @@ const RuleForm: React.FC<RuleFormProps> = ({
 
   return (
     <div style={{ padding: '1.5rem' }}>
-      <form onSubmit={handleSubmit(handleFormSubmit)} style={formStyle}>
+      <form 
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleSubmit(handleMainFormSubmit)(e);
+        }} 
+        style={formStyle}
+        noValidate
+      >
         <div style={formGroupStyle}>
           <Controller
             name="name"
@@ -243,7 +281,11 @@ const RuleForm: React.FC<RuleFormProps> = ({
                   </IconButton>
                   <IconButton
                     size="small"
-                    onClick={() => handleNodeDelete(index)}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleNodeDelete(index);
+                    }}
                     color="error"
                   >
                     <DeleteIcon />
@@ -266,9 +308,14 @@ const RuleForm: React.FC<RuleFormProps> = ({
           ))}
 
           <Button
+            type="button"
             variant="outlined"
             startIcon={<AddIcon />}
-            onClick={() => handleNodeDialogOpen(null)}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleNodeDialogOpen(null);
+            }}
             fullWidth
             sx={{ mt: 2 }}
           >
@@ -289,12 +336,16 @@ const RuleForm: React.FC<RuleFormProps> = ({
         </div>
       </form>
 
-      <NodeDialog
-        open={isNodeDialogOpen}
-        onClose={handleNodeDialogClose}
-        onSave={() => {}}
-        //initialData={currentNodeIndex !== null ? nodes[currentNodeIndex] : undefined}
-      />
+      {isNodeDialogOpen && (
+        <NodeDialog
+          open={isNodeDialogOpen}
+          onClose={handleNodeDialogClose}
+          onSave={(data) => {
+            handleNodeSave(data);
+            handleNodeDialogClose();
+          }}
+        />
+      )}
     </div>
   );
 };
