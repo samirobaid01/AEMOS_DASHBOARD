@@ -56,8 +56,9 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
   const { t } = useTranslation();
   const { darkMode } = useTheme();
   const colors = useThemeColors();
-  const [expressions, setExpressions] = useState<Expression[]>([]);
+  const [expressionsHistory, setExpressionsHistory] = useState<Expression[][]>([]);
   const [currentType, setCurrentType] = useState<"AND" | "OR" | "SINGLE">("SINGLE");
+  const [expressions, setExpressions] = useState<Expression[]>([]);
   const [loading, setLoading] = useState(false);
   const [sensors, setSensors] = useState<Array<{ id: number; uuid: string; name: string }>>([]);
   const [devices, setDevices] = useState<Device[]>([]);
@@ -174,18 +175,50 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
   };
 
   const handleUUIDChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const id = e.target.value;
-    setValue('UUID', id);
-    fetchKeys(watch('sourceType'), id);
+    const selectedId = e.target.value;
+    const selectedItem = watch("sourceType") === "sensor" 
+      ? sensors.find(s => s.id.toString() === selectedId)
+      : devices.find(d => d.id.toString() === selectedId);
+    
+    if (selectedItem) {
+      setValue('UUID', selectedItem.uuid);
+      fetchKeys(watch('sourceType'), selectedId);
+    }
   };
 
   const addExpression = (data: BaseExpression) => {
-    setExpressions([...expressions, data]);
-    reset();
+    if (currentType === "SINGLE") {
+      onSave(data);
+    } else {
+      // Save current state to history before updating
+      setExpressionsHistory(prev => [...prev, expressions]);
+      setExpressions(prev => [...prev, data]);
+      reset({
+        sourceType: "sensor",
+        UUID: "",
+        key: "",
+        operator: ">",
+        value: "",
+      });
+    }
   };
 
-  const removeExpression = (index: number) => {
-    setExpressions(expressions.filter((_, i) => i !== index));
+  const addNestedGroup = (type: "AND" | "OR") => {
+    const newGroup: CompoundExpression = {
+      type,
+      expressions: []
+    };
+    // Save current state to history before updating
+    setExpressionsHistory(prev => [...prev, expressions]);
+    setExpressions(prev => [...prev, newGroup]);
+  };
+
+  const handleUndo = () => {
+    if (expressionsHistory.length > 0) {
+      const previousState = expressionsHistory[expressionsHistory.length - 1];
+      setExpressions(previousState);
+      setExpressionsHistory(prev => prev.slice(0, -1));
+    }
   };
 
   const handleFormSubmit = (data: BaseExpression) => {
@@ -197,7 +230,7 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
       }
       onSave({
         type: currentType,
-        expressions,
+        expressions: expressions,
       });
     }
   };
@@ -251,14 +284,78 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
     padding: '1rem',
     backgroundColor: darkMode ? colors.background : '#f9fafb',
     borderRadius: '0.5rem',
+    border: `1px solid ${darkMode ? colors.border : '#e5e7eb'}`,
+    fontFamily: 'monospace',
   };
 
   const expressionItemStyle = {
-    padding: '0.75rem',
-    backgroundColor: darkMode ? colors.surfaceBackground : 'white',
-    border: `1px solid ${darkMode ? colors.border : '#e5e7eb'}`,
-    borderRadius: '0.375rem',
-    marginBottom: '0.5rem',
+    marginLeft: '1.5rem',
+    position: 'relative' as const,
+  };
+
+  const bracketStyle = {
+    color: darkMode ? colors.textSecondary : '#6b7280',
+  };
+
+  const propertyStyle = {
+    color: darkMode ? '#4d7efa' : '#3b82f6',
+    marginRight: '0.5rem',
+  };
+
+  const valueStyle = {
+    color: darkMode ? colors.textPrimary : '#111827',
+  };
+
+  const renderExpression = (expr: Expression, index: number, level: number = 0) => {
+    if ('type' in expr) {
+      // Compound Expression (AND/OR)
+      return (
+        <div key={index}>
+          <div style={bracketStyle}>{level === 0 ? '{' : ''}</div>
+          <div style={expressionItemStyle}>
+            <span style={propertyStyle}>"type":</span>
+            <span style={valueStyle}>"{expr.type}",</span>
+            <br />
+            <span style={propertyStyle}>"expressions":</span>
+            <span style={bracketStyle}>[</span>
+            <div style={expressionItemStyle}>
+              {expr.expressions.map((e, i) => (
+                <React.Fragment key={i}>
+                  {renderExpression(e, i, level + 1)}
+                  {i < expr.expressions.length - 1 && <span style={bracketStyle}>,</span>}
+                </React.Fragment>
+              ))}
+            </div>
+            <span style={bracketStyle}>]</span>
+          </div>
+          <div style={bracketStyle}>{level === 0 ? '}' : ''}</div>
+        </div>
+      );
+    } else {
+      // Base Expression
+      return (
+        <div key={index} style={expressionItemStyle}>
+          <span style={bracketStyle}>{`{`}</span>
+          <div style={expressionItemStyle}>
+            <span style={propertyStyle}>"sourceType":</span>
+            <span style={valueStyle}>"{expr.sourceType}",</span>
+            <br />
+            <span style={propertyStyle}>"UUID":</span>
+            <span style={valueStyle}>"{expr.UUID}",</span>
+            <br />
+            <span style={propertyStyle}>"key":</span>
+            <span style={valueStyle}>"{expr.key}",</span>
+            <br />
+            <span style={propertyStyle}>"operator":</span>
+            <span style={valueStyle}>"{expr.operator}",</span>
+            <br />
+            <span style={propertyStyle}>"value":</span>
+            <span style={valueStyle}>{typeof expr.value === 'string' ? `"${expr.value}"` : expr.value}</span>
+          </div>
+          <span style={bracketStyle}>{`}`}</span>
+        </div>
+      );
+    }
   };
 
   const modalFooter = (
@@ -323,7 +420,105 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
         </select>
       </div>
 
+      {currentType !== "SINGLE" && expressions.length > 0 && (
+        <div style={expressionListStyle}>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '1rem',
+          }}>
+            <h4 style={{
+              margin: 0,
+              color: darkMode ? colors.textPrimary : '#111827',
+              fontFamily: 'system-ui',
+            }}>
+              Current Expression
+            </h4>
+            <button
+              type="button"
+              onClick={handleUndo}
+              disabled={expressionsHistory.length === 0}
+              style={{
+                padding: '0.25rem 0.5rem',
+                backgroundColor: 'transparent',
+                color: expressionsHistory.length === 0 
+                  ? (darkMode ? colors.textSecondary : '#9CA3AF')
+                  : (darkMode ? colors.dangerText : '#dc2626'),
+                border: `1px solid ${expressionsHistory.length === 0 
+                  ? (darkMode ? colors.border : '#e5e7eb')
+                  : (darkMode ? colors.dangerText : '#dc2626')}`,
+                borderRadius: '0.375rem',
+                fontSize: '0.75rem',
+                cursor: expressionsHistory.length === 0 ? 'not-allowed' : 'pointer',
+                opacity: expressionsHistory.length === 0 ? 0.5 : 1,
+              }}
+            >
+              Undo Last Step
+            </button>
+          </div>
+          <div style={bracketStyle}>{`{`}</div>
+          <div style={expressionItemStyle}>
+            <span style={propertyStyle}>"type":</span>
+            <span style={valueStyle}>"{currentType}",</span>
+            <br />
+            <span style={propertyStyle}>"expressions":</span>
+            <span style={bracketStyle}>[</span>
+            <div style={expressionItemStyle}>
+              {expressions.map((expr, index) => (
+                <React.Fragment key={index}>
+                  {renderExpression(expr, index)}
+                  {index < expressions.length - 1 && <span style={bracketStyle}>,</span>}
+                </React.Fragment>
+              ))}
+            </div>
+            <span style={bracketStyle}>]</span>
+          </div>
+          <div style={bracketStyle}>{`}`}</div>
+        </div>
+      )}
+
       <form id="nodeForm" onSubmit={handleSubmit(handleFormSubmit)}>
+        {currentType !== "SINGLE" && (
+          <div style={formGroupStyle}>
+            <button
+              type="button"
+              onClick={() => addNestedGroup("AND")}
+              style={{
+                padding: '0.5rem 1rem',
+                backgroundColor: darkMode ? colors.surfaceBackground : 'white',
+                color: darkMode ? colors.textSecondary : '#4b5563',
+                border: `1px solid ${darkMode ? colors.border : '#d1d5db'}`,
+                borderRadius: '0.375rem',
+                fontSize: '0.875rem',
+                fontWeight: 500,
+                cursor: 'pointer',
+                width: '48%',
+                marginRight: '4%',
+              }}
+            >
+              Add AND Group
+            </button>
+            <button
+              type="button"
+              onClick={() => addNestedGroup("OR")}
+              style={{
+                padding: '0.5rem 1rem',
+                backgroundColor: darkMode ? colors.surfaceBackground : 'white',
+                color: darkMode ? colors.textSecondary : '#4b5563',
+                border: `1px solid ${darkMode ? colors.border : '#d1d5db'}`,
+                borderRadius: '0.375rem',
+                fontSize: '0.875rem',
+                fontWeight: 500,
+                cursor: 'pointer',
+                width: '48%',
+              }}
+            >
+              Add OR Group
+            </button>
+          </div>
+        )}
+
         <div style={formGroupStyle}>
           <label style={labelStyle}>Source Type</label>
           <select
@@ -391,75 +586,29 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
           <input
             {...register("value")}
             style={inputStyle}
-            type="text"
+            type={watch("sourceType") === "sensor" ? "number" : "text"}
           />
         </div>
 
         {currentType !== "SINGLE" && (
-          <>
-            <button
-              type="button"
-              onClick={handleSubmit(addExpression)}
-              style={{
-                padding: '0.5rem 1rem',
-                backgroundColor: darkMode ? colors.surfaceBackground : 'white',
-                color: darkMode ? colors.textSecondary : '#4b5563',
-                border: `1px solid ${darkMode ? colors.border : '#d1d5db'}`,
-                borderRadius: '0.375rem',
-                fontSize: '0.875rem',
-                fontWeight: 500,
-                cursor: 'pointer',
-                width: '100%',
-                marginBottom: '1rem',
-              }}
-            >
-              Add Expression
-            </button>
-
-            {expressions.length > 0 && (
-              <div style={expressionListStyle}>
-                <h4 style={{
-                  margin: '0 0 1rem 0',
-                  color: darkMode ? colors.textPrimary : '#111827',
-                }}>
-                  Current Expressions
-                </h4>
-                {expressions.map((expr, index) => (
-                  <div key={index} style={expressionItemStyle}>
-                    <div style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                    }}>
-                      <span style={{
-                        color: darkMode ? colors.textPrimary : '#111827',
-                        fontSize: '0.875rem',
-                      }}>
-                        {isBaseExpression(expr) ? (
-                          `${expr.sourceType} - ${expr.UUID} - ${expr.key} ${expr.operator} ${expr.value}`
-                        ) : (
-                          `${expr.type} Group with ${expr.expressions.length} expressions`
-                        )}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => removeExpression(index)}
-                        style={{
-                          padding: '0.25rem',
-                          backgroundColor: 'transparent',
-                          border: 'none',
-                          cursor: 'pointer',
-                          color: darkMode ? colors.dangerText : '#dc2626',
-                        }}
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </>
+          <button
+            type="button"
+            onClick={handleSubmit(addExpression)}
+            style={{
+              padding: '0.5rem 1rem',
+              backgroundColor: darkMode ? colors.surfaceBackground : 'white',
+              color: darkMode ? colors.textSecondary : '#4b5563',
+              border: `1px solid ${darkMode ? colors.border : '#d1d5db'}`,
+              borderRadius: '0.375rem',
+              fontSize: '0.875rem',
+              fontWeight: 500,
+              cursor: 'pointer',
+              width: '100%',
+              marginBottom: '1rem',
+            }}
+          >
+            Add Condition
+          </button>
         )}
       </form>
     </Modal>
