@@ -392,7 +392,6 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
     topBar.appendChild(removeGroup);
 
     const container = document.createElement('div');
-    container.className = 'expressions-container';
     const controls = document.createElement('div');
     controls.className = 'controls';
 
@@ -426,16 +425,13 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
     (div as any).getData = () => {
       const expressions = Array.from(container.children).map(child => {
         const data = (child as any).getData();
-        console.log('Group child expression data:', data);
         return data;
       }).filter(data => data !== null && data !== undefined);
 
-      const result = {
+      return {
         type: logicType.value,
         expressions: expressions
       };
-      console.log('Group getData result:', result);
-      return result;
     };
 
     logicType.addEventListener('change', () => generateJSON(false));
@@ -450,14 +446,14 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
     if (!builderRef.current || !builderRef.current.firstChild) return;
     try {
       const data = (builderRef.current.firstChild as any).getData();
-      const expressions = Array.isArray(data.expressions) ? data.expressions : [data];
-      const outputData = JSON.stringify({ expressions }, null, 2);
+      // Ensure we keep the type and expressions structure
+      const outputData = JSON.stringify(data, null, 2);
       console.log('Generating JSON:', outputData);
       setOutput(outputData);
       
       // Only trigger save if explicitly requested
       if (shouldSave && onSave) {
-        onSave({ expressions });
+        onSave(data);
       }
     } catch (error) {
       console.error('Error generating JSON:', error);
