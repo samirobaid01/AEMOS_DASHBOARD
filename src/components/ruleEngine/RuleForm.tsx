@@ -292,8 +292,8 @@ const RuleForm: React.FC<RuleFormProps> = ({
       <NodeDialog
         open={isNodeDialogOpen}
         onClose={handleNodeDialogClose}
-        onSave={handleNodeSave}
-        initialData={currentNodeIndex !== null ? nodes[currentNodeIndex] : undefined}
+        onSave={() => {}}
+        //initialData={currentNodeIndex !== null ? nodes[currentNodeIndex] : undefined}
       />
     </div>
   );
