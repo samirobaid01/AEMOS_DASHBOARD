@@ -30,15 +30,28 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const location = useLocation();
   const { hasPermission, hasAnyPermission, hasAllPermissions, isSystemAdmin } = usePermissions();
 
-  // console.log('ProtectedRoute: Checking permissions');
-  // console.log('ProtectedRoute: Current path =', location.pathname);
-  // console.log('ProtectedRoute: requiredPermission =', requiredPermission);
-  // console.log('ProtectedRoute: requiredPermissions =', requiredPermissions);
-  // console.log('ProtectedRoute: anyPermission =', anyPermission);
+  // Helper to safely get component name
+  const getComponentName = () => {
+    if (React.isValidElement(children)) {
+      const type = children.type;
+      if (typeof type === 'function') {
+        return type.name || 'UnnamedComponent';
+      }
+    }
+    return 'Unknown';
+  };
+
+  console.log('ProtectedRoute: Starting permission check', {
+    path: location.pathname,
+    requiredPermission,
+    requiredPermissions,
+    anyPermission,
+    component: getComponentName()
+  });
 
   // System admins always have access
   if (isSystemAdmin()) {
-    // console.log('ProtectedRoute: User is system admin, granting access');
+    console.log('ProtectedRoute: User is system admin, granting access');
     return <>{children}</>;
   }
 
@@ -47,20 +60,35 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   if (requiredPermission) {
     hasAccess = hasPermission(requiredPermission);
-    // console.log(`ProtectedRoute: Checking single permission '${requiredPermission}', hasAccess = ${hasAccess}`);
+    console.log(`ProtectedRoute: Checking single permission '${requiredPermission}'`, {
+      hasAccess,
+      path: location.pathname,
+      component: getComponentName()
+    });
   } else if (requiredPermissions.length > 0) {
     hasAccess = anyPermission 
       ? hasAnyPermission(requiredPermissions)
       : hasAllPermissions(requiredPermissions);
-    // console.log(`ProtectedRoute: Checking ${anyPermission ? 'any' : 'all'} permissions, hasAccess = ${hasAccess}`);
+    console.log(`ProtectedRoute: Checking ${anyPermission ? 'any' : 'all'} permissions`, {
+      hasAccess,
+      requiredPermissions,
+      path: location.pathname,
+      component: getComponentName()
+    });
   }
 
   // Render children if user has access, otherwise redirect
   if (hasAccess) {
-    // console.log('ProtectedRoute: Access granted, rendering children');
+    console.log('ProtectedRoute: Access granted, rendering children', {
+      path: location.pathname,
+      component: getComponentName()
+    });
     return <>{children}</>;
   } else {
-    // console.log(`ProtectedRoute: Access denied, redirecting to ${fallbackPath}`);
+    console.log(`ProtectedRoute: Access denied, redirecting to ${fallbackPath}`, {
+      path: location.pathname,
+      component: getComponentName()
+    });
     return <Navigate to={fallbackPath} state={{ from: location }} replace />;
   }
 };

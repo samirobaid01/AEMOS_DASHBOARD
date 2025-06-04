@@ -48,6 +48,7 @@
     "areas": "Areas",
     "sensors": "Sensors",
     "devices": "Devices",
+    "rules": "Rules",
     "settings": "Settings",
     "profile": "Profile"
   },
@@ -324,7 +325,8 @@
     "permission_denied": "Permission Denied",
     "no_access_permission": "You don't have permission to access this resource.",
     "go_to_dashboard": "Go to Dashboard",
-    "addField": "Add Field"
+    "addField": "Add Field",
+    "thisActionCannotBeUndone": "This action cannot be undone"
   },
   "errors": {
     "notFound": "Page not found",
@@ -352,5 +354,33 @@
     "sms_notifications_desc": "Receive SMS alerts for critical events",
     "app_notifications": "App Notifications",
     "app_notifications_desc": "Receive in-app notifications and alerts"
+  },
+  "ruleEngine": {
+    "title": "Rule Engine",
+    "add": "Add Rule",
+    "createRuleChain": "Create Rule Chain",
+    "ruleChainName": "Rule Chain Name",
+    "ruleChainDescription": "Rule Chain Description",
+    "saving": "Saving...",
+    "updateRuleChain": "Update Rule Chain",
+    "edit": "Edit Rule",
+    "delete": "Delete Rule",
+    "noRules": "No rules found",
+    "noRuleFound": "No rules match your search criteria. Try clearing filters or add a new rule.",
+    "searchRule": "Search rule",
+    "deleteConfirmation": "Delete Rule Chain",
+    "deleteConfirmationMessage": "Are you sure you want to delete {{name}}?",
+    "deleteSuccess": "Rule chain deleted successfully",
+    "deleteError": "Failed to delete rule chain",
+    "ruleNode":{
+      "title":"Rule Nodes",
+      "editNode":"Edit Node",
+      "addNode":"Add Node",
+      "sourceType":"Source Type",
+      "save":"Save",
+      "cancel":"Cancel",
+      "nodeType":"Node Type",
+      "nodeNotFound":"Node not found"
+    }
   }
 } 

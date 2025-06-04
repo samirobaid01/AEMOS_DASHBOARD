@@ -32,6 +32,11 @@ interface SelectedState {
   allowedValues: string[];
 }
 
+interface DeviceState {
+  stateName: string;
+  // ... other properties of DeviceState if any
+}
+
 const DeviceDetails = () => {
   const { id } = useParams<{ id: string }>();
   const dispatch = useDispatch<AppDispatch>();
@@ -83,7 +88,7 @@ const DeviceDetails = () => {
       });
 
       const state = device.states.find(
-        (s) => s.stateName === notification.metadata.stateName
+        (s: DeviceState) => s.stateName === notification.metadata.stateName
       );
       if (!state) return;
 

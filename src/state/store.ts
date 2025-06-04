@@ -1,4 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit';
+import type { ThunkAction, Action } from '@reduxjs/toolkit';
 import authReducer from './slices/auth.slice';
 import organizationsReducer from './slices/organizations.slice';
 import areasReducer from './slices/areas.slice';
@@ -7,10 +8,10 @@ import devicesReducer from './slices/devices.slice';
 import deviceStatesReducer from './slices/deviceStates.slice';
 import deviceDetailsReducer from './slices/deviceDetails.slice';
 import deviceStateInstancesReducer from './slices/deviceStateInstances.slice';
+import ruleEngineReducer from './slices/ruleEngine.slice';
 // Import other reducers as they are created
 // import devicesReducer from './slices/devices.slice';
 
-// Define the root reducer type first
 const rootReducer = {
   auth: authReducer,
   organizations: organizationsReducer,
@@ -20,6 +21,7 @@ const rootReducer = {
   deviceStates: deviceStatesReducer,
   deviceDetails: deviceDetailsReducer,
   deviceStateInstances: deviceStateInstancesReducer,
+  ruleEngine: ruleEngineReducer,
   // Add other reducers as they are created
   // devices: devicesReducer,
 };
@@ -32,6 +34,12 @@ export const store = configureStore({
     }),
 });
 
-// Define RootState using reducer type
+// Infer the `RootState` and `AppDispatch` types from the store itself
 export type RootState = ReturnType<typeof store.getState>;
-export type AppDispatch = typeof store.dispatch; 
+export type AppDispatch = typeof store.dispatch;
+export type AppThunk<ReturnType = void> = ThunkAction<
+  ReturnType,
+  RootState,
+  unknown,
+  Action<string>
+>; 

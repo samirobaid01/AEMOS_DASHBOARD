@@ -434,10 +434,9 @@ const OrganizationDetails: React.FC<OrganizationDetailsProps> = ({
                     >
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <p style={{ fontSize: '0.875rem', fontWeight: 500, color: colors.textPrimary }}>{device.name}</p>
-                        <p style={{ fontSize: '0.75rem', color: colors.textMuted }}>{device.serialNumber}</p>
+                        <p style={{ fontSize: '0.75rem', color: colors.textMuted }}>{device.uuid}</p>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center' }}>
-                        <span style={{ fontSize: '0.75rem', color: colors.textMuted, marginRight: '0.5rem' }}>{device.type}</span>
                         <span style={{
                           display: 'inline-flex',
                           alignItems: 'center',
