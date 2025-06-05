@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from "react";
 import {
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
   Button,
-} from '@mui/material';
+} from "@mui/material";
 
 interface Sensor {
   id: number;
@@ -59,67 +59,70 @@ interface NodeDialogProps {
 
 const NodeDialog: React.FC<NodeDialogProps> = ({
   organizationId = 1,
-  jwtToken= 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NjcxLCJlbWFpbCI6InNhbWlyYWRtaW5AeW9wbWFpbC5jb20iLCJwZXJtaXNzaW9ucyI6WyJhcmVhLmNyZWF0ZSIsImFyZWEuZGVsZXRlIiwiYXJlYS51cGRhdGUiLCJhcmVhLnZpZXciLCJjb21tYW5kLmNhbmNlbCIsImNvbW1hbmQucmV0cnkiLCJjb21tYW5kLnNlbmQiLCJjb21tYW5kLnZpZXciLCJjb21tYW5kVHlwZS5jcmVhdGUiLCJjb21tYW5kVHlwZS5kZWxldGUiLCJjb21tYW5kVHlwZS51cGRhdGUiLCJjb21tYW5kVHlwZS52aWV3IiwiZGV2aWNlLmFuYWx5dGljcy52aWV3IiwiZGV2aWNlLmNvbnRyb2wiLCJkZXZpY2UuY3JlYXRlIiwiZGV2aWNlLmRlbGV0ZSIsImRldmljZS5oZWFydGJlYXQudmlldyIsImRldmljZS5tZXRhZGF0YS51cGRhdGUiLCJkZXZpY2Uuc3RhdHVzLnVwZGF0ZSIsImRldmljZS51cGRhdGUiLCJkZXZpY2UudmlldyIsIm1haW50ZW5hbmNlLmRlbGV0ZSIsIm1haW50ZW5hbmNlLmxvZyIsIm1haW50ZW5hbmNlLnNjaGVkdWxlIiwibWFpbnRlbmFuY2UudXBkYXRlIiwibWFpbnRlbmFuY2UudmlldyIsIm9yZ2FuaXphdGlvbi5jcmVhdGUiLCJvcmdhbml6YXRpb24uZGVsZXRlIiwib3JnYW5pemF0aW9uLnVwZGF0ZSIsIm9yZ2FuaXphdGlvbi52aWV3IiwicGVybWlzc2lvbi5tYW5hZ2UiLCJyZXBvcnQuZ2VuZXJhdGUiLCJyZXBvcnQudmlldyIsInJvbGUuYXNzaWduIiwicm9sZS52aWV3IiwicnVsZS5jcmVhdGUiLCJydWxlLmRlbGV0ZSIsInJ1bGUudXBkYXRlIiwicnVsZS52aWV3Iiwic2Vuc29yLmNyZWF0ZSIsInNlbnNvci5kZWxldGUiLCJzZW5zb3IudXBkYXRlIiwic2Vuc29yLnZpZXciLCJzZXR0aW5ncy51cGRhdGUiLCJzZXR0aW5ncy52aWV3Iiwic3RhdGUuY3JlYXRlIiwic3RhdGUudmlldyIsInN0YXRlVHJhbnNpdGlvbi5tYW5hZ2UiLCJzdGF0ZVRyYW5zaXRpb24udmlldyIsInN0YXRlVHlwZS5tYW5hZ2UiLCJzdGF0ZVR5cGUudmlldyIsInVzZXIuY3JlYXRlIiwidXNlci5kZWxldGUiLCJ1c2VyLnVwZGF0ZSIsInVzZXIudmlldyJdLCJyb2xlcyI6WyJBZG1pbiJdLCJpYXQiOjE3NDkxMDkzNTEsImV4cCI6MTc0OTE5NTc1MX0.Rrxw7foQXqj6v5zdrPaB1FKkHqa5AqIdtHveXaDsMfo',
+  jwtToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NjcxLCJlbWFpbCI6InNhbWlyYWRtaW5AeW9wbWFpbC5jb20iLCJwZXJtaXNzaW9ucyI6WyJhcmVhLmNyZWF0ZSIsImFyZWEuZGVsZXRlIiwiYXJlYS51cGRhdGUiLCJhcmVhLnZpZXciLCJjb21tYW5kLmNhbmNlbCIsImNvbW1hbmQucmV0cnkiLCJjb21tYW5kLnNlbmQiLCJjb21tYW5kLnZpZXciLCJjb21tYW5kVHlwZS5jcmVhdGUiLCJjb21tYW5kVHlwZS5kZWxldGUiLCJjb21tYW5kVHlwZS51cGRhdGUiLCJjb21tYW5kVHlwZS52aWV3IiwiZGV2aWNlLmFuYWx5dGljcy52aWV3IiwiZGV2aWNlLmNvbnRyb2wiLCJkZXZpY2UuY3JlYXRlIiwiZGV2aWNlLmRlbGV0ZSIsImRldmljZS5oZWFydGJlYXQudmlldyIsImRldmljZS5tZXRhZGF0YS51cGRhdGUiLCJkZXZpY2Uuc3RhdHVzLnVwZGF0ZSIsImRldmljZS51cGRhdGUiLCJkZXZpY2UudmlldyIsIm1haW50ZW5hbmNlLmRlbGV0ZSIsIm1haW50ZW5hbmNlLmxvZyIsIm1haW50ZW5hbmNlLnNjaGVkdWxlIiwibWFpbnRlbmFuY2UudXBkYXRlIiwibWFpbnRlbmFuY2UudmlldyIsIm9yZ2FuaXphdGlvbi5jcmVhdGUiLCJvcmdhbml6YXRpb24uZGVsZXRlIiwib3JnYW5pemF0aW9uLnVwZGF0ZSIsIm9yZ2FuaXphdGlvbi52aWV3IiwicGVybWlzc2lvbi5tYW5hZ2UiLCJyZXBvcnQuZ2VuZXJhdGUiLCJyZXBvcnQudmlldyIsInJvbGUuYXNzaWduIiwicm9sZS52aWV3IiwicnVsZS5jcmVhdGUiLCJydWxlLmRlbGV0ZSIsInJ1bGUudXBkYXRlIiwicnVsZS52aWV3Iiwic2Vuc29yLmNyZWF0ZSIsInNlbnNvci5kZWxldGUiLCJzZW5zb3IudXBkYXRlIiwic2Vuc29yLnZpZXciLCJzZXR0aW5ncy51cGRhdGUiLCJzZXR0aW5ncy52aWV3Iiwic3RhdGUuY3JlYXRlIiwic3RhdGUudmlldyIsInN0YXRlVHJhbnNpdGlvbi5tYW5hZ2UiLCJzdGF0ZVRyYW5zaXRpb24udmlldyIsInN0YXRlVHlwZS5tYW5hZ2UiLCJzdGF0ZVR5cGUudmlldyIsInVzZXIuY3JlYXRlIiwidXNlci5kZWxldGUiLCJ1c2VyLnVwZGF0ZSIsInVzZXIudmlldyJdLCJyb2xlcyI6WyJBZG1pbiJdLCJpYXQiOjE3NDkxMDkzNTEsImV4cCI6MTc0OTE5NTc1MX0.Rrxw7foQXqj6v5zdrPaB1FKkHqa5AqIdtHveXaDsMfo",
   ruleChainId,
   open,
   onClose,
-  onSave
+  onSave,
 }) => {
   const [sensors, setSensors] = useState<Sensor[]>([]);
   const [devices, setDevices] = useState<Device[]>([]);
-  const [output, setOutput] = useState<string>('');
+  const [output, setOutput] = useState<string>("");
   const builderRef = useRef<HTMLDivElement>(null);
   const sensorsRef = useRef<Sensor[]>([]);
   const devicesRef = useRef<Device[]>([]);
   const isInitializedRef = useRef<boolean>(false);
 
   const resetState = () => {
-    setOutput('');
+    setOutput("");
     if (builderRef.current) {
-      builderRef.current.innerHTML = '';
+      builderRef.current.innerHTML = "";
     }
   };
 
   const saveExpression = async () => {
     try {
-      console.log('Current output:', output);
+      console.log("Current output:", output);
       const data = JSON.parse(output);
-      
+
       // Prepare the API request payload
       const payload = {
         ruleChainId: 20,
-        type: 'filter',
+        type: "filter",
         config: JSON.stringify(data.expressions[0]),
-        nextNodeId: null
+        nextNodeId: null,
       };
 
-      console.log('Sending payload to API:', payload);
+      console.log("Sending payload to API:", payload);
 
-      const response = await fetch(`http://localhost:3000/api/v1/rule-chains/nodes?organizationId=${organizationId}`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${jwtToken}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
-      });
+      const response = await fetch(
+        `http://localhost:3000/api/v1/rule-chains/nodes?organizationId=${organizationId}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${jwtToken}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`API call failed: ${response.statusText}`);
       }
 
       const result = await response.json();
-      console.log('API Response:', result);
+      console.log("API Response:", result);
 
       // Call onSave with the original data for UI updates
       if (onSave) {
         onSave(data);
       }
-      
+
       // Close the dialog
       handleClose();
     } catch (error) {
-      console.error('Error saving node:', error);
+      console.error("Error saving node:", error);
     }
   };
 
@@ -131,27 +134,36 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
 
   const fetchSensorsAndDevices = async () => {
     try {
-      console.log('Fetching sensors and devices...');
+      console.log("Fetching sensors and devices...");
       const [sensorsRes, devicesRes] = await Promise.all([
-        fetch(`http://localhost:3000/api/v1/sensors?organizationId=${organizationId}`, {
-          headers: {
-            Authorization: `Bearer ${jwtToken}`,
-            'Content-Type': 'application/json'
+        fetch(
+          `http://localhost:3000/api/v1/sensors?organizationId=${organizationId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${jwtToken}`,
+              "Content-Type": "application/json",
+            },
           }
-        }).then(res => res.json()),
-        fetch(`http://localhost:3000/api/v1/devices?organizationId=${organizationId}`, {
-          headers: {
-            Authorization: `Bearer ${jwtToken}`,
-            'Content-Type': 'application/json'
+        ).then((res) => res.json()),
+        fetch(
+          `http://localhost:3000/api/v1/devices?organizationId=${organizationId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${jwtToken}`,
+              "Content-Type": "application/json",
+            },
           }
-        }).then(res => res.json())
+        ).then((res) => res.json()),
       ]);
 
       const fetchedSensors = sensorsRes.data?.sensors || [];
       const fetchedDevices = devicesRes.data?.devices || [];
 
-      console.log('Fetched data:', { sensors: fetchedSensors, devices: fetchedDevices });
-      
+      console.log("Fetched data:", {
+        sensors: fetchedSensors,
+        devices: fetchedDevices,
+      });
+
       // Update both state and refs
       sensorsRef.current = fetchedSensors;
       devicesRef.current = fetchedDevices;
@@ -160,7 +172,7 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
 
       return { sensors: fetchedSensors, devices: fetchedDevices };
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.error("Error fetching data:", error);
       return { sensors: [], devices: [] };
     }
   };
@@ -170,50 +182,64 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
     const keys: KeyOption[] = [];
 
     Object.entries(caps).forEach(([key, value]) => {
-      if (key.includes('Range') && Array.isArray(value) && value.length === 2) {
-        keys.push({ key: key.replace('Range', ''), values: null, range: value as [number, number] });
+      if (key.includes("Range") && Array.isArray(value) && value.length === 2) {
+        keys.push({
+          key: key.replace("Range", ""),
+          values: null,
+          range: value as [number, number],
+        });
       } else if (Array.isArray(value)) {
-        keys.push({ key: key.replace(/([A-Z])/g, '_$1').toLowerCase(), values: value });
-      } else if (typeof value === 'boolean') {
-        keys.push({ key: key.replace(/([A-Z])/g, '_$1').toLowerCase(), values: null });
+        keys.push({
+          key: key.replace(/([A-Z])/g, "_$1").toLowerCase(),
+          values: value,
+        });
+      } else if (typeof value === "boolean") {
+        keys.push({
+          key: key.replace(/([A-Z])/g, "_$1").toLowerCase(),
+          values: null,
+        });
       }
     });
 
     return keys;
   };
 
-  const createConditionNode = async (parent: HTMLDivElement, isInitializing = false) => {
-    const div = document.createElement('div');
-    div.className = 'condition';
+  const createConditionNode = async (
+    parent: HTMLDivElement,
+    isInitializing = false
+  ) => {
+    const div = document.createElement("div");
+    div.className = "condition";
 
-    const sourceType = document.createElement('select');
-    ['sensor', 'device'].forEach(type => {
-      const opt = document.createElement('option');
+    const sourceType = document.createElement("select");
+    ["sensor", "device"].forEach((type) => {
+      const opt = document.createElement("option");
       opt.value = type;
       opt.textContent = type;
       sourceType.appendChild(opt);
     });
 
-    const uuidSelect = document.createElement('select');
-    const key = document.createElement('select');
+    const uuidSelect = document.createElement("select");
+    const key = document.createElement("select");
 
-    const operator = document.createElement('select');
-    ['==', '!=', '>', '<', '>=', '<='].forEach(op => {
-      const opt = document.createElement('option');
+    const operator = document.createElement("select");
+    ["==", "!=", ">", "<", ">=", "<="].forEach((op) => {
+      const opt = document.createElement("option");
       opt.value = op;
       opt.textContent = op;
       operator.appendChild(opt);
     });
 
-    let value: HTMLInputElement | HTMLSelectElement = document.createElement('input');
-    value.type = 'text';
-    value.placeholder = 'value';
-    value.className = 'value-input';
+    let value: HTMLInputElement | HTMLSelectElement =
+      document.createElement("input");
+    value.type = "text";
+    value.placeholder = "value";
+    value.className = "value-input";
 
-    const remove = document.createElement('button');
-    remove.textContent = '[-]';
-    remove.className = 'remove-btn';
-    remove.type = 'button';
+    const remove = document.createElement("button");
+    remove.textContent = "[-]";
+    remove.className = "remove-btn";
+    remove.type = "button";
     remove.onclick = (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -224,54 +250,57 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
     };
 
     const updateSensorKeys = async (uuid: string) => {
-      console.log('Updating sensor keys for UUID:', uuid);
-      const sensor = sensorsRef.current.find(s => s.uuid === uuid);
+      console.log("Updating sensor keys for UUID:", uuid);
+      const sensor = sensorsRef.current.find((s) => s.uuid === uuid);
       if (!sensor) return;
-      
+
       try {
-        const res = await fetch(`http://localhost:3000/api/v1/sensors/${sensor.id}?organizationId=${organizationId}`, {
-          headers: {
-            Authorization: `Bearer ${jwtToken}`,
-            'Content-Type': 'application/json'
+        const res = await fetch(
+          `http://localhost:3000/api/v1/sensors/${sensor.id}?organizationId=${organizationId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${jwtToken}`,
+              "Content-Type": "application/json",
+            },
           }
-        });
+        );
         const json = await res.json();
         const keys = json?.data?.sensor?.TelemetryData || [];
 
-        key.innerHTML = '';
+        key.innerHTML = "";
         keys.forEach((k: any) => {
-          const opt = document.createElement('option');
+          const opt = document.createElement("option");
           opt.value = k.variableName;
           opt.textContent = k.variableName;
           key.appendChild(opt);
         });
-        
+
         // Trigger change event on key select to update subsequent elements
-        const event = new Event('change');
+        const event = new Event("change");
         key.dispatchEvent(event);
       } catch (error) {
-        console.error('Error fetching sensor keys:', error);
+        console.error("Error fetching sensor keys:", error);
       }
     };
 
     const updateDeviceKeys = (uuid: string) => {
-      console.log('Updating device keys for UUID:', uuid);
-      const device = devicesRef.current.find(d => d.uuid === uuid);
+      console.log("Updating device keys for UUID:", uuid);
+      const device = devicesRef.current.find((d) => d.uuid === uuid);
       if (!device) return;
 
       const keys = getDeviceKeys(device);
       console.log("Device keys:", keys);
 
-      key.innerHTML = '';
-      keys.forEach(k => {
-        const opt = document.createElement('option');
+      key.innerHTML = "";
+      keys.forEach((k) => {
+        const opt = document.createElement("option");
         opt.value = k.key;
         opt.textContent = k.key;
         key.appendChild(opt);
       });
 
       // Trigger change event on key select to update subsequent elements
-      const event = new Event('change');
+      const event = new Event("change");
       key.dispatchEvent(event);
     };
 
@@ -279,26 +308,26 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
       const currentSensors = sensorsRef.current;
       const currentDevices = devicesRef.current;
 
-      console.log('Updating UUIDs and Keys', { 
+      console.log("Updating UUIDs and Keys", {
         sourceType: sourceType.value,
         sensorsAvailable: currentSensors.length > 0,
         sensorsCount: currentSensors.length,
-        currentSensors
+        currentSensors,
       });
 
-      uuidSelect.innerHTML = '';
-      key.innerHTML = '';
+      uuidSelect.innerHTML = "";
+      key.innerHTML = "";
 
-      if (sourceType.value === 'sensor') {
+      if (sourceType.value === "sensor") {
         if (currentSensors.length === 0) {
-          console.log('No sensors available');
-          const opt = document.createElement('option');
-          opt.value = '';
-          opt.textContent = 'No sensors available';
+          console.log("No sensors available");
+          const opt = document.createElement("option");
+          opt.value = "";
+          opt.textContent = "No sensors available";
           uuidSelect.appendChild(opt);
         } else {
-          currentSensors.forEach(sensor => {
-            const opt = document.createElement('option');
+          currentSensors.forEach((sensor) => {
+            const opt = document.createElement("option");
             opt.value = sensor.uuid;
             opt.textContent = sensor.name;
             uuidSelect.appendChild(opt);
@@ -310,14 +339,14 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
         }
       } else {
         if (currentDevices.length === 0) {
-          console.log('No devices available');
-          const opt = document.createElement('option');
-          opt.value = '';
-          opt.textContent = 'No devices available';
+          console.log("No devices available");
+          const opt = document.createElement("option");
+          opt.value = "";
+          opt.textContent = "No devices available";
           uuidSelect.appendChild(opt);
         } else {
-          currentDevices.forEach(device => {
-            const opt = document.createElement('option');
+          currentDevices.forEach((device) => {
+            const opt = document.createElement("option");
             opt.value = device.uuid;
             opt.textContent = device.name;
             uuidSelect.appendChild(opt);
@@ -330,7 +359,7 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
       }
 
       // Trigger change event on UUID select to update subsequent elements
-      const event = new Event('change');
+      const event = new Event("change");
       uuidSelect.dispatchEvent(event);
 
       if (!isInitializing) {
@@ -346,26 +375,29 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
         UUID: uuidSelect.value,
         key: key.value,
         operator: operator.value,
-        value: currentValue && currentValue.length > 0 
-          ? (isNaN(currentValue as any) ? currentValue : Number(currentValue))
-          : null
+        value:
+          currentValue && currentValue.length > 0
+            ? isNaN(currentValue as any)
+              ? currentValue
+              : Number(currentValue)
+            : null,
       };
-      console.log('Condition getData:', data);
+      console.log("Condition getData:", data);
       return data;
     };
 
     // Add event listeners with proper update chain
-    sourceType.addEventListener('change', async () => {
-      console.log('Source type changed:', sourceType.value);
+    sourceType.addEventListener("change", async () => {
+      console.log("Source type changed:", sourceType.value);
       await updateUUIDsAndKeys();
       if (!isInitializing) {
         generateJSON(false);
       }
     });
-    
-    uuidSelect.addEventListener('change', async () => {
-      console.log('UUID changed:', uuidSelect.value);
-      if (sourceType.value === 'sensor') {
+
+    uuidSelect.addEventListener("change", async () => {
+      console.log("UUID changed:", uuidSelect.value);
+      if (sourceType.value === "sensor") {
         await updateSensorKeys(uuidSelect.value);
       } else {
         updateDeviceKeys(uuidSelect.value);
@@ -375,22 +407,22 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
       }
     });
 
-    key.addEventListener('change', () => {
-      console.log('Key changed:', key.value);
+    key.addEventListener("change", () => {
+      console.log("Key changed:", key.value);
       if (!isInitializing) {
         generateJSON(false);
       }
     });
 
-    operator.addEventListener('change', () => {
-      console.log('Operator changed:', operator.value);
+    operator.addEventListener("change", () => {
+      console.log("Operator changed:", operator.value);
       if (!isInitializing) {
         generateJSON(false);
       }
     });
 
-    value.addEventListener('input', () => {
-      console.log('Value changed:', value.value);
+    value.addEventListener("input", () => {
+      console.log("Value changed:", value.value);
       if (!isInitializing) {
         generateJSON(false);
       }
@@ -404,31 +436,31 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
     div.appendChild(remove);
 
     parent.appendChild(div);
-    
+
     // Initialize the dropdowns after appending to parent
     await updateUUIDsAndKeys();
-    
+
     return div;
   };
 
-  const createGroupNode = async (type = 'AND', parent?: HTMLDivElement) => {
-    const div = document.createElement('div');
-    div.className = 'group';
+  const createGroupNode = async (type = "AND", parent?: HTMLDivElement) => {
+    const div = document.createElement("div");
+    div.className = "group";
 
-    const topBar = document.createElement('div');
-    const logicType = document.createElement('select');
-    ['AND', 'OR'].forEach(op => {
-      const opt = document.createElement('option');
+    const topBar = document.createElement("div");
+    const logicType = document.createElement("select");
+    ["AND", "OR"].forEach((op) => {
+      const opt = document.createElement("option");
       opt.value = op;
       opt.textContent = op;
       logicType.appendChild(opt);
     });
     logicType.value = type;
 
-    const removeGroup = document.createElement('button');
-    removeGroup.textContent = '[-]';
-    removeGroup.className = 'remove-btn';
-    removeGroup.type = 'button';
+    const removeGroup = document.createElement("button");
+    removeGroup.textContent = "[-]";
+    removeGroup.className = "remove-btn";
+    removeGroup.type = "button";
     removeGroup.onclick = (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -439,13 +471,13 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
     topBar.appendChild(logicType);
     topBar.appendChild(removeGroup);
 
-    const container = document.createElement('div');
-    const controls = document.createElement('div');
-    controls.className = 'controls';
+    const container = document.createElement("div");
+    const controls = document.createElement("div");
+    controls.className = "controls";
 
-    const addCondition = document.createElement('button');
-    addCondition.textContent = 'Add Condition';
-    addCondition.type = 'button';
+    const addCondition = document.createElement("button");
+    addCondition.textContent = "Add Condition";
+    addCondition.type = "button";
     addCondition.onclick = async (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -453,13 +485,13 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
       generateJSON(false);
     };
 
-    const addGroup = document.createElement('button');
-    addGroup.textContent = 'Add Group';
-    addGroup.type = 'button';
+    const addGroup = document.createElement("button");
+    addGroup.textContent = "Add Group";
+    addGroup.type = "button";
     addGroup.onclick = async (e) => {
       e.preventDefault();
       e.stopPropagation();
-      await createGroupNode('AND', container);
+      await createGroupNode("AND", container);
       generateJSON(false);
     };
 
@@ -471,18 +503,20 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
     div.appendChild(controls);
 
     (div as any).getData = () => {
-      const expressions = Array.from(container.children).map(child => {
-        const data = (child as any).getData();
-        return data;
-      }).filter(data => data !== null && data !== undefined);
+      const expressions = Array.from(container.children)
+        .map((child) => {
+          const data = (child as any).getData();
+          return data;
+        })
+        .filter((data) => data !== null && data !== undefined);
 
       return {
         type: logicType.value,
-        expressions: expressions
+        expressions: expressions,
       };
     };
 
-    logicType.addEventListener('change', () => generateJSON(false));
+    logicType.addEventListener("change", () => generateJSON(false));
 
     if (parent) {
       parent.appendChild(div);
@@ -496,15 +530,15 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
       const data = (builderRef.current.firstChild as any).getData();
       // Ensure we keep the type and expressions structure
       const outputData = JSON.stringify(data, null, 2);
-      console.log('Generating JSON:', outputData);
+      console.log("Generating JSON:", outputData);
       setOutput(outputData);
-      
+
       // Only trigger save if explicitly requested
       if (shouldSave && onSave) {
         onSave(data);
       }
     } catch (error) {
-      console.error('Error generating JSON:', error);
+      console.error("Error generating JSON:", error);
     }
   };
 
@@ -520,10 +554,10 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
       const init = async () => {
         try {
           await fetchSensorsAndDevices();
-          
+
           if (builderRef.current) {
-            builderRef.current.innerHTML = '';
-            const root = await createGroupNode('AND');
+            builderRef.current.innerHTML = "";
+            const root = await createGroupNode("AND");
             if (root && builderRef.current) {
               builderRef.current.appendChild(root);
               // Remove the automatic creation of first condition
@@ -531,7 +565,7 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
             }
           }
         } catch (error) {
-          console.error('Error initializing:', error);
+          console.error("Error initializing:", error);
         }
       };
       init();
@@ -544,8 +578,8 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
   }, [open]);
 
   return (
-    <Dialog 
-      open={open} 
+    <Dialog
+      open={open}
       onClose={handleClose}
       maxWidth="md"
       fullWidth
@@ -553,43 +587,45 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
       keepMounted={false}
       aria-labelledby="expression-builder-dialog-title"
     >
-      <DialogTitle id="expression-builder-dialog-title">Expression Builder</DialogTitle>
+      <DialogTitle id="expression-builder-dialog-title">
+        Expression Builder
+      </DialogTitle>
       <DialogContent>
-        <div 
+        <div
           style={{
-            padding: '20px',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '20px'
+            padding: "20px",
+            display: "flex",
+            flexDirection: "column",
+            gap: "20px",
           }}
           onClick={(e) => e.stopPropagation()}
         >
-          <div 
-            id="builder" 
+          <div
+            id="builder"
             ref={builderRef}
             style={{
-              minHeight: '200px',
-              border: '1px solid #e0e0e0',
-              borderRadius: '4px',
-              padding: '20px'
+              minHeight: "200px",
+              border: "1px solid #e0e0e0",
+              borderRadius: "4px",
+              padding: "20px",
             }}
             onClick={(e) => e.stopPropagation()}
           />
-          
-          <div 
-            className="output" 
+
+          <div
+            className="output"
             style={{
-              whiteSpace: 'pre',
-              background: '#f9f9f9',
-              padding: '1em',
-              border: '1px solid #ccc',
-              borderRadius: '4px',
-              maxHeight: '200px',
-              overflowY: 'auto',
-              fontFamily: 'monospace'
+              whiteSpace: "pre",
+              background: "#f9f9f9",
+              padding: "1em",
+              border: "1px solid #ccc",
+              borderRadius: "4px",
+              maxHeight: "200px",
+              overflowY: "auto",
+              fontFamily: "monospace",
             }}
           >
-            {output || 'Expression will appear here as you build it...'}
+            {output || "Expression will appear here as you build it..."}
           </div>
 
           <style>{`
@@ -642,16 +678,12 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
         </div>
       </DialogContent>
       <DialogActions>
-        <Button 
-          onClick={handleClose} 
-          color="inherit"
-          type="button"
-        >
+        <Button onClick={handleClose} color="inherit" type="button">
           Cancel
         </Button>
-        <Button 
+        <Button
           onClick={saveExpression}
-          variant="contained" 
+          variant="contained"
           color="primary"
           type="button"
         >
