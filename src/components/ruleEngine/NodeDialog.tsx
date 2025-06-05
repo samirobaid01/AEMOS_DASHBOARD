@@ -55,15 +55,32 @@ interface NodeDialogProps {
   open: boolean;
   onClose: () => void;
   onSave?: (data: any) => void;
+  initialExpression?: {
+    type: 'filter' | 'action';
+    sourceType?: string;
+    UUID?: string;
+    key?: string;
+    operator?: string;
+    value?: string | number;
+    command?: {
+      deviceUuid: string;
+      stateName: string;
+      value: string;
+      initiatedBy: 'device';
+    };
+  };
+  mode: 'add' | 'edit';
 }
 
 const NodeDialog: React.FC<NodeDialogProps> = ({
   organizationId = 1,
   jwtToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NjcxLCJlbWFpbCI6InNhbWlyYWRtaW5AeW9wbWFpbC5jb20iLCJwZXJtaXNzaW9ucyI6WyJhcmVhLmNyZWF0ZSIsImFyZWEuZGVsZXRlIiwiYXJlYS51cGRhdGUiLCJhcmVhLnZpZXciLCJjb21tYW5kLmNhbmNlbCIsImNvbW1hbmQucmV0cnkiLCJjb21tYW5kLnNlbmQiLCJjb21tYW5kLnZpZXciLCJjb21tYW5kVHlwZS5jcmVhdGUiLCJjb21tYW5kVHlwZS5kZWxldGUiLCJjb21tYW5kVHlwZS51cGRhdGUiLCJjb21tYW5kVHlwZS52aWV3IiwiZGV2aWNlLmFuYWx5dGljcy52aWV3IiwiZGV2aWNlLmNvbnRyb2wiLCJkZXZpY2UuY3JlYXRlIiwiZGV2aWNlLmRlbGV0ZSIsImRldmljZS5oZWFydGJlYXQudmlldyIsImRldmljZS5tZXRhZGF0YS51cGRhdGUiLCJkZXZpY2Uuc3RhdHVzLnVwZGF0ZSIsImRldmljZS51cGRhdGUiLCJkZXZpY2UudmlldyIsIm1haW50ZW5hbmNlLmRlbGV0ZSIsIm1haW50ZW5hbmNlLmxvZyIsIm1haW50ZW5hbmNlLnNjaGVkdWxlIiwibWFpbnRlbmFuY2UudXBkYXRlIiwibWFpbnRlbmFuY2UudmlldyIsIm9yZ2FuaXphdGlvbi5jcmVhdGUiLCJvcmdhbml6YXRpb24uZGVsZXRlIiwib3JnYW5pemF0aW9uLnVwZGF0ZSIsIm9yZ2FuaXphdGlvbi52aWV3IiwicGVybWlzc2lvbi5tYW5hZ2UiLCJyZXBvcnQuZ2VuZXJhdGUiLCJyZXBvcnQudmlldyIsInJvbGUuYXNzaWduIiwicm9sZS52aWV3IiwicnVsZS5jcmVhdGUiLCJydWxlLmRlbGV0ZSIsInJ1bGUudXBkYXRlIiwicnVsZS52aWV3Iiwic2Vuc29yLmNyZWF0ZSIsInNlbnNvci5kZWxldGUiLCJzZW5zb3IudXBkYXRlIiwic2Vuc29yLnZpZXciLCJzZXR0aW5ncy51cGRhdGUiLCJzZXR0aW5ncy52aWV3Iiwic3RhdGUuY3JlYXRlIiwic3RhdGUudmlldyIsInN0YXRlVHJhbnNpdGlvbi5tYW5hZ2UiLCJzdGF0ZVRyYW5zaXRpb24udmlldyIsInN0YXRlVHlwZS5tYW5hZ2UiLCJzdGF0ZVR5cGUudmlldyIsInVzZXIuY3JlYXRlIiwidXNlci5kZWxldGUiLCJ1c2VyLnVwZGF0ZSIsInVzZXIudmlldyJdLCJyb2xlcyI6WyJBZG1pbiJdLCJpYXQiOjE3NDkxMDkzNTEsImV4cCI6MTc0OTE5NTc1MX0.Rrxw7foQXqj6v5zdrPaB1FKkHqa5AqIdtHveXaDsMfo",
-  ruleChainId,
+  ruleChainId = 20,
   open,
   onClose,
   onSave,
+  initialExpression,
+  mode = 'add'
 }) => {
   const [sensors, setSensors] = useState<Sensor[]>([]);
   const [devices, setDevices] = useState<Device[]>([]);
@@ -206,7 +223,14 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
 
   const createConditionNode = async (
     parent: HTMLDivElement,
-    isInitializing = false
+    isInitializing = false,
+    initialData?: {
+      sourceType: string;
+      UUID: string;
+      key: string;
+      operator: string;
+      value: string | number;
+    }
   ) => {
     const div = document.createElement("div");
     div.className = "condition";
@@ -219,6 +243,11 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
       sourceType.appendChild(opt);
     });
 
+    // Set initial value if in edit mode
+    if (initialData) {
+      sourceType.value = initialData.sourceType;
+    }
+
     const uuidSelect = document.createElement("select");
     const key = document.createElement("select");
 
@@ -230,11 +259,20 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
       operator.appendChild(opt);
     });
 
-    let value: HTMLInputElement | HTMLSelectElement =
-      document.createElement("input");
+    // Set initial operator if in edit mode
+    if (initialData) {
+      operator.value = initialData.operator;
+    }
+
+    let value: HTMLInputElement | HTMLSelectElement = document.createElement("input");
     value.type = "text";
     value.placeholder = "value";
     value.className = "value-input";
+
+    // Set initial value if in edit mode
+    if (initialData) {
+      value.value = initialData.value.toString();
+    }
 
     const remove = document.createElement("button");
     remove.textContent = "[-]";
@@ -440,6 +478,18 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
     // Initialize the dropdowns after appending to parent
     await updateUUIDsAndKeys();
 
+    if (initialData) {
+      // Set UUID after dropdowns are populated
+      uuidSelect.value = initialData.UUID;
+      // Trigger UUID change to populate keys
+      const changeEvent = new Event("change");
+      uuidSelect.dispatchEvent(changeEvent);
+
+      // Wait for keys to be populated
+      await new Promise(resolve => setTimeout(resolve, 100));
+      key.value = initialData.key;
+    }
+
     return div;
   };
 
@@ -553,14 +603,64 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
     if (open && !isInitializedRef.current) {
       const init = async () => {
         try {
+          console.log("Initializing dialog with mode:", mode, "and initial expression:", initialExpression);
           await fetchSensorsAndDevices();
-
+          
           if (builderRef.current) {
             builderRef.current.innerHTML = "";
             const root = await createGroupNode("AND");
             if (root && builderRef.current) {
               builderRef.current.appendChild(root);
-              // Remove the automatic creation of first condition
+              const container = root.querySelector('.group > div') as HTMLDivElement;
+              if (container) {
+                if (mode === 'edit' && initialExpression) {
+                  console.log("Creating node in edit mode with type:", initialExpression.type);
+                  
+                  // Set initial output for edit mode
+                  if (initialExpression.type === 'filter' && 
+                      initialExpression.sourceType && 
+                      initialExpression.UUID && 
+                      initialExpression.key && 
+                      initialExpression.operator && 
+                      initialExpression.value !== undefined) {
+                    
+                    setOutput(JSON.stringify({
+                      expressions: [{
+                        sourceType: initialExpression.sourceType,
+                        UUID: initialExpression.UUID,
+                        key: initialExpression.key,
+                        operator: initialExpression.operator,
+                        value: initialExpression.value
+                      }]
+                    }, null, 2));
+
+                    await createConditionNode(container, true, {
+                      sourceType: initialExpression.sourceType,
+                      UUID: initialExpression.UUID,
+                      key: initialExpression.key,
+                      operator: initialExpression.operator,
+                      value: initialExpression.value
+                    });
+                  } else if (initialExpression.type === 'action' && initialExpression.command) {
+                    setOutput(JSON.stringify({
+                      expressions: [{
+                        type: "action",
+                        config: {
+                          type: "DEVICE_COMMAND",
+                          command: initialExpression.command
+                        }
+                      }]
+                    }, null, 2));
+
+                    await createActionNode(container, true, {
+                      command: initialExpression.command
+                    });
+                  }
+                } else {
+                  console.log("Creating empty condition node in add mode");
+                  await createConditionNode(container, true);
+                }
+              }
               isInitializedRef.current = true;
             }
           }
@@ -575,7 +675,120 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
         isInitializedRef.current = false;
       }
     };
-  }, [open]);
+  }, [open, mode, initialExpression]);
+
+  const createActionNode = async (
+    parent: HTMLDivElement,
+    isInitializing = false,
+    initialData?: {
+      command: {
+        deviceUuid: string;
+        stateName: string;
+        value: string;
+        initiatedBy: 'device';
+      };
+    }
+  ) => {
+    const div = document.createElement("div");
+    div.className = "condition action";
+
+    // Create device select
+    const deviceSelect = document.createElement("select");
+    deviceSelect.className = "device-select";
+    
+    // Wait for devices to be available
+    if (devices.length === 0) {
+      console.log("Waiting for devices to load...");
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
+
+    console.log("Populating devices:", devices.length);
+    
+    // Populate devices
+    devices.forEach((device) => {
+      const opt = document.createElement("option");
+      opt.value = device.uuid;
+      opt.textContent = device.name;
+      deviceSelect.appendChild(opt);
+    });
+
+    // Create state name input
+    const stateNameInput = document.createElement("input");
+    stateNameInput.type = "text";
+    stateNameInput.placeholder = "State Name";
+    stateNameInput.className = "state-input";
+
+    // Create value input
+    const valueInput = document.createElement("input");
+    valueInput.type = "text";
+    valueInput.placeholder = "Value";
+    valueInput.className = "value-input";
+
+    // Set initial values if in edit mode
+    if (initialData?.command) {
+      console.log("Setting initial values for action node:", initialData.command);
+      deviceSelect.value = initialData.command.deviceUuid;
+      stateNameInput.value = initialData.command.stateName;
+      valueInput.value = initialData.command.value;
+    }
+
+    const remove = document.createElement("button");
+    remove.textContent = "[-]";
+    remove.className = "remove-btn";
+    remove.type = "button";
+    remove.onclick = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      div.remove();
+      if (!isInitializing) {
+        generateJSON(false);
+      }
+    };
+
+    // Add event listeners
+    const handleChange = () => {
+      if (!isInitializing) {
+        generateJSON(false);
+      }
+    };
+
+    deviceSelect.addEventListener("change", handleChange);
+    stateNameInput.addEventListener("input", handleChange);
+    valueInput.addEventListener("input", handleChange);
+
+    // Set up getData
+    (div as any).getData = () => {
+      const data = {
+        type: "action",
+        config: {
+          type: "DEVICE_COMMAND",
+          command: {
+            deviceUuid: deviceSelect.value,
+            stateName: stateNameInput.value,
+            value: valueInput.value,
+            initiatedBy: "device"
+          }
+        }
+      };
+      console.log("Action node getData:", data);
+      return data;
+    };
+
+    // Append elements
+    div.appendChild(deviceSelect);
+    div.appendChild(stateNameInput);
+    div.appendChild(valueInput);
+    div.appendChild(remove);
+
+    parent.appendChild(div);
+
+    // Trigger initial data collection
+    if (!isInitializing) {
+      generateJSON(false);
+    }
+
+    return div;
+  };
 
   return (
     <Dialog

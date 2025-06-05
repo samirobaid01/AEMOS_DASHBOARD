@@ -81,6 +81,36 @@ const RuleForm: React.FC<RuleFormProps> = ({
     setCurrentNodeIndex(null);
   };
 
+  const getInitialExpression = (index: number | null) => {
+    if (index === null) return undefined;
+    
+    const node = nodes[index];
+    if (!node) return undefined;
+
+    if (node.type === 'filter') {
+      return {
+        type: 'filter' as const,
+        sourceType: node.config.sourceType || 'sensor',
+        UUID: node.config.UUID || '',
+        key: node.config.key || '',
+        operator: node.config.operator || '==',
+        value: node.config.value || ''
+      };
+    } else if (node.type === 'action') {
+      return {
+        type: 'action' as const,
+        command: {
+          deviceUuid: node.config.command?.deviceUuid || '',
+          stateName: node.config.command?.stateName || '',
+          value: node.config.command?.value || '',
+          initiatedBy: 'device' as const
+        }
+      };
+    }
+
+    return undefined;
+  };
+
   const handleNodeSave = (data: { expressions: Array<ConditionData | GroupData> }) => {
     console.log('Saving node data:', data);
     if (!data.expressions.length) {
@@ -353,6 +383,8 @@ const RuleForm: React.FC<RuleFormProps> = ({
           ruleChainId={ruleChainId}
           jwtToken={jwtToken}
           organizationId={organizationId}
+          mode={currentNodeIndex === null ? 'add' : 'edit'}
+          initialExpression={getInitialExpression(currentNodeIndex)}
         />
       )}
     </div>
