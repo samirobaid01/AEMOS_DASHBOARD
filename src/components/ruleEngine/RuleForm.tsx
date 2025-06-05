@@ -20,6 +20,9 @@ import { ruleFormResolver } from '../../containers/RuleEngine/RuleEdit';
 
 interface RuleFormProps {
   initialData?: RuleChain;
+  ruleChainId?: number;
+  jwtToken?: string;
+  organizationId?: number;
   onSubmit: (data: any) => Promise<void>;
   isLoading?: boolean;
 }
@@ -44,6 +47,9 @@ interface NodeFormData {
 
 const RuleForm: React.FC<RuleFormProps> = ({
   initialData,
+  ruleChainId,
+  jwtToken,
+  organizationId,
   onSubmit,
   isLoading = false,
 }) => {
@@ -344,6 +350,9 @@ const RuleForm: React.FC<RuleFormProps> = ({
             handleNodeSave(data);
             handleNodeDialogClose();
           }}
+          ruleChainId={ruleChainId}
+          jwtToken={jwtToken}
+          organizationId={organizationId}
         />
       )}
     </div>
