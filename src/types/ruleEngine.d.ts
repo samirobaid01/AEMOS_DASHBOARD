@@ -2,6 +2,7 @@ export interface RuleNode {
   id: number;
   ruleChainId: number;
   type: 'filter' | 'action';
+  name: string;
   config: string;
   nextNodeId: number | null;
 }

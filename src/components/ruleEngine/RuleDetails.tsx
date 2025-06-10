@@ -10,6 +10,7 @@ import { deleteRule } from '../../state/slices/ruleEngine.slice';
 import { toastService } from '../../services/toastService';
 import type { AppDispatch } from '../../state/store';
 import Modal from '../../components/common/Modal/Modal';
+import { FormControl, Select, MenuItem } from '@mui/material';
 
 interface RuleDetailsProps {
   rule: RuleChain | null;
@@ -17,6 +18,8 @@ interface RuleDetailsProps {
   error?: string | null;
   onBack?: () => void;
   windowWidth?: number;
+  jwtToken?: string;
+  organizationId?: number;
 }
 
 const RuleDetails: React.FC<RuleDetailsProps> = ({ 
@@ -24,7 +27,9 @@ const RuleDetails: React.FC<RuleDetailsProps> = ({
   isLoading, 
   error,
   onBack,
-  windowWidth = window.innerWidth
+  windowWidth = window.innerWidth,
+  jwtToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NjcxLCJlbWFpbCI6InNhbWlyYWRtaW5AeW9wbWFpbC5jb20iLCJwZXJtaXNzaW9ucyI6WyJhcmVhLmNyZWF0ZSIsImFyZWEuZGVsZXRlIiwiYXJlYS51cGRhdGUiLCJhcmVhLnZpZXciLCJjb21tYW5kLmNhbmNlbCIsImNvbW1hbmQucmV0cnkiLCJjb21tYW5kLnNlbmQiLCJjb21tYW5kLnZpZXciLCJjb21tYW5kVHlwZS5jcmVhdGUiLCJjb21tYW5kVHlwZS5kZWxldGUiLCJjb21tYW5kVHlwZS51cGRhdGUiLCJjb21tYW5kVHlwZS52aWV3IiwiZGV2aWNlLmFuYWx5dGljcy52aWV3IiwiZGV2aWNlLmNvbnRyb2wiLCJkZXZpY2UuY3JlYXRlIiwiZGV2aWNlLmRlbGV0ZSIsImRldmljZS5oZWFydGJlYXQudmlldyIsImRldmljZS5tZXRhZGF0YS51cGRhdGUiLCJkZXZpY2Uuc3RhdHVzLnVwZGF0ZSIsImRldmljZS51cGRhdGUiLCJkZXZpY2UudmlldyIsIm1haW50ZW5hbmNlLmRlbGV0ZSIsIm1haW50ZW5hbmNlLmxvZyIsIm1haW50ZW5hbmNlLnNjaGVkdWxlIiwibWFpbnRlbmFuY2UudXBkYXRlIiwibWFpbnRlbmFuY2UudmlldyIsIm9yZ2FuaXphdGlvbi5jcmVhdGUiLCJvcmdhbml6YXRpb24uZGVsZXRlIiwib3JnYW5pemF0aW9uLnVwZGF0ZSIsIm9yZ2FuaXphdGlvbi52aWV3IiwicGVybWlzc2lvbi5tYW5hZ2UiLCJyZXBvcnQuZ2VuZXJhdGUiLCJyZXBvcnQudmlldyIsInJvbGUuYXNzaWduIiwicm9sZS52aWV3IiwicnVsZS5jcmVhdGUiLCJydWxlLmRlbGV0ZSIsInJ1bGUudXBkYXRlIiwicnVsZS52aWV3Iiwic2Vuc29yLmNyZWF0ZSIsInNlbnNvci5kZWxldGUiLCJzZW5zb3IudXBkYXRlIiwic2Vuc29yLnZpZXciLCJzZXR0aW5ncy51cGRhdGUiLCJzZXR0aW5ncy52aWV3Iiwic3RhdGUuY3JlYXRlIiwic3RhdGUudmlldyIsInN0YXRlVHJhbnNpdGlvbi5tYW5hZ2UiLCJzdGF0ZVRyYW5zaXRpb24udmlldyIsInN0YXRlVHlwZS5tYW5hZ2UiLCJzdGF0ZVR5cGUudmlldyIsInVzZXIuY3JlYXRlIiwidXNlci5kZWxldGUiLCJ1c2VyLnVwZGF0ZSIsInVzZXIudmlldyJdLCJyb2xlcyI6WyJBZG1pbiJdLCJpYXQiOjE3NDk1MzI0NjUsImV4cCI6MTc0OTYxODg2NX0.fcUWi5gGeasJj5U4pPmQpwkWyIWhmIyvAXC5qnNCLuA",
+  organizationId = localStorage.getItem('organizationId'),
 }) => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const { t } = useTranslation();
@@ -57,6 +62,44 @@ const RuleDetails: React.FC<RuleDetailsProps> = ({
       toastService.error(t('ruleEngine.deleteError'));
       console.error('Failed to delete rule chain:', error);
       setShowDeleteModal(false);
+    }
+  };
+
+  const handleNextNodeChange = async (nodeId: number, selectedNextNodeId: number | null) => {
+    try {
+      // Find the current node to get its data
+      const currentNode = rule?.nodes.find(n => n.id === nodeId);
+      if (!currentNode) return;
+
+      const response = await fetch(
+        `http://localhost:3000/api/v1/rule-chains/nodes/${nodeId}?organizationId=${organizationId}`,
+        {
+          method: 'PATCH',
+          headers: {
+            'Authorization': `Bearer ${jwtToken}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            type: currentNode.type,
+            config: currentNode.config,
+            nextNodeId: selectedNextNodeId
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to update next node');
+      }
+
+      // Show success message
+      toastService.success('Next node updated successfully');
+      
+      // Optionally refresh the rule details
+      // You might want to implement a refresh function and call it here
+
+    } catch (error) {
+      console.error('Error updating next node:', error);
+      toastService.error('Failed to update next node');
     }
   };
 
@@ -388,40 +431,60 @@ const RuleDetails: React.FC<RuleDetailsProps> = ({
             </p>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              {rule?.nodes?.map((node, index) => (
-                <div
-                  key={node.id}
-                  style={{
-                    ...cardStyle,
-                    padding: '1rem',
-                    marginBottom: index < rule.nodes.length - 1 ? '1rem' : 0,
-                  }}
-                >
-                  <h3 style={{
-                    fontSize: '1rem',
-                    fontWeight: 500,
-                    color: darkMode ? colors.textPrimary : '#111827',
-                    margin: '0 0 0.5rem 0',
-                  }}>
-                    {node.type.charAt(0).toUpperCase() + node.type.slice(1)} {t('rules.node')}
-                  </h3>
+              {rule?.nodes?.map((node, index) => {
+                // Create options for the dropdown
+                const nodeOptions = rule.nodes
+                  .filter(n => n.id !== node.id) // Exclude current node
+                  .map(n => ({
+                    id: n.id,
+                    name: n.name || `${n.type.charAt(0).toUpperCase() + n.type.slice(1)} Node ${n.id}`
+                  }));
 
-                  <p style={labelStyle}>{t('rules.configuration')}:</p>
-                  <pre style={codeBlockStyle}>
-                    {JSON.stringify(JSON.parse(node.config), null, 2)}
-                  </pre>
-
-                  {node.nextNodeId && (
-                    <p style={{
-                      ...labelStyle,
-                      marginTop: '0.5rem',
-                      marginBottom: 0,
+                return (
+                  <div
+                    key={node.id}
+                    style={{
+                      ...cardStyle,
+                      padding: '1rem',
+                      marginBottom: index < rule.nodes.length - 1 ? '1rem' : 0,
+                    }}
+                  >
+                    <h3 style={{
+                      fontSize: '1rem',
+                      fontWeight: 500,
+                      color: darkMode ? colors.textPrimary : '#111827',
+                      margin: '0 0 0.5rem 0',
                     }}>
-                      {t('rules.nextNode')}: {node.nextNodeId}
-                    </p>
-                  )}
-                </div>
-              ))}
+                      {node.name || `${node.type.charAt(0).toUpperCase() + node.type.slice(1)} Node ${node.id}`}
+                    </h3>
+
+                    <p style={labelStyle}>{t('rules.configuration')}:</p>
+                    <pre style={codeBlockStyle}>
+                      {JSON.stringify(JSON.parse(node.config), null, 2)}
+                    </pre>
+
+                    <FormControl fullWidth sx={{ mt: 2 }}>
+                      <Select
+                        value={node.nextNodeId === null ? '' : node.nextNodeId.toString()}
+                        onChange={(e) => handleNextNodeChange(
+                          node.id,
+                          e.target.value === '' ? null : Number(e.target.value)
+                        )}
+                        displayEmpty
+                      >
+                        <MenuItem value="">
+                          <em>Select next node</em>
+                        </MenuItem>
+                        {nodeOptions.map((option) => (
+                          <MenuItem key={option.id} value={option.id.toString()}>
+                            {option.name}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
