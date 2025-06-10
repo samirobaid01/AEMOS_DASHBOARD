@@ -95,6 +95,7 @@ const RuleForm: React.FC<RuleFormProps> = ({
     return initialData.nodes.map((node) => ({
       id: node.id,
       type: node.type,
+      name: node.name,
       config: JSON.parse(node.config),
     }));
   });
@@ -144,7 +145,9 @@ const RuleForm: React.FC<RuleFormProps> = ({
 
     if (node.type === 'filter') {
       return {
+        id:node.id,
         type: 'filter' as const,
+        name: node.name || '',
         sourceType: node.config.sourceType || 'sensor',
         UUID: node.config.UUID || '',
         key: node.config.key || '',
@@ -434,7 +437,7 @@ const RuleForm: React.FC<RuleFormProps> = ({
                 <div key={index} style={nodeItemStyle}>
                   <div style={nodeHeaderStyle}>
                     <Typography variant="subtitle1">
-                      {node.type.charAt(0).toUpperCase() + node.type.slice(1)} Node
+                      {node.type.charAt(0).toUpperCase() + node.type.slice(1)} Node {node.name}
                     </Typography>
                     <div style={nodeActionsStyle}>
                       <IconButton

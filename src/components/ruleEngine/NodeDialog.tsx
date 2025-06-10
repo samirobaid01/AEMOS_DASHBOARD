@@ -57,6 +57,8 @@ interface NodeDialogProps {
   onClose: () => void;
   onSave?: (data: any) => void;
   initialExpression?: {
+    id?: number;
+    name?: string;
     type: 'filter' | 'action';
     sourceType?: string;
     UUID?: string;
@@ -86,11 +88,23 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
   const [sensors, setSensors] = useState<Sensor[]>([]);
   const [devices, setDevices] = useState<Device[]>([]);
   const [output, setOutput] = useState<string>("");
-  const [nodeName, setNodeName] = useState<string>("");
+  const [nodeName, setNodeName] = useState<string>(initialExpression?.name || "");
   const builderRef = useRef<HTMLDivElement>(null);
   const sensorsRef = useRef<Sensor[]>([]);
   const devicesRef = useRef<Device[]>([]);
   const isInitializedRef = useRef<boolean>(false);
+
+  // Reset state when dialog opens/closes
+  useEffect(() => {
+    if (open) {
+      // In edit mode, initialize with the name from initialExpression
+      if (mode === 'edit' && initialExpression?.name) {
+        setNodeName(initialExpression.name);
+      } else {
+        setNodeName('');
+      }
+    }
+  }, [open, mode, initialExpression]);
 
   const resetState = () => {
     setOutput("");
@@ -125,6 +139,57 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
         `http://localhost:3000/api/v1/rule-chains/nodes?organizationId=${organizationId}`,
         {
           method: "POST",
+          headers: {
+            Authorization: `Bearer ${jwtToken}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        console.error("Error response:", errorData);
+        throw new Error(`API call failed: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      console.log("API Response:", result);
+
+      // Call onSave with the original data for UI updates
+      if (onSave) {
+        onSave(data);
+      }
+
+      // Close the dialog
+      handleClose();
+    } catch (error) {
+      console.error("Error saving node:", error);
+    }
+  };
+
+  const updateExpression = async () => {
+    try {
+      if (!nodeName.trim()) {
+        console.error("Node name is required");
+        return;
+      }
+
+      console.log("Current output:", output);
+      const data = JSON.parse(output);
+
+      // Prepare the API request payload
+      const payload = {
+        name: nodeName.trim(),
+        config: JSON.stringify(data.expressions[0])
+      };
+
+      console.log("Sending payload to API:", payload);
+
+      const response = await fetch(
+        `http://localhost:3000/api/v1/rule-chains/nodes/${initialExpression?.id}?organizationId=${organizationId}`,
+        {
+          method: "PATCH",
           headers: {
             Authorization: `Bearer ${jwtToken}`,
             "Content-Type": "application/json",
@@ -917,13 +982,13 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
           Cancel
         </Button>
         <Button
-          onClick={saveExpression}
+          onClick={mode === 'edit' ? updateExpression : saveExpression}
           variant="contained"
           color="primary"
           type="button"
           disabled={!nodeName.trim()}
         >
-          Save
+          {mode === 'edit' ? 'Update' : 'Save'}
         </Button>
       </DialogActions>
     </Dialog>
