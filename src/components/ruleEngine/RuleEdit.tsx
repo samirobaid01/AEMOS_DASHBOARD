@@ -11,6 +11,7 @@ interface RuleEditProps {
   error?: string | null;
   onSubmit: (data: RuleChainUpdatePayload) => Promise<void>;
   windowWidth?: number;
+  ruleChainId: number;
 }
 
 const RuleEdit: React.FC<RuleEditProps> = ({
@@ -18,7 +19,8 @@ const RuleEdit: React.FC<RuleEditProps> = ({
   isLoading,
   error,
   onSubmit,
-  windowWidth = window.innerWidth
+  windowWidth = window.innerWidth,
+  ruleChainId
 }) => {
   const { t } = useTranslation();
   const { darkMode } = useTheme();
@@ -93,6 +95,7 @@ const RuleEdit: React.FC<RuleEditProps> = ({
         initialData={rule}
         onSubmit={onSubmit}
         isLoading={isLoading}
+        ruleChainId={ruleChainId}
       />
     </div>
   );

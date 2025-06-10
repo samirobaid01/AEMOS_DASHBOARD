@@ -163,6 +163,7 @@ const RuleEdit: React.FC = () => {
         initialData={selectedRule}
         onSubmit={handleSubmit}
         isLoading={loading}
+        ruleChainId={parseInt(id!)}
       />
     </Box>
   );

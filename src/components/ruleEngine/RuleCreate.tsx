@@ -8,9 +8,10 @@ import type { RuleChainCreatePayload } from '../../types/ruleEngine';
 interface RuleCreateProps {
   onSubmit: (data: RuleChainCreatePayload) => Promise<void>;
   isLoading?: boolean;
+  ruleChainId: number;
 }
 
-const RuleCreate: React.FC<RuleCreateProps> = ({ onSubmit, isLoading }) => {
+const RuleCreate: React.FC<RuleCreateProps> = ({ onSubmit, isLoading, ruleChainId }) => {
   const { t } = useTranslation();
   const { darkMode } = useTheme();
   const colors = useThemeColors();
@@ -29,7 +30,11 @@ const RuleCreate: React.FC<RuleCreateProps> = ({ onSubmit, isLoading }) => {
       }}>
         {t('ruleEngine.createRuleChain')}
       </h1>
-      <RuleForm onSubmit={onSubmit} isLoading={isLoading} />
+      <RuleForm 
+        onSubmit={onSubmit} 
+        isLoading={isLoading} 
+        ruleChainId={ruleChainId}
+      />
     </div>
   );
 };

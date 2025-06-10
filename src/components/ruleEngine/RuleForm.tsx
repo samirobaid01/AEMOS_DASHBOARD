@@ -12,6 +12,7 @@ import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import EditIcon from '@mui/icons-material/Edit';
 import type { RuleChain } from '../../types/ruleEngine';
 import NodeDialog from './NodeDialog';
+import ActionDialog from './ActionDialog';
 import type { ConditionData, GroupData } from './NodeDialog';
 import { useTheme } from '../../context/ThemeContext';
 import { useThemeColors } from '../../hooks/useThemeColors';
@@ -20,30 +21,40 @@ import { ruleFormResolver } from '../../containers/RuleEngine/RuleEdit';
 
 interface RuleFormProps {
   initialData?: RuleChain;
-  ruleChainId?: number;
+  ruleChainId: number;
   jwtToken?: string;
   organizationId?: number;
   onSubmit: (data: any) => Promise<void>;
   isLoading?: boolean;
 }
 
-interface NodeFormData {
-  type: 'filter' | 'action';
+interface FilterConfig {
+  type: 'filter';
   config: {
     sourceType?: 'sensor';
     UUID?: string;
     key?: string;
     operator?: '>' | '<' | '=' | '>=';
     value?: number;
-    type?: 'DEVICE_COMMAND';
-    command?: {
-      deviceUuid: string;
-      stateName: string;
-      value: string;
-      initiatedBy: 'device';
-    };
   };
 }
+
+interface DeviceCommand {
+  deviceUuid: string;
+  stateName: string;
+  value: string;
+  initiatedBy: 'device';
+}
+
+interface ActionConfig {
+  type: 'action';
+  config: {
+    type: 'DEVICE_COMMAND';
+    command: DeviceCommand;
+  };
+}
+
+type NodeFormData = FilterConfig | ActionConfig;
 
 const RuleForm: React.FC<RuleFormProps> = ({
   initialData,
@@ -53,6 +64,8 @@ const RuleForm: React.FC<RuleFormProps> = ({
   onSubmit,
   isLoading = false,
 }) => {
+  console.log('RuleForm props:', { ruleChainId, organizationId });
+  
   const { darkMode } = useTheme();
   const colors = useThemeColors();
   const { t } = useTranslation();
@@ -68,6 +81,7 @@ const RuleForm: React.FC<RuleFormProps> = ({
 
   const [isNodeDialogOpen, setIsNodeDialogOpen] = useState(false);
   const [currentNodeIndex, setCurrentNodeIndex] = useState<number | null>(null);
+  const [isActionDialogOpen, setIsActionDialogOpen] = useState(false);
 
   const handleNodeDialogOpen = (index: number | null) => {
     console.log('Opening node dialog with index:', index);
@@ -75,9 +89,30 @@ const RuleForm: React.FC<RuleFormProps> = ({
     setIsNodeDialogOpen(true);
   };
 
+  const handleActionDialogOpen = (index?: number) => {
+    console.log('Opening action dialog with index:', index);
+    if (index !== undefined) {
+      // Edit mode
+      console.log('Edit mode - setting current node index:', index);
+      console.log('Current node data:', nodes[index]);
+      setCurrentNodeIndex(index);
+    } else {
+      // Add mode - reset current node index
+      console.log('Add mode - resetting current node index');
+      setCurrentNodeIndex(null);
+    }
+    setIsActionDialogOpen(true);
+  };
+
   const handleNodeDialogClose = () => {
     console.log('Closing node dialog');
     setIsNodeDialogOpen(false);
+    setCurrentNodeIndex(null);
+  };
+
+  const handleActionDialogClose = () => {
+    console.log('Closing action dialog');
+    setIsActionDialogOpen(false);
     setCurrentNodeIndex(null);
   };
 
@@ -96,18 +131,7 @@ const RuleForm: React.FC<RuleFormProps> = ({
         operator: node.config.operator || '==',
         value: node.config.value || ''
       };
-    } else if (node.type === 'action') {
-      return {
-        type: 'action' as const,
-        command: {
-          deviceUuid: node.config.command?.deviceUuid || '',
-          stateName: node.config.command?.stateName || '',
-          value: node.config.command?.value || '',
-          initiatedBy: 'device' as const
-        }
-      };
     }
-
     return undefined;
   };
 
@@ -172,6 +196,60 @@ const RuleForm: React.FC<RuleFormProps> = ({
 
   const handleNodeDelete = (index: number) => {
     setNodes(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const getActionNodeData = (node: NodeFormData): ActionConfig | undefined => {
+    console.log('Getting action node data from:', node);
+    if (node.type === 'action') {
+      // The node has a nested config structure: config.config.command
+      const nestedConfig = node.config as any;
+      const commandData = nestedConfig.config?.command;
+
+      console.log('Nested config:', nestedConfig);
+      console.log('Extracted command data:', commandData);
+
+      if (commandData) {
+        const actionData: ActionConfig = {
+          type: 'action',
+          config: {
+            type: 'DEVICE_COMMAND',
+            command: {
+              deviceUuid: commandData.deviceUuid,
+              stateName: commandData.stateName,
+              value: commandData.value,
+              initiatedBy: 'device'
+            }
+          }
+        };
+        console.log('Transformed action data:', actionData);
+        return actionData;
+      }
+    }
+    return undefined;
+  };
+
+  const handleActionSave = (actionData: any) => {
+    console.log('Saving action data:', actionData);
+    const newNode: ActionConfig = {
+      type: 'action',
+      config: {
+        type: 'DEVICE_COMMAND',
+        command: actionData.config.command
+      }
+    };
+    
+    if (currentNodeIndex !== null) {
+      // Edit mode - update existing node
+      setNodes(prev => {
+        const newNodes = [...prev];
+        newNodes[currentNodeIndex] = newNode;
+        return newNodes;
+      });
+    } else {
+      // Add mode - add new node
+      setNodes(prev => [...prev, newNode]);
+    }
+    handleActionDialogClose();
   };
 
   const handleMainFormSubmit = async (data: any) => {
@@ -311,7 +389,7 @@ const RuleForm: React.FC<RuleFormProps> = ({
                 <div style={nodeActionsStyle}>
                   <IconButton
                     size="small"
-                    onClick={() => handleNodeDialogOpen(index)}
+                    onClick={() => node.type === 'filter' ? handleNodeDialogOpen(index) : handleActionDialogOpen(index)}
                   >
                     <EditIcon />
                   </IconButton>
@@ -343,20 +421,35 @@ const RuleForm: React.FC<RuleFormProps> = ({
             </div>
           ))}
 
-          <Button
-            type="button"
-            variant="outlined"
-            startIcon={<AddIcon />}
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              handleNodeDialogOpen(null);
-            }}
-            fullWidth
-            sx={{ mt: 2 }}
-          >
-            Add Node
-          </Button>
+          <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+            <Button
+              type="button"
+              variant="outlined"
+              startIcon={<AddIcon />}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleNodeDialogOpen(null);
+              }}
+              fullWidth
+            >
+              Add Node
+            </Button>
+
+            <Button
+              type="button"
+              variant="outlined"
+              startIcon={<AddIcon />}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleActionDialogOpen(); // Call without index for Add mode
+              }}
+              fullWidth
+            >
+              Add Action
+            </Button>
+          </div>
         </div>
 
         <div style={{ marginTop: '2rem' }}>
@@ -387,6 +480,17 @@ const RuleForm: React.FC<RuleFormProps> = ({
           initialExpression={getInitialExpression(currentNodeIndex)}
         />
       )}
+
+      <ActionDialog
+        open={isActionDialogOpen}
+        onClose={handleActionDialogClose}
+        onSave={handleActionSave}
+        ruleChainId={ruleChainId}
+        jwtToken={jwtToken}
+        organizationId={organizationId}
+        mode={currentNodeIndex !== null ? 'edit' : 'add'}
+        initialData={currentNodeIndex !== null && nodes[currentNodeIndex] ? getActionNodeData(nodes[currentNodeIndex]) : undefined}
+      />
     </div>
   );
 };
