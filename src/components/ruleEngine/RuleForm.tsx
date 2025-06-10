@@ -18,6 +18,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { useThemeColors } from '../../hooks/useThemeColors';
 import { useTranslation } from 'react-i18next';
 import { ruleFormResolver } from '../../containers/RuleEngine/RuleEdit';
+import { toastService } from '../../services/toastService';
 
 interface RuleFormProps {
   initialData?: RuleChain;
@@ -30,14 +31,11 @@ interface RuleFormProps {
 }
 
 interface FilterConfig {
-  type: 'filter';
-  config: {
-    sourceType?: 'sensor';
-    UUID?: string;
-    key?: string;
-    operator?: '>' | '<' | '=' | '>=';
-    value?: number;
-  };
+  sourceType: string;
+  UUID: string;
+  key: string;
+  operator: string;
+  value: string | number;
 }
 
 interface DeviceCommand {
@@ -48,25 +46,44 @@ interface DeviceCommand {
 }
 
 interface ActionConfig {
+  type: 'DEVICE_COMMAND';
+  command: DeviceCommand;
+}
+
+interface NodeFormData {
+  id?: number;
+  name?: string;
+  type: 'filter' | 'action';
+  config: {
+    sourceType?: string;
+    UUID?: string;
+    key?: string;
+    operator?: string;
+    value?: string | number;
+    type?: 'DEVICE_COMMAND';
+    command?: DeviceCommand;
+  };
+}
+
+interface ActionNodeData {
   type: 'action';
+  name?: string;
   config: {
     type: 'DEVICE_COMMAND';
     command: DeviceCommand;
   };
 }
 
-type NodeFormData = FilterConfig | ActionConfig;
-
 const RuleForm: React.FC<RuleFormProps> = ({
   initialData,
   ruleChainId,
-  jwtToken,
-  organizationId,
+  jwtToken ="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NjcxLCJlbWFpbCI6InNhbWlyYWRtaW5AeW9wbWFpbC5jb20iLCJwZXJtaXNzaW9ucyI6WyJhcmVhLmNyZWF0ZSIsImFyZWEuZGVsZXRlIiwiYXJlYS51cGRhdGUiLCJhcmVhLnZpZXciLCJjb21tYW5kLmNhbmNlbCIsImNvbW1hbmQucmV0cnkiLCJjb21tYW5kLnNlbmQiLCJjb21tYW5kLnZpZXciLCJjb21tYW5kVHlwZS5jcmVhdGUiLCJjb21tYW5kVHlwZS5kZWxldGUiLCJjb21tYW5kVHlwZS51cGRhdGUiLCJjb21tYW5kVHlwZS52aWV3IiwiZGV2aWNlLmFuYWx5dGljcy52aWV3IiwiZGV2aWNlLmNvbnRyb2wiLCJkZXZpY2UuY3JlYXRlIiwiZGV2aWNlLmRlbGV0ZSIsImRldmljZS5oZWFydGJlYXQudmlldyIsImRldmljZS5tZXRhZGF0YS51cGRhdGUiLCJkZXZpY2Uuc3RhdHVzLnVwZGF0ZSIsImRldmljZS51cGRhdGUiLCJkZXZpY2UudmlldyIsIm1haW50ZW5hbmNlLmRlbGV0ZSIsIm1haW50ZW5hbmNlLmxvZyIsIm1haW50ZW5hbmNlLnNjaGVkdWxlIiwibWFpbnRlbmFuY2UudXBkYXRlIiwibWFpbnRlbmFuY2UudmlldyIsIm9yZ2FuaXphdGlvbi5jcmVhdGUiLCJvcmdhbml6YXRpb24uZGVsZXRlIiwib3JnYW5pemF0aW9uLnVwZGF0ZSIsIm9yZ2FuaXphdGlvbi52aWV3IiwicGVybWlzc2lvbi5tYW5hZ2UiLCJyZXBvcnQuZ2VuZXJhdGUiLCJyZXBvcnQudmlldyIsInJvbGUuYXNzaWduIiwicm9sZS52aWV3IiwicnVsZS5jcmVhdGUiLCJydWxlLmRlbGV0ZSIsInJ1bGUudXBkYXRlIiwicnVsZS52aWV3Iiwic2Vuc29yLmNyZWF0ZSIsInNlbnNvci5kZWxldGUiLCJzZW5zb3IudXBkYXRlIiwic2Vuc29yLnZpZXciLCJzZXR0aW5ncy51cGRhdGUiLCJzZXR0aW5ncy52aWV3Iiwic3RhdGUuY3JlYXRlIiwic3RhdGUudmlldyIsInN0YXRlVHJhbnNpdGlvbi5tYW5hZ2UiLCJzdGF0ZVRyYW5zaXRpb24udmlldyIsInN0YXRlVHlwZS5tYW5hZ2UiLCJzdGF0ZVR5cGUudmlldyIsInVzZXIuY3JlYXRlIiwidXNlci5kZWxldGUiLCJ1c2VyLnVwZGF0ZSIsInVzZXIudmlldyJdLCJyb2xlcyI6WyJBZG1pbiJdLCJpYXQiOjE3NDk1NjczNTAsImV4cCI6MTc0OTY1Mzc1MH0.1IYQi_op61esKmUwiYcHB1yj2JfcOrcIzpMl-XBXqpk",
+  organizationId = 1,
   onSubmit,
   isLoading = false,
   showNodeSection = true,
 }) => {
-  console.log('RuleForm props:', { ruleChainId, organizationId });
+  console.log('RuleForm props:', { ruleChainId, organizationId, jwtToken });
   
   const { darkMode } = useTheme();
   const colors = useThemeColors();
@@ -76,6 +93,7 @@ const RuleForm: React.FC<RuleFormProps> = ({
       return [];
     }
     return initialData.nodes.map((node) => ({
+      id: node.id,
       type: node.type,
       config: JSON.parse(node.config),
     }));
@@ -196,43 +214,71 @@ const RuleForm: React.FC<RuleFormProps> = ({
     }
   };
 
-  const handleNodeDelete = (index: number) => {
-    setNodes(prev => prev.filter((_, i) => i !== index));
+  const handleNodeDelete = async (nodeId: number | undefined) => {
+    if (!nodeId) {
+      console.error('Cannot delete node: no node ID provided');
+      return;
+    }
+
+    if (!organizationId) {
+      console.error('Cannot delete node: no organization ID provided');
+      toastService.error('Organization ID is required');
+      return;
+    }
+
+    if (!jwtToken) {
+      console.error('Cannot delete node: no JWT token provided');
+      toastService.error('Authentication token is missing');
+      return;
+    }
+
+    try {
+      console.log('Deleting node:', nodeId, 'for organization:', organizationId);
+      
+      const response = await fetch(
+        `http://localhost:3000/api/v1/rule-chains/nodes/${nodeId}?organizationId=${organizationId}`,
+        {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${jwtToken}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        console.error('Error response:', errorData);
+        throw new Error('Failed to delete node');
+      }
+
+      // Remove node from local state
+      setNodes(prev => prev.filter(node => node.id !== nodeId));
+      toastService.success('Node deleted successfully');
+    } catch (error) {
+      console.error('Error deleting node:', error);
+      toastService.error('Failed to delete node');
+    }
   };
 
-  const getActionNodeData = (node: NodeFormData): ActionConfig | undefined => {
+  const getActionNodeData = (node: NodeFormData): ActionNodeData | undefined => {
     console.log('Getting action node data from:', node);
-    if (node.type === 'action') {
-      // The node has a nested config structure: config.config.command
-      const nestedConfig = node.config as any;
-      const commandData = nestedConfig.config?.command;
-
-      console.log('Nested config:', nestedConfig);
-      console.log('Extracted command data:', commandData);
-
-      if (commandData) {
-        const actionData: ActionConfig = {
-          type: 'action',
-          config: {
-            type: 'DEVICE_COMMAND',
-            command: {
-              deviceUuid: commandData.deviceUuid,
-              stateName: commandData.stateName,
-              value: commandData.value,
-              initiatedBy: 'device'
-            }
-          }
-        };
-        console.log('Transformed action data:', actionData);
-        return actionData;
-      }
+    if (node.type === 'action' && node.config.type === 'DEVICE_COMMAND' && node.config.command) {
+      return {
+        type: 'action',
+        name: node.name,
+        config: {
+          type: 'DEVICE_COMMAND',
+          command: node.config.command
+        }
+      };
     }
     return undefined;
   };
 
   const handleActionSave = (actionData: any) => {
     console.log('Saving action data:', actionData);
-    const newNode: ActionConfig = {
+    const newNode: NodeFormData = {
       type: 'action',
       config: {
         type: 'DEVICE_COMMAND',
@@ -402,7 +448,7 @@ const RuleForm: React.FC<RuleFormProps> = ({
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          handleNodeDelete(index);
+                          handleNodeDelete(node.id);
                         }}
                         color="error"
                       >

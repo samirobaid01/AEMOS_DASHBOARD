@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useParams, Navigate } from 'react-router-dom';
 import { fetchRuleDetails, updateRule, selectSelectedRule, selectRuleEngineLoading } from '../../state/slices/ruleEngine.slice';
 import { useRuleEnginePermissions } from '../../hooks/useRuleEnginePermissions';
+import { selectSelectedOrganizationId } from '../../state/slices/auth.slice';
 import type { AppDispatch } from '../../state/store';
 import type { RuleChainUpdatePayload } from '../../types/ruleEngine';
 import RuleForm from '../../components/ruleEngine/RuleForm';
@@ -113,6 +114,7 @@ const RuleEdit: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const { canUpdate } = useRuleEnginePermissions();
+  const selectedOrganizationId = useSelector(selectSelectedOrganizationId);
 
   const selectedRule = useSelector(selectSelectedRule);
   const loading = useSelector(selectRuleEngineLoading);
@@ -164,6 +166,7 @@ const RuleEdit: React.FC = () => {
         onSubmit={handleSubmit}
         isLoading={loading}
         ruleChainId={parseInt(id!)}
+        organizationId={selectedOrganizationId || 1}
       />
     </Box>
   );

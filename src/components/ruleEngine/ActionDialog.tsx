@@ -14,16 +14,21 @@ import {
   Box,
 } from '@mui/material';
 
+interface DeviceState {
+  id: number;
+  deviceId: number;
+  stateName: string;
+  dataType: string;
+  defaultValue: string;
+  allowedValues: string;
+  status: string;
+}
+
 interface Device {
   uuid: string;
   name: string;
-  capabilities: Record<string, any>;
-}
-
-interface DeviceState {
-  key: string;
-  values: string[] | null;
-  range?: [number, number];
+  id: number;
+  states: DeviceState[];
 }
 
 interface ActionDialogProps {
@@ -53,7 +58,7 @@ const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
   open,
   onClose,
   onSave,
-  organizationId = 1,
+  organizationId,
   jwtToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NjcxLCJlbWFpbCI6InNhbWlyYWRtaW5AeW9wbWFpbC5jb20iLCJwZXJtaXNzaW9ucyI6WyJhcmVhLmNyZWF0ZSIsImFyZWEuZGVsZXRlIiwiYXJlYS51cGRhdGUiLCJhcmVhLnZpZXciLCJjb21tYW5kLmNhbmNlbCIsImNvbW1hbmQucmV0cnkiLCJjb21tYW5kLnNlbmQiLCJjb21tYW5kLnZpZXciLCJjb21tYW5kVHlwZS5jcmVhdGUiLCJjb21tYW5kVHlwZS5kZWxldGUiLCJjb21tYW5kVHlwZS51cGRhdGUiLCJjb21tYW5kVHlwZS52aWV3IiwiZGV2aWNlLmFuYWx5dGljcy52aWV3IiwiZGV2aWNlLmNvbnRyb2wiLCJkZXZpY2UuY3JlYXRlIiwiZGV2aWNlLmRlbGV0ZSIsImRldmljZS5oZWFydGJlYXQudmlldyIsImRldmljZS5tZXRhZGF0YS51cGRhdGUiLCJkZXZpY2Uuc3RhdHVzLnVwZGF0ZSIsImRldmljZS51cGRhdGUiLCJkZXZpY2UudmlldyIsIm1haW50ZW5hbmNlLmRlbGV0ZSIsIm1haW50ZW5hbmNlLmxvZyIsIm1haW50ZW5hbmNlLnNjaGVkdWxlIiwibWFpbnRlbmFuY2UudXBkYXRlIiwibWFpbnRlbmFuY2UudmlldyIsIm9yZ2FuaXphdGlvbi5jcmVhdGUiLCJvcmdhbml6YXRpb24uZGVsZXRlIiwib3JnYW5pemF0aW9uLnVwZGF0ZSIsIm9yZ2FuaXphdGlvbi52aWV3IiwicGVybWlzc2lvbi5tYW5hZ2UiLCJyZXBvcnQuZ2VuZXJhdGUiLCJyZXBvcnQudmlldyIsInJvbGUuYXNzaWduIiwicm9sZS52aWV3IiwicnVsZS5jcmVhdGUiLCJydWxlLmRlbGV0ZSIsInJ1bGUudXBkYXRlIiwicnVsZS52aWV3Iiwic2Vuc29yLmNyZWF0ZSIsInNlbnNvci5kZWxldGUiLCJzZW5zb3IudXBkYXRlIiwic2Vuc29yLnZpZXciLCJzZXR0aW5ncy51cGRhdGUiLCJzZXR0aW5ncy52aWV3Iiwic3RhdGUuY3JlYXRlIiwic3RhdGUudmlldyIsInN0YXRlVHJhbnNpdGlvbi5tYW5hZ2UiLCJzdGF0ZVRyYW5zaXRpb24udmlldyIsInN0YXRlVHlwZS5tYW5hZ2UiLCJzdGF0ZVR5cGUudmlldyIsInVzZXIuY3JlYXRlIiwidXNlci5kZWxldGUiLCJ1c2VyLnVwZGF0ZSIsInVzZXIudmlldyJdLCJyb2xlcyI6WyJBZG1pbiJdLCJpYXQiOjE3NDk1MzI0NjUsImV4cCI6MTc0OTYxODg2NX0.fcUWi5gGeasJj5U4pPmQpwkWyIWhmIyvAXC5qnNCLuA",
   ruleChainId,
   mode = 'add',
@@ -67,6 +72,7 @@ const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
   const [stateValue, setStateValue] = useState<string>('');
   const [jsonOutput, setJsonOutput] = useState<string>('');
   const [nodeName, setNodeName] = useState<string>('');
+  const [allowedValues, setAllowedValues] = useState<string[]>([]);
 
   const fetchDevices = useCallback(async () => {
     try {
@@ -130,39 +136,55 @@ const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
     }
   }, [open, mode, initialData]);
 
-  const currentDeviceStates = useMemo(() => {
-    if (selectedDevice) {
-      const device = devices.find(d => d.uuid === selectedDevice);
-      if (device) {
-        const states: DeviceState[] = [];
-        Object.entries(device.capabilities || {}).forEach(([key, value]) => {
-          if (key.includes("Range") && Array.isArray(value) && value.length === 2) {
-            states.push({
-              key: key.replace("Range", ""),
-              values: null,
-              range: value as [number, number],
-            });
-          } else if (Array.isArray(value)) {
-            states.push({
-              key: key.replace(/([A-Z])/g, "_$1").toLowerCase(),
-              values: value,
-            });
-          } else if (typeof value === "boolean") {
-            states.push({
-              key: key.replace(/([A-Z])/g, "_$1").toLowerCase(),
-              values: ["true", "false"],
-            });
-          }
-        });
-        return states;
+  const fetchDeviceStates = async (deviceId: number) => {
+    try {
+      const response = await fetch(
+        `http://localhost:3000/api/v1/devices/${deviceId}?organizationId=${organizationId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${jwtToken}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+      const result = await response.json();
+      if (result.status === 'success' && result.data.device.states) {
+        setDeviceStates(result.data.device.states);
+      }
+    } catch (error) {
+      console.error('Error fetching device states:', error);
+    }
+  };
+
+  const handleDeviceChange = async (deviceUuid: string) => {
+    setSelectedDevice(deviceUuid);
+    setStateName('');
+    setStateValue('');
+    setAllowedValues([]);
+    
+    // Find the device ID from the UUID
+    const selectedDeviceObj = devices.find(d => d.uuid === deviceUuid);
+    if (selectedDeviceObj?.id) {
+      await fetchDeviceStates(selectedDeviceObj.id);
+    }
+  };
+
+  const handleStateNameChange = (newStateName: string) => {
+    setStateName(newStateName);
+    setStateValue(''); // Reset state value when state name changes
+    
+    // Find the selected state and update allowed values
+    const selectedState = deviceStates.find(state => state.stateName === newStateName);
+    if (selectedState) {
+      try {
+        const parsedValues = JSON.parse(selectedState.allowedValues);
+        setAllowedValues(parsedValues);
+      } catch (error) {
+        console.error('Error parsing allowed values:', error);
+        setAllowedValues([]);
       }
     }
-    return [];
-  }, [selectedDevice, devices]);
-
-  useEffect(() => {
-    setDeviceStates(currentDeviceStates);
-  }, [currentDeviceStates]);
+  };
 
   useEffect(() => {
     if (actionType === 'Device' && selectedDevice && stateName && stateValue) {
@@ -264,13 +286,13 @@ const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
             </Select>
           </FormControl>
 
-          {actionType === 'Device' ? (
+          {actionType === 'Device' && (
             <>
               <FormControl fullWidth>
                 <InputLabel>Device</InputLabel>
                 <Select
                   value={selectedDevice}
-                  onChange={(e) => setSelectedDevice(e.target.value)}
+                  onChange={(e) => handleDeviceChange(e.target.value)}
                   label="Device"
                 >
                   {devices.map((device) => (
@@ -286,12 +308,12 @@ const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
                   <InputLabel>Device State</InputLabel>
                   <Select
                     value={stateName}
-                    onChange={(e) => setStateName(e.target.value)}
+                    onChange={(e) => handleStateNameChange(e.target.value)}
                     label="Device State"
                   >
                     {deviceStates.map((state) => (
-                      <MenuItem key={state.key} value={state.key}>
-                        {state.key}
+                      <MenuItem key={state.id} value={state.stateName}>
+                        {state.stateName}
                       </MenuItem>
                     ))}
                   </Select>
@@ -299,23 +321,22 @@ const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
               )}
 
               {stateName && (
-                <TextField
-                  fullWidth
-                  label="State Value"
-                  value={stateValue}
-                  onChange={(e) => setStateValue(e.target.value)}
-                  helperText={
-                    deviceStates.find(s => s.key === stateName)?.range 
-                      ? `Range: ${deviceStates.find(s => s.key === stateName)?.range?.join(' - ')}`
-                      : deviceStates.find(s => s.key === stateName)?.values?.join(', ')
-                  }
-                />
+                <FormControl fullWidth>
+                  <InputLabel>State Value</InputLabel>
+                  <Select
+                    value={stateValue}
+                    onChange={(e) => setStateValue(e.target.value)}
+                    label="State Value"
+                  >
+                    {allowedValues.map((value) => (
+                      <MenuItem key={value} value={value}>
+                        {value}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
               )}
             </>
-          ) : (
-            <Typography color="text.secondary" sx={{ mt: 2 }}>
-              This feature is not available yet
-            </Typography>
           )}
 
           {jsonOutput && (
