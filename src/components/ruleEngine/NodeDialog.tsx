@@ -156,9 +156,13 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
       const result = await response.json();
       console.log("API Response:", result);
 
-      // Call onSave with the original data for UI updates
+      // Call onSave with the data including the name and new ID
       if (onSave) {
-        onSave(data);
+        onSave({
+          ...data,
+          name: nodeName.trim(),
+          id: result.data.id // Include the new ID from the response
+        });
       }
 
       // Close the dialog
@@ -207,9 +211,13 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
       const result = await response.json();
       console.log("API Response:", result);
 
-      // Call onSave with the original data for UI updates
+      // Call onSave with the data including the name
       if (onSave) {
-        onSave(data);
+        onSave({
+          ...data,
+          name: nodeName.trim(),
+          id: initialExpression?.id
+        });
       }
 
       // Close the dialog

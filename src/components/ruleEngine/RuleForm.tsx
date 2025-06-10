@@ -78,7 +78,7 @@ const RuleForm: React.FC<RuleFormProps> = ({
   initialData,
   ruleChainId,
   jwtToken ="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NjcxLCJlbWFpbCI6InNhbWlyYWRtaW5AeW9wbWFpbC5jb20iLCJwZXJtaXNzaW9ucyI6WyJhcmVhLmNyZWF0ZSIsImFyZWEuZGVsZXRlIiwiYXJlYS51cGRhdGUiLCJhcmVhLnZpZXciLCJjb21tYW5kLmNhbmNlbCIsImNvbW1hbmQucmV0cnkiLCJjb21tYW5kLnNlbmQiLCJjb21tYW5kLnZpZXciLCJjb21tYW5kVHlwZS5jcmVhdGUiLCJjb21tYW5kVHlwZS5kZWxldGUiLCJjb21tYW5kVHlwZS51cGRhdGUiLCJjb21tYW5kVHlwZS52aWV3IiwiZGV2aWNlLmFuYWx5dGljcy52aWV3IiwiZGV2aWNlLmNvbnRyb2wiLCJkZXZpY2UuY3JlYXRlIiwiZGV2aWNlLmRlbGV0ZSIsImRldmljZS5oZWFydGJlYXQudmlldyIsImRldmljZS5tZXRhZGF0YS51cGRhdGUiLCJkZXZpY2Uuc3RhdHVzLnVwZGF0ZSIsImRldmljZS51cGRhdGUiLCJkZXZpY2UudmlldyIsIm1haW50ZW5hbmNlLmRlbGV0ZSIsIm1haW50ZW5hbmNlLmxvZyIsIm1haW50ZW5hbmNlLnNjaGVkdWxlIiwibWFpbnRlbmFuY2UudXBkYXRlIiwibWFpbnRlbmFuY2UudmlldyIsIm9yZ2FuaXphdGlvbi5jcmVhdGUiLCJvcmdhbml6YXRpb24uZGVsZXRlIiwib3JnYW5pemF0aW9uLnVwZGF0ZSIsIm9yZ2FuaXphdGlvbi52aWV3IiwicGVybWlzc2lvbi5tYW5hZ2UiLCJyZXBvcnQuZ2VuZXJhdGUiLCJyZXBvcnQudmlldyIsInJvbGUuYXNzaWduIiwicm9sZS52aWV3IiwicnVsZS5jcmVhdGUiLCJydWxlLmRlbGV0ZSIsInJ1bGUudXBkYXRlIiwicnVsZS52aWV3Iiwic2Vuc29yLmNyZWF0ZSIsInNlbnNvci5kZWxldGUiLCJzZW5zb3IudXBkYXRlIiwic2Vuc29yLnZpZXciLCJzZXR0aW5ncy51cGRhdGUiLCJzZXR0aW5ncy52aWV3Iiwic3RhdGUuY3JlYXRlIiwic3RhdGUudmlldyIsInN0YXRlVHJhbnNpdGlvbi5tYW5hZ2UiLCJzdGF0ZVRyYW5zaXRpb24udmlldyIsInN0YXRlVHlwZS5tYW5hZ2UiLCJzdGF0ZVR5cGUudmlldyIsInVzZXIuY3JlYXRlIiwidXNlci5kZWxldGUiLCJ1c2VyLnVwZGF0ZSIsInVzZXIudmlldyJdLCJyb2xlcyI6WyJBZG1pbiJdLCJpYXQiOjE3NDk1NjczNTAsImV4cCI6MTc0OTY1Mzc1MH0.1IYQi_op61esKmUwiYcHB1yj2JfcOrcIzpMl-XBXqpk",
-  organizationId = 1,
+  organizationId,
   onSubmit,
   isLoading = false,
   showNodeSection = true,
@@ -89,6 +89,7 @@ const RuleForm: React.FC<RuleFormProps> = ({
   const colors = useThemeColors();
   const { t } = useTranslation();
   const [nodes, setNodes] = useState<NodeFormData[]>(() => {
+    console.log("triggered initialData from useState", JSON.stringify(initialData));
     if (!initialData?.nodes) {
       return [];
     }
@@ -158,7 +159,7 @@ const RuleForm: React.FC<RuleFormProps> = ({
     return undefined;
   };
 
-  const handleNodeSave = (data: { expressions: Array<ConditionData | GroupData> }) => {
+  const handleNodeSave = (data: { expressions: Array<ConditionData | GroupData>, name: string, id?: number }) => {
     console.log('Saving node data:', data);
     if (!data.expressions.length) {
       console.log('No expressions to save');
@@ -180,6 +181,8 @@ const RuleForm: React.FC<RuleFormProps> = ({
     if ('sourceType' in expression) {
       // It's a ConditionData
       nodeData = {
+        id: data.id,
+        name: data.name,
         type: 'filter',
         config: {
           sourceType: expression.sourceType === 'sensor' ? 'sensor' : undefined,
@@ -192,6 +195,8 @@ const RuleForm: React.FC<RuleFormProps> = ({
     } else {
       // It's a GroupData
       nodeData = {
+        id: data.id,
+        name: data.name,
         type: 'action',
         config: {
           type: 'DEVICE_COMMAND',
@@ -437,7 +442,7 @@ const RuleForm: React.FC<RuleFormProps> = ({
                 <div key={index} style={nodeItemStyle}>
                   <div style={nodeHeaderStyle}>
                     <Typography variant="subtitle1">
-                      {node.type.charAt(0).toUpperCase() + node.type.slice(1)} Node {node.name}
+                      {node.type.charAt(0).toUpperCase() + node.type.slice(1)} Node {node.name} {JSON.stringify(node)}
                     </Typography>
                     <div style={nodeActionsStyle}>
                       <IconButton
