@@ -89,7 +89,6 @@ const RuleForm: React.FC<RuleFormProps> = ({
   const colors = useThemeColors();
   const { t } = useTranslation();
   const [nodes, setNodes] = useState<NodeFormData[]>(() => {
-    console.log("triggered initialData from useState", JSON.stringify(initialData));
     if (!initialData?.nodes) {
       return [];
     }
@@ -442,7 +441,7 @@ const RuleForm: React.FC<RuleFormProps> = ({
                 <div key={index} style={nodeItemStyle}>
                   <div style={nodeHeaderStyle}>
                     <Typography variant="subtitle1">
-                      {node.type.charAt(0).toUpperCase() + node.type.slice(1)} Node {node.name} {JSON.stringify(node)}
+                      {node.type.charAt(0).toUpperCase() + node.type.slice(1)} Node {node.name}
                     </Typography>
                     <div style={nodeActionsStyle}>
                       <IconButton
