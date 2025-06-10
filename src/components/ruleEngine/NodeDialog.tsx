@@ -98,6 +98,7 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
   useEffect(() => {
     if (open) {
       // In edit mode, initialize with the name from initialExpression
+      console.log("Initial expression:", initialExpression);
       if (mode === 'edit' && initialExpression?.name) {
         setNodeName(initialExpression.name);
       } else {
@@ -327,14 +328,8 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
       sourceType.appendChild(opt);
     });
 
-    // Set initial value if in edit mode
-    if (initialData) {
-      sourceType.value = initialData.sourceType;
-    }
-
     const uuidSelect = document.createElement("select");
     const key = document.createElement("select");
-
     const operator = document.createElement("select");
     ["==", "!=", ">", "<", ">=", "<="].forEach((op) => {
       const opt = document.createElement("option");
@@ -343,33 +338,10 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
       operator.appendChild(opt);
     });
 
-    // Set initial operator if in edit mode
-    if (initialData) {
-      operator.value = initialData.operator;
-    }
-
-    let value: HTMLInputElement | HTMLSelectElement = document.createElement("input");
+    const value = document.createElement("input");
     value.type = "text";
     value.placeholder = "value";
     value.className = "value-input";
-
-    // Set initial value if in edit mode
-    if (initialData) {
-      value.value = initialData.value.toString();
-    }
-
-    const remove = document.createElement("button");
-    remove.textContent = "[-]";
-    remove.className = "remove-btn";
-    remove.type = "button";
-    remove.onclick = (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      div.remove();
-      if (!isInitializing) {
-        generateJSON(false);
-      }
-    };
 
     const updateSensorKeys = async (uuid: string) => {
       console.log("Updating sensor keys for UUID:", uuid);
@@ -397,9 +369,7 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
           key.appendChild(opt);
         });
 
-        // Trigger change event on key select to update subsequent elements
-        const event = new Event("change");
-        key.dispatchEvent(event);
+        generateJSON(false);
       } catch (error) {
         console.error("Error fetching sensor keys:", error);
       }
@@ -421,9 +391,7 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
         key.appendChild(opt);
       });
 
-      // Trigger change event on key select to update subsequent elements
-      const event = new Event("change");
-      key.dispatchEvent(event);
+      generateJSON(false);
     };
 
     const updateUUIDsAndKeys = async () => {
@@ -480,41 +448,39 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
         }
       }
 
-      // Trigger change event on UUID select to update subsequent elements
-      const event = new Event("change");
-      uuidSelect.dispatchEvent(event);
-
-      if (!isInitializing) {
-        generateJSON(false);
-      }
+      generateJSON(false);
     };
 
     // Set up getData before adding event listeners
     (div as any).getData = () => {
       const currentValue = value.value;
-      const data = {
+      console.log("Getting data from condition node:", {
+        value: currentValue,
+        sourceType: sourceType.value,
+        UUID: uuidSelect.value,
+        key: key.value,
+        operator: operator.value
+      });
+
+      // Return the condition data directly
+      return {
         sourceType: sourceType.value,
         UUID: uuidSelect.value,
         key: key.value,
         operator: operator.value,
-        value:
-          currentValue && currentValue.length > 0
-            ? isNaN(currentValue as any)
-              ? currentValue
-              : Number(currentValue)
-            : null,
+        value: currentValue && currentValue.length > 0
+          ? isNaN(currentValue as any)
+            ? currentValue
+            : Number(currentValue)
+          : null
       };
-      console.log("Condition getData:", data);
-      return data;
     };
 
     // Add event listeners with proper update chain
     sourceType.addEventListener("change", async () => {
       console.log("Source type changed:", sourceType.value);
       await updateUUIDsAndKeys();
-      if (!isInitializing) {
-        generateJSON(false);
-      }
+      generateJSON(false);
     });
 
     uuidSelect.addEventListener("change", async () => {
@@ -524,30 +490,22 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
       } else {
         updateDeviceKeys(uuidSelect.value);
       }
-      if (!isInitializing) {
-        generateJSON(false);
-      }
+      generateJSON(false);
     });
 
     key.addEventListener("change", () => {
       console.log("Key changed:", key.value);
-      if (!isInitializing) {
-        generateJSON(false);
-      }
+      generateJSON(false);
     });
 
     operator.addEventListener("change", () => {
       console.log("Operator changed:", operator.value);
-      if (!isInitializing) {
-        generateJSON(false);
-      }
+      generateJSON(false);
     });
 
     value.addEventListener("input", () => {
       console.log("Value changed:", value.value);
-      if (!isInitializing) {
-        generateJSON(false);
-      }
+      generateJSON(false);
     });
 
     div.appendChild(sourceType);
@@ -555,23 +513,27 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
     div.appendChild(key);
     div.appendChild(operator);
     div.appendChild(value);
-    div.appendChild(remove);
 
     parent.appendChild(div);
 
     // Initialize the dropdowns after appending to parent
     await updateUUIDsAndKeys();
 
+    // Set initial values if provided
     if (initialData) {
-      // Set UUID after dropdowns are populated
+      console.log("Setting initial values:", initialData);
+      sourceType.value = initialData.sourceType;
+      await updateUUIDsAndKeys();
       uuidSelect.value = initialData.UUID;
-      // Trigger UUID change to populate keys
-      const changeEvent = new Event("change");
-      uuidSelect.dispatchEvent(changeEvent);
-
-      // Wait for keys to be populated
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await updateSensorKeys(initialData.UUID);
       key.value = initialData.key;
+      operator.value = initialData.operator;
+      value.value = initialData.value.toString();
+      
+      // Force an update after setting all values
+      setTimeout(() => {
+        generateJSON(false);
+      }, 0);
     }
 
     return div;
@@ -659,17 +621,37 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
   };
 
   const generateJSON = (shouldSave = false) => {
-    if (!builderRef.current || !builderRef.current.firstChild) return;
+    if (!builderRef.current) return;
     try {
-      const data = (builderRef.current.firstChild as any).getData();
-      // Ensure we keep the type and expressions structure
+      // Find the condition element
+      const conditionElement = builderRef.current.querySelector('.condition');
+      if (!conditionElement) {
+        console.error("No condition element found");
+        return;
+      }
+
+      const conditionData = (conditionElement as any).getData();
+      console.log("Raw condition data:", conditionData);
+
+      // Create the proper structure
+      const data = {
+        type: "AND",
+        expressions: [conditionData]
+      };
+
       const outputData = JSON.stringify(data, null, 2);
       console.log("Generating JSON:", outputData);
-      setOutput(outputData);
+      
+      // Force a state update
+      setOutput(outputData + " "); // Add a space to force React to see it as a new value
 
       // Only trigger save if explicitly requested
       if (shouldSave && onSave) {
-        onSave(data);
+        onSave({
+          ...data,
+          name: nodeName.trim(),
+          id: initialExpression?.id
+        });
       }
     } catch (error) {
       console.error("Error generating JSON:", error);
@@ -698,48 +680,14 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
               const container = root.querySelector('.group > div') as HTMLDivElement;
               if (container) {
                 if (mode === 'edit' && initialExpression) {
-                  console.log("Creating node in edit mode with type:", initialExpression.type);
-                  
-                  // Set initial output for edit mode
-                  if (initialExpression.type === 'filter' && 
-                      initialExpression.sourceType && 
-                      initialExpression.UUID && 
-                      initialExpression.key && 
-                      initialExpression.operator && 
-                      initialExpression.value !== undefined) {
-                    
-                    setOutput(JSON.stringify({
-                      expressions: [{
-                        sourceType: initialExpression.sourceType,
-                        UUID: initialExpression.UUID,
-                        key: initialExpression.key,
-                        operator: initialExpression.operator,
-                        value: initialExpression.value
-                      }]
-                    }, null, 2));
-
-                    await createConditionNode(container, true, {
-                      sourceType: initialExpression.sourceType,
-                      UUID: initialExpression.UUID,
-                      key: initialExpression.key,
-                      operator: initialExpression.operator,
-                      value: initialExpression.value
-                    });
-                  } else if (initialExpression.type === 'action' && initialExpression.command) {
-                    setOutput(JSON.stringify({
-                      expressions: [{
-                        type: "action",
-                        config: {
-                          type: "DEVICE_COMMAND",
-                          command: initialExpression.command
-                        }
-                      }]
-                    }, null, 2));
-
-                    await createActionNode(container, true, {
-                      command: initialExpression.command
-                    });
-                  }
+                  console.log("Creating node in edit mode with data:", initialExpression);
+                  await createConditionNode(container, true, {
+                    sourceType: initialExpression.sourceType || 'sensor',
+                    UUID: initialExpression.UUID || '',
+                    key: initialExpression.key || '',
+                    operator: initialExpression.operator || '==',
+                    value: initialExpression.value || ''
+                  });
                 } else {
                   console.log("Creating empty condition node in add mode");
                   await createConditionNode(container, true);
