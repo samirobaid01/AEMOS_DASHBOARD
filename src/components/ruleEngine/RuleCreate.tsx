@@ -4,14 +4,23 @@ import { useTheme } from '../../context/ThemeContext';
 import { useThemeColors } from '../../hooks/useThemeColors';
 import RuleForm from './RuleForm';
 import type { RuleChainCreatePayload } from '../../types/ruleEngine';
+import { Button, Box } from '@mui/material';
 
 interface RuleCreateProps {
   onSubmit: (data: RuleChainCreatePayload) => Promise<void>;
+  onFinish: () => void;
   isLoading?: boolean;
-  ruleChainId: number;
+  ruleChainId: number | null;
+  showNodeSection: boolean;
 }
 
-const RuleCreate: React.FC<RuleCreateProps> = ({ onSubmit, isLoading, ruleChainId }) => {
+const RuleCreate: React.FC<RuleCreateProps> = ({ 
+  onSubmit, 
+  onFinish,
+  isLoading, 
+  ruleChainId,
+  showNodeSection 
+}) => {
   const { t } = useTranslation();
   const { darkMode } = useTheme();
   const colors = useThemeColors();
@@ -28,13 +37,26 @@ const RuleCreate: React.FC<RuleCreateProps> = ({ onSubmit, isLoading, ruleChainI
         marginBottom: '1.5rem',
         color: darkMode ? colors.textPrimary : '#111827'
       }}>
-        {t('ruleEngine.createRuleChain')}
+        {showNodeSection ? t('ruleEngine.addNodes') : t('ruleEngine.createRuleChain')}
       </h1>
       <RuleForm 
         onSubmit={onSubmit} 
         isLoading={isLoading} 
-        ruleChainId={ruleChainId}
+        ruleChainId={ruleChainId || undefined}
+        showNodeSection={showNodeSection}
       />
+      {showNodeSection && (
+        <Box mt={2}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={onFinish}
+            fullWidth
+          >
+            {t('ruleEngine.finish')}
+          </Button>
+        </Box>
+      )}
     </div>
   );
 };

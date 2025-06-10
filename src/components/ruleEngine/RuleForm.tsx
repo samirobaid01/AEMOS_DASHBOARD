@@ -21,11 +21,12 @@ import { ruleFormResolver } from '../../containers/RuleEngine/RuleEdit';
 
 interface RuleFormProps {
   initialData?: RuleChain;
-  ruleChainId: number;
+  ruleChainId?: number;
   jwtToken?: string;
   organizationId?: number;
   onSubmit: (data: any) => Promise<void>;
   isLoading?: boolean;
+  showNodeSection?: boolean;
 }
 
 interface FilterConfig {
@@ -63,6 +64,7 @@ const RuleForm: React.FC<RuleFormProps> = ({
   organizationId,
   onSubmit,
   isLoading = false,
+  showNodeSection = true,
 }) => {
   console.log('RuleForm props:', { ruleChainId, organizationId });
   
@@ -375,122 +377,128 @@ const RuleForm: React.FC<RuleFormProps> = ({
           />
         </div>
 
-        <div style={nodeListStyle}>
-          <Typography variant="h6" gutterBottom>
-            Rule Chain Nodes
-          </Typography>
+        {showNodeSection && ruleChainId && (
+          <>
+            <div style={nodeListStyle}>
+              <Typography variant="h6" gutterBottom>
+                Rule Chain Nodes
+              </Typography>
 
-          {nodes.map((node, index) => (
-            <div key={index} style={nodeItemStyle}>
-              <div style={nodeHeaderStyle}>
-                <Typography variant="subtitle1">
-                  {node.type.charAt(0).toUpperCase() + node.type.slice(1)} Node
-                </Typography>
-                <div style={nodeActionsStyle}>
-                  <IconButton
-                    size="small"
-                    onClick={() => node.type === 'filter' ? handleNodeDialogOpen(index) : handleActionDialogOpen(index)}
-                  >
-                    <EditIcon />
-                  </IconButton>
-                  <IconButton
-                    size="small"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      handleNodeDelete(index);
-                    }}
-                    color="error"
-                  >
-                    <DeleteIcon />
-                  </IconButton>
+              {nodes.map((node, index) => (
+                <div key={index} style={nodeItemStyle}>
+                  <div style={nodeHeaderStyle}>
+                    <Typography variant="subtitle1">
+                      {node.type.charAt(0).toUpperCase() + node.type.slice(1)} Node
+                    </Typography>
+                    <div style={nodeActionsStyle}>
+                      <IconButton
+                        size="small"
+                        onClick={() => node.type === 'filter' ? handleNodeDialogOpen(index) : handleActionDialogOpen(index)}
+                      >
+                        <EditIcon />
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleNodeDelete(index);
+                        }}
+                        color="error"
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </div>
+                  </div>
+
+                  <div style={nodeConfigStyle}>
+                    <pre style={{ margin: 0 }}>
+                      {JSON.stringify(node.config, null, 2)}
+                    </pre>
+                  </div>
+
+                  {index < nodes.length - 1 && (
+                    <div style={arrowStyle}>
+                      <ArrowDownwardIcon color="action" />
+                    </div>
+                  )}
                 </div>
-              </div>
+              ))}
 
-              <div style={nodeConfigStyle}>
-                <pre style={{ margin: 0 }}>
-                  {JSON.stringify(node.config, null, 2)}
-                </pre>
-              </div>
+              <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                <Button
+                  type="button"
+                  variant="outlined"
+                  startIcon={<AddIcon />}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleNodeDialogOpen(null);
+                  }}
+                  fullWidth
+                >
+                  Add Node
+                </Button>
 
-              {index < nodes.length - 1 && (
-                <div style={arrowStyle}>
-                  <ArrowDownwardIcon color="action" />
-                </div>
-              )}
+                <Button
+                  type="button"
+                  variant="outlined"
+                  startIcon={<AddIcon />}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleActionDialogOpen();
+                  }}
+                  fullWidth
+                >
+                  Add Action
+                </Button>
+              </div>
             </div>
-          ))}
 
-          <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+            {isNodeDialogOpen && (
+              <NodeDialog
+                open={isNodeDialogOpen}
+                onClose={handleNodeDialogClose}
+                onSave={(data) => {
+                  handleNodeSave(data);
+                  handleNodeDialogClose();
+                }}
+                ruleChainId={ruleChainId}
+                jwtToken={jwtToken}
+                organizationId={organizationId}
+                mode={currentNodeIndex === null ? 'add' : 'edit'}
+                initialExpression={getInitialExpression(currentNodeIndex)}
+              />
+            )}
+
+            <ActionDialog
+              open={isActionDialogOpen}
+              onClose={handleActionDialogClose}
+              onSave={handleActionSave}
+              ruleChainId={ruleChainId}
+              jwtToken={jwtToken}
+              organizationId={organizationId}
+              mode={currentNodeIndex !== null ? 'edit' : 'add'}
+              initialData={currentNodeIndex !== null && nodes[currentNodeIndex] ? getActionNodeData(nodes[currentNodeIndex]) : undefined}
+            />
+          </>
+        )}
+
+        {!ruleChainId && (
+          <div style={{ marginTop: '2rem' }}>
             <Button
-              type="button"
-              variant="outlined"
-              startIcon={<AddIcon />}
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                handleNodeDialogOpen(null);
-              }}
+              type="submit"
+              variant="contained"
+              color="primary"
+              disabled={isLoading}
               fullWidth
             >
-              Add Node
-            </Button>
-
-            <Button
-              type="button"
-              variant="outlined"
-              startIcon={<AddIcon />}
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                handleActionDialogOpen(); // Call without index for Add mode
-              }}
-              fullWidth
-            >
-              Add Action
+              {isLoading ? t('ruleEngine.saving') : t('ruleEngine.createRuleChain')}
             </Button>
           </div>
-        </div>
-
-        <div style={{ marginTop: '2rem' }}>
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            disabled={isLoading}
-            fullWidth
-          >
-            {isLoading ? t('ruleEngine.saving') : initialData ? t('ruleEngine.updateRuleChain') : t('ruleEngine.createRuleChain')}
-          </Button>
-        </div>
+        )}
       </form>
-
-      {isNodeDialogOpen && (
-        <NodeDialog
-          open={isNodeDialogOpen}
-          onClose={handleNodeDialogClose}
-          onSave={(data) => {
-            handleNodeSave(data);
-            handleNodeDialogClose();
-          }}
-          ruleChainId={ruleChainId}
-          jwtToken={jwtToken}
-          organizationId={organizationId}
-          mode={currentNodeIndex === null ? 'add' : 'edit'}
-          initialExpression={getInitialExpression(currentNodeIndex)}
-        />
-      )}
-
-      <ActionDialog
-        open={isActionDialogOpen}
-        onClose={handleActionDialogClose}
-        onSave={handleActionSave}
-        ruleChainId={ruleChainId}
-        jwtToken={jwtToken}
-        organizationId={organizationId}
-        mode={currentNodeIndex !== null ? 'edit' : 'add'}
-        initialData={currentNodeIndex !== null && nodes[currentNodeIndex] ? getActionNodeData(nodes[currentNodeIndex]) : undefined}
-      />
     </div>
   );
 };

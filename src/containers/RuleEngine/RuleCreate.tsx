@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { createRule, selectRuleEngineLoading } from '../../state/slices/ruleEngine.slice';
@@ -15,6 +15,7 @@ const RuleCreate: React.FC = () => {
   const { canCreate } = useRuleEnginePermissions();
   const loading = useSelector(selectRuleEngineLoading);
   const selectedOrganizationId = useSelector(selectSelectedOrganizationId);
+  const [createdRuleId, setCreatedRuleId] = useState<number | null>(null);
 
   const handleSubmit = async (data: RuleChainCreatePayload) => {
     try {
@@ -25,10 +26,18 @@ const RuleCreate: React.FC = () => {
         return;
       }
       const result = await dispatch(createRule(data)).unwrap();
+      setCreatedRuleId(result.id);
       toastService.success('Rule chain created successfully');
-      navigate(`/rule-engine/${result.id}`);
+      // Don't navigate immediately, let the user add nodes first
+      // navigate(`/rule-engine/${result.id}`);
     } catch (error) {
       toastService.error('Failed to create rule chain');
+    }
+  };
+
+  const handleFinish = () => {
+    if (createdRuleId) {
+      navigate(`/rule-engine/${createdRuleId}`);
     }
   };
 
@@ -39,7 +48,10 @@ const RuleCreate: React.FC = () => {
   return (
     <RuleCreateComponent
       onSubmit={handleSubmit}
+      onFinish={handleFinish}
       isLoading={loading}
+      ruleChainId={createdRuleId}
+      showNodeSection={!!createdRuleId}
     />
   );
 };

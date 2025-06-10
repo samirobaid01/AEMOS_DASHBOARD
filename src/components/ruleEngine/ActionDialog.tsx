@@ -36,6 +36,7 @@ interface ActionDialogProps {
   mode?: 'add' | 'edit';
   initialData?: {
     type: 'action';
+    name?: string;
     config: {
       type: 'DEVICE_COMMAND';
       command: {
@@ -65,6 +66,7 @@ const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
   const [stateName, setStateName] = useState<string>('');
   const [stateValue, setStateValue] = useState<string>('');
   const [jsonOutput, setJsonOutput] = useState<string>('');
+  const [nodeName, setNodeName] = useState<string>('');
 
   const fetchDevices = useCallback(async () => {
     try {
@@ -98,6 +100,7 @@ const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
         setStateName('');
         setStateValue('');
         setJsonOutput('');
+        setNodeName('');
       } else if (mode === 'edit' && initialData) {
         try {
           if (initialData.type === 'action' && initialData.config.command) {
@@ -106,6 +109,7 @@ const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
             setSelectedDevice(command.deviceUuid || '');
             setStateName(command.stateName || '');
             setStateValue(command.value || '');
+            setNodeName(initialData.name || '');
             setJsonOutput(JSON.stringify({
               type: 'action',
               config: {
@@ -181,13 +185,15 @@ const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
   }, [actionType, selectedDevice, stateName, stateValue, mode]);
 
   const handleSave = async () => {
-    if (!jsonOutput) return;
+    if (!jsonOutput || !nodeName.trim()) return;
 
     try {
+      const parsedOutput = JSON.parse(jsonOutput);
       const requestBody = {
-        ruleChainId: ruleChainId,
+        ruleChainId,
         type: 'action',
-        config: jsonOutput,
+        name: nodeName.trim(),
+        config: JSON.stringify(parsedOutput.config),
         nextNodeId: null,
       };
       
@@ -215,7 +221,7 @@ const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
       console.log('Save response:', responseData);
 
       if (onSave) {
-        onSave(JSON.parse(jsonOutput));
+        onSave(parsedOutput);
       }
       onClose();
     } catch (error) {
@@ -235,6 +241,16 @@ const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
       </DialogTitle>
       <DialogContent>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
+          <TextField
+            fullWidth
+            label="Node Name"
+            value={nodeName}
+            onChange={(e) => setNodeName(e.target.value)}
+            required
+            error={!nodeName.trim()}
+            helperText={!nodeName.trim() ? "Node name is required" : ""}
+          />
+
           <FormControl fullWidth>
             <InputLabel>Action Type</InputLabel>
             <Select
@@ -329,7 +345,7 @@ const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
           onClick={handleSave}
           variant="contained"
           color="primary"
-          disabled={!jsonOutput}
+          disabled={!jsonOutput || !nodeName.trim()}
         >
           Save
         </Button>

@@ -5,6 +5,7 @@ import {
   DialogContent,
   DialogActions,
   Button,
+  TextField,
 } from "@mui/material";
 
 interface Sensor {
@@ -75,7 +76,7 @@ interface NodeDialogProps {
 const NodeDialog: React.FC<NodeDialogProps> = ({
   organizationId = 1,
   jwtToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NjcxLCJlbWFpbCI6InNhbWlyYWRtaW5AeW9wbWFpbC5jb20iLCJwZXJtaXNzaW9ucyI6WyJhcmVhLmNyZWF0ZSIsImFyZWEuZGVsZXRlIiwiYXJlYS51cGRhdGUiLCJhcmVhLnZpZXciLCJjb21tYW5kLmNhbmNlbCIsImNvbW1hbmQucmV0cnkiLCJjb21tYW5kLnNlbmQiLCJjb21tYW5kLnZpZXciLCJjb21tYW5kVHlwZS5jcmVhdGUiLCJjb21tYW5kVHlwZS5kZWxldGUiLCJjb21tYW5kVHlwZS51cGRhdGUiLCJjb21tYW5kVHlwZS52aWV3IiwiZGV2aWNlLmFuYWx5dGljcy52aWV3IiwiZGV2aWNlLmNvbnRyb2wiLCJkZXZpY2UuY3JlYXRlIiwiZGV2aWNlLmRlbGV0ZSIsImRldmljZS5oZWFydGJlYXQudmlldyIsImRldmljZS5tZXRhZGF0YS51cGRhdGUiLCJkZXZpY2Uuc3RhdHVzLnVwZGF0ZSIsImRldmljZS51cGRhdGUiLCJkZXZpY2UudmlldyIsIm1haW50ZW5hbmNlLmRlbGV0ZSIsIm1haW50ZW5hbmNlLmxvZyIsIm1haW50ZW5hbmNlLnNjaGVkdWxlIiwibWFpbnRlbmFuY2UudXBkYXRlIiwibWFpbnRlbmFuY2UudmlldyIsIm9yZ2FuaXphdGlvbi5jcmVhdGUiLCJvcmdhbml6YXRpb24uZGVsZXRlIiwib3JnYW5pemF0aW9uLnVwZGF0ZSIsIm9yZ2FuaXphdGlvbi52aWV3IiwicGVybWlzc2lvbi5tYW5hZ2UiLCJyZXBvcnQuZ2VuZXJhdGUiLCJyZXBvcnQudmlldyIsInJvbGUuYXNzaWduIiwicm9sZS52aWV3IiwicnVsZS5jcmVhdGUiLCJydWxlLmRlbGV0ZSIsInJ1bGUudXBkYXRlIiwicnVsZS52aWV3Iiwic2Vuc29yLmNyZWF0ZSIsInNlbnNvci5kZWxldGUiLCJzZW5zb3IudXBkYXRlIiwic2Vuc29yLnZpZXciLCJzZXR0aW5ncy51cGRhdGUiLCJzZXR0aW5ncy52aWV3Iiwic3RhdGUuY3JlYXRlIiwic3RhdGUudmlldyIsInN0YXRlVHJhbnNpdGlvbi5tYW5hZ2UiLCJzdGF0ZVRyYW5zaXRpb24udmlldyIsInN0YXRlVHlwZS5tYW5hZ2UiLCJzdGF0ZVR5cGUudmlldyIsInVzZXIuY3JlYXRlIiwidXNlci5kZWxldGUiLCJ1c2VyLnVwZGF0ZSIsInVzZXIudmlldyJdLCJyb2xlcyI6WyJBZG1pbiJdLCJpYXQiOjE3NDk1MzI0NjUsImV4cCI6MTc0OTYxODg2NX0.fcUWi5gGeasJj5U4pPmQpwkWyIWhmIyvAXC5qnNCLuA",
-  ruleChainId = 20,
+  ruleChainId,
   open,
   onClose,
   onSave,
@@ -85,6 +86,7 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
   const [sensors, setSensors] = useState<Sensor[]>([]);
   const [devices, setDevices] = useState<Device[]>([]);
   const [output, setOutput] = useState<string>("");
+  const [nodeName, setNodeName] = useState<string>("");
   const builderRef = useRef<HTMLDivElement>(null);
   const sensorsRef = useRef<Sensor[]>([]);
   const devicesRef = useRef<Device[]>([]);
@@ -92,6 +94,7 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
 
   const resetState = () => {
     setOutput("");
+    setNodeName("");
     if (builderRef.current) {
       builderRef.current.innerHTML = "";
     }
@@ -99,13 +102,19 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
 
   const saveExpression = async () => {
     try {
+      if (!nodeName.trim()) {
+        console.error("Node name is required");
+        return;
+      }
+
       console.log("Current output:", output);
       const data = JSON.parse(output);
 
       // Prepare the API request payload
       const payload = {
-        ruleChainId: 20,
+        ruleChainId,
         type: "filter",
+        name: nodeName.trim(),
         config: JSON.stringify(data.expressions[0]),
         nextNodeId: null,
       };
@@ -125,6 +134,8 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
       );
 
       if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        console.error("Error response:", errorData);
         throw new Error(`API call failed: ${response.statusText}`);
       }
 
@@ -813,6 +824,17 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
           }}
           onClick={(e) => e.stopPropagation()}
         >
+          <TextField
+            fullWidth
+            label="Node Name"
+            value={nodeName}
+            onChange={(e) => setNodeName(e.target.value)}
+            required
+            error={!nodeName.trim()}
+            helperText={!nodeName.trim() ? "Node name is required" : ""}
+            sx={{ mb: 2 }}
+          />
+
           <div
             id="builder"
             ref={builderRef}
@@ -899,6 +921,7 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
           variant="contained"
           color="primary"
           type="button"
+          disabled={!nodeName.trim()}
         >
           Save
         </Button>
