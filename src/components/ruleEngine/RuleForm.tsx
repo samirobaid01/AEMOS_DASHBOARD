@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import {
   TextField,
@@ -17,15 +17,13 @@ import type { ConditionData, GroupData } from './NodeDialog';
 import { useTheme } from '../../context/ThemeContext';
 import { useThemeColors } from '../../hooks/useThemeColors';
 import { useTranslation } from 'react-i18next';
-import { ruleFormResolver } from '../../containers/RuleEngine/RuleEdit';
-import { toastService } from '../../services/toastService';
+import { ruleFormResolver } from '../../utils/validation/ruleFormValidation';
 
 interface RuleFormProps {
   initialData?: RuleChain;
   ruleChainId?: number;
-  jwtToken?: string;
-  organizationId?: number;
   onSubmit: (data: any) => Promise<void>;
+  onNodeDelete: (nodeId: number) => Promise<void>;
   isLoading?: boolean;
   showNodeSection?: boolean;
 }
@@ -77,14 +75,11 @@ interface ActionNodeData {
 const RuleForm: React.FC<RuleFormProps> = ({
   initialData,
   ruleChainId,
-  jwtToken ="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NjcxLCJlbWFpbCI6InNhbWlyYWRtaW5AeW9wbWFpbC5jb20iLCJwZXJtaXNzaW9ucyI6WyJhcmVhLmNyZWF0ZSIsImFyZWEuZGVsZXRlIiwiYXJlYS51cGRhdGUiLCJhcmVhLnZpZXciLCJjb21tYW5kLmNhbmNlbCIsImNvbW1hbmQucmV0cnkiLCJjb21tYW5kLnNlbmQiLCJjb21tYW5kLnZpZXciLCJjb21tYW5kVHlwZS5jcmVhdGUiLCJjb21tYW5kVHlwZS5kZWxldGUiLCJjb21tYW5kVHlwZS51cGRhdGUiLCJjb21tYW5kVHlwZS52aWV3IiwiZGV2aWNlLmFuYWx5dGljcy52aWV3IiwiZGV2aWNlLmNvbnRyb2wiLCJkZXZpY2UuY3JlYXRlIiwiZGV2aWNlLmRlbGV0ZSIsImRldmljZS5oZWFydGJlYXQudmlldyIsImRldmljZS5tZXRhZGF0YS51cGRhdGUiLCJkZXZpY2Uuc3RhdHVzLnVwZGF0ZSIsImRldmljZS51cGRhdGUiLCJkZXZpY2UudmlldyIsIm1haW50ZW5hbmNlLmRlbGV0ZSIsIm1haW50ZW5hbmNlLmxvZyIsIm1haW50ZW5hbmNlLnNjaGVkdWxlIiwibWFpbnRlbmFuY2UudXBkYXRlIiwibWFpbnRlbmFuY2UudmlldyIsIm9yZ2FuaXphdGlvbi5jcmVhdGUiLCJvcmdhbml6YXRpb24uZGVsZXRlIiwib3JnYW5pemF0aW9uLnVwZGF0ZSIsIm9yZ2FuaXphdGlvbi52aWV3IiwicGVybWlzc2lvbi5tYW5hZ2UiLCJyZXBvcnQuZ2VuZXJhdGUiLCJyZXBvcnQudmlldyIsInJvbGUuYXNzaWduIiwicm9sZS52aWV3IiwicnVsZS5jcmVhdGUiLCJydWxlLmRlbGV0ZSIsInJ1bGUudXBkYXRlIiwicnVsZS52aWV3Iiwic2Vuc29yLmNyZWF0ZSIsInNlbnNvci5kZWxldGUiLCJzZW5zb3IudXBkYXRlIiwic2Vuc29yLnZpZXciLCJzZXR0aW5ncy51cGRhdGUiLCJzZXR0aW5ncy52aWV3Iiwic3RhdGUuY3JlYXRlIiwic3RhdGUudmlldyIsInN0YXRlVHJhbnNpdGlvbi5tYW5hZ2UiLCJzdGF0ZVRyYW5zaXRpb24udmlldyIsInN0YXRlVHlwZS5tYW5hZ2UiLCJzdGF0ZVR5cGUudmlldyIsInVzZXIuY3JlYXRlIiwidXNlci5kZWxldGUiLCJ1c2VyLnVwZGF0ZSIsInVzZXIudmlldyJdLCJyb2xlcyI6WyJBZG1pbiJdLCJpYXQiOjE3NDk1NjczNTAsImV4cCI6MTc0OTY1Mzc1MH0.1IYQi_op61esKmUwiYcHB1yj2JfcOrcIzpMl-XBXqpk",
-  organizationId,
   onSubmit,
+  onNodeDelete,
   isLoading = false,
   showNodeSection = true,
 }) => {
-  console.log('RuleForm props:', { ruleChainId, organizationId, jwtToken });
-  
   const { darkMode } = useTheme();
   const colors = useThemeColors();
   const { t } = useTranslation();
@@ -227,44 +222,11 @@ const RuleForm: React.FC<RuleFormProps> = ({
       return;
     }
 
-    if (!organizationId) {
-      console.error('Cannot delete node: no organization ID provided');
-      toastService.error('Organization ID is required');
-      return;
-    }
-
-    if (!jwtToken) {
-      console.error('Cannot delete node: no JWT token provided');
-      toastService.error('Authentication token is missing');
-      return;
-    }
-
     try {
-      console.log('Deleting node:', nodeId, 'for organization:', organizationId);
-      
-      const response = await fetch(
-        `http://localhost:3000/api/v1/rule-chains/nodes/${nodeId}?organizationId=${organizationId}`,
-        {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${jwtToken}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
-        console.error('Error response:', errorData);
-        throw new Error('Failed to delete node');
-      }
-
-      // Remove node from local state
+      await onNodeDelete(nodeId);
       setNodes(prev => prev.filter(node => node.id !== nodeId));
-      toastService.success('Node deleted successfully');
     } catch (error) {
       console.error('Error deleting node:', error);
-      toastService.error('Failed to delete node');
     }
   };
 
@@ -518,8 +480,6 @@ const RuleForm: React.FC<RuleFormProps> = ({
                   handleNodeDialogClose();
                 }}
                 ruleChainId={ruleChainId}
-                jwtToken={jwtToken}
-                organizationId={organizationId}
                 mode={currentNodeIndex === null ? 'add' : 'edit'}
                 initialExpression={getInitialExpression(currentNodeIndex)}
               />
@@ -530,8 +490,6 @@ const RuleForm: React.FC<RuleFormProps> = ({
               onClose={handleActionDialogClose}
               onSave={handleActionSave}
               ruleChainId={ruleChainId}
-              jwtToken={jwtToken}
-              organizationId={organizationId}
               mode={currentNodeIndex !== null ? 'edit' : 'add'}
               initialData={currentNodeIndex !== null && nodes[currentNodeIndex] ? getActionNodeData(nodes[currentNodeIndex]) : undefined}
             />

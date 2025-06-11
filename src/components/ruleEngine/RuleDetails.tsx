@@ -1,14 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import type { RuleChain } from '../../types/ruleEngine';
 import { useTheme } from '../../context/ThemeContext';
 import { useThemeColors } from '../../hooks/useThemeColors';
 import { useTranslation } from 'react-i18next';
 import { useRuleEnginePermissions } from '../../hooks/useRuleEnginePermissions';
-import { useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
-import { deleteRule } from '../../state/slices/ruleEngine.slice';
-import { toastService } from '../../services/toastService';
-import type { AppDispatch } from '../../state/store';
 import Modal from '../../components/common/Modal/Modal';
 import { FormControl, Select, MenuItem } from '@mui/material';
 
@@ -17,9 +12,10 @@ interface RuleDetailsProps {
   isLoading: boolean;
   error?: string | null;
   onBack?: () => void;
+  onEdit: (ruleId: number) => void;
+  onDelete: (ruleId: number) => Promise<void>;
+  onNextNodeChange: (nodeId: number, nextNodeId: number | null) => Promise<void>;
   windowWidth?: number;
-  jwtToken?: string;
-  organizationId?: number;
 }
 
 const RuleDetails: React.FC<RuleDetailsProps> = ({ 
@@ -27,80 +23,20 @@ const RuleDetails: React.FC<RuleDetailsProps> = ({
   isLoading, 
   error,
   onBack,
+  onEdit,
+  onDelete,
+  onNextNodeChange,
   windowWidth = window.innerWidth,
-  jwtToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NjcxLCJlbWFpbCI6InNhbWlyYWRtaW5AeW9wbWFpbC5jb20iLCJwZXJtaXNzaW9ucyI6WyJhcmVhLmNyZWF0ZSIsImFyZWEuZGVsZXRlIiwiYXJlYS51cGRhdGUiLCJhcmVhLnZpZXciLCJjb21tYW5kLmNhbmNlbCIsImNvbW1hbmQucmV0cnkiLCJjb21tYW5kLnNlbmQiLCJjb21tYW5kLnZpZXciLCJjb21tYW5kVHlwZS5jcmVhdGUiLCJjb21tYW5kVHlwZS5kZWxldGUiLCJjb21tYW5kVHlwZS51cGRhdGUiLCJjb21tYW5kVHlwZS52aWV3IiwiZGV2aWNlLmFuYWx5dGljcy52aWV3IiwiZGV2aWNlLmNvbnRyb2wiLCJkZXZpY2UuY3JlYXRlIiwiZGV2aWNlLmRlbGV0ZSIsImRldmljZS5oZWFydGJlYXQudmlldyIsImRldmljZS5tZXRhZGF0YS51cGRhdGUiLCJkZXZpY2Uuc3RhdHVzLnVwZGF0ZSIsImRldmljZS51cGRhdGUiLCJkZXZpY2UudmlldyIsIm1haW50ZW5hbmNlLmRlbGV0ZSIsIm1haW50ZW5hbmNlLmxvZyIsIm1haW50ZW5hbmNlLnNjaGVkdWxlIiwibWFpbnRlbmFuY2UudXBkYXRlIiwibWFpbnRlbmFuY2UudmlldyIsIm9yZ2FuaXphdGlvbi5jcmVhdGUiLCJvcmdhbml6YXRpb24uZGVsZXRlIiwib3JnYW5pemF0aW9uLnVwZGF0ZSIsIm9yZ2FuaXphdGlvbi52aWV3IiwicGVybWlzc2lvbi5tYW5hZ2UiLCJyZXBvcnQuZ2VuZXJhdGUiLCJyZXBvcnQudmlldyIsInJvbGUuYXNzaWduIiwicm9sZS52aWV3IiwicnVsZS5jcmVhdGUiLCJydWxlLmRlbGV0ZSIsInJ1bGUudXBkYXRlIiwicnVsZS52aWV3Iiwic2Vuc29yLmNyZWF0ZSIsInNlbnNvci5kZWxldGUiLCJzZW5zb3IudXBkYXRlIiwic2Vuc29yLnZpZXciLCJzZXR0aW5ncy51cGRhdGUiLCJzZXR0aW5ncy52aWV3Iiwic3RhdGUuY3JlYXRlIiwic3RhdGUudmlldyIsInN0YXRlVHJhbnNpdGlvbi5tYW5hZ2UiLCJzdGF0ZVRyYW5zaXRpb24udmlldyIsInN0YXRlVHlwZS5tYW5hZ2UiLCJzdGF0ZVR5cGUudmlldyIsInVzZXIuY3JlYXRlIiwidXNlci5kZWxldGUiLCJ1c2VyLnVwZGF0ZSIsInVzZXIudmlldyJdLCJyb2xlcyI6WyJBZG1pbiJdLCJpYXQiOjE3NDk1MzI0NjUsImV4cCI6MTc0OTYxODg2NX0.fcUWi5gGeasJj5U4pPmQpwkWyIWhmIyvAXC5qnNCLuA",
-  organizationId = localStorage.getItem('organizationId'),
 }) => {
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = React.useState(false);
   const { t } = useTranslation();
   const { darkMode } = useTheme();
   const colors = useThemeColors();
   const isMobile = windowWidth < 768;
-  const navigate = useNavigate();
-  const dispatch = useDispatch<AppDispatch>();
   const { canUpdate, canDelete } = useRuleEnginePermissions();
-
-  const handleEdit = () => {
-    if (rule) {
-      navigate(`/rule-engine/${rule.id}/edit`);
-    }
-  };
 
   const handleDeleteClick = () => {
     setShowDeleteModal(true);
-  };
-
-  const handleConfirmDelete = async () => {
-    try {
-      if (!rule) return;
-      
-      await dispatch(deleteRule(rule.id)).unwrap();
-      toastService.success(t('ruleEngine.deleteSuccess'));
-      setShowDeleteModal(false);
-      navigate('/rule-engine');
-    } catch (error) {
-      toastService.error(t('ruleEngine.deleteError'));
-      console.error('Failed to delete rule chain:', error);
-      setShowDeleteModal(false);
-    }
-  };
-
-  const handleNextNodeChange = async (nodeId: number, selectedNextNodeId: number | null) => {
-    try {
-      // Find the current node to get its data
-      const currentNode = rule?.nodes.find(n => n.id === nodeId);
-      if (!currentNode) return;
-
-      const response = await fetch(
-        `http://localhost:3000/api/v1/rule-chains/nodes/${nodeId}?organizationId=${organizationId}`,
-        {
-          method: 'PATCH',
-          headers: {
-            'Authorization': `Bearer ${jwtToken}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            type: currentNode.type,
-            config: currentNode.config,
-            nextNodeId: selectedNextNodeId
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error('Failed to update next node');
-      }
-
-      // Show success message
-      toastService.success('Next node updated successfully');
-      
-      // Optionally refresh the rule details
-      // You might want to implement a refresh function and call it here
-
-    } catch (error) {
-      console.error('Error updating next node:', error);
-      toastService.error('Failed to update next node');
-    }
   };
 
   const formatDate = (dateString: string) => {
@@ -205,59 +141,6 @@ const RuleDetails: React.FC<RuleDetailsProps> = ({
     border: `1px solid ${darkMode ? colors.border : '#e5e7eb'}`,
   };
 
-  const deleteModalFooter = (
-    <>
-      <button
-        onClick={() => setShowDeleteModal(false)}
-        style={{
-          padding: '0.5rem 1rem',
-          backgroundColor: darkMode ? colors.surfaceBackground : 'white',
-          color: darkMode ? colors.textSecondary : '#4b5563',
-          border: `1px solid ${darkMode ? colors.border : '#d1d5db'}`,
-          borderRadius: '0.375rem',
-          fontSize: '0.875rem',
-          fontWeight: 500,
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          transition: 'all 0.2s',
-        }}
-        onMouseOver={(e) => {
-          e.currentTarget.style.backgroundColor = darkMode ? colors.background : '#f3f4f6';
-        }}
-        onMouseOut={(e) => {
-          e.currentTarget.style.backgroundColor = darkMode ? colors.surfaceBackground : 'white';
-        }}
-      >
-        {t('common.cancel')}
-      </button>
-      <button
-        onClick={handleConfirmDelete}
-        style={{
-          padding: '0.5rem 1rem',
-          backgroundColor: darkMode ? '#ef5350' : '#ef4444',
-          color: 'white',
-          border: 'none',
-          borderRadius: '0.375rem',
-          fontSize: '0.875rem',
-          fontWeight: 500,
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          transition: 'all 0.2s',
-        }}
-        onMouseOver={(e) => {
-          e.currentTarget.style.backgroundColor = darkMode ? '#f44336' : '#dc2626';
-        }}
-        onMouseOut={(e) => {
-          e.currentTarget.style.backgroundColor = darkMode ? '#ef5350' : '#ef4444';
-        }}
-      >
-        {t('common.delete')}
-      </button>
-    </>
-  );
-
   if (isLoading) {
     return (
       <div style={{
@@ -338,7 +221,7 @@ const RuleDetails: React.FC<RuleDetailsProps> = ({
           <div style={buttonGroupStyle}>
             {canUpdate && (
               <button
-                onClick={handleEdit}
+                onClick={() => rule && onEdit(rule.id)} // explanation:  if (rule) { onEdit(rule.id); }
                 style={buttonStyle('primary')}
                 onMouseOver={(e) => {
                   e.currentTarget.style.backgroundColor = darkMode ? '#5d8efa' : '#2563eb';
@@ -466,7 +349,7 @@ const RuleDetails: React.FC<RuleDetailsProps> = ({
                     <FormControl fullWidth sx={{ mt: 2 }}>
                       <Select
                         value={node.nextNodeId === null ? '' : node.nextNodeId.toString()}
-                        onChange={(e) => handleNextNodeChange(
+                        onChange={(e) => onNextNodeChange(
                           node.id,
                           e.target.value === '' ? null : Number(e.target.value)
                         )}
@@ -494,7 +377,63 @@ const RuleDetails: React.FC<RuleDetailsProps> = ({
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
         title={t('ruleEngine.deleteConfirmation')}
-        footer={deleteModalFooter}
+        footer={(
+          <>
+            <button
+              onClick={() => setShowDeleteModal(false)}
+              style={{
+                padding: '0.5rem 1rem',
+                backgroundColor: darkMode ? colors.surfaceBackground : 'white',
+                color: darkMode ? colors.textSecondary : '#4b5563',
+                border: `1px solid ${darkMode ? colors.border : '#d1d5db'}`,
+                borderRadius: '0.375rem',
+                fontSize: '0.875rem',
+                fontWeight: 500,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                transition: 'all 0.2s',
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.backgroundColor = darkMode ? colors.background : '#f3f4f6';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.backgroundColor = darkMode ? colors.surfaceBackground : 'white';
+              }}
+            >
+              {t('common.cancel')}
+            </button>
+            <button
+              onClick={async () => {
+                if (rule) {
+                  await onDelete(rule.id);
+                  setShowDeleteModal(false);
+                }
+              }}
+              style={{
+                padding: '0.5rem 1rem',
+                backgroundColor: darkMode ? '#ef5350' : '#ef4444',
+                color: 'white',
+                border: 'none',
+                borderRadius: '0.375rem',
+                fontSize: '0.875rem',
+                fontWeight: 500,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                transition: 'all 0.2s',
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.backgroundColor = darkMode ? '#f44336' : '#dc2626';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.backgroundColor = darkMode ? '#ef5350' : '#ef4444';
+              }}
+            >
+              {t('common.delete')}
+            </button>
+          </>
+        )}
       >
         <p style={{
           color: darkMode ? colors.textPrimary : '#111827',

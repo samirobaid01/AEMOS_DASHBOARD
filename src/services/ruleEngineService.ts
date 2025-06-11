@@ -55,12 +55,36 @@ export const deleteRule = async (ruleId: number) => {
   return response.data;
 };
 
+/**
+ * Update rule node
+ */
+export const updateRuleNode = async (nodeId: number, payload: {
+  type: string;
+  config: string;
+  nextNodeId: number | null;
+}) => {
+  const params = withOrganizationId();
+  const response = await apiClient.patch(`/rule-chains/nodes/${nodeId}`, payload, { params });
+  return response.data.data;
+};
+
+/**
+ * Delete rule node
+ */
+export const deleteRuleNode = async (nodeId: number) => {
+  const params = withOrganizationId();
+  const response = await apiClient.delete(`/rule-chains/nodes/${nodeId}`, { params });
+  return response.data;
+};
+
 const RuleEngineService = {
   getRules,
   getRuleDetails,
   createRule,
   updateRule,
   deleteRule,
+  updateRuleNode,
+  deleteRuleNode,
 };
 
 export default RuleEngineService; 

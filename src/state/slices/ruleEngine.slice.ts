@@ -80,6 +80,36 @@ export const deleteRule = createAsyncThunk(
   }
 );
 
+export const updateRuleNode = createAsyncThunk(
+  'ruleEngine/updateRuleNode',
+  async ({ nodeId, payload }: { 
+    nodeId: number;
+    payload: {
+      type: string;
+      config: string;
+      nextNodeId: number | null;
+    }
+  }, { rejectWithValue }) => {
+    try {
+      return await RuleEngineService.updateRuleNode(nodeId, payload);
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to update rule node');
+    }
+  }
+);
+
+export const deleteRuleNode = createAsyncThunk(
+  'ruleEngine/deleteRuleNode',
+  async (nodeId: number, { rejectWithValue }) => {
+    try {
+      await RuleEngineService.deleteRuleNode(nodeId);
+      return nodeId;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to delete rule node');
+    }
+  }
+);
+
 // Slice
 const ruleEngineSlice = createSlice({
   name: 'ruleEngine',
@@ -171,6 +201,45 @@ const ruleEngineSlice = createSlice({
       }
     });
     builder.addCase(deleteRule.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload as string;
+    });
+
+    // Update Rule Node
+    builder.addCase(updateRuleNode.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+    });
+    builder.addCase(updateRuleNode.fulfilled, (state, action) => {
+      state.loading = false;
+      if (state.selectedRule?.nodes) {
+        const nodeIndex = state.selectedRule.nodes.findIndex(
+          (node) => node.id === action.payload.id
+        );
+        if (nodeIndex !== -1) {
+          state.selectedRule.nodes[nodeIndex] = action.payload;
+        }
+      }
+    });
+    builder.addCase(updateRuleNode.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload as string;
+    });
+
+    // Delete Rule Node
+    builder.addCase(deleteRuleNode.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+    });
+    builder.addCase(deleteRuleNode.fulfilled, (state, action) => {
+      state.loading = false;
+      if (state.selectedRule?.nodes) {
+        state.selectedRule.nodes = state.selectedRule.nodes.filter(
+          (node) => node.id !== action.payload
+        );
+      }
+    });
+    builder.addCase(deleteRuleNode.rejected, (state, action) => {
       state.loading = false;
       state.error = action.payload as string;
     });
