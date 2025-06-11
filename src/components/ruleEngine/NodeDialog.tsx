@@ -182,7 +182,7 @@ const ConditionBuilder: React.FC<{
           onChange={(e) => handleUUIDChange(e.target.value)}
           label={condition.sourceType === 'sensor' ? 'Sensor' : 'Device'}
         >
-          {(condition.sourceType === 'sensor' ? sensors : devices).map((item) => (
+          {((condition.sourceType === 'sensor' ? sensors : devices) || []).map((item) => (
             <MenuItem key={item.uuid} value={item.uuid}>
               {item.name}
             </MenuItem>
