@@ -15,12 +15,10 @@ import type { Device, DeviceState } from '../../types/device';
 import type { Sensor } from '../../types/sensor';
 import NodeDialog from './NodeDialog';
 import ActionDialog from './ActionDialog';
-import type { ConditionData, GroupData } from './NodeDialog';
 import { useTheme } from '../../context/ThemeContext';
 import { useThemeColors } from '../../hooks/useThemeColors';
 import { useTranslation } from 'react-i18next';
 import { ruleFormResolver } from '../../utils/validation/ruleFormValidation';
-import { toastService } from '../../services/toastService';
 
 interface RuleFormProps {
   initialData?: RuleChain;
