@@ -5,6 +5,8 @@ import { useThemeColors } from '../../hooks/useThemeColors';
 import RuleForm from './RuleForm';
 import type { RuleChainCreatePayload } from '../../types/ruleEngine';
 import { Button, Box } from '@mui/material';
+import type { Sensor } from '../../types/sensor';
+import type { Device, DeviceState } from '../../types/device';
 
 interface RuleCreateProps {
   onSubmit: (data: RuleChainCreatePayload) => Promise<void>;
@@ -12,6 +14,15 @@ interface RuleCreateProps {
   isLoading?: boolean;
   ruleChainId: number | null;
   showNodeSection: boolean;
+  onNodeDelete: (nodeId: number) => Promise<void>;
+  onNodeCreate: (data: any) => Promise<void>;
+  onNodeUpdate: (nodeId: number, data: any) => Promise<void>;
+  sensors: Sensor[];
+  devices: Device[];
+  deviceStates: DeviceState[];
+  sensorDetails: Sensor | null;
+  onFetchSensorDetails: (sensorId: number) => Promise<void>;
+  onFetchDeviceStates: (deviceId: number) => Promise<void>;
 }
 
 const RuleCreate: React.FC<RuleCreateProps> = ({ 
@@ -19,7 +30,16 @@ const RuleCreate: React.FC<RuleCreateProps> = ({
   onFinish,
   isLoading, 
   ruleChainId,
-  showNodeSection 
+  showNodeSection,
+  onNodeDelete,
+  onNodeCreate,
+  onNodeUpdate,
+  sensors,
+  devices,
+  deviceStates,
+  sensorDetails,
+  onFetchSensorDetails,
+  onFetchDeviceStates
 }) => {
   const { t } = useTranslation();
   const { darkMode } = useTheme();
@@ -44,6 +64,15 @@ const RuleCreate: React.FC<RuleCreateProps> = ({
         isLoading={isLoading} 
         ruleChainId={ruleChainId || undefined}
         showNodeSection={showNodeSection}
+        onNodeDelete={onNodeDelete}
+        onNodeCreate={onNodeCreate}
+        onNodeUpdate={onNodeUpdate}
+        sensors={sensors}
+        devices={devices}
+        deviceStates={deviceStates}
+        sensorDetails={sensorDetails}
+        onFetchSensorDetails={onFetchSensorDetails}
+        onFetchDeviceStates={onFetchDeviceStates}
       />
       {showNodeSection && (
         <Box mt={2}>

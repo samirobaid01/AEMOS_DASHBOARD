@@ -35,8 +35,6 @@ interface RuleFormProps {
   sensorDetails: Sensor | null;
   onFetchSensorDetails: (sensorId: number) => Promise<void>;
   onFetchDeviceStates: (deviceId: number) => Promise<void>;
-  organizationId: string;
-  jwtToken: string;
 }
 
 interface FilterConfig {
