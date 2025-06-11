@@ -125,6 +125,7 @@ export const updateRuleNode = createAsyncThunk(
     payload: {
       name: string;
       config: string;
+      nextNodeId?: number | null;
     }
   }, { rejectWithValue }) => {
     try {

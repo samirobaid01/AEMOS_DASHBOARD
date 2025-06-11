@@ -130,7 +130,27 @@ const RuleEdit: React.FC = () => {
 
   const handleNodeUpdate = async (nodeId: number, data: any) => {
     try {
-      await dispatch(updateRuleNode({ nodeId, payload: data })).unwrap();
+      const currentNode = selectedRule?.nodes.find(n => n.id === nodeId);
+      if (!currentNode) return;
+
+      // Get the current nextNodeId from the existing node
+      const currentConfig = JSON.parse(currentNode.config);
+      const nextNodeId = currentConfig.nextNodeId;
+
+      await dispatch(updateRuleNode({ 
+        nodeId, 
+        payload: {
+          name: data.name,
+          config: data.config,
+          ...(nextNodeId !== undefined ? { nextNodeId } : {})  // Only include nextNodeId if it exists
+        }
+      })).unwrap();
+      
+      // Refresh rule details to get updated state
+      if (id) {
+        await dispatch(fetchRuleDetails(parseInt(id))).unwrap();
+      }
+      
       toastService.success(t('ruleEngine.nodeUpdateSuccess'));
     } catch (error) {
       console.error('Error updating node:', error);
@@ -170,6 +190,7 @@ const RuleEdit: React.FC = () => {
         showNodeSection={true}
         onNodeDelete={handleNodeDelete}
         onNodeCreate={handleNodeCreate}
+        onNodeUpdate={handleNodeUpdate}
         sensors={sensors}
         devices={devices}
         deviceStates={deviceStates}

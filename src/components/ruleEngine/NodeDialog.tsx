@@ -35,6 +35,21 @@ interface GroupData {
   expressions: Array<ConditionData | GroupData>;
 }
 
+interface ParsedExpression {
+  sourceType?: string;
+  UUID?: string;
+  key?: string;
+  operator?: string;
+  value?: string | number;
+  type?: string;
+  expressions?: ParsedExpression[];
+}
+
+interface ConfigObject {
+  type: string;
+  expressions: ParsedExpression[];
+}
+
 interface NodeDialogProps {
   open: boolean;
   onClose: () => void;
@@ -51,6 +66,7 @@ interface NodeDialogProps {
     key?: string;
     operator?: string;
     value?: string | number;
+    config?: string;
   };
   sensors: Sensor[];
   devices: Device[];
@@ -70,6 +86,25 @@ const ConditionBuilder: React.FC<{
   onFetchSensorDetails: (sensorId: number) => Promise<void>;
 }> = ({ condition, onChange, onDelete, sensors, devices, sensorDetails, onFetchSensorDetails }) => {
   const { t } = useTranslation();
+  const [isLoadingSensorDetails, setIsLoadingSensorDetails] = useState(false);
+
+  // Load sensor details when UUID changes
+  useEffect(() => {
+    const loadSensorDetails = async () => {
+      if (condition.sourceType === 'sensor' && condition.UUID) {
+        const sensor = sensors.find(s => s.uuid === condition.UUID);
+        if (sensor && (!sensorDetails || sensorDetails.id !== sensor.id)) {
+          setIsLoadingSensorDetails(true);
+          try {
+            await onFetchSensorDetails(sensor.id);
+          } finally {
+            setIsLoadingSensorDetails(false);
+          }
+        }
+      }
+    };
+    loadSensorDetails();
+  }, [condition.UUID, condition.sourceType, sensors, onFetchSensorDetails, sensorDetails]);
 
   const handleSourceTypeChange = (newSourceType: 'sensor' | 'device') => {
     const newUUID = newSourceType === 'sensor' ? sensors[0]?.uuid : devices[0]?.uuid;
@@ -81,13 +116,7 @@ const ConditionBuilder: React.FC<{
     });
   };
 
-  const handleUUIDChange = async (newUUID: string) => {
-    if (condition.sourceType === 'sensor') {
-      const sensor = sensors.find(s => s.uuid === newUUID);
-      if (sensor) {
-        await onFetchSensorDetails(sensor.id);
-      }
-    }
+  const handleUUIDChange = (newUUID: string) => {
     onChange({
       ...condition,
       UUID: newUUID,
@@ -97,14 +126,18 @@ const ConditionBuilder: React.FC<{
 
   const getAvailableKeys = () => {
     if (condition.sourceType === 'sensor') {
-      return sensorDetails?.TelemetryData?.map(td => ({
+      if (isLoadingSensorDetails || !sensorDetails) {
+        return [];
+      }
+      return sensorDetails.TelemetryData?.map(td => ({
         value: td.variableName,
         label: td.variableName
       })) || [];
     } else {
       const device = devices.find(d => d.uuid === condition.UUID);
-      if (!device?.capabilities) return [];
-      
+      if (!device?.capabilities) {
+        return [];
+      }
       return Object.entries(device.capabilities).map(([key, value]) => {
         const formattedKey = key.replace(/([A-Z])/g, "_$1").toLowerCase();
         return {
@@ -114,6 +147,19 @@ const ConditionBuilder: React.FC<{
       });
     }
   };
+
+  const availableKeys = getAvailableKeys();
+  const currentKey = condition.key;
+
+  // Reset key if it's not in available options
+  useEffect(() => {
+    if (currentKey && availableKeys.length > 0 && !availableKeys.some(k => k.value === currentKey)) {
+      onChange({
+        ...condition,
+        key: ''
+      });
+    }
+  }, [availableKeys, currentKey]);
 
   return (
     <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center', width: '100%' }}>
@@ -150,8 +196,9 @@ const ConditionBuilder: React.FC<{
           value={condition.key}
           onChange={(e) => onChange({ ...condition, key: e.target.value })}
           label="Key"
+          disabled={isLoadingSensorDetails || availableKeys.length === 0}
         >
-          {getAvailableKeys().map((key) => (
+          {availableKeys.map((key) => (
             <MenuItem key={key.value} value={key.value}>
               {key.label}
             </MenuItem>
@@ -321,6 +368,77 @@ const ExpressionGroup: React.FC<{
   );
 };
 
+const parseExistingConfig = (initialExpression: NodeDialogProps['initialExpression'], defaultUUID: string = ''): GroupData => {
+  // Default empty group
+  const defaultGroup: GroupData = {
+    type: 'AND',
+    expressions: [{
+      sourceType: 'sensor',
+      UUID: defaultUUID,
+      key: '',
+      operator: '==',
+      value: ''
+    }]
+  };
+
+  if (!initialExpression) {
+    return defaultGroup;
+  }
+
+  try {
+    if (initialExpression.config) {
+      const parsedConfig = JSON.parse(initialExpression.config) as ParsedExpression;
+      
+      // Validate the parsed config
+      if (parsedConfig && 
+          typeof parsedConfig === 'object' && 
+          'type' in parsedConfig && 
+          'expressions' in parsedConfig &&
+          Array.isArray(parsedConfig.expressions)) {
+        
+        // Validate each expression in the group
+        const validExpressions = parsedConfig.expressions.map((expr: ParsedExpression) => {
+          if (expr.sourceType && expr.UUID && expr.key && expr.operator && 'value' in expr) {
+            return {
+              sourceType: expr.sourceType as 'sensor' | 'device',
+              UUID: expr.UUID,
+              key: expr.key,
+              operator: expr.operator,
+              value: expr.value
+            };
+          } else if (expr.type && expr.expressions) {
+            // Handle nested groups recursively
+            return expr as GroupData;
+          }
+          return null;
+        }).filter((expr): expr is (ConditionData | GroupData) => expr !== null);
+
+        if (validExpressions.length > 0) {
+          return {
+            type: parsedConfig.type as 'AND' | 'OR',
+            expressions: validExpressions
+          };
+        }
+      }
+    }
+
+    // If config parsing fails or no config, create a single condition from individual fields
+    return {
+      type: 'AND',
+      expressions: [{
+        sourceType: (initialExpression.sourceType as 'sensor' | 'device') || 'sensor',
+        UUID: initialExpression.UUID || defaultUUID,
+        key: initialExpression.key || '',
+        operator: initialExpression.operator || '==',
+        value: initialExpression.value || ''
+      }]
+    };
+  } catch (error) {
+    console.error('Error parsing initial expression:', error);
+    return defaultGroup;
+  }
+};
+
 const NodeDialog: React.FC<NodeDialogProps> = ({
   open,
   onClose,
@@ -335,33 +453,135 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
   onFetchSensorDetails,
 }) => {
   const { t } = useTranslation();
+  const [isLoading, setIsLoading] = useState(true);
   const [nodeName, setNodeName] = useState(initialExpression?.name || '');
-  const [rootGroup, setRootGroup] = useState<GroupData>({
+  const [rootGroup, setRootGroup] = useState<GroupData>(() => ({
     type: 'AND',
     expressions: [{
-      sourceType: (initialExpression?.sourceType as 'sensor' | 'device') || 'sensor',
-      UUID: initialExpression?.UUID || sensors[0]?.uuid || '',
-      key: initialExpression?.key || '',
-      operator: initialExpression?.operator || '==',
-      value: initialExpression?.value || '',
+      sourceType: 'sensor',
+      UUID: '',
+      key: '',
+      operator: '==',
+      value: ''
     }]
-  });
+  }));
 
+  // Load initial expression data
+  useEffect(() => {
+    const loadExpressionData = async () => {
+      if (!open || !initialExpression || !sensors.length) {
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+        console.log('Initial expression full data:', JSON.stringify(initialExpression, null, 2));
+        
+        let parsedConfig: ParsedExpression | null = null;
+
+        // Try to parse config if it's a string
+        if (typeof initialExpression.config === 'string') {
+          try {
+            parsedConfig = JSON.parse(initialExpression.config);
+            console.log('Parsed config from string:', parsedConfig);
+          } catch (e) {
+            console.log('Failed to parse config string:', e);
+          }
+        }
+        // If config is an object, try to use it directly
+        else if (initialExpression.config && typeof initialExpression.config === 'object') {
+          console.log('Using config object directly:', initialExpression.config);
+          parsedConfig = initialExpression.config as ParsedExpression;
+        }
+
+        console.log('Parsed/direct config:', parsedConfig);
+
+        // If we have a valid config with expressions, use it
+        if (parsedConfig?.type && Array.isArray(parsedConfig.expressions)) {
+          await handleParsedConfig(parsedConfig);
+        } 
+        // Otherwise, create a single expression from the initialExpression fields
+        else {
+          console.log('Creating single expression from fields:', initialExpression);
+          const singleExpression = {
+            type: 'AND' as const,
+            expressions: [{
+              sourceType: initialExpression.sourceType as 'sensor' | 'device',
+              UUID: initialExpression.UUID || '',
+              key: initialExpression.key || '',
+              operator: initialExpression.operator || '==',
+              value: initialExpression.value || ''
+            }]
+          };
+          await handleParsedConfig(singleExpression);
+        }
+      } catch (error) {
+        console.error('Error loading expression data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadExpressionData();
+  }, [open, initialExpression, sensors]);
+
+  // Load sensor details when UUID changes
+  useEffect(() => {
+    const loadSensorDetails = async () => {
+      if (!rootGroup?.expressions?.length) return;
+
+      // Get unique sensor UUIDs
+      const sensorUUIDs = new Set<string>();
+      rootGroup.expressions.forEach(expr => {
+        if ('sourceType' in expr && expr.sourceType === 'sensor' && expr.UUID) {
+          sensorUUIDs.add(expr.UUID);
+        }
+      });
+
+      // Load details for each unique sensor
+      for (const UUID of sensorUUIDs) {
+        const sensor = sensors.find(s => s.uuid === UUID);
+        if (sensor && !sensorDetails?.id) {
+          await onFetchSensorDetails(sensor.id);
+        }
+      }
+    };
+
+    loadSensorDetails();
+  }, [rootGroup, sensors, sensorDetails, onFetchSensorDetails]);
+
+  const handleParsedConfig = async (config: ParsedExpression) => {
+    console.log('Handling config:', config);
+    
+    if (!Array.isArray(config.expressions)) {
+      console.log('No valid expressions array found');
+      return;
+    }
+
+    // Set the root group with all expressions
+    const newRootGroup = {
+      type: config.type as 'AND' | 'OR',
+      expressions: config.expressions.map(expr => ({
+        sourceType: expr.sourceType as 'sensor' | 'device',
+        UUID: expr.UUID || '',
+        key: expr.key || '',
+        operator: expr.operator || '==',
+        value: expr.value || ''
+      }))
+    };
+
+    console.log('Setting new root group:', newRootGroup);
+    setRootGroup(newRootGroup);
+  };
+
+  // Reset form when dialog opens/closes
   useEffect(() => {
     if (open) {
+      console.log('Dialog opened with initial expression:', initialExpression);
       setNodeName(initialExpression?.name || '');
-      setRootGroup({
-        type: 'AND',
-        expressions: [{
-          sourceType: (initialExpression?.sourceType as 'sensor' | 'device') || 'sensor',
-          UUID: initialExpression?.UUID || sensors[0]?.uuid || '',
-          key: initialExpression?.key || '',
-          operator: initialExpression?.operator || '==',
-          value: initialExpression?.value || '',
-        }]
-      });
     }
-  }, [open, initialExpression, sensors]);
+  }, [open, initialExpression]);
 
   const handleSave = () => {
     if (!nodeName.trim()) return;
@@ -369,7 +589,8 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
     if (mode === 'edit' && initialExpression?.id && onUpdate) {
       onUpdate(initialExpression.id, {
         name: nodeName.trim(),
-        config: JSON.stringify(rootGroup)
+        config: JSON.stringify(rootGroup),
+        type: "filter"  // Preserve the node type
       });
     } else if (onSave) {
       onSave({
@@ -382,6 +603,18 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
     }
     onClose();
   };
+
+  if (isLoading) {
+    return (
+      <Dialog open={open} maxWidth="md" fullWidth>
+        <DialogContent>
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '200px' }}>
+            <Typography>Loading...</Typography>
+          </Box>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   return (
     <Dialog

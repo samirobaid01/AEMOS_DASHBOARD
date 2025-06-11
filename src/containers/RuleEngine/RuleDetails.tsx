@@ -51,15 +51,15 @@ const RuleDetails: React.FC = () => {
     try {
       const currentNode = selectedRule?.nodes.find(n => n.id === nodeId);
       if (!currentNode) return;
-
+      console.log("Next node ID:", nextNodeId);
       await dispatch(updateRuleNode({
         nodeId,
         payload: {
           name: currentNode.name || '',
           config: JSON.stringify({
-            ...JSON.parse(currentNode.config),
-            nextNodeId
-          })
+            ...JSON.parse(currentNode.config)
+          }),
+          nextNodeId: nextNodeId
         }
       })).unwrap();
 
