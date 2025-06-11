@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -13,30 +13,12 @@ import {
   Typography,
   Box,
 } from '@mui/material';
-
-interface DeviceState {
-  id: number;
-  deviceId: number;
-  stateName: string;
-  dataType: string;
-  defaultValue: string;
-  allowedValues: string;
-  status: string;
-}
-
-interface Device {
-  uuid: string;
-  name: string;
-  id: number;
-  states: DeviceState[];
-}
+import type { Device, DeviceState } from '../../types/device';
 
 interface ActionDialogProps {
   open: boolean;
   onClose: () => void;
   onSave?: (data: any) => void;
-  organizationId?: number;
-  jwtToken?: string;
   ruleChainId: number;
   mode?: 'add' | 'edit';
   initialData?: {
@@ -52,51 +34,29 @@ interface ActionDialogProps {
       };
     };
   };
+  devices: Device[];
+  deviceStates: DeviceState[];
+  onFetchDeviceStates: (deviceId: number) => Promise<void>;
 }
 
 const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
   open,
   onClose,
   onSave,
-  organizationId,
-  jwtToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NjcxLCJlbWFpbCI6InNhbWlyYWRtaW5AeW9wbWFpbC5jb20iLCJwZXJtaXNzaW9ucyI6WyJhcmVhLmNyZWF0ZSIsImFyZWEuZGVsZXRlIiwiYXJlYS51cGRhdGUiLCJhcmVhLnZpZXciLCJjb21tYW5kLmNhbmNlbCIsImNvbW1hbmQucmV0cnkiLCJjb21tYW5kLnNlbmQiLCJjb21tYW5kLnZpZXciLCJjb21tYW5kVHlwZS5jcmVhdGUiLCJjb21tYW5kVHlwZS5kZWxldGUiLCJjb21tYW5kVHlwZS51cGRhdGUiLCJjb21tYW5kVHlwZS52aWV3IiwiZGV2aWNlLmFuYWx5dGljcy52aWV3IiwiZGV2aWNlLmNvbnRyb2wiLCJkZXZpY2UuY3JlYXRlIiwiZGV2aWNlLmRlbGV0ZSIsImRldmljZS5oZWFydGJlYXQudmlldyIsImRldmljZS5tZXRhZGF0YS51cGRhdGUiLCJkZXZpY2Uuc3RhdHVzLnVwZGF0ZSIsImRldmljZS51cGRhdGUiLCJkZXZpY2UudmlldyIsIm1haW50ZW5hbmNlLmRlbGV0ZSIsIm1haW50ZW5hbmNlLmxvZyIsIm1haW50ZW5hbmNlLnNjaGVkdWxlIiwibWFpbnRlbmFuY2UudXBkYXRlIiwibWFpbnRlbmFuY2UudmlldyIsIm9yZ2FuaXphdGlvbi5jcmVhdGUiLCJvcmdhbml6YXRpb24uZGVsZXRlIiwib3JnYW5pemF0aW9uLnVwZGF0ZSIsIm9yZ2FuaXphdGlvbi52aWV3IiwicGVybWlzc2lvbi5tYW5hZ2UiLCJyZXBvcnQuZ2VuZXJhdGUiLCJyZXBvcnQudmlldyIsInJvbGUuYXNzaWduIiwicm9sZS52aWV3IiwicnVsZS5jcmVhdGUiLCJydWxlLmRlbGV0ZSIsInJ1bGUudXBkYXRlIiwicnVsZS52aWV3Iiwic2Vuc29yLmNyZWF0ZSIsInNlbnNvci5kZWxldGUiLCJzZW5zb3IudXBkYXRlIiwic2Vuc29yLnZpZXciLCJzZXR0aW5ncy51cGRhdGUiLCJzZXR0aW5ncy52aWV3Iiwic3RhdGUuY3JlYXRlIiwic3RhdGUudmlldyIsInN0YXRlVHJhbnNpdGlvbi5tYW5hZ2UiLCJzdGF0ZVRyYW5zaXRpb24udmlldyIsInN0YXRlVHlwZS5tYW5hZ2UiLCJzdGF0ZVR5cGUudmlldyIsInVzZXIuY3JlYXRlIiwidXNlci5kZWxldGUiLCJ1c2VyLnVwZGF0ZSIsInVzZXIudmlldyJdLCJyb2xlcyI6WyJBZG1pbiJdLCJpYXQiOjE3NDk2MjU3MTMsImV4cCI6MTc0OTcxMjExM30.j7lOAaRgAP_7CZhurI8hyXHEylynRIGxNVJiZgQlHls",
   ruleChainId,
   mode = 'add',
   initialData,
+  devices = [],
+  deviceStates = [],
+  onFetchDeviceStates,
 }) => {
   const [actionType, setActionType] = useState<string>('Device');
-  const [devices, setDevices] = useState<Device[]>([]);
   const [selectedDevice, setSelectedDevice] = useState<string>('');
-  const [deviceStates, setDeviceStates] = useState<DeviceState[]>([]);
   const [stateName, setStateName] = useState<string>('');
   const [stateValue, setStateValue] = useState<string>('');
   const [jsonOutput, setJsonOutput] = useState<string>('');
   const [nodeName, setNodeName] = useState<string>('');
   const [allowedValues, setAllowedValues] = useState<string[]>([]);
-
-  const fetchDevices = useCallback(async () => {
-    try {
-      const response = await fetch(
-        `http://localhost:3000/api/v1/devices?organizationId=${organizationId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${jwtToken}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-      const result = await response.json();
-      setDevices(result.data?.devices || []);
-    } catch (error) {
-      console.error('Error fetching devices:', error);
-    }
-  }, [organizationId, jwtToken]);
-
-  useEffect(() => {
-    if (open && devices.length === 0) {
-      fetchDevices();
-    }
-  }, [open, devices.length, fetchDevices]);
 
   useEffect(() => {
     if (open) {
@@ -136,26 +96,6 @@ const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
     }
   }, [open, mode, initialData]);
 
-  const fetchDeviceStates = async (deviceId: number) => {
-    try {
-      const response = await fetch(
-        `http://localhost:3000/api/v1/devices/${deviceId}?organizationId=${organizationId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${jwtToken}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-      const result = await response.json();
-      if (result.status === 'success' && result.data.device.states) {
-        setDeviceStates(result.data.device.states);
-      }
-    } catch (error) {
-      console.error('Error fetching device states:', error);
-    }
-  };
-
   const handleDeviceChange = async (deviceUuid: string) => {
     setSelectedDevice(deviceUuid);
     setStateName('');
@@ -165,7 +105,7 @@ const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
     // Find the device ID from the UUID
     const selectedDeviceObj = devices.find(d => d.uuid === deviceUuid);
     if (selectedDeviceObj?.id) {
-      await fetchDeviceStates(selectedDeviceObj.id);
+      await onFetchDeviceStates(selectedDeviceObj.id);
     }
   };
 
@@ -173,12 +113,12 @@ const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
     setStateName(newStateName);
     setStateValue(''); // Reset state value when state name changes
     
-    // Find the selected state and update allowed values
-    const selectedState = deviceStates.find(state => state.stateName === newStateName);
+    // Add null check before finding state
+    const selectedState = deviceStates?.find(state => state.stateName === newStateName);
     if (selectedState) {
       try {
         const parsedValues = JSON.parse(selectedState.allowedValues);
-        setAllowedValues(parsedValues);
+        setAllowedValues(Array.isArray(parsedValues) ? parsedValues : []);
       } catch (error) {
         console.error('Error parsing allowed values:', error);
         setAllowedValues([]);
@@ -218,32 +158,9 @@ const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
         config: JSON.stringify(parsedOutput.config),
         nextNodeId: null,
       };
-      
-      console.log('Saving action node with data:', requestBody);
-
-      const response = await fetch(
-        `http://localhost:3000/api/v1/rule-chains/nodes?organizationId=${organizationId}`,
-        {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${jwtToken}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(requestBody),
-        }
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
-        console.error('Error response:', errorData);
-        throw new Error('Failed to save action node');
-      }
-
-      const responseData = await response.json();
-      console.log('Save response:', responseData);
 
       if (onSave) {
-        onSave(parsedOutput);
+        onSave(requestBody);
       }
       onClose();
     } catch (error) {
@@ -295,7 +212,7 @@ const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
                   onChange={(e) => handleDeviceChange(e.target.value)}
                   label="Device"
                 >
-                  {devices.map((device) => (
+                  {(devices || []).map((device) => (
                     <MenuItem key={device.uuid} value={device.uuid}>
                       {device.name}
                     </MenuItem>
@@ -311,7 +228,7 @@ const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
                     onChange={(e) => handleStateNameChange(e.target.value)}
                     label="Device State"
                   >
-                    {deviceStates.map((state) => (
+                    {(deviceStates || []).map((state) => (
                       <MenuItem key={state.id} value={state.stateName}>
                         {state.stateName}
                       </MenuItem>
@@ -328,7 +245,7 @@ const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
                     onChange={(e) => setStateValue(e.target.value)}
                     label="State Value"
                   >
-                    {allowedValues.map((value) => (
+                    {(allowedValues || []).map((value) => (
                       <MenuItem key={value} value={value}>
                         {value}
                       </MenuItem>

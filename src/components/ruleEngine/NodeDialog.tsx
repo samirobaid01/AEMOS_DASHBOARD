@@ -7,18 +7,9 @@ import {
   Button,
   TextField,
 } from "@mui/material";
-
-interface Sensor {
-  id: number;
-  uuid: string;
-  name: string;
-}
-
-interface Device {
-  uuid: string;
-  name: string;
-  capabilities: Record<string, any>;
-}
+import { useTranslation } from "react-i18next";
+import type { Device } from "../../types/device";
+import type { Sensor } from "../../types/sensor";
 
 interface KeyOption {
   key: string;
@@ -50,12 +41,12 @@ interface ValueElement extends HTMLElement {
 }
 
 interface NodeDialogProps {
-  organizationId?: number;
-  jwtToken?: string;
-  ruleChainId?: number;
   open: boolean;
   onClose: () => void;
   onSave?: (data: any) => void;
+  onUpdate?: (nodeId: number, data: any) => void;
+  ruleChainId?: number;
+  mode: 'add' | 'edit';
   initialExpression?: {
     id?: number;
     name?: string;
@@ -65,40 +56,37 @@ interface NodeDialogProps {
     key?: string;
     operator?: string;
     value?: string | number;
-    command?: {
-      deviceUuid: string;
-      stateName: string;
-      value: string;
-      initiatedBy: 'device';
-    };
   };
-  mode: 'add' | 'edit';
+  sensors: Sensor[];
+  devices: Device[];
+  sensorDetails: Sensor | null;
+  onFetchSensorDetails: (sensorId: number) => Promise<void>;
 }
 
 const NodeDialog: React.FC<NodeDialogProps> = ({
-  organizationId = 1,
-  jwtToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NjcxLCJlbWFpbCI6InNhbWlyYWRtaW5AeW9wbWFpbC5jb20iLCJwZXJtaXNzaW9ucyI6WyJhcmVhLmNyZWF0ZSIsImFyZWEuZGVsZXRlIiwiYXJlYS51cGRhdGUiLCJhcmVhLnZpZXciLCJjb21tYW5kLmNhbmNlbCIsImNvbW1hbmQucmV0cnkiLCJjb21tYW5kLnNlbmQiLCJjb21tYW5kLnZpZXciLCJjb21tYW5kVHlwZS5jcmVhdGUiLCJjb21tYW5kVHlwZS5kZWxldGUiLCJjb21tYW5kVHlwZS51cGRhdGUiLCJjb21tYW5kVHlwZS52aWV3IiwiZGV2aWNlLmFuYWx5dGljcy52aWV3IiwiZGV2aWNlLmNvbnRyb2wiLCJkZXZpY2UuY3JlYXRlIiwiZGV2aWNlLmRlbGV0ZSIsImRldmljZS5oZWFydGJlYXQudmlldyIsImRldmljZS5tZXRhZGF0YS51cGRhdGUiLCJkZXZpY2Uuc3RhdHVzLnVwZGF0ZSIsImRldmljZS51cGRhdGUiLCJkZXZpY2UudmlldyIsIm1haW50ZW5hbmNlLmRlbGV0ZSIsIm1haW50ZW5hbmNlLmxvZyIsIm1haW50ZW5hbmNlLnNjaGVkdWxlIiwibWFpbnRlbmFuY2UudXBkYXRlIiwibWFpbnRlbmFuY2UudmlldyIsIm9yZ2FuaXphdGlvbi5jcmVhdGUiLCJvcmdhbml6YXRpb24uZGVsZXRlIiwib3JnYW5pemF0aW9uLnVwZGF0ZSIsIm9yZ2FuaXphdGlvbi52aWV3IiwicGVybWlzc2lvbi5tYW5hZ2UiLCJyZXBvcnQuZ2VuZXJhdGUiLCJyZXBvcnQudmlldyIsInJvbGUuYXNzaWduIiwicm9sZS52aWV3IiwicnVsZS5jcmVhdGUiLCJydWxlLmRlbGV0ZSIsInJ1bGUudXBkYXRlIiwicnVsZS52aWV3Iiwic2Vuc29yLmNyZWF0ZSIsInNlbnNvci5kZWxldGUiLCJzZW5zb3IudXBkYXRlIiwic2Vuc29yLnZpZXciLCJzZXR0aW5ncy51cGRhdGUiLCJzZXR0aW5ncy52aWV3Iiwic3RhdGUuY3JlYXRlIiwic3RhdGUudmlldyIsInN0YXRlVHJhbnNpdGlvbi5tYW5hZ2UiLCJzdGF0ZVRyYW5zaXRpb24udmlldyIsInN0YXRlVHlwZS5tYW5hZ2UiLCJzdGF0ZVR5cGUudmlldyIsInVzZXIuY3JlYXRlIiwidXNlci5kZWxldGUiLCJ1c2VyLnVwZGF0ZSIsInVzZXIudmlldyJdLCJyb2xlcyI6WyJBZG1pbiJdLCJpYXQiOjE3NDk2MjU3MTMsImV4cCI6MTc0OTcxMjExM30.j7lOAaRgAP_7CZhurI8hyXHEylynRIGxNVJiZgQlHls",
-  ruleChainId,
   open,
   onClose,
   onSave,
+  onUpdate,
+  ruleChainId,
+  mode = 'add',
   initialExpression,
-  mode = 'add'
+  sensors = [],
+  devices = [],
+  sensorDetails,
+  onFetchSensorDetails,
 }) => {
-  const [sensors, setSensors] = useState<Sensor[]>([]);
-  const [devices, setDevices] = useState<Device[]>([]);
   const [output, setOutput] = useState<string>("");
   const [nodeName, setNodeName] = useState<string>(initialExpression?.name || "");
   const builderRef = useRef<HTMLDivElement>(null);
   const sensorsRef = useRef<Sensor[]>([]);
   const devicesRef = useRef<Device[]>([]);
   const isInitializedRef = useRef<boolean>(false);
+  const { t } = useTranslation();
 
   // Reset state when dialog opens/closes
   useEffect(() => {
     if (open) {
-      // In edit mode, initialize with the name from initialExpression
-      console.log("Initial expression:", initialExpression);
       if (mode === 'edit' && initialExpression?.name) {
         setNodeName(initialExpression.name);
       } else {
@@ -115,166 +103,54 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
     }
   };
 
-  const saveExpression = async () => {
-    try {
-      if (!nodeName.trim()) {
-        console.error("Node name is required");
-        return;
-      }
-
-      console.log("Current output:", output);
-      const data = JSON.parse(output);
-
-      // Prepare the API request payload
-      const payload = {
-        ruleChainId,
-        type: "filter",
-        name: nodeName.trim(),
-        config: JSON.stringify(data.expressions[0]),
-        nextNodeId: null,
-      };
-
-      console.log("Sending payload to API:", payload);
-
-      const response = await fetch(
-        `http://localhost:3000/api/v1/rule-chains/nodes?organizationId=${organizationId}`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${jwtToken}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
-        }
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
-        console.error("Error response:", errorData);
-        throw new Error(`API call failed: ${response.statusText}`);
-      }
-
-      const result = await response.json();
-      console.log("API Response:", result);
-
-      // Call onSave with the data including the name and new ID
-      if (onSave) {
-        onSave({
-          ...data,
-          name: nodeName.trim(),
-          id: result.data.id // Include the new ID from the response
-        });
-      }
-
-      // Close the dialog
-      handleClose();
-    } catch (error) {
-      console.error("Error saving node:", error);
-    }
-  };
-
-  const updateExpression = async () => {
-    try {
-      if (!nodeName.trim()) {
-        console.error("Node name is required");
-        return;
-      }
-
-      console.log("Current output:", output);
-      const data = JSON.parse(output);
-
-      // Prepare the API request payload
-      const payload = {
-        name: nodeName.trim(),
-        config: JSON.stringify(data.expressions[0])
-      };
-
-      console.log("Sending payload to API:", payload);
-
-      const response = await fetch(
-        `http://localhost:3000/api/v1/rule-chains/nodes/${initialExpression?.id}?organizationId=${organizationId}`,
-        {
-          method: "PATCH",
-          headers: {
-            Authorization: `Bearer ${jwtToken}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
-        }
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
-        console.error("Error response:", errorData);
-        throw new Error(`API call failed: ${response.statusText}`);
-      }
-
-      const result = await response.json();
-      console.log("API Response:", result);
-
-      // Call onSave with the data including the name
-      if (onSave) {
-        onSave({
-          ...data,
-          name: nodeName.trim(),
-          id: initialExpression?.id
-        });
-      }
-
-      // Close the dialog
-      handleClose();
-    } catch (error) {
-      console.error("Error saving node:", error);
-    }
-  };
-
-  // Handle dialog close
   const handleClose = () => {
     resetState();
     onClose();
   };
 
+  // Update refs when props change
+  useEffect(() => {
+    console.log('NodeDialog props updated:', { sensors, devices });
+    if (builderRef.current) {
+      const sourceTypeSelect = builderRef.current.querySelector('select:first-child') as HTMLSelectElement;
+      if (sourceTypeSelect?.value) {
+        updateUUIDsAndKeys(sourceTypeSelect.value);
+      }
+    }
+  }, [sensors, devices]);
+
+  const updateSensorKeys = async (uuid: string) => {
+    const sensor = sensorsRef.current.find((s) => s.uuid === uuid);
+    if (!sensor) return;
+
+    await onFetchSensorDetails(sensor.id);
+    
+    if (!builderRef.current) return;
+    
+    const keySelect = builderRef.current.querySelector('select:nth-child(3)') as HTMLSelectElement;
+    if (!keySelect) return;
+
+    keySelect.innerHTML = '';
+    if (sensorDetails?.TelemetryData) {
+      sensorDetails.TelemetryData.forEach((k: any) => {
+        const opt = document.createElement("option");
+        opt.value = k.variableName;
+        opt.textContent = k.variableName;
+        keySelect.appendChild(opt);
+      });
+    }
+
+    generateJSON(false);
+  };
+
   const fetchSensorsAndDevices = async () => {
     try {
-      console.log("Fetching sensors and devices...");
-      const [sensorsRes, devicesRes] = await Promise.all([
-        fetch(
-          `http://localhost:3000/api/v1/sensors?organizationId=${organizationId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${jwtToken}`,
-              "Content-Type": "application/json",
-            },
-          }
-        ).then((res) => res.json()),
-        fetch(
-          `http://localhost:3000/api/v1/devices?organizationId=${organizationId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${jwtToken}`,
-              "Content-Type": "application/json",
-            },
-          }
-        ).then((res) => res.json()),
-      ]);
-
-      const fetchedSensors = sensorsRes.data?.sensors || [];
-      const fetchedDevices = devicesRes.data?.devices || [];
-
-      console.log("Fetched data:", {
-        sensors: fetchedSensors,
-        devices: fetchedDevices,
-      });
-
-      // Update both state and refs
-      sensorsRef.current = fetchedSensors;
-      devicesRef.current = fetchedDevices;
-      setSensors(fetchedSensors);
-      setDevices(fetchedDevices);
-
-      return { sensors: fetchedSensors, devices: fetchedDevices };
+      console.log("Using sensors and devices from props");
+      sensorsRef.current = sensors;
+      devicesRef.current = devices;
+      return { sensors, devices };
     } catch (error) {
-      console.error("Error fetching data:", error);
+      console.error("Error setting up data:", error);
       return { sensors: [], devices: [] };
     }
   };
@@ -304,6 +180,82 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
     });
 
     return keys;
+  };
+
+  const updateDeviceKeys = (uuid: string) => {
+    const device = devicesRef.current.find((d) => d.uuid === uuid);
+    if (!device || !builderRef.current) return;
+
+    const keys = getDeviceKeys(device);
+    const keySelect = builderRef.current.querySelector('select:nth-child(3)') as HTMLSelectElement;
+    if (!keySelect) return;
+
+    keySelect.innerHTML = "";
+    keys.forEach((k) => {
+      const opt = document.createElement("option");
+      opt.value = k.key;
+      opt.textContent = k.key;
+      keySelect.appendChild(opt);
+    });
+
+    generateJSON(false);
+  };
+
+  const updateUUIDsAndKeys = async (sourceTypeValue: string) => {
+    console.log("Updating UUIDs and Keys for source type:", sourceTypeValue, { sensors, devices });
+    
+    if (!builderRef.current) return;
+    const uuidSelect = builderRef.current.querySelector('select:nth-child(2)') as HTMLSelectElement;
+    const keySelect = builderRef.current.querySelector('select:nth-child(3)') as HTMLSelectElement;
+    
+    if (!uuidSelect || !keySelect) return;
+
+    uuidSelect.innerHTML = "";
+    keySelect.innerHTML = "";
+
+    if (sourceTypeValue === "sensor") {
+      if (sensors.length === 0) {
+        const opt = document.createElement("option");
+        opt.value = "";
+        opt.textContent = "No sensors available";
+        opt.disabled = true;
+        uuidSelect.appendChild(opt);
+        return;
+      }
+
+      sensors.forEach((sensor) => {
+        const opt = document.createElement("option");
+        opt.value = sensor.uuid;
+        opt.textContent = sensor.name;
+        uuidSelect.appendChild(opt);
+      });
+
+      if (uuidSelect.firstChild) {
+        await updateSensorKeys(uuidSelect.value);
+      }
+    } else {
+      if (devices.length === 0) {
+        const opt = document.createElement("option");
+        opt.value = "";
+        opt.textContent = "No devices available";
+        opt.disabled = true;
+        uuidSelect.appendChild(opt);
+        return;
+      }
+
+      devices.forEach((device) => {
+        const opt = document.createElement("option");
+        opt.value = device.uuid;
+        opt.textContent = device.name;
+        uuidSelect.appendChild(opt);
+      });
+
+      if (uuidSelect.firstChild) {
+        updateDeviceKeys(uuidSelect.value);
+      }
+    }
+
+    generateJSON(false);
   };
 
   const createConditionNode = async (
@@ -343,126 +295,9 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
     value.placeholder = "value";
     value.className = "value-input";
 
-    const updateSensorKeys = async (uuid: string) => {
-      console.log("Updating sensor keys for UUID:", uuid);
-      const sensor = sensorsRef.current.find((s) => s.uuid === uuid);
-      if (!sensor) return;
-
-      try {
-        const res = await fetch(
-          `http://localhost:3000/api/v1/sensors/${sensor.id}?organizationId=${organizationId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${jwtToken}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
-        const json = await res.json();
-        const keys = json?.data?.sensor?.TelemetryData || [];
-
-        key.innerHTML = "";
-        keys.forEach((k: any) => {
-          const opt = document.createElement("option");
-          opt.value = k.variableName;
-          opt.textContent = k.variableName;
-          key.appendChild(opt);
-        });
-
-        generateJSON(false);
-      } catch (error) {
-        console.error("Error fetching sensor keys:", error);
-      }
-    };
-
-    const updateDeviceKeys = (uuid: string) => {
-      console.log("Updating device keys for UUID:", uuid);
-      const device = devicesRef.current.find((d) => d.uuid === uuid);
-      if (!device) return;
-
-      const keys = getDeviceKeys(device);
-      console.log("Device keys:", keys);
-
-      key.innerHTML = "";
-      keys.forEach((k) => {
-        const opt = document.createElement("option");
-        opt.value = k.key;
-        opt.textContent = k.key;
-        key.appendChild(opt);
-      });
-
-      generateJSON(false);
-    };
-
-    const updateUUIDsAndKeys = async () => {
-      const currentSensors = sensorsRef.current;
-      const currentDevices = devicesRef.current;
-
-      console.log("Updating UUIDs and Keys", {
-        sourceType: sourceType.value,
-        sensorsAvailable: currentSensors.length > 0,
-        sensorsCount: currentSensors.length,
-        currentSensors,
-      });
-
-      uuidSelect.innerHTML = "";
-      key.innerHTML = "";
-
-      if (sourceType.value === "sensor") {
-        if (currentSensors.length === 0) {
-          console.log("No sensors available");
-          const opt = document.createElement("option");
-          opt.value = "";
-          opt.textContent = "No sensors available";
-          uuidSelect.appendChild(opt);
-        } else {
-          currentSensors.forEach((sensor) => {
-            const opt = document.createElement("option");
-            opt.value = sensor.uuid;
-            opt.textContent = sensor.name;
-            uuidSelect.appendChild(opt);
-          });
-
-          if (uuidSelect.firstChild) {
-            await updateSensorKeys(uuidSelect.value);
-          }
-        }
-      } else {
-        if (currentDevices.length === 0) {
-          console.log("No devices available");
-          const opt = document.createElement("option");
-          opt.value = "";
-          opt.textContent = "No devices available";
-          uuidSelect.appendChild(opt);
-        } else {
-          currentDevices.forEach((device) => {
-            const opt = document.createElement("option");
-            opt.value = device.uuid;
-            opt.textContent = device.name;
-            uuidSelect.appendChild(opt);
-          });
-
-          if (uuidSelect.firstChild) {
-            updateDeviceKeys(uuidSelect.value);
-          }
-        }
-      }
-
-      generateJSON(false);
-    };
-
     // Set up getData before adding event listeners
     (div as any).getData = () => {
       const currentValue = value.value;
-      console.log("Getting data from condition node:", {
-        value: currentValue,
-        sourceType: sourceType.value,
-        UUID: uuidSelect.value,
-        key: key.value,
-        operator: operator.value
-      });
-
-      // Return the condition data directly
       return {
         sourceType: sourceType.value,
         UUID: uuidSelect.value,
@@ -479,7 +314,65 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
     // Add event listeners with proper update chain
     sourceType.addEventListener("change", async () => {
       console.log("Source type changed:", sourceType.value);
-      await updateUUIDsAndKeys();
+      if (sourceType.value === "sensor") {
+        // Clear existing options
+        uuidSelect.innerHTML = "";
+        key.innerHTML = "";
+        
+        console.log("Populating sensors:", sensors);
+        if (sensors.length === 0) {
+          // Add a placeholder option if no sensors
+          const opt = document.createElement("option");
+          opt.value = "";
+          opt.textContent = "Loading sensors...";
+          opt.disabled = true;
+          uuidSelect.appendChild(opt);
+          return;
+        }
+
+        // Populate sensor options
+        sensors.forEach((sensor) => {
+          const opt = document.createElement("option");
+          opt.value = sensor.uuid;
+          opt.textContent = sensor.name;
+          uuidSelect.appendChild(opt);
+        });
+
+        // If there are sensors, fetch keys for the first one
+        if (sensors.length > 0) {
+          uuidSelect.value = sensors[0].uuid;
+          await updateSensorKeys(sensors[0].uuid);
+        }
+      } else {
+        // Clear existing options
+        uuidSelect.innerHTML = "";
+        key.innerHTML = "";
+        
+        console.log("Populating devices:", devices);
+        if (devices.length === 0) {
+          // Add a placeholder option if no devices
+          const opt = document.createElement("option");
+          opt.value = "";
+          opt.textContent = "Loading devices...";
+          opt.disabled = true;
+          uuidSelect.appendChild(opt);
+          return;
+        }
+
+        // Populate device options
+        devices.forEach((device) => {
+          const opt = document.createElement("option");
+          opt.value = device.uuid;
+          opt.textContent = device.name;
+          uuidSelect.appendChild(opt);
+        });
+
+        // If there are devices, update keys for the first one
+        if (devices.length > 0) {
+          uuidSelect.value = devices[0].uuid;
+          updateDeviceKeys(devices[0].uuid);
+        }
+      }
       generateJSON(false);
     });
 
@@ -516,16 +409,17 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
 
     parent.appendChild(div);
 
-    // Initialize the dropdowns after appending to parent
-    await updateUUIDsAndKeys();
-
     // Set initial values if provided
     if (initialData) {
       console.log("Setting initial values:", initialData);
       sourceType.value = initialData.sourceType;
-      await updateUUIDsAndKeys();
+      await updateUUIDsAndKeys(initialData.sourceType);
       uuidSelect.value = initialData.UUID;
-      await updateSensorKeys(initialData.UUID);
+      if (initialData.sourceType === 'sensor') {
+        await updateSensorKeys(initialData.UUID);
+      } else {
+        updateDeviceKeys(initialData.UUID);
+      }
       key.value = initialData.key;
       operator.value = initialData.operator;
       value.value = initialData.value.toString();
@@ -534,6 +428,9 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
       setTimeout(() => {
         generateJSON(false);
       }, 0);
+    } else {
+      // Initialize with default source type
+      await updateUUIDsAndKeys(sourceType.value);
     }
 
     return div;
@@ -661,8 +558,56 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
   const handleSave = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    generateJSON(true); // Pass true to indicate this should trigger a save
-    handleClose();
+    
+    if (!nodeName.trim()) {
+      console.error("Node name is required");
+      return;
+    }
+
+    try {
+      // Get the condition data from the current node
+      const conditionElement = builderRef.current?.querySelector('.condition');
+      if (!conditionElement) {
+        console.error("No condition element found");
+        return;
+      }
+
+      const conditionData = (conditionElement as any).getData();
+      console.log("Raw condition data:", conditionData);
+
+      // Create the proper structure with expressions array
+      const data = {
+        expressions: [{
+          type: "AND",
+          expressions: [conditionData]
+        }],
+        name: nodeName.trim(),
+        id: initialExpression?.id
+      };
+
+      console.log("Saving data with expressions:", data);
+
+      if (mode === 'edit' && initialExpression?.id && onUpdate) {
+        onUpdate(initialExpression.id, {
+          name: nodeName.trim(),
+          config: JSON.stringify(data.expressions[0])
+        });
+      } else if (onSave) {
+        // For new nodes, we need to create it first to get an ID
+        const saveData = {
+          ruleChainId,
+          type: "filter",
+          name: nodeName.trim(),
+          config: JSON.stringify(data.expressions[0]),
+          nextNodeId: null,
+        };
+        console.log("Creating new node with data:", saveData);
+        onSave(saveData);
+      }
+      handleClose();
+    } catch (error) {
+      console.error("Error saving node:", error);
+    }
   };
 
   useEffect(() => {
@@ -938,7 +883,7 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
           Cancel
         </Button>
         <Button
-          onClick={mode === 'edit' ? updateExpression : saveExpression}
+          onClick={handleSave}
           variant="contained"
           color="primary"
           type="button"

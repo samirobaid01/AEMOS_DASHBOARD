@@ -59,9 +59,8 @@ export const deleteRule = async (ruleId: number) => {
  * Update rule node
  */
 export const updateRuleNode = async (nodeId: number, payload: {
-  type: string;
+  name: string;
   config: string;
-  nextNodeId: number | null;
 }) => {
   const params = withOrganizationId();
   const response = await apiClient.patch(`/rule-chains/nodes/${nodeId}`, payload, { params });
@@ -77,6 +76,57 @@ export const deleteRuleNode = async (nodeId: number) => {
   return response.data;
 };
 
+/**
+ * Create rule node
+ */
+export const createRuleNode = async (payload: {
+  ruleChainId: number;
+  type: string;
+  name: string;
+  config: string;
+  nextNodeId: number | null;
+}) => {
+  const params = withOrganizationId();
+  const response = await apiClient.post('/rule-chains/nodes', payload, { params });
+  return response.data.data;
+};
+
+/**
+ * Fetch sensors
+ */
+export const fetchSensors = async () => {
+  const params = withOrganizationId();
+  const response = await apiClient.get('/sensors', { params });
+  return response.data.data.sensors;
+};
+
+/**
+ * Fetch sensor details
+ */
+export const fetchSensorDetails = async (sensorId: number) => {
+  const params = withOrganizationId();
+  const response = await apiClient.get(`/sensors/${sensorId}`, { params });
+  return response.data.data.sensor;
+};
+
+/**
+ * Fetch devices
+ */
+export const fetchDevices = async () => {
+  const params = withOrganizationId();
+  const response = await apiClient.get('/devices', { params });
+  return response.data.data.devices;
+};
+
+/**
+ * Fetch device states
+ */
+export const fetchDeviceStates = async (deviceId: number) => {
+  const params = withOrganizationId();
+  const response = await apiClient.get(`/devices/${deviceId}`, { params });
+  return response.data.data.device.states;
+};
+
 const RuleEngineService = {
   getRules,
   getRuleDetails,
@@ -85,6 +135,11 @@ const RuleEngineService = {
   deleteRule,
   updateRuleNode,
   deleteRuleNode,
+  createRuleNode,
+  fetchSensors,
+  fetchSensorDetails,
+  fetchDevices,
+  fetchDeviceStates,
 };
 
 export default RuleEngineService; 

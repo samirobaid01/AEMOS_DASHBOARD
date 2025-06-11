@@ -1,8 +1,25 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
-import type { RuleChain, RuleEngineState, RuleChainCreatePayload, RuleChainUpdatePayload } from '../../types/ruleEngine';
 import type { RootState } from '../store';
+import type { RuleChain, RuleChainCreatePayload, RuleChainUpdatePayload } from '../../types/ruleEngine';
+import type { Sensor } from '../../types/sensor';
+import type { Device, DeviceState } from '../../types/device';
 import RuleEngineService from '../../services/ruleEngineService';
+
+// Define the state type here instead of importing it
+interface RuleEngineState {
+  rules: RuleChain[];
+  selectedRule: RuleChain | null;
+  loading: boolean;
+  error: string | null;
+  filters: {
+    search: string;
+  };
+  sensors: Sensor[];
+  devices: Device[];
+  deviceStates: DeviceState[];
+  sensorDetails: Sensor | null;
+}
 
 // Initial state
 const initialState: RuleEngineState = {
@@ -13,6 +30,10 @@ const initialState: RuleEngineState = {
   filters: {
     search: '',
   },
+  sensors: [],
+  devices: [],
+  deviceStates: [],
+  sensorDetails: null,
 };
 
 // Async thunks
@@ -80,14 +101,30 @@ export const deleteRule = createAsyncThunk(
   }
 );
 
+export const createRuleNode = createAsyncThunk(
+  'ruleEngine/createRuleNode',
+  async (payload: {
+    ruleChainId: number;
+    type: string;
+    name: string;
+    config: string;
+    nextNodeId: number | null;
+  }, { rejectWithValue }) => {
+    try {
+      return await RuleEngineService.createRuleNode(payload);
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to create rule node');
+    }
+  }
+);
+
 export const updateRuleNode = createAsyncThunk(
   'ruleEngine/updateRuleNode',
   async ({ nodeId, payload }: { 
     nodeId: number;
     payload: {
-      type: string;
+      name: string;
       config: string;
-      nextNodeId: number | null;
     }
   }, { rejectWithValue }) => {
     try {
@@ -106,6 +143,50 @@ export const deleteRuleNode = createAsyncThunk(
       return nodeId;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || 'Failed to delete rule node');
+    }
+  }
+);
+
+export const fetchSensors = createAsyncThunk(
+  'ruleEngine/fetchSensors',
+  async (_, { rejectWithValue }) => {
+    try {
+      return await RuleEngineService.fetchSensors();
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch sensors');
+    }
+  }
+);
+
+export const fetchSensorDetails = createAsyncThunk(
+  'ruleEngine/fetchSensorDetails',
+  async (sensorId: number, { rejectWithValue }) => {
+    try {
+      return await RuleEngineService.fetchSensorDetails(sensorId);
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch sensor details');
+    }
+  }
+);
+
+export const fetchDevices = createAsyncThunk(
+  'ruleEngine/fetchDevices',
+  async (_, { rejectWithValue }) => {
+    try {
+      return await RuleEngineService.fetchDevices();
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch devices');
+    }
+  }
+);
+
+export const fetchDeviceStates = createAsyncThunk(
+  'ruleEngine/fetchDeviceStates',
+  async (deviceId: number, { rejectWithValue }) => {
+    try {
+      return await RuleEngineService.fetchDeviceStates(deviceId);
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch device states');
     }
   }
 );
@@ -205,6 +286,22 @@ const ruleEngineSlice = createSlice({
       state.error = action.payload as string;
     });
 
+    // Create Rule Node
+    builder.addCase(createRuleNode.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+    });
+    builder.addCase(createRuleNode.fulfilled, (state, action) => {
+      state.loading = false;
+      if (state.selectedRule?.nodes) {
+        state.selectedRule.nodes.push(action.payload);
+      }
+    });
+    builder.addCase(createRuleNode.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload as string;
+    });
+
     // Update Rule Node
     builder.addCase(updateRuleNode.pending, (state) => {
       state.loading = true;
@@ -213,11 +310,9 @@ const ruleEngineSlice = createSlice({
     builder.addCase(updateRuleNode.fulfilled, (state, action) => {
       state.loading = false;
       if (state.selectedRule?.nodes) {
-        const nodeIndex = state.selectedRule.nodes.findIndex(
-          (node) => node.id === action.payload.id
-        );
-        if (nodeIndex !== -1) {
-          state.selectedRule.nodes[nodeIndex] = action.payload;
+        const index = state.selectedRule.nodes.findIndex(node => node.id === action.payload.id);
+        if (index !== -1) {
+          state.selectedRule.nodes[index] = action.payload;
         }
       }
     });
@@ -226,20 +321,66 @@ const ruleEngineSlice = createSlice({
       state.error = action.payload as string;
     });
 
-    // Delete Rule Node
-    builder.addCase(deleteRuleNode.pending, (state) => {
+    // Fetch Sensors
+    builder.addCase(fetchSensors.pending, (state) => {
+      console.log('fetchSensors: pending');
       state.loading = true;
       state.error = null;
     });
-    builder.addCase(deleteRuleNode.fulfilled, (state, action) => {
+    builder.addCase(fetchSensors.fulfilled, (state, action) => {
+      console.log('fetchSensors: fulfilled', action.payload);
       state.loading = false;
-      if (state.selectedRule?.nodes) {
-        state.selectedRule.nodes = state.selectedRule.nodes.filter(
-          (node) => node.id !== action.payload
-        );
-      }
+      state.sensors = action.payload;
     });
-    builder.addCase(deleteRuleNode.rejected, (state, action) => {
+    builder.addCase(fetchSensors.rejected, (state, action) => {
+      console.log('fetchSensors: rejected', action.payload);
+      state.loading = false;
+      state.error = action.payload as string;
+      state.sensors = []; // Initialize to empty array on error
+    });
+
+    // Fetch Devices
+    builder.addCase(fetchDevices.pending, (state) => {
+      console.log('fetchDevices: pending');
+      state.loading = true;
+      state.error = null;
+    });
+    builder.addCase(fetchDevices.fulfilled, (state, action) => {
+      console.log('fetchDevices: fulfilled', action.payload);
+      state.loading = false;
+      state.devices = action.payload;
+    });
+    builder.addCase(fetchDevices.rejected, (state, action) => {
+      console.log('fetchDevices: rejected', action.payload);
+      state.loading = false;
+      state.error = action.payload as string;
+      state.devices = []; // Initialize to empty array on error
+    });
+
+    // Fetch Device States
+    builder.addCase(fetchDeviceStates.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+    });
+    builder.addCase(fetchDeviceStates.fulfilled, (state, action) => {
+      state.loading = false;
+      state.deviceStates = action.payload;
+    });
+    builder.addCase(fetchDeviceStates.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload as string;
+    });
+
+    // Fetch Sensor Details
+    builder.addCase(fetchSensorDetails.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+    });
+    builder.addCase(fetchSensorDetails.fulfilled, (state, action) => {
+      state.loading = false;
+      state.sensorDetails = action.payload;
+    });
+    builder.addCase(fetchSensorDetails.rejected, (state, action) => {
       state.loading = false;
       state.error = action.payload as string;
     });
@@ -254,5 +395,9 @@ export const selectSelectedRule = (state: RootState) => state.ruleEngine.selecte
 export const selectRuleEngineLoading = (state: RootState) => state.ruleEngine.loading;
 export const selectRuleEngineError = (state: RootState) => state.ruleEngine.error;
 export const selectRuleEngineSearchFilter = (state: RootState) => state.ruleEngine.filters.search;
+export const selectSensors = (state: RootState) => state.ruleEngine.sensors;
+export const selectDevices = (state: RootState) => state.ruleEngine.devices;
+export const selectDeviceStates = (state: RootState) => state.ruleEngine.deviceStates;
+export const selectSensorDetails = (state: RootState) => state.ruleEngine.sensorDetails;
 
 export default ruleEngineSlice.reducer; 

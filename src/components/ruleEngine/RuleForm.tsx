@@ -11,6 +11,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import EditIcon from '@mui/icons-material/Edit';
 import type { RuleChain } from '../../types/ruleEngine';
+import type { Device, DeviceState } from '../../types/device';
+import type { Sensor } from '../../types/sensor';
 import NodeDialog from './NodeDialog';
 import ActionDialog from './ActionDialog';
 import type { ConditionData, GroupData } from './NodeDialog';
@@ -18,14 +20,24 @@ import { useTheme } from '../../context/ThemeContext';
 import { useThemeColors } from '../../hooks/useThemeColors';
 import { useTranslation } from 'react-i18next';
 import { ruleFormResolver } from '../../utils/validation/ruleFormValidation';
+import { toastService } from '../../services/toastService';
 
 interface RuleFormProps {
   initialData?: RuleChain;
   ruleChainId?: number;
   onSubmit: (data: any) => Promise<void>;
   onNodeDelete: (nodeId: number) => Promise<void>;
+  onNodeCreate: (data: any) => Promise<void>;
   isLoading?: boolean;
   showNodeSection?: boolean;
+  sensors: Sensor[];
+  devices: Device[];
+  deviceStates: DeviceState[];
+  sensorDetails: Sensor | null;
+  onFetchSensorDetails: (sensorId: number) => Promise<void>;
+  onFetchDeviceStates: (deviceId: number) => Promise<void>;
+  organizationId: string;
+  jwtToken: string;
 }
 
 interface FilterConfig {
@@ -77,8 +89,17 @@ const RuleForm: React.FC<RuleFormProps> = ({
   ruleChainId,
   onSubmit,
   onNodeDelete,
+  onNodeCreate,
   isLoading = false,
   showNodeSection = true,
+  sensors,
+  devices,
+  deviceStates,
+  sensorDetails,
+  onFetchSensorDetails,
+  onFetchDeviceStates,
+  organizationId,
+  jwtToken,
 }) => {
   const { darkMode } = useTheme();
   const colors = useThemeColors();
@@ -153,9 +174,17 @@ const RuleForm: React.FC<RuleFormProps> = ({
     return undefined;
   };
 
-  const handleNodeSave = (data: { expressions: Array<ConditionData | GroupData>, name: string, id?: number }) => {
+  const handleNodeSave = async (data: any) => {
     console.log('Saving node data:', data);
-    if (!data.expressions.length) {
+    
+    // If it's a new node being created
+    if (data.ruleChainId) {
+      await onNodeCreate(data);
+      return;
+    }
+
+    // For existing nodes or other cases
+    if (!data?.expressions?.length) {
       console.log('No expressions to save');
       return;
     }
@@ -164,7 +193,7 @@ const RuleForm: React.FC<RuleFormProps> = ({
     if (data.expressions.length === 1 && 
         'type' in data.expressions[0] && 
         data.expressions[0].type === 'AND' && 
-        data.expressions[0].expressions.length === 0) {
+        !data.expressions[0].expressions?.length) {
       console.log('Empty AND group, not saving');
       return;
     }
@@ -172,18 +201,19 @@ const RuleForm: React.FC<RuleFormProps> = ({
     const expression = data.expressions[0];
     let nodeData: NodeFormData;
 
-    if ('sourceType' in expression) {
-      // It's a ConditionData
+    if ('expressions' in expression && expression.expressions[0] && 'sourceType' in expression.expressions[0]) {
+      // It's a ConditionData wrapped in an AND group
+      const conditionData = expression.expressions[0];
       nodeData = {
         id: data.id,
         name: data.name,
         type: 'filter',
         config: {
-          sourceType: expression.sourceType === 'sensor' ? 'sensor' : undefined,
-          UUID: expression.UUID,
-          key: expression.key,
-          operator: expression.operator as '>' | '<' | '=' | '>=',
-          value: typeof expression.value === 'number' ? expression.value : undefined
+          sourceType: conditionData.sourceType === 'sensor' ? 'sensor' : undefined,
+          UUID: conditionData.UUID,
+          key: conditionData.key,
+          operator: conditionData.operator as '>' | '<' | '=' | '>=',
+          value: typeof conditionData.value === 'number' ? conditionData.value : undefined
         }
       };
     } else {
@@ -217,6 +247,7 @@ const RuleForm: React.FC<RuleFormProps> = ({
   };
 
   const handleNodeDelete = async (nodeId: number | undefined) => {
+    console.log('Attempting to delete node:', nodeId);
     if (!nodeId) {
       console.error('Cannot delete node: no node ID provided');
       return;
@@ -482,6 +513,10 @@ const RuleForm: React.FC<RuleFormProps> = ({
                 ruleChainId={ruleChainId}
                 mode={currentNodeIndex === null ? 'add' : 'edit'}
                 initialExpression={getInitialExpression(currentNodeIndex)}
+                sensors={sensors}
+                devices={devices}
+                sensorDetails={sensorDetails}
+                onFetchSensorDetails={onFetchSensorDetails}
               />
             )}
 
@@ -489,9 +524,12 @@ const RuleForm: React.FC<RuleFormProps> = ({
               open={isActionDialogOpen}
               onClose={handleActionDialogClose}
               onSave={handleActionSave}
-              ruleChainId={ruleChainId}
+              ruleChainId={ruleChainId || 0}
               mode={currentNodeIndex !== null ? 'edit' : 'add'}
               initialData={currentNodeIndex !== null && nodes[currentNodeIndex] ? getActionNodeData(nodes[currentNodeIndex]) : undefined}
+              devices={devices}
+              deviceStates={deviceStates}
+              onFetchDeviceStates={onFetchDeviceStates}
             />
           </>
         )}
