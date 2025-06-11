@@ -7,10 +7,8 @@ import {
   selectRuleEngineLoading, 
   selectRuleEngineError,
   deleteRule,
-  updateRuleNode
+  updateRuleNode,
 } from '../../state/slices/ruleEngine.slice';
-import { selectAuthToken } from '../../state/slices/auth.slice';
-import { selectSelectedOrganizationId } from '../../state/slices/auth.slice';
 import { useRuleEnginePermissions } from '../../hooks/useRuleEnginePermissions';
 import type { AppDispatch } from '../../state/store';
 import { RuleDetails as RuleDetailsComponent } from '../../components/ruleEngine';
@@ -20,15 +18,13 @@ import { useTranslation } from 'react-i18next';
 const RuleDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const dispatch = useDispatch<AppDispatch>();
-  const navigate = useNavigate();
   const { t } = useTranslation();
   const { canView } = useRuleEnginePermissions();
+  const navigate = useNavigate();
 
   const selectedRule = useSelector(selectSelectedRule);
   const loading = useSelector(selectRuleEngineLoading);
   const error = useSelector(selectRuleEngineError);
-  const token = useSelector(selectAuthToken);
-  const organizationId = useSelector(selectSelectedOrganizationId);
 
   useEffect(() => {
     if (id) {
@@ -59,9 +55,11 @@ const RuleDetails: React.FC = () => {
       await dispatch(updateRuleNode({
         nodeId,
         payload: {
-          type: currentNode.type,
-          config: currentNode.config,
-          nextNodeId
+          name: currentNode.name || '',
+          config: JSON.stringify({
+            ...JSON.parse(currentNode.config),
+            nextNodeId
+          })
         }
       })).unwrap();
 
