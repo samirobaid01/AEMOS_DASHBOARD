@@ -75,6 +75,37 @@ interface NodeDialogProps {
 
 const OPERATORS = ["==", "!=", ">", "<", ">=", "<="];
 
+// Function to optimize the structure by removing unnecessary single-expression groups
+const optimizeStructure = (data: GroupData | ConditionData, isRoot: boolean = true): any => {
+  console.log('Optimizing structure:', data, 'isRoot:', isRoot);
+  
+  // If it's a condition, return it as-is
+  if ('sourceType' in data) {
+    console.log('Found condition, returning as-is');
+    return data;
+  }
+  
+  // Only flatten single-expression groups at the ROOT level
+  if (isRoot && data.expressions.length === 1) {
+    console.log('Found single-expression group at root level, flattening');
+    // Recursively optimize the single expression (but it's no longer root)
+    return optimizeStructure(data.expressions[0], false);
+  }
+  
+  // For nested groups OR multiple expressions, keep the group but optimize nested expressions
+  if (data.expressions.length >= 1) {
+    console.log('Found group (nested or multi-expression), preserving structure and optimizing nested expressions');
+    return {
+      type: data.type,
+      expressions: data.expressions.map(expr => optimizeStructure(expr, false))
+    };
+  }
+  
+  // If no expressions, return null (this shouldn't happen in normal usage)
+  console.log('Found empty group, returning null');
+  return null;
+};
+
 const ConditionBuilder: React.FC<{
   condition: ConditionData;
   onChange: (newCondition: ConditionData) => void;
@@ -630,10 +661,13 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
   const handleSave = () => {
     if (!nodeName.trim()) return;
 
+    // Optimize the structure before saving
+    const optimizedConfig = optimizeStructure(rootGroup);
+
     if (mode === 'edit' && initialExpression?.id && onUpdate) {
       onUpdate(initialExpression.id, {
         name: nodeName.trim(),
-        config: JSON.stringify(rootGroup),
+        config: JSON.stringify(optimizedConfig),
         type: "filter"  // Preserve the node type
       });
     } else if (onSave) {
@@ -641,7 +675,7 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
         ruleChainId,
         type: "filter",
         name: nodeName.trim(),
-        config: JSON.stringify(rootGroup),
+        config: JSON.stringify(optimizedConfig),
         nextNodeId: null,
       });
     }
@@ -697,7 +731,7 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
               Preview:
             </Typography>
             <pre style={{ margin: 0, overflow: 'auto' }}>
-              {JSON.stringify(rootGroup, null, 2)}
+              {JSON.stringify(optimizeStructure(rootGroup), null, 2)}
             </pre>
           </Box>
         </Box>

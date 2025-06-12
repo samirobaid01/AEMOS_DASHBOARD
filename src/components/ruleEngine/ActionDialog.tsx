@@ -57,6 +57,7 @@ const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
   const [jsonOutput, setJsonOutput] = useState<string>('');
   const [nodeName, setNodeName] = useState<string>('');
   const [allowedValues, setAllowedValues] = useState<string[]>([]);
+  const [isLoadingDeviceStates, setIsLoadingDeviceStates] = useState<boolean>(false);
 
   useEffect(() => {
     if (open) {
@@ -67,6 +68,7 @@ const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
         setStateValue('');
         setJsonOutput('');
         setNodeName('');
+        setIsLoadingDeviceStates(false);
       } else if (mode === 'edit' && initialData) {
         try {
           if (initialData.type === 'action' && initialData.config.command) {
@@ -88,13 +90,24 @@ const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
                 }
               }
             }, null, 2));
+            
+            // Fetch device states for the initial device in edit mode
+            if (command.deviceUuid) {
+              const selectedDeviceObj = devices.find(d => d.uuid === command.deviceUuid);
+              if (selectedDeviceObj?.id) {
+                setIsLoadingDeviceStates(true);
+                onFetchDeviceStates(selectedDeviceObj.id).finally(() => {
+                  setIsLoadingDeviceStates(false);
+                });
+              }
+            }
           }
         } catch (error) {
           console.error('Error parsing initialData:', error);
         }
       }
     }
-  }, [open, mode, initialData]);
+  }, [open, mode, initialData, devices, onFetchDeviceStates]);
 
   const handleDeviceChange = async (deviceUuid: string) => {
     console.log('Device changed to:', deviceUuid);
@@ -108,8 +121,16 @@ const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
     console.log('Selected device object:', selectedDeviceObj);
     
     if (selectedDeviceObj?.id) {
-      console.log('Fetching device states for device ID:', selectedDeviceObj.id);
-      await onFetchDeviceStates(selectedDeviceObj.id);
+      try {
+        console.log('Fetching device states for device ID:', selectedDeviceObj.id);
+        setIsLoadingDeviceStates(true);
+        await onFetchDeviceStates(selectedDeviceObj.id);
+        console.log('Device states fetched successfully');
+      } catch (error) {
+        console.error('Error fetching device states:', error);
+      } finally {
+        setIsLoadingDeviceStates(false);
+      }
     }
   };
 
@@ -180,29 +201,46 @@ const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
       selectedDevice,
       devicesLength: devices.length,
       deviceStatesLength: deviceStates.length,
-      deviceStates: deviceStates
+      isLoadingDeviceStates
     });
     
-    if (!selectedDevice || !devices.length || !deviceStates.length) {
-      console.log('Early return: missing data');
+    if (!selectedDevice) {
+      console.log('No device selected');
+      return [];
+    }
+    
+    if (!devices.length) {
+      console.log('No devices available');
+      return [];
+    }
+    
+    if (!deviceStates.length) {
+      console.log('No device states available in store');
       return [];
     }
     
     // Find the selected device object to get its ID
     const selectedDeviceObj = devices.find(d => d.uuid === selectedDevice);
     if (!selectedDeviceObj) {
-      console.log('Selected device object not found');
+      console.log('Selected device object not found for UUID:', selectedDevice);
       return [];
     }
     
     console.log('Selected device ID:', selectedDeviceObj.id);
     
     // Filter device states to only show states for the selected device
-    const filtered = deviceStates.filter(state => state.deviceId === selectedDeviceObj.id);
-    console.log('Filtered device states:', filtered);
+    const filtered = deviceStates.filter(state => {
+      const matches = state.deviceId === selectedDeviceObj.id;
+      if (!matches) {
+        console.log(`State ${state.stateName} (deviceId: ${state.deviceId}) does not match selected device ID: ${selectedDeviceObj.id}`);
+      }
+      return matches;
+    });
+    
+    console.log(`Filtered ${filtered.length} device states for device ${selectedDeviceObj.name}:`, filtered);
     
     return filtered;
-  }, [selectedDevice, devices, deviceStates]);
+  }, [selectedDevice, devices, deviceStates, isLoadingDeviceStates]);
 
   return (
     <Dialog
@@ -263,12 +301,23 @@ const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
                     value={stateName}
                     onChange={(e) => handleStateNameChange(e.target.value)}
                     label="Device State"
+                    disabled={isLoadingDeviceStates}
                   >
-                    {filteredDeviceStates.map((state) => (
-                      <MenuItem key={state.id} value={state.stateName}>
-                        {state.stateName}
+                    {isLoadingDeviceStates ? (
+                      <MenuItem disabled>
+                        Loading device states...
                       </MenuItem>
-                    ))}
+                    ) : filteredDeviceStates.length === 0 ? (
+                      <MenuItem disabled>
+                        No device states available
+                      </MenuItem>
+                    ) : (
+                      filteredDeviceStates.map((state) => (
+                        <MenuItem key={state.id} value={state.stateName}>
+                          {state.stateName}
+                        </MenuItem>
+                      ))
+                    )}
                   </Select>
                 </FormControl>
               )}
@@ -327,10 +376,13 @@ const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
     </Dialog>
   );
 }, (prevProps, nextProps) => {
+  // Improved React.memo comparison to include device states
   return (
     prevProps.open === nextProps.open &&
     prevProps.mode === nextProps.mode &&
     prevProps.ruleChainId === nextProps.ruleChainId &&
+    prevProps.devices.length === nextProps.devices.length &&
+    prevProps.deviceStates.length === nextProps.deviceStates.length &&
     JSON.stringify(prevProps.initialData) === JSON.stringify(nextProps.initialData)
   );
 });

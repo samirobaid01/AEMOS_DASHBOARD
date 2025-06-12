@@ -123,8 +123,20 @@ export const fetchDevices = async () => {
  */
 export const fetchDeviceStates = async (deviceId: number) => {
   const params = withOrganizationId();
-  const response = await apiClient.get(`/devices/${deviceId}`, { params });
-  return response.data.data.device.states;
+  console.log('RuleEngineService: Fetching device states for device:', deviceId, 'with params:', params);
+  const response = await apiClient.get(`/device-states/device/${deviceId}`, { params });
+  console.log('RuleEngineService: Device states response:', response.data);
+  
+  // Parse allowedValues from JSON string to array if needed and ensure proper format
+  const states = response.data.data?.map((state: any) => ({
+    ...state,
+    allowedValues: typeof state.allowedValues === 'string' 
+      ? state.allowedValues 
+      : JSON.stringify(state.allowedValues || [])
+  })) || [];
+  
+  console.log('RuleEngineService: Processed device states:', states);
+  return states;
 };
 
 const RuleEngineService = {
