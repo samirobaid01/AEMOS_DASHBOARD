@@ -97,6 +97,7 @@ const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
   }, [open, mode, initialData]);
 
   const handleDeviceChange = async (deviceUuid: string) => {
+    console.log('Device changed to:', deviceUuid);
     setSelectedDevice(deviceUuid);
     setStateName('');
     setStateValue('');
@@ -104,7 +105,10 @@ const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
     
     // Find the device ID from the UUID
     const selectedDeviceObj = devices.find(d => d.uuid === deviceUuid);
+    console.log('Selected device object:', selectedDeviceObj);
+    
     if (selectedDeviceObj?.id) {
+      console.log('Fetching device states for device ID:', selectedDeviceObj.id);
       await onFetchDeviceStates(selectedDeviceObj.id);
     }
   };
@@ -113,8 +117,8 @@ const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
     setStateName(newStateName);
     setStateValue(''); // Reset state value when state name changes
     
-    // Add null check before finding state
-    const selectedState = deviceStates?.find(state => state.stateName === newStateName);
+    // Use filtered device states instead of all device states
+    const selectedState = filteredDeviceStates?.find(state => state.stateName === newStateName);
     if (selectedState) {
       try {
         const parsedValues = JSON.parse(selectedState.allowedValues);
@@ -123,6 +127,8 @@ const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
         console.error('Error parsing allowed values:', error);
         setAllowedValues([]);
       }
+    } else {
+      setAllowedValues([]);
     }
   };
 
@@ -167,6 +173,36 @@ const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
       console.error('Error saving action node:', error);
     }
   };
+
+  // Add a computed property to get filtered device states for the selected device
+  const filteredDeviceStates = useMemo(() => {
+    console.log('Filtering device states...', {
+      selectedDevice,
+      devicesLength: devices.length,
+      deviceStatesLength: deviceStates.length,
+      deviceStates: deviceStates
+    });
+    
+    if (!selectedDevice || !devices.length || !deviceStates.length) {
+      console.log('Early return: missing data');
+      return [];
+    }
+    
+    // Find the selected device object to get its ID
+    const selectedDeviceObj = devices.find(d => d.uuid === selectedDevice);
+    if (!selectedDeviceObj) {
+      console.log('Selected device object not found');
+      return [];
+    }
+    
+    console.log('Selected device ID:', selectedDeviceObj.id);
+    
+    // Filter device states to only show states for the selected device
+    const filtered = deviceStates.filter(state => state.deviceId === selectedDeviceObj.id);
+    console.log('Filtered device states:', filtered);
+    
+    return filtered;
+  }, [selectedDevice, devices, deviceStates]);
 
   return (
     <Dialog
@@ -228,7 +264,7 @@ const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
                     onChange={(e) => handleStateNameChange(e.target.value)}
                     label="Device State"
                   >
-                    {(deviceStates || []).map((state) => (
+                    {filteredDeviceStates.map((state) => (
                       <MenuItem key={state.id} value={state.stateName}>
                         {state.stateName}
                       </MenuItem>

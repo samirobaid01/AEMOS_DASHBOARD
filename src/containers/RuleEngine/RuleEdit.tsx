@@ -110,6 +110,7 @@ const RuleEdit: React.FC = () => {
   };
 
   const handleNodeCreate = async (data: any) => {
+    console.log("called handleNodeCreate from container");
     try {
       if (!id) return;
       
@@ -169,6 +170,7 @@ const RuleEdit: React.FC = () => {
 
   const handleFetchSensorDetails = async (sensorId: number) => {
     try {
+      console.log("called fetch sensor detail from container");
       await dispatch(fetchSensorDetails(sensorId)).unwrap();
     } catch (error) {
       console.error('Error fetching sensor details:', error);
@@ -197,8 +199,6 @@ const RuleEdit: React.FC = () => {
         sensorDetails={sensorDetails}
         onFetchSensorDetails={handleFetchSensorDetails}
         onFetchDeviceStates={handleFetchDeviceStates}
-        organizationId={organizationId?.toString() || ''}
-        jwtToken={token || ''}
       />
       <NodeDialog
         open={false} // Control this with state if needed

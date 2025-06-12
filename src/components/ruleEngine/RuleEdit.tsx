@@ -20,7 +20,7 @@ interface RuleEditProps {
   sensors: Sensor[];
   devices: Device[];
   deviceStates: DeviceState[];
-  sensorDetails: Sensor | null;
+  sensorDetails: { [uuid: string]: Sensor };
   onFetchSensorDetails: (sensorId: number) => Promise<void>;
   onFetchDeviceStates: (deviceId: number) => Promise<void>;
 }

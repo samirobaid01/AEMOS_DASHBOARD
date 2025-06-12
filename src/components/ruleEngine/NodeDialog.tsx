@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -14,7 +14,6 @@ import {
   Typography,
   IconButton,
   Stack,
-  Divider,
 } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import AddIcon from '@mui/icons-material/Add';
@@ -70,7 +69,7 @@ interface NodeDialogProps {
   };
   sensors: Sensor[];
   devices: Device[];
-  sensorDetails: Sensor | null;
+  sensorDetails: { [uuid: string]: Sensor };
   onFetchSensorDetails: (sensorId: number) => Promise<void>;
 }
 
@@ -82,29 +81,39 @@ const ConditionBuilder: React.FC<{
   onDelete?: () => void;
   sensors: Sensor[];
   devices: Device[];
-  sensorDetails: Sensor | null;
+  sensorDetails: { [uuid: string]: Sensor };
   onFetchSensorDetails: (sensorId: number) => Promise<void>;
 }> = ({ condition, onChange, onDelete, sensors, devices, sensorDetails, onFetchSensorDetails }) => {
   const { t } = useTranslation();
   const [isLoadingSensorDetails, setIsLoadingSensorDetails] = useState(false);
+  const lastFetchTime = useRef<number>(0);
 
-  // Load sensor details when UUID changes
+  // Load sensor details when UUID changes or when sensors/devices update
   useEffect(() => {
+    console.log("I am called on changing the value in first dropdown");
     const loadSensorDetails = async () => {
       if (condition.sourceType === 'sensor' && condition.UUID) {
         const sensor = sensors.find(s => s.uuid === condition.UUID);
-        if (sensor && (!sensorDetails || sensorDetails.id !== sensor.id)) {
-          setIsLoadingSensorDetails(true);
-          try {
-            await onFetchSensorDetails(sensor.id);
-          } finally {
-            setIsLoadingSensorDetails(false);
+        if (sensor && !sensorDetails[condition.UUID]) {
+          const now = Date.now();
+          // Only fetch if more than 300ms has passed since last fetch
+          if (now - lastFetchTime.current > 300) {
+            setIsLoadingSensorDetails(true);
+            try {
+              lastFetchTime.current = now;
+              await onFetchSensorDetails(sensor.id);
+            } catch (error) {
+              console.error('Error fetching sensor details:', error);
+            } finally {
+              setIsLoadingSensorDetails(false);
+            }
           }
         }
       }
     };
+
     loadSensorDetails();
-  }, [condition.UUID, condition.sourceType, sensors, onFetchSensorDetails, sensorDetails]);
+  }, [condition.UUID, condition.sourceType, sensors, devices, sensorDetails, onFetchSensorDetails]);
 
   const handleSourceTypeChange = (newSourceType: 'sensor' | 'device') => {
     const newUUID = newSourceType === 'sensor' ? sensors[0]?.uuid : devices[0]?.uuid;
@@ -126,10 +135,10 @@ const ConditionBuilder: React.FC<{
 
   const getAvailableKeys = () => {
     if (condition.sourceType === 'sensor') {
-      if (isLoadingSensorDetails || !sensorDetails) {
+      if (isLoadingSensorDetails || !sensorDetails[condition.UUID]) {
         return [];
       }
-      return sensorDetails.TelemetryData?.map(td => ({
+      return sensorDetails[condition.UUID].TelemetryData?.map(td => ({
         value: td.variableName,
         label: td.variableName
       })) || [];
@@ -243,7 +252,7 @@ const ExpressionGroup: React.FC<{
   onDelete?: () => void;
   sensors: Sensor[];
   devices: Device[];
-  sensorDetails: Sensor | null;
+  sensorDetails: { [uuid: string]: Sensor };
   onFetchSensorDetails: (sensorId: number) => Promise<void>;
 }> = ({ group, onChange, onDelete, sensors, devices, sensorDetails, onFetchSensorDetails }) => {
   const handleTypeChange = (newType: 'AND' | 'OR') => {
@@ -531,18 +540,25 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
     const loadSensorDetails = async () => {
       if (!rootGroup?.expressions?.length) return;
 
-      // Get unique sensor UUIDs
+      // Get unique sensor UUIDs that need details loaded
       const sensorUUIDs = new Set<string>();
-      rootGroup.expressions.forEach(expr => {
-        if ('sourceType' in expr && expr.sourceType === 'sensor' && expr.UUID) {
-          sensorUUIDs.add(expr.UUID);
-        }
-      });
+      
+      const collectSensorUUIDs = (expressions: Array<ConditionData | GroupData>) => {
+        expressions.forEach(expr => {
+          if ('sourceType' in expr && expr.sourceType === 'sensor' && expr.UUID && !sensorDetails[expr.UUID]) {
+            sensorUUIDs.add(expr.UUID);
+          } else if ('expressions' in expr) {
+            collectSensorUUIDs(expr.expressions);
+          }
+        });
+      };
+      
+      collectSensorUUIDs(rootGroup.expressions);
 
       // Load details for each unique sensor
       for (const UUID of sensorUUIDs) {
         const sensor = sensors.find(s => s.uuid === UUID);
-        if (sensor && !sensorDetails?.id) {
+        if (sensor) {
           await onFetchSensorDetails(sensor.id);
         }
       }

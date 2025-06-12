@@ -47,5 +47,5 @@ export interface RuleEngineState {
   sensors: Sensor[];
   devices: Device[];
   deviceStates: DeviceState[];
-  sensorDetails: Sensor | null;
+  sensorDetails: { [uuid: string]: Sensor };
 } 

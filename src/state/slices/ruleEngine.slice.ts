@@ -18,7 +18,7 @@ interface RuleEngineState {
   sensors: Sensor[];
   devices: Device[];
   deviceStates: DeviceState[];
-  sensorDetails: Sensor | null;
+  sensorDetails: { [uuid: string]: Sensor };
 }
 
 // Initial state
@@ -33,7 +33,7 @@ const initialState: RuleEngineState = {
   sensors: [],
   devices: [],
   deviceStates: [],
-  sensorDetails: null,
+  sensorDetails: {},
 };
 
 // Async thunks
@@ -161,9 +161,16 @@ export const fetchSensors = createAsyncThunk(
 
 export const fetchSensorDetails = createAsyncThunk(
   'ruleEngine/fetchSensorDetails',
-  async (sensorId: number, { rejectWithValue }) => {
+  async (sensorId: number, { getState, rejectWithValue }) => {
     try {
-      return await RuleEngineService.fetchSensorDetails(sensorId);
+      const state = getState() as RootState;
+      const sensor = state.ruleEngine.sensors.find(s => s.id === sensorId);
+      const sensorDetails = await RuleEngineService.fetchSensorDetails(sensorId);
+      
+      return {
+        uuid: sensor?.uuid || '',
+        sensorDetails
+      };
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || 'Failed to fetch sensor details');
     }
@@ -379,7 +386,10 @@ const ruleEngineSlice = createSlice({
     });
     builder.addCase(fetchSensorDetails.fulfilled, (state, action) => {
       state.loading = false;
-      state.sensorDetails = action.payload;
+      const { uuid, sensorDetails } = action.payload;
+      if (uuid) {
+        state.sensorDetails[uuid] = sensorDetails;
+      }
     });
     builder.addCase(fetchSensorDetails.rejected, (state, action) => {
       state.loading = false;

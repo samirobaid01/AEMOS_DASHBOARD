@@ -32,7 +32,7 @@ interface RuleFormProps {
   sensors: Sensor[];
   devices: Device[];
   deviceStates: DeviceState[];
-  sensorDetails: Sensor | null;
+  sensorDetails: { [uuid: string]: Sensor };
   onFetchSensorDetails: (sensorId: number) => Promise<void>;
   onFetchDeviceStates: (deviceId: number) => Promise<void>;
 }
@@ -345,28 +345,51 @@ const RuleForm: React.FC<RuleFormProps> = ({
     return undefined;
   };
 
-  const handleActionSave = (actionData: any) => {
+  const handleActionSave = async (actionData: any) => {
     console.log('Saving action data:', actionData);
-    const newNode: NodeFormData = {
-      type: 'action',
-      config: {
-        type: 'DEVICE_COMMAND',
-        command: actionData.config.command
-      }
-    };
     
-    if (currentNodeIndex !== null) {
-      // Edit mode - update existing node
-      setNodes(prev => {
-        const newNodes = [...prev];
-        newNodes[currentNodeIndex] = newNode;
-        return newNodes;
-      });
-    } else {
-      // Add mode - add new node
-      setNodes(prev => [...prev, newNode]);
+    try {
+      if (currentNodeIndex !== null) {
+        // Edit mode - update existing node via API
+        const existingNode = nodes[currentNodeIndex];
+        if (existingNode?.id && onNodeUpdate) {
+          await onNodeUpdate(existingNode.id, {
+            name: actionData.name || '',
+            config: actionData.config
+          });
+          
+          // Update local state after successful API call
+          setNodes(prev => {
+            const newNodes = [...prev];
+            newNodes[currentNodeIndex] = {
+              ...existingNode,
+              name: actionData.name || '',
+              config: JSON.parse(actionData.config)
+            };
+            return newNodes;
+          });
+        }
+      } else {
+        // Add mode - create new node via API
+        console.log("creating new node via API");
+        if (onNodeCreate) {
+          await onNodeCreate(actionData);
+          
+          // Add to local state after successful API call
+          const newNode: NodeFormData = {
+            type: 'action',
+            name: actionData.name || '',
+            config: JSON.parse(actionData.config)
+          };
+          setNodes(prev => [...prev, newNode]);
+        }
+      }
+      
+      handleActionDialogClose();
+    } catch (error) {
+      console.error('Error saving action node:', error);
+      // Keep dialog open on error so user can retry
     }
-    handleActionDialogClose();
   };
 
   const handleMainFormSubmit = async (data: any) => {

@@ -18,7 +18,7 @@ import {
 } from '../../state/slices/ruleEngine.slice';
 import { useRuleEnginePermissions } from '../../hooks/useRuleEnginePermissions';
 import type { AppDispatch } from '../../state/store';
-import type { RuleChainCreatePayload } from '../../types/ruleEngine';
+import type { RuleChainCreatePayload, RuleChainUpdatePayload } from '../../types/ruleEngine';
 import { selectSelectedOrganizationId } from '../../state/slices/auth.slice';
 import { RuleCreate as RuleCreateComponent } from '../../components/ruleEngine';
 import { toastService } from '../../services/toastService';
@@ -56,15 +56,27 @@ const RuleCreate: React.FC = () => {
     loadData();
   }, [dispatch, t]);
 
-  const handleSubmit = async (data: RuleChainCreatePayload) => {
+  const handleSubmit = async (data: RuleChainCreatePayload | RuleChainUpdatePayload) => {
     try {
+      // Ensure we have required fields for creation
+      if (!data.name || !data.description) {
+        toastService.error('Name and description are required');
+        return;
+      }
+
+      // Create the payload ensuring all required fields are present
+      const createData = {
+        name: data.name,
+        description: data.description
+      } as RuleChainCreatePayload;
+
       if(selectedOrganizationId){
-        data.organizationId = selectedOrganizationId;
+        (createData as any).organizationId = selectedOrganizationId;
       }else{
         toastService.error('Please select an organization');
         return;
       }
-      const result = await dispatch(createRule(data)).unwrap();
+      const result = await dispatch(createRule(createData)).unwrap();
       setCreatedRuleId(result.id);
       toastService.success('Rule chain created successfully');
     } catch (error) {
@@ -126,7 +138,9 @@ const RuleCreate: React.FC = () => {
 
   const handleFetchSensorDetails = async (sensorId: number) => {
     try {
+      console.log("called fetch sensor detail from RuleCreate container");
       await dispatch(fetchSensorDetails(sensorId)).unwrap();
+      console.log("now sensor details is", sensorDetails);
     } catch (error) {
       console.error('Error fetching sensor details:', error);
       toastService.error(t('ruleEngine.fetchSensorDetailsError'));

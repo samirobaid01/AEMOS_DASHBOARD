@@ -3,13 +3,13 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 import { useThemeColors } from '../../hooks/useThemeColors';
 import RuleForm from './RuleForm';
-import type { RuleChainCreatePayload } from '../../types/ruleEngine';
+import type { RuleChainCreatePayload, RuleChainUpdatePayload } from '../../types/ruleEngine';
 import { Button, Box } from '@mui/material';
 import type { Sensor } from '../../types/sensor';
 import type { Device, DeviceState } from '../../types/device';
 
 interface RuleCreateProps {
-  onSubmit: (data: RuleChainCreatePayload) => Promise<void>;
+  onSubmit: (data: RuleChainCreatePayload | RuleChainUpdatePayload) => Promise<void>;
   onFinish: () => void;
   isLoading?: boolean;
   ruleChainId: number | null;
@@ -20,7 +20,7 @@ interface RuleCreateProps {
   sensors: Sensor[];
   devices: Device[];
   deviceStates: DeviceState[];
-  sensorDetails: Sensor | null;
+  sensorDetails: { [uuid: string]: Sensor };
   onFetchSensorDetails: (sensorId: number) => Promise<void>;
   onFetchDeviceStates: (deviceId: number) => Promise<void>;
 }
