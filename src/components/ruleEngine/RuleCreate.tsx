@@ -3,14 +3,44 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 import { useThemeColors } from '../../hooks/useThemeColors';
 import RuleForm from './RuleForm';
-import type { RuleChainCreatePayload } from '../../types/ruleEngine';
+import type { RuleChainCreatePayload, RuleChainUpdatePayload } from '../../types/ruleEngine';
+import { Button, Box } from '@mui/material';
+import type { Sensor } from '../../types/sensor';
+import type { Device, DeviceState } from '../../types/device';
 
 interface RuleCreateProps {
-  onSubmit: (data: RuleChainCreatePayload) => Promise<void>;
+  onSubmit: (data: RuleChainCreatePayload | RuleChainUpdatePayload) => Promise<void>;
+  onFinish: () => void;
   isLoading?: boolean;
+  ruleChainId: number | null;
+  showNodeSection: boolean;
+  onNodeDelete: (nodeId: number) => Promise<void>;
+  onNodeCreate: (data: any) => Promise<void>;
+  onNodeUpdate: (nodeId: number, data: any) => Promise<void>;
+  sensors: Sensor[];
+  devices: Device[];
+  deviceStates: DeviceState[];
+  sensorDetails: { [uuid: string]: Sensor };
+  onFetchSensorDetails: (sensorId: number) => Promise<void>;
+  onFetchDeviceStates: (deviceId: number) => Promise<void>;
 }
 
-const RuleCreate: React.FC<RuleCreateProps> = ({ onSubmit, isLoading }) => {
+const RuleCreate: React.FC<RuleCreateProps> = ({ 
+  onSubmit, 
+  onFinish,
+  isLoading, 
+  ruleChainId,
+  showNodeSection,
+  onNodeDelete,
+  onNodeCreate,
+  onNodeUpdate,
+  sensors,
+  devices,
+  deviceStates,
+  sensorDetails,
+  onFetchSensorDetails,
+  onFetchDeviceStates
+}) => {
   const { t } = useTranslation();
   const { darkMode } = useTheme();
   const colors = useThemeColors();
@@ -27,9 +57,35 @@ const RuleCreate: React.FC<RuleCreateProps> = ({ onSubmit, isLoading }) => {
         marginBottom: '1.5rem',
         color: darkMode ? colors.textPrimary : '#111827'
       }}>
-        {t('ruleEngine.createRuleChain')}
+        {showNodeSection ? t('ruleEngine.addNodes') : t('ruleEngine.createRuleChain')}
       </h1>
-      <RuleForm onSubmit={onSubmit} isLoading={isLoading} />
+      <RuleForm 
+        onSubmit={onSubmit} 
+        isLoading={isLoading} 
+        ruleChainId={ruleChainId || undefined}
+        showNodeSection={showNodeSection}
+        onNodeDelete={onNodeDelete}
+        onNodeCreate={onNodeCreate}
+        onNodeUpdate={onNodeUpdate}
+        sensors={sensors}
+        devices={devices}
+        deviceStates={deviceStates}
+        sensorDetails={sensorDetails}
+        onFetchSensorDetails={onFetchSensorDetails}
+        onFetchDeviceStates={onFetchDeviceStates}
+      />
+      {showNodeSection && (
+        <Box mt={2}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={onFinish}
+            fullWidth
+          >
+            {t('ruleEngine.finish')}
+          </Button>
+        </Box>
+      )}
     </div>
   );
 };

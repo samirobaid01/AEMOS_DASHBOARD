@@ -4,6 +4,8 @@ import { useTheme } from '../../context/ThemeContext';
 import { useThemeColors } from '../../hooks/useThemeColors';
 import RuleForm from './RuleForm';
 import type { RuleChain, RuleChainUpdatePayload } from '../../types/ruleEngine';
+import type { Sensor } from '../../types/sensor';
+import type { Device, DeviceState } from '../../types/device';
 
 interface RuleEditProps {
   rule: RuleChain | null;
@@ -11,6 +13,16 @@ interface RuleEditProps {
   error?: string | null;
   onSubmit: (data: RuleChainUpdatePayload) => Promise<void>;
   windowWidth?: number;
+  ruleChainId: number;
+  onNodeDelete: (nodeId: number) => Promise<void>;
+  onNodeCreate: (data: any) => Promise<void>;
+  onNodeUpdate: (nodeId: number, data: any) => Promise<void>;
+  sensors: Sensor[];
+  devices: Device[];
+  deviceStates: DeviceState[];
+  sensorDetails: { [uuid: string]: Sensor };
+  onFetchSensorDetails: (sensorId: number) => Promise<void>;
+  onFetchDeviceStates: (deviceId: number) => Promise<void>;
 }
 
 const RuleEdit: React.FC<RuleEditProps> = ({
@@ -18,7 +30,17 @@ const RuleEdit: React.FC<RuleEditProps> = ({
   isLoading,
   error,
   onSubmit,
-  windowWidth = window.innerWidth
+  windowWidth = window.innerWidth,
+  ruleChainId,
+  onNodeDelete,
+  onNodeCreate,
+  onNodeUpdate,
+  sensors,
+  devices,
+  deviceStates,
+  sensorDetails,
+  onFetchSensorDetails,
+  onFetchDeviceStates
 }) => {
   const { t } = useTranslation();
   const { darkMode } = useTheme();
@@ -93,6 +115,17 @@ const RuleEdit: React.FC<RuleEditProps> = ({
         initialData={rule}
         onSubmit={onSubmit}
         isLoading={isLoading}
+        ruleChainId={ruleChainId}
+        showNodeSection={true}
+        onNodeDelete={onNodeDelete}
+        onNodeCreate={onNodeCreate}
+        onNodeUpdate={onNodeUpdate}
+        sensors={sensors}
+        devices={devices}
+        deviceStates={deviceStates}
+        sensorDetails={sensorDetails}
+        onFetchSensorDetails={onFetchSensorDetails}
+        onFetchDeviceStates={onFetchDeviceStates}
       />
     </div>
   );

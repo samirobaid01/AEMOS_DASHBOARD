@@ -1,21 +1,20 @@
-import React, { useState } from 'react';
+import React from 'react';
 import type { RuleChain } from '../../types/ruleEngine';
 import { useTheme } from '../../context/ThemeContext';
 import { useThemeColors } from '../../hooks/useThemeColors';
 import { useTranslation } from 'react-i18next';
 import { useRuleEnginePermissions } from '../../hooks/useRuleEnginePermissions';
-import { useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
-import { deleteRule } from '../../state/slices/ruleEngine.slice';
-import { toastService } from '../../services/toastService';
-import type { AppDispatch } from '../../state/store';
 import Modal from '../../components/common/Modal/Modal';
+import { FormControl, Select, MenuItem } from '@mui/material';
 
 interface RuleDetailsProps {
   rule: RuleChain | null;
   isLoading: boolean;
   error?: string | null;
   onBack?: () => void;
+  onEdit: (ruleId: number) => void;
+  onDelete: (ruleId: number) => Promise<void>;
+  onNextNodeChange: (nodeId: number, nextNodeId: number | null) => Promise<void>;
   windowWidth?: number;
 }
 
@@ -24,40 +23,20 @@ const RuleDetails: React.FC<RuleDetailsProps> = ({
   isLoading, 
   error,
   onBack,
-  windowWidth = window.innerWidth
+  onEdit,
+  onDelete,
+  onNextNodeChange,
+  windowWidth = window.innerWidth,
 }) => {
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = React.useState(false);
   const { t } = useTranslation();
   const { darkMode } = useTheme();
   const colors = useThemeColors();
   const isMobile = windowWidth < 768;
-  const navigate = useNavigate();
-  const dispatch = useDispatch<AppDispatch>();
   const { canUpdate, canDelete } = useRuleEnginePermissions();
-
-  const handleEdit = () => {
-    if (rule) {
-      navigate(`/rule-engine/${rule.id}/edit`);
-    }
-  };
 
   const handleDeleteClick = () => {
     setShowDeleteModal(true);
-  };
-
-  const handleConfirmDelete = async () => {
-    try {
-      if (!rule) return;
-      
-      await dispatch(deleteRule(rule.id)).unwrap();
-      toastService.success(t('ruleEngine.deleteSuccess'));
-      setShowDeleteModal(false);
-      navigate('/rule-engine');
-    } catch (error) {
-      toastService.error(t('ruleEngine.deleteError'));
-      console.error('Failed to delete rule chain:', error);
-      setShowDeleteModal(false);
-    }
   };
 
   const formatDate = (dateString: string) => {
@@ -162,59 +141,6 @@ const RuleDetails: React.FC<RuleDetailsProps> = ({
     border: `1px solid ${darkMode ? colors.border : '#e5e7eb'}`,
   };
 
-  const deleteModalFooter = (
-    <>
-      <button
-        onClick={() => setShowDeleteModal(false)}
-        style={{
-          padding: '0.5rem 1rem',
-          backgroundColor: darkMode ? colors.surfaceBackground : 'white',
-          color: darkMode ? colors.textSecondary : '#4b5563',
-          border: `1px solid ${darkMode ? colors.border : '#d1d5db'}`,
-          borderRadius: '0.375rem',
-          fontSize: '0.875rem',
-          fontWeight: 500,
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          transition: 'all 0.2s',
-        }}
-        onMouseOver={(e) => {
-          e.currentTarget.style.backgroundColor = darkMode ? colors.background : '#f3f4f6';
-        }}
-        onMouseOut={(e) => {
-          e.currentTarget.style.backgroundColor = darkMode ? colors.surfaceBackground : 'white';
-        }}
-      >
-        {t('common.cancel')}
-      </button>
-      <button
-        onClick={handleConfirmDelete}
-        style={{
-          padding: '0.5rem 1rem',
-          backgroundColor: darkMode ? '#ef5350' : '#ef4444',
-          color: 'white',
-          border: 'none',
-          borderRadius: '0.375rem',
-          fontSize: '0.875rem',
-          fontWeight: 500,
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          transition: 'all 0.2s',
-        }}
-        onMouseOver={(e) => {
-          e.currentTarget.style.backgroundColor = darkMode ? '#f44336' : '#dc2626';
-        }}
-        onMouseOut={(e) => {
-          e.currentTarget.style.backgroundColor = darkMode ? '#ef5350' : '#ef4444';
-        }}
-      >
-        {t('common.delete')}
-      </button>
-    </>
-  );
-
   if (isLoading) {
     return (
       <div style={{
@@ -295,7 +221,7 @@ const RuleDetails: React.FC<RuleDetailsProps> = ({
           <div style={buttonGroupStyle}>
             {canUpdate && (
               <button
-                onClick={handleEdit}
+                onClick={() => rule && onEdit(rule.id)} // explanation:  if (rule) { onEdit(rule.id); }
                 style={buttonStyle('primary')}
                 onMouseOver={(e) => {
                   e.currentTarget.style.backgroundColor = darkMode ? '#5d8efa' : '#2563eb';
@@ -388,40 +314,60 @@ const RuleDetails: React.FC<RuleDetailsProps> = ({
             </p>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              {rule?.nodes?.map((node, index) => (
-                <div
-                  key={node.id}
-                  style={{
-                    ...cardStyle,
-                    padding: '1rem',
-                    marginBottom: index < rule.nodes.length - 1 ? '1rem' : 0,
-                  }}
-                >
-                  <h3 style={{
-                    fontSize: '1rem',
-                    fontWeight: 500,
-                    color: darkMode ? colors.textPrimary : '#111827',
-                    margin: '0 0 0.5rem 0',
-                  }}>
-                    {node.type.charAt(0).toUpperCase() + node.type.slice(1)} {t('rules.node')}
-                  </h3>
+              {rule?.nodes?.map((node, index) => {
+                // Create options for the dropdown
+                const nodeOptions = rule.nodes
+                  .filter(n => n.id !== node.id) // Exclude current node
+                  .map(n => ({
+                    id: n.id,
+                    name: n.name || `${n.type.charAt(0).toUpperCase() + n.type.slice(1)} Node ${n.id}`
+                  }));
 
-                  <p style={labelStyle}>{t('rules.configuration')}:</p>
-                  <pre style={codeBlockStyle}>
-                    {JSON.stringify(JSON.parse(node.config), null, 2)}
-                  </pre>
-
-                  {node.nextNodeId && (
-                    <p style={{
-                      ...labelStyle,
-                      marginTop: '0.5rem',
-                      marginBottom: 0,
+                return (
+                  <div
+                    key={node.id}
+                    style={{
+                      ...cardStyle,
+                      padding: '1rem',
+                      marginBottom: index < rule.nodes.length - 1 ? '1rem' : 0,
+                    }}
+                  >
+                    <h3 style={{
+                      fontSize: '1rem',
+                      fontWeight: 500,
+                      color: darkMode ? colors.textPrimary : '#111827',
+                      margin: '0 0 0.5rem 0',
                     }}>
-                      {t('rules.nextNode')}: {node.nextNodeId}
-                    </p>
-                  )}
-                </div>
-              ))}
+                      {node.name || `${node.type.charAt(0).toUpperCase() + node.type.slice(1)} Node ${node.id}`}
+                    </h3>
+
+                    <p style={labelStyle}>{t('rules.configuration')}:</p>
+                    <pre style={codeBlockStyle}>
+                      {JSON.stringify(JSON.parse(node.config), null, 2)}
+                    </pre>
+
+                    <FormControl fullWidth sx={{ mt: 2 }}>
+                      <Select
+                        value={node.nextNodeId === null ? '' : node.nextNodeId.toString()}
+                        onChange={(e) => onNextNodeChange(
+                          node.id,
+                          e.target.value === '' ? null : Number(e.target.value)
+                        )}
+                        displayEmpty
+                      >
+                        <MenuItem value="">
+                          <em>Select next node</em>
+                        </MenuItem>
+                        {nodeOptions.map((option) => (
+                          <MenuItem key={option.id} value={option.id.toString()}>
+                            {option.name}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
@@ -431,7 +377,63 @@ const RuleDetails: React.FC<RuleDetailsProps> = ({
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
         title={t('ruleEngine.deleteConfirmation')}
-        footer={deleteModalFooter}
+        footer={(
+          <>
+            <button
+              onClick={() => setShowDeleteModal(false)}
+              style={{
+                padding: '0.5rem 1rem',
+                backgroundColor: darkMode ? colors.surfaceBackground : 'white',
+                color: darkMode ? colors.textSecondary : '#4b5563',
+                border: `1px solid ${darkMode ? colors.border : '#d1d5db'}`,
+                borderRadius: '0.375rem',
+                fontSize: '0.875rem',
+                fontWeight: 500,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                transition: 'all 0.2s',
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.backgroundColor = darkMode ? colors.background : '#f3f4f6';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.backgroundColor = darkMode ? colors.surfaceBackground : 'white';
+              }}
+            >
+              {t('common.cancel')}
+            </button>
+            <button
+              onClick={async () => {
+                if (rule) {
+                  await onDelete(rule.id);
+                  setShowDeleteModal(false);
+                }
+              }}
+              style={{
+                padding: '0.5rem 1rem',
+                backgroundColor: darkMode ? '#ef5350' : '#ef4444',
+                color: 'white',
+                border: 'none',
+                borderRadius: '0.375rem',
+                fontSize: '0.875rem',
+                fontWeight: 500,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                transition: 'all 0.2s',
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.backgroundColor = darkMode ? '#f44336' : '#dc2626';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.backgroundColor = darkMode ? '#ef5350' : '#ef4444';
+              }}
+            >
+              {t('common.delete')}
+            </button>
+          </>
+        )}
       >
         <p style={{
           color: darkMode ? colors.textPrimary : '#111827',

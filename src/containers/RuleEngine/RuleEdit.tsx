@@ -1,121 +1,49 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate, useParams, Navigate } from 'react-router-dom';
-import { fetchRuleDetails, updateRule, selectSelectedRule, selectRuleEngineLoading } from '../../state/slices/ruleEngine.slice';
+import { useParams, Navigate } from 'react-router-dom';
+import { 
+  fetchRuleDetails, 
+  selectSelectedRule, 
+  selectRuleEngineLoading, 
+  selectRuleEngineError,
+  updateRule,
+  deleteRuleNode,
+  createRuleNode,
+  updateRuleNode,
+  fetchSensors,
+  fetchDevices,
+  fetchDeviceStates,
+  fetchSensorDetails,
+  selectSensors,
+  selectDevices,
+  selectDeviceStates,
+  selectSensorDetails,
+} from '../../state/slices/ruleEngine.slice';
+import { selectAuthToken } from '../../state/slices/auth.slice';
+import { selectSelectedOrganizationId } from '../../state/slices/auth.slice';
 import { useRuleEnginePermissions } from '../../hooks/useRuleEnginePermissions';
 import type { AppDispatch } from '../../state/store';
-import type { RuleChainUpdatePayload } from '../../types/ruleEngine';
 import RuleForm from '../../components/ruleEngine/RuleForm';
+import NodeDialog from '../../components/ruleEngine/NodeDialog';
+import ActionDialog from '../../components/ruleEngine/ActionDialog';
 import { toastService } from '../../services/toastService';
-import { Box, Typography, CircularProgress } from '@mui/material';
-import * as yup from 'yup';
-import { yupResolver } from '@hookform/resolvers/yup';
-
-// Rule form validation
-export const ruleFormSchema = yup.object().shape({
-  name: yup.string().required('Name is required'),
-  description: yup.string().required('Description is required'),
-});
-
-export const ruleFormResolver = yupResolver(ruleFormSchema);
-
-// Node form types
-export interface FilterConfig {
-  sourceType: string;
-  UUID: string;
-  key: string;
-  operator: ">" | "<" | "=" | ">=";
-  value: number;
-}
-
-export interface ActionConfig {
-  deviceUuid: string;
-  stateName: string;
-  stateValue: string;
-}
-
-export interface NodeFormData {
-  type: "filter" | "action";
-  config: FilterConfig | ActionConfig;
-}
-
-export const defaultNodeFormValues = {
-  type: "filter" as const,
-  config: {
-    sourceType: "",
-    UUID: "",
-    key: "",
-    operator: ">" as const,
-    value: 0,
-    deviceUuid: "",
-    stateName: "",
-    stateValue: "",
-  },
-};
-
-// Node configuration validation schema
-export const nodeValidationSchema = yup.object({
-  type: yup.string().oneOf(['filter', 'action']).required(),
-  config: yup.lazy((value) => {
-    if (value?.type === 'filter') {
-      return yup.object({
-        sourceType: yup.string().required('Source type is required'),
-        UUID: yup.string().required('UUID is required'),
-        key: yup.string().required('Key is required'),
-        operator: yup.string().oneOf(['>', '<', '=', '>=']).required('Operator is required'),
-        value: yup.number().required('Value is required'),
-      });
-    }
-    return yup.object({
-      deviceUuid: yup.string().required('Device UUID is required'),
-      stateName: yup.string().required('State name is required'),
-      stateValue: yup.string().required('State value is required'),
-    });
-  }),
-});
-
-// Form resolver
-export const nodeFormResolver = yupResolver(nodeValidationSchema);
-
-// Helper function to format node data for API
-export const formatNodeData = (data: NodeFormData) => {
-  if (data.type === "filter") {
-    const config = data.config as FilterConfig;
-    return {
-      type: data.type,
-      config: {
-        sourceType: config.sourceType,
-        UUID: config.UUID,
-        key: config.key,
-        operator: config.operator,
-        value: config.value,
-      },
-    };
-  } else {
-    const config = data.config as ActionConfig;
-    return {
-      type: data.type,
-      config: {
-        type: "DEVICE_COMMAND",
-        command: {
-          deviceUuid: config.deviceUuid,
-          stateName: config.stateName,
-          value: config.stateValue,
-          initiatedBy: "device",
-        },
-      },
-    };
-  }
-};
+import { useTranslation } from 'react-i18next';
 
 const RuleEdit: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const dispatch = useDispatch<AppDispatch>();
-  const navigate = useNavigate();
+  const { t } = useTranslation();
   const { canUpdate } = useRuleEnginePermissions();
 
   const selectedRule = useSelector(selectSelectedRule);
   const loading = useSelector(selectRuleEngineLoading);
+  const error = useSelector(selectRuleEngineError);
+  const token = useSelector(selectAuthToken);
+  const organizationId = useSelector(selectSelectedOrganizationId);
+  const sensors = useSelector(selectSensors);
+  const devices = useSelector(selectDevices);
+  const deviceStates = useSelector(selectDeviceStates);
+  const sensorDetails = useSelector(selectSensorDetails);
 
   useEffect(() => {
     if (id) {
@@ -123,48 +51,177 @@ const RuleEdit: React.FC = () => {
     }
   }, [dispatch, id]);
 
-  const handleSubmit = async (data: RuleChainUpdatePayload) => {
-    try {
-      if (!id) {
-        throw new Error('Rule ID is required');
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        console.log('Starting to fetch sensors and devices...');
+        const [sensorsResult, devicesResult] = await Promise.all([
+          dispatch(fetchSensors()).unwrap(),
+          dispatch(fetchDevices()).unwrap()
+        ]);
+        console.log('Fetch completed:', { sensorsResult, devicesResult });
+      } catch (error) {
+        console.error('Error loading sensors or devices:', error);
+        toastService.error(t('common.errorLoadingData'));
       }
+    };
 
-      const result = await dispatch(updateRule({
-        id: parseInt(id),
-        payload: data,
-      })).unwrap();
+    loadData();
+  }, [dispatch]);
 
-      toastService.success('Rule chain updated successfully');
-      navigate(`/rule-engine/${result.id}`);
+  useEffect(() => {
+    console.log('Sensors state updated:', { 
+      sensorCount: sensors?.length,
+      sensors,
+      loading,
+      error 
+    });
+  }, [sensors, loading, error]);
+
+  useEffect(() => {
+    console.log('Devices state updated:', { 
+      deviceCount: devices?.length,
+      devices,
+      loading,
+      error 
+    });
+  }, [devices, loading, error]);
+
+  const handleSubmit = async (data: any) => {
+    if (!id) return;
+
+    try {
+      await dispatch(updateRule({ id: parseInt(id), payload: data })).unwrap();
+      toastService.success(t('ruleEngine.updateSuccess'));
     } catch (error) {
-      toastService.error('Failed to update rule chain');
+      toastService.error(t('ruleEngine.updateError'));
       console.error('Failed to update rule chain:', error);
     }
   };
 
-  if (!canUpdate) {
-    return <Navigate to="/rule-engine" replace />;
-  }
+  const handleNodeDelete = async (nodeId: number) => {
+    try {
+      await dispatch(deleteRuleNode(nodeId)).unwrap();
+      toastService.success(t('ruleEngine.nodeDeleteSuccess'));
+    } catch (error) {
+      console.error('Error deleting node:', error);
+      toastService.error(t('ruleEngine.nodeDeleteError'));
+    }
+  };
 
-  if (!selectedRule) {
-    return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight={400}>
-        <CircularProgress />
-      </Box>
-    );
+  const handleNodeCreate = async (data: any) => {
+    console.log("called handleNodeCreate from container");
+    try {
+      if (!id) return;
+      
+      await dispatch(createRuleNode({
+        ruleChainId: parseInt(id),
+        type: data.type,
+        name: data.name,
+        config: data.config,
+        nextNodeId: null
+      })).unwrap();
+      
+      toastService.success(t('ruleEngine.nodeCreateSuccess'));
+    } catch (error) {
+      console.error('Error creating node:', error);
+      toastService.error(t('ruleEngine.nodeCreateError'));
+    }
+  };
+
+  const handleNodeUpdate = async (nodeId: number, data: any) => {
+    try {
+      const currentNode = selectedRule?.nodes.find(n => n.id === nodeId);
+      if (!currentNode) return;
+
+      // Get the current nextNodeId from the existing node
+      const currentConfig = JSON.parse(currentNode.config);
+      const nextNodeId = currentConfig.nextNodeId;
+
+      await dispatch(updateRuleNode({ 
+        nodeId, 
+        payload: {
+          name: data.name,
+          config: data.config,
+          ...(nextNodeId !== undefined ? { nextNodeId } : {})  // Only include nextNodeId if it exists
+        }
+      })).unwrap();
+      
+      // Refresh rule details to get updated state
+      if (id) {
+        await dispatch(fetchRuleDetails(parseInt(id))).unwrap();
+      }
+      
+      toastService.success(t('ruleEngine.nodeUpdateSuccess'));
+    } catch (error) {
+      console.error('Error updating node:', error);
+      toastService.error(t('ruleEngine.nodeUpdateError'));
+    }
+  };
+
+  const handleFetchDeviceStates = async (deviceId: number) => {
+    try {
+      await dispatch(fetchDeviceStates(deviceId)).unwrap();
+    } catch (error) {
+      console.error('Error fetching device states:', error);
+      toastService.error(t('ruleEngine.fetchDeviceStatesError'));
+    }
+  };
+
+  const handleFetchSensorDetails = async (sensorId: number) => {
+    try {
+      console.log("called fetch sensor detail from container");
+      await dispatch(fetchSensorDetails(sensorId)).unwrap();
+    } catch (error) {
+      console.error('Error fetching sensor details:', error);
+      toastService.error(t('ruleEngine.fetchSensorDetailsError'));
+    }
+  };
+
+  if (!canUpdate) {
+    return <Navigate to="/dashboard" replace />;
   }
 
   return (
-    <Box p={3}>
-      <Typography variant="h4" gutterBottom>
-        Edit Rule Chain
-      </Typography>
+    <>
       <RuleForm
-        initialData={selectedRule}
+        initialData={selectedRule || undefined}
+        ruleChainId={id ? parseInt(id) : undefined}
         onSubmit={handleSubmit}
         isLoading={loading}
+        showNodeSection={true}
+        onNodeDelete={handleNodeDelete}
+        onNodeCreate={handleNodeCreate}
+        onNodeUpdate={handleNodeUpdate}
+        sensors={sensors}
+        devices={devices}
+        deviceStates={deviceStates}
+        sensorDetails={sensorDetails}
+        onFetchSensorDetails={handleFetchSensorDetails}
+        onFetchDeviceStates={handleFetchDeviceStates}
       />
-    </Box>
+      <NodeDialog
+        open={false} // Control this with state if needed
+        onClose={() => {}} // Add close handler if needed
+        onSave={handleNodeCreate}
+        onUpdate={handleNodeUpdate}
+        sensors={sensors}
+        devices={devices}
+        onFetchSensorDetails={handleFetchSensorDetails}
+        sensorDetails={sensorDetails}
+        mode="add"
+      />
+      <ActionDialog
+        open={false} // Control this with state if needed
+        onClose={() => {}} // Add close handler if needed
+        onSave={handleNodeCreate}
+        devices={devices}
+        deviceStates={deviceStates}
+        onFetchDeviceStates={handleFetchDeviceStates}
+        mode="add"
+        ruleChainId={id ? parseInt(id) : 0}
+      />
+    </>
   );
 };
 

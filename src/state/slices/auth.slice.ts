@@ -258,6 +258,11 @@ export const selectCurrentUser = createSelector(
   (auth) => auth.user
 );
 
+export const selectAuthToken = createSelector(
+  [selectAuth],
+  (auth) => auth.token
+);
+
 export const selectSelectedOrganizationId = createSelector(
   [selectAuth],
   (auth) => auth.selectedOrganizationId
