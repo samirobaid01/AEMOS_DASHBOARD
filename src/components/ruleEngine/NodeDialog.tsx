@@ -407,7 +407,7 @@ const parseExistingConfig = (initialExpression: NodeDialogProps['initialExpressi
         
         // Validate each expression in the group
         const validExpressions = parsedConfig.expressions.map((expr: ParsedExpression) => {
-          if (expr.sourceType && expr.UUID && expr.key && expr.operator && 'value' in expr) {
+          if (expr.sourceType && expr.UUID && expr.key && expr.operator && expr.value !== undefined) {
             return {
               sourceType: expr.sourceType as 'sensor' | 'device',
               UUID: expr.UUID,
@@ -575,19 +575,47 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
       return;
     }
 
-    // Set the root group with all expressions
-    const newRootGroup = {
-      type: config.type as 'AND' | 'OR',
-      expressions: config.expressions.map(expr => ({
-        sourceType: expr.sourceType as 'sensor' | 'device',
-        UUID: expr.UUID || '',
-        key: expr.key || '',
-        operator: expr.operator || '==',
-        value: expr.value || ''
-      }))
+    // Recursively convert parsed expressions to proper format
+    const convertExpression = (expr: ParsedExpression): ConditionData | GroupData | null => {
+      // Check if it's a condition (has sourceType, UUID, key, operator, value)
+      if (expr.sourceType && expr.UUID && expr.key && expr.operator && expr.value !== undefined) {
+        return {
+          sourceType: expr.sourceType as 'sensor' | 'device',
+          UUID: expr.UUID,
+          key: expr.key,
+          operator: expr.operator,
+          value: expr.value
+        };
+      }
+      // Check if it's a group (has type and expressions)
+      else if (expr.type && Array.isArray(expr.expressions)) {
+        const nestedExpressions = expr.expressions
+          .map(convertExpression)
+          .filter((e): e is (ConditionData | GroupData) => e !== null);
+        
+        if (nestedExpressions.length > 0) {
+          return {
+            type: expr.type as 'AND' | 'OR',
+            expressions: nestedExpressions
+          };
+        }
+      }
+      
+      return null;
     };
 
-    console.log('Setting new root group:', newRootGroup);
+    // Convert all expressions
+    const convertedExpressions = config.expressions
+      .map(convertExpression)
+      .filter((expr): expr is (ConditionData | GroupData) => expr !== null);
+
+    // Set the root group with properly converted expressions
+    const newRootGroup: GroupData = {
+      type: config.type as 'AND' | 'OR',
+      expressions: convertedExpressions
+    };
+
+    console.log('Setting new root group with nested structure:', newRootGroup);
     setRootGroup(newRootGroup);
   };
 
