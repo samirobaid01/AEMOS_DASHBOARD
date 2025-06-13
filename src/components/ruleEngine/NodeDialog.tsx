@@ -26,7 +26,7 @@ interface ConditionData {
   UUID: string;
   key: string;
   operator: string;
-  value: string | number;
+  value: string | number | number[] | string[];
 }
 
 interface GroupData {
@@ -39,7 +39,7 @@ interface ParsedExpression {
   UUID?: string;
   key?: string;
   operator?: string;
-  value?: string | number;
+  value?: string | number | number[] | string[];
   type?: string;
   expressions?: ParsedExpression[];
 }
@@ -73,7 +73,158 @@ interface NodeDialogProps {
   onFetchSensorDetails: (sensorId: number) => Promise<void>;
 }
 
-const OPERATORS = ["==", "!=", ">", "<", ">=", "<="];
+const OPERATORS = [
+  // Basic comparisons
+  { value: "==", label: "Equals", category: "comparison", valueType: "single" },
+  { value: "!=", label: "Not Equals", category: "comparison", valueType: "single" },
+  { value: ">", label: "Greater Than", category: "comparison", valueType: "single" },
+  { value: "<", label: "Less Than", category: "comparison", valueType: "single" },
+  { value: ">=", label: "Greater Than or Equal", category: "comparison", valueType: "single" },
+  { value: "<=", label: "Less Than or Equal", category: "comparison", valueType: "single" },
+  
+  // Null/Empty checks
+  { value: "isNull", label: "Is Null", category: "null", valueType: "none" },
+  { value: "isNotNull", label: "Is Not Null", category: "null", valueType: "none" },
+  { value: "isEmpty", label: "Is Empty", category: "null", valueType: "none" },
+  { value: "isNotEmpty", label: "Is Not Empty", category: "null", valueType: "none" },
+  
+  // Type checks
+  { value: "isNumber", label: "Is Number", category: "type", valueType: "none" },
+  { value: "isString", label: "Is String", category: "type", valueType: "none" },
+  { value: "isBoolean", label: "Is Boolean", category: "type", valueType: "none" },
+  { value: "isArray", label: "Is Array", category: "type", valueType: "none" },
+  
+  // Numeric operations
+  { value: "between", label: "Between", category: "numeric", valueType: "range" },
+  
+  // String operations
+  { value: "contains", label: "Contains", category: "string", valueType: "single" },
+  { value: "notContains", label: "Not Contains", category: "string", valueType: "single" },
+  { value: "startsWith", label: "Starts With", category: "string", valueType: "single" },
+  { value: "endsWith", label: "Ends With", category: "string", valueType: "single" },
+  { value: "matches", label: "Matches Regex", category: "string", valueType: "single" },
+  
+  // Array operations
+  { value: "in", label: "In", category: "array", valueType: "array" },
+  { value: "notIn", label: "Not In", category: "array", valueType: "array" },
+  { value: "hasAll", label: "Has All", category: "array", valueType: "array" },
+  { value: "hasAny", label: "Has Any", category: "array", valueType: "array" },
+  { value: "hasNone", label: "Has None", category: "array", valueType: "array" },
+  
+  // Time operations
+  { value: "olderThan", label: "Older Than (seconds)", category: "time", valueType: "single" },
+  { value: "newerThan", label: "Newer Than (seconds)", category: "time", valueType: "single" },
+  { value: "inLast", label: "In Last (seconds)", category: "time", valueType: "single" },
+];
+
+// Helper function to get operator configuration
+const getOperatorConfig = (operatorValue: string) => {
+  return OPERATORS.find(op => op.value === operatorValue) || { value: operatorValue, label: operatorValue, category: "comparison", valueType: "single" };
+};
+
+// Value Input Component for different operator types
+const ValueInput: React.FC<{
+  operator: string;
+  value: string | number | number[] | string[];
+  onChange: (value: string | number | number[] | string[]) => void;
+}> = ({ operator, value, onChange }) => {
+  const operatorConfig = getOperatorConfig(operator);
+  const { t } = useTranslation();
+
+  const handleSingleValueChange = (newValue: string) => {
+    // Try to convert to number if it looks like a number
+    const numberValue = Number(newValue);
+    if (!isNaN(numberValue) && newValue.trim() !== '') {
+      onChange(numberValue);
+    } else {
+      onChange(newValue);
+    }
+  };
+
+  const handleRangeValueChange = (index: 0 | 1, newValue: string) => {
+    const currentValue = Array.isArray(value) ? value as number[] : [0, 0];
+    const numberValue = Number(newValue);
+    const newRangeValue: number[] = [...currentValue];
+    newRangeValue[index] = !isNaN(numberValue) ? numberValue : 0;
+    onChange(newRangeValue);
+  };
+
+  const handleArrayValueChange = (newValue: string) => {
+    // Parse comma-separated values, keeping them as strings or converting to numbers
+    const arrayValue = newValue.split(',').map(item => {
+      const trimmed = item.trim();
+      const numberValue = Number(trimmed);
+      // Only convert to number if it's a valid number and not an empty string
+      return !isNaN(numberValue) && trimmed !== '' && trimmed !== '.' ? numberValue : trimmed;
+    }).filter(item => item !== '');
+    
+    // Determine if this should be a string array or number array
+    const hasNumbers = arrayValue.some(item => typeof item === 'number');
+    const hasStrings = arrayValue.some(item => typeof item === 'string' && item !== '');
+    
+    if (hasNumbers && !hasStrings) {
+      // All numbers
+      onChange(arrayValue.filter((item): item is number => typeof item === 'number'));
+    } else {
+      // Mixed or all strings - convert all to strings
+      onChange(arrayValue.map(item => String(item)));
+    }
+  };
+
+  switch (operatorConfig.valueType) {
+    case 'none':
+      return null; // No input needed for operators like isNull, isNumber, etc.
+
+    case 'range':
+      const rangeValue = Array.isArray(value) ? value : [0, 0];
+      return (
+        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', minWidth: 200 }}>
+          <TextField
+            label="Min"
+            type="number"
+            value={rangeValue[0] || ''}
+            onChange={(e) => handleRangeValueChange(0, e.target.value)}
+            size="small"
+            sx={{ flex: 1 }}
+          />
+          <Typography variant="body2">to</Typography>
+          <TextField
+            label="Max"
+            type="number"
+            value={rangeValue[1] || ''}
+            onChange={(e) => handleRangeValueChange(1, e.target.value)}
+            size="small"
+            sx={{ flex: 1 }}
+          />
+        </Box>
+      );
+
+    case 'array':
+      const displayValue = Array.isArray(value) ? value.join(', ') : String(value || '');
+      return (
+        <TextField
+          label="Values (comma-separated)"
+          value={displayValue}
+          onChange={(e) => handleArrayValueChange(e.target.value)}
+          sx={{ minWidth: 200 }}
+          placeholder="value1, value2, value3"
+          helperText="Enter values separated by commas"
+        />
+      );
+
+    case 'single':
+    default:
+      return (
+        <TextField
+          label="Value"
+          value={Array.isArray(value) ? value.join(', ') : String(value || '')}
+          onChange={(e) => handleSingleValueChange(e.target.value)}
+          sx={{ minWidth: 120 }}
+          placeholder={operatorConfig.category === 'string' ? 'Enter text' : 'Enter value'}
+        />
+      );
+  }
+};
 
 // Function to optimize the structure by removing unnecessary single-expression groups
 const optimizeStructure = (data: GroupData | ConditionData, isRoot: boolean = true): any => {
@@ -253,19 +404,82 @@ const ConditionBuilder: React.FC<{
           onChange={(e) => onChange({ ...condition, operator: e.target.value })}
           label="Operator"
         >
-          {OPERATORS.map((op) => (
-            <MenuItem key={op} value={op}>
-              {op}
+          {/* Basic Comparisons */}
+          <MenuItem disabled sx={{ fontWeight: 'bold', color: 'primary.main' }}>
+            Basic Comparisons
+          </MenuItem>
+          {OPERATORS.filter(op => op.category === 'comparison').map((op) => (
+            <MenuItem key={op.value} value={op.value} sx={{ pl: 3 }}>
+              {op.label}
+            </MenuItem>
+          ))}
+          
+          {/* Null/Empty Checks */}
+          <MenuItem disabled sx={{ fontWeight: 'bold', color: 'primary.main', mt: 1 }}>
+            Null/Empty Checks
+          </MenuItem>
+          {OPERATORS.filter(op => op.category === 'null').map((op) => (
+            <MenuItem key={op.value} value={op.value} sx={{ pl: 3 }}>
+              {op.label}
+            </MenuItem>
+          ))}
+          
+          {/* Type Checks */}
+          <MenuItem disabled sx={{ fontWeight: 'bold', color: 'primary.main', mt: 1 }}>
+            Type Checks
+          </MenuItem>
+          {OPERATORS.filter(op => op.category === 'type').map((op) => (
+            <MenuItem key={op.value} value={op.value} sx={{ pl: 3 }}>
+              {op.label}
+            </MenuItem>
+          ))}
+          
+          {/* Numeric Operations */}
+          <MenuItem disabled sx={{ fontWeight: 'bold', color: 'primary.main', mt: 1 }}>
+            Numeric Operations
+          </MenuItem>
+          {OPERATORS.filter(op => op.category === 'numeric').map((op) => (
+            <MenuItem key={op.value} value={op.value} sx={{ pl: 3 }}>
+              {op.label}
+            </MenuItem>
+          ))}
+          
+          {/* String Operations */}
+          <MenuItem disabled sx={{ fontWeight: 'bold', color: 'primary.main', mt: 1 }}>
+            String Operations
+          </MenuItem>
+          {OPERATORS.filter(op => op.category === 'string').map((op) => (
+            <MenuItem key={op.value} value={op.value} sx={{ pl: 3 }}>
+              {op.label}
+            </MenuItem>
+          ))}
+          
+          {/* Array Operations */}
+          <MenuItem disabled sx={{ fontWeight: 'bold', color: 'primary.main', mt: 1 }}>
+            Array Operations
+          </MenuItem>
+          {OPERATORS.filter(op => op.category === 'array').map((op) => (
+            <MenuItem key={op.value} value={op.value} sx={{ pl: 3 }}>
+              {op.label}
+            </MenuItem>
+          ))}
+          
+          {/* Time Operations */}
+          <MenuItem disabled sx={{ fontWeight: 'bold', color: 'primary.main', mt: 1 }}>
+            Time Operations
+          </MenuItem>
+          {OPERATORS.filter(op => op.category === 'time').map((op) => (
+            <MenuItem key={op.value} value={op.value} sx={{ pl: 3 }}>
+              {op.label}
             </MenuItem>
           ))}
         </Select>
       </FormControl>
 
-      <TextField
-        label="Value"
+      <ValueInput
+        operator={condition.operator}
         value={condition.value}
-        onChange={(e) => onChange({ ...condition, value: e.target.value })}
-        sx={{ minWidth: 120 }}
+        onChange={(newValue) => onChange({ ...condition, value: newValue })}
       />
 
       {onDelete && (
