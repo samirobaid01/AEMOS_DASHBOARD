@@ -20,6 +20,9 @@ import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import type { Device } from "../../types/device";
 import type { Sensor } from "../../types/sensor";
+import * as deviceStatesService from '../../services/deviceStates.service';
+import { useSelector } from 'react-redux';
+import { selectSelectedOrganizationId } from '../../state/slices/auth.slice';
 
 interface ConditionData {
   sourceType: 'sensor' | 'device';
@@ -268,7 +271,10 @@ const ConditionBuilder: React.FC<{
 }> = ({ condition, onChange, onDelete, sensors, devices, sensorDetails, onFetchSensorDetails }) => {
   const { t } = useTranslation();
   const [isLoadingSensorDetails, setIsLoadingSensorDetails] = useState(false);
+  const [isLoadingDeviceStates, setIsLoadingDeviceStates] = useState(false);
+  const [deviceStates, setDeviceStates] = useState<any[]>([]);
   const lastFetchTime = useRef<number>(0);
+  const organizationId = useSelector(selectSelectedOrganizationId);
 
   // Load sensor details when UUID changes or when sensors/devices update
   useEffect(() => {
@@ -296,6 +302,31 @@ const ConditionBuilder: React.FC<{
 
     loadSensorDetails();
   }, [condition.UUID, condition.sourceType, sensors, devices, sensorDetails, onFetchSensorDetails]);
+
+  // Fetch device states when a device is selected
+  useEffect(() => {
+    const fetchDeviceStatesForDevice = async () => {
+      if (condition.sourceType === 'device' && condition.UUID && organizationId) {
+        const device = devices.find(d => d.uuid === condition.UUID);
+        if (device?.id) {
+          setIsLoadingDeviceStates(true);
+          try {
+            const states = await deviceStatesService.getDeviceStates(device.id, organizationId);
+            setDeviceStates(states || []);
+          } catch (error) {
+            console.error('Error fetching device states:', error);
+            setDeviceStates([]);
+          } finally {
+            setIsLoadingDeviceStates(false);
+          }
+        }
+      } else {
+        setDeviceStates([]);
+      }
+    };
+
+    fetchDeviceStatesForDevice();
+  }, [condition.UUID, condition.sourceType, devices, organizationId]);
 
   const handleSourceTypeChange = (newSourceType: 'sensor' | 'device') => {
     const newUUID = newSourceType === 'sensor' ? sensors[0]?.uuid : devices[0]?.uuid;
@@ -325,17 +356,16 @@ const ConditionBuilder: React.FC<{
         label: td.variableName
       })) || [];
     } else {
-      const device = devices.find(d => d.uuid === condition.UUID);
-      if (!device?.capabilities) {
+      // For devices, use the fetched device states
+      if (isLoadingDeviceStates) {
         return [];
       }
-      return Object.entries(device.capabilities).map(([key, value]) => {
-        const formattedKey = key.replace(/([A-Z])/g, "_$1").toLowerCase();
-        return {
-          value: formattedKey,
-          label: formattedKey
-        };
-      });
+      
+      // Extract stateName from device states response
+      return deviceStates.map(state => ({
+        value: state.stateName,
+        label: state.stateName
+      }));
     }
   };
 
@@ -387,13 +417,19 @@ const ConditionBuilder: React.FC<{
           value={condition.key}
           onChange={(e) => onChange({ ...condition, key: e.target.value })}
           label="Key"
-          disabled={isLoadingSensorDetails || availableKeys.length === 0}
+          disabled={isLoadingSensorDetails || isLoadingDeviceStates || availableKeys.length === 0}
         >
-          {availableKeys.map((key) => (
-            <MenuItem key={key.value} value={key.value}>
-              {key.label}
+          {availableKeys.length === 0 ? (
+            <MenuItem disabled value="">
+              {isLoadingSensorDetails || isLoadingDeviceStates ? 'Loading...' : 'No options available'}
             </MenuItem>
-          ))}
+          ) : (
+            availableKeys.map((key) => (
+              <MenuItem key={key.value} value={key.value}>
+                {key.label}
+              </MenuItem>
+            ))
+          )}
         </Select>
       </FormControl>
 
