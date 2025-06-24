@@ -30,6 +30,7 @@ interface ConditionData {
   key: string;
   operator: string;
   value: string | number | number[] | string[];
+  duration?: string | number;
 }
 
 interface GroupData {
@@ -43,6 +44,7 @@ interface ParsedExpression {
   key?: string;
   operator?: string;
   value?: string | number | number[] | string[];
+  duration?: string | number;
   type?: string;
   expressions?: ParsedExpression[];
 }
@@ -68,6 +70,7 @@ interface NodeDialogProps {
     key?: string;
     operator?: string;
     value?: string | number;
+    duration?: string | number;
     config?: string;
   };
   sensors: Sensor[];
@@ -115,9 +118,14 @@ const OPERATORS = [
   { value: "hasNone", label: "Has None", category: "array", valueType: "array" },
   
   // Time operations
-  { value: "olderThan", label: "Older Than (seconds)", category: "time", valueType: "single" },
-  { value: "newerThan", label: "Newer Than (seconds)", category: "time", valueType: "single" },
-  { value: "inLast", label: "In Last (seconds)", category: "time", valueType: "single" },
+  { value: "olderThan", label: "Older Than (s|m|h|d)", category: "time", valueType: "singleDuration" },
+  { value: "newerThan", label: "Newer Than (s|m|h|d)", category: "time", valueType: "singleDuration" },
+  { value: "inLast", label: "In Last (s|m|h|d)", category: "time", valueType: "singleDuration" },
+
+  //Time operations with value to compare with
+  { value: "valueOlderThan", label: "Value Older Than (s|m|h|d)", category: "timeValue", valueType: "compareValueDuration" },
+  { value: "valueNewerThan", label: "Value Newer Than (s|m|h|d)", category: "timeValue", valueType: "compareValueDuration" },
+  { value: "valueInLast", label: "Value In Last (s|m|h|d)", category: "timeValue", valueType: "compareValueDuration" },
 ];
 
 // Helper function to get operator configuration
@@ -129,8 +137,10 @@ const getOperatorConfig = (operatorValue: string) => {
 const ValueInput: React.FC<{
   operator: string;
   value: string | number | number[] | string[];
+  duration?: string | number;
   onChange: (value: string | number | number[] | string[]) => void;
-}> = ({ operator, value, onChange }) => {
+  onDurationChange?: (duration: string | number) => void;
+}> = ({ operator, value, duration, onChange, onDurationChange }) => {
   const operatorConfig = getOperatorConfig(operator);
   const { t } = useTranslation();
 
@@ -215,7 +225,35 @@ const ValueInput: React.FC<{
         />
       );
 
-    case 'single':
+    case 'singleDuration':
+      return (
+        <TextField
+          label="30s | 1m | 1h | 1d"
+          value={Array.isArray(value) ? value.join(', ') : String(value || '')}
+          onChange={(e) => handleSingleValueChange(e.target.value)}
+          sx={{ minWidth: 120 }}
+          placeholder={operatorConfig.category === 'string' ? 'Enter text' : 'Enter value'}
+        />
+      );
+    case 'compareValueDuration':
+      return (
+        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', minWidth: 200 }}>
+          <TextField
+            label="Duration (30s | 1m | 1h | 1d)"
+            value={duration || ''}
+            onChange={(e) => onDurationChange?.(e.target.value)}
+            sx={{ minWidth: 120 }}
+            placeholder="Enter duration"
+          />
+          <TextField
+            label="Value"
+            value={Array.isArray(value) ? value.join(', ') : String(value || '')}
+            onChange={(e) => handleSingleValueChange(e.target.value)}
+            sx={{ minWidth: 120 }}
+            placeholder="Enter value"
+          />
+        </Box>
+      );
     default:
       return (
         <TextField
@@ -231,24 +269,19 @@ const ValueInput: React.FC<{
 
 // Function to optimize the structure by removing unnecessary single-expression groups
 const optimizeStructure = (data: GroupData | ConditionData, isRoot: boolean = true): any => {
-  console.log('Optimizing structure:', data, 'isRoot:', isRoot);
-  
   // If it's a condition, return it as-is
   if ('sourceType' in data) {
-    console.log('Found condition, returning as-is');
     return data;
   }
   
   // Only flatten single-expression groups at the ROOT level
   if (isRoot && data.expressions.length === 1) {
-    console.log('Found single-expression group at root level, flattening');
     // Recursively optimize the single expression (but it's no longer root)
     return optimizeStructure(data.expressions[0], false);
   }
   
   // For nested groups OR multiple expressions, keep the group but optimize nested expressions
   if (data.expressions.length >= 1) {
-    console.log('Found group (nested or multi-expression), preserving structure and optimizing nested expressions');
     return {
       type: data.type,
       expressions: data.expressions.map(expr => optimizeStructure(expr, false))
@@ -256,7 +289,6 @@ const optimizeStructure = (data: GroupData | ConditionData, isRoot: boolean = tr
   }
   
   // If no expressions, return null (this shouldn't happen in normal usage)
-  console.log('Found empty group, returning null');
   return null;
 };
 
@@ -278,7 +310,6 @@ const ConditionBuilder: React.FC<{
 
   // Load sensor details when UUID changes or when sensors/devices update
   useEffect(() => {
-    console.log("I am called on changing the value in first dropdown");
     const loadSensorDetails = async () => {
       if (condition.sourceType === 'sensor' && condition.UUID) {
         const sensor = sensors.find(s => s.uuid === condition.UUID);
@@ -509,13 +540,24 @@ const ConditionBuilder: React.FC<{
               {op.label}
             </MenuItem>
           ))}
+          {/* Time Operations with value to compare with */}
+          <MenuItem disabled sx={{ fontWeight: 'bold', color: 'primary.main', mt: 1 }}>
+            Time Operations with value to compare with
+          </MenuItem>
+          {OPERATORS.filter(op => op.category === 'timeValue').map((op) => (
+            <MenuItem key={op.value} value={op.value} sx={{ pl: 3 }}>
+              {op.label}
+            </MenuItem>
+          ))}
         </Select>
       </FormControl>
 
       <ValueInput
         operator={condition.operator}
         value={condition.value}
+        duration={condition.duration}
         onChange={(newValue) => onChange({ ...condition, value: newValue })}
+        onDurationChange={(newDuration) => onChange({ ...condition, duration: newDuration })}
       />
 
       {onDelete && (
@@ -559,7 +601,8 @@ const ExpressionGroup: React.FC<{
         UUID: sensors[0]?.uuid || '',
         key: '',
         operator: '==',
-        value: ''
+        value: '',
+        duration: undefined
       }]
     });
   };
@@ -658,77 +701,6 @@ const ExpressionGroup: React.FC<{
   );
 };
 
-const parseExistingConfig = (initialExpression: NodeDialogProps['initialExpression'], defaultUUID: string = ''): GroupData => {
-  // Default empty group
-  const defaultGroup: GroupData = {
-    type: 'AND',
-    expressions: [{
-      sourceType: 'sensor',
-      UUID: defaultUUID,
-      key: '',
-      operator: '==',
-      value: ''
-    }]
-  };
-
-  if (!initialExpression) {
-    return defaultGroup;
-  }
-
-  try {
-    if (initialExpression.config) {
-      const parsedConfig = JSON.parse(initialExpression.config) as ParsedExpression;
-      
-      // Validate the parsed config
-      if (parsedConfig && 
-          typeof parsedConfig === 'object' && 
-          'type' in parsedConfig && 
-          'expressions' in parsedConfig &&
-          Array.isArray(parsedConfig.expressions)) {
-        
-        // Validate each expression in the group
-        const validExpressions = parsedConfig.expressions.map((expr: ParsedExpression) => {
-          if (expr.sourceType && expr.UUID && expr.key && expr.operator && expr.value !== undefined) {
-            return {
-              sourceType: expr.sourceType as 'sensor' | 'device',
-              UUID: expr.UUID,
-              key: expr.key,
-              operator: expr.operator,
-              value: expr.value
-            };
-          } else if (expr.type && expr.expressions) {
-            // Handle nested groups recursively
-            return expr as GroupData;
-          }
-          return null;
-        }).filter((expr): expr is (ConditionData | GroupData) => expr !== null);
-
-        if (validExpressions.length > 0) {
-          return {
-            type: parsedConfig.type as 'AND' | 'OR',
-            expressions: validExpressions
-          };
-        }
-      }
-    }
-
-    // If config parsing fails or no config, create a single condition from individual fields
-    return {
-      type: 'AND',
-      expressions: [{
-        sourceType: (initialExpression.sourceType as 'sensor' | 'device') || 'sensor',
-        UUID: initialExpression.UUID || defaultUUID,
-        key: initialExpression.key || '',
-        operator: initialExpression.operator || '==',
-        value: initialExpression.value || ''
-      }]
-    };
-  } catch (error) {
-    console.error('Error parsing initial expression:', error);
-    return defaultGroup;
-  }
-};
-
 const NodeDialog: React.FC<NodeDialogProps> = ({
   open,
   onClose,
@@ -752,7 +724,8 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
       UUID: '',
       key: '',
       operator: '==',
-      value: ''
+      value: '',
+      duration: undefined
     }]
   }));
 
@@ -766,7 +739,6 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
 
       try {
         setIsLoading(true);
-        console.log('Initial expression full data:', JSON.stringify(initialExpression, null, 2));
         
         let parsedConfig: ParsedExpression | null = null;
 
@@ -774,37 +746,29 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
         if (typeof initialExpression.config === 'string') {
           try {
             parsedConfig = JSON.parse(initialExpression.config);
-            console.log('Parsed config from string:', parsedConfig);
           } catch (e) {
-            console.log('Failed to parse config string:', e);
+            console.error('Failed to parse config string:', e);
           }
         }
         // If config is an object, try to use it directly
         else if (initialExpression.config && typeof initialExpression.config === 'object') {
-          console.log('Using config object directly:', initialExpression.config);
           parsedConfig = initialExpression.config as ParsedExpression;
         }
 
-        console.log('Parsed/direct config:', parsedConfig);
-
-        // If we have a valid config with expressions, use it
-        if (parsedConfig?.type && Array.isArray(parsedConfig.expressions)) {
-          await handleParsedConfig(parsedConfig);
-        } 
-        // Otherwise, create a single expression from the initialExpression fields
-        else {
-          console.log('Creating single expression from fields:', initialExpression);
-          const singleExpression = {
-            type: 'AND' as const,
-            expressions: [{
-              sourceType: initialExpression.sourceType as 'sensor' | 'device',
-              UUID: initialExpression.UUID || '',
-              key: initialExpression.key || '',
-              operator: initialExpression.operator || '==',
-              value: initialExpression.value || ''
-            }]
-          };
-          await handleParsedConfig(singleExpression);
+        // If we have a valid config, process it
+        if (parsedConfig) {
+          // Handle group structure (normal case)
+          if (parsedConfig.type && Array.isArray(parsedConfig.expressions)) {
+            await handleParsedConfig(parsedConfig);
+          } 
+          // Handle flattened condition (single condition optimized by optimizeStructure)
+          else if (parsedConfig.sourceType && parsedConfig.UUID && parsedConfig.key && parsedConfig.operator && parsedConfig.value !== undefined) {
+            const wrappedConfig = {
+              type: 'AND' as const,
+              expressions: [parsedConfig]
+            };
+            await handleParsedConfig(wrappedConfig);
+          }
         }
       } catch (error) {
         console.error('Error loading expression data:', error);
@@ -849,10 +813,8 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
   }, [rootGroup, sensors, sensorDetails, onFetchSensorDetails]);
 
   const handleParsedConfig = async (config: ParsedExpression) => {
-    console.log('Handling config:', config);
-    
     if (!Array.isArray(config.expressions)) {
-      console.log('No valid expressions array found');
+      console.error('No valid expressions array found');
       return;
     }
 
@@ -865,7 +827,8 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
           UUID: expr.UUID,
           key: expr.key,
           operator: expr.operator,
-          value: expr.value
+          value: expr.value,
+          duration: expr.duration
         };
       }
       // Check if it's a group (has type and expressions)
@@ -896,14 +859,12 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
       expressions: convertedExpressions
     };
 
-    console.log('Setting new root group with nested structure:', newRootGroup);
     setRootGroup(newRootGroup);
   };
 
   // Reset form when dialog opens/closes
   useEffect(() => {
     if (open) {
-      console.log('Dialog opened with initial expression:', initialExpression);
       setNodeName(initialExpression?.name || '');
     }
   }, [open, initialExpression]);
