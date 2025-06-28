@@ -141,7 +141,7 @@ const Dashboard = () => {
     }}>
       <DashboardHeader title={t('dashboard.title')} />
       
-      <AdminTools />
+      {/* <AdminTools /> */}
       
       <div style={{ 
         display: 'grid',

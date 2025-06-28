@@ -43,6 +43,7 @@ interface FilterConfig {
   key: string;
   operator: string;
   value: string | number;
+  duration: string;
 }
 
 interface DeviceCommand {
@@ -112,7 +113,7 @@ const RuleForm: React.FC<RuleFormProps> = ({
     }
     return initialData.nodes.map((node) => ({
       id: node.id,
-      type: node.type,
+      type: node.type as 'filter' | 'action',
       name: node.name,
       config: JSON.parse(node.config),
     }));
@@ -123,7 +124,7 @@ const RuleForm: React.FC<RuleFormProps> = ({
     if (initialData?.nodes) {
       setNodes(initialData.nodes.map((node) => ({
         id: node.id,
-        type: node.type,
+        type: node.type as 'filter' | 'action',
         name: node.name,
         config: JSON.parse(node.config),
         nextNodeId: node.nextNodeId
@@ -212,7 +213,8 @@ const RuleForm: React.FC<RuleFormProps> = ({
           UUID: nodeConfig?.UUID || '',
           key: nodeConfig?.key || '',
           operator: nodeConfig?.operator || '==',
-          value: nodeConfig?.value || ''
+          value: nodeConfig?.value || '',
+          duration: nodeConfig?.duration || ''
         }]
       };
 
@@ -314,7 +316,6 @@ const RuleForm: React.FC<RuleFormProps> = ({
   };
 
   const getActionNodeData = (node: NodeFormData): ActionNodeData | undefined => {
-    console.log('Getting action node data from:', node);
     
     let config: ActionConfig | undefined;
     
@@ -333,7 +334,7 @@ const RuleForm: React.FC<RuleFormProps> = ({
     else if (typeof node.config === 'object' && 'type' in node.config && node.config.type === 'DEVICE_COMMAND') {
       config = node.config as ActionConfig;
     }
-
+    
     if (config) {
       return {
         type: 'action',

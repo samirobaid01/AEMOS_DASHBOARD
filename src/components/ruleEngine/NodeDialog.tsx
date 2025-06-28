@@ -20,13 +20,17 @@ import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import type { Device } from "../../types/device";
 import type { Sensor } from "../../types/sensor";
+import * as deviceStatesService from '../../services/deviceStates.service';
+import { useSelector } from 'react-redux';
+import { selectSelectedOrganizationId } from '../../state/slices/auth.slice';
 
 interface ConditionData {
   sourceType: 'sensor' | 'device';
   UUID: string;
   key: string;
   operator: string;
-  value: string | number;
+  value: string | number | number[] | string[];
+  duration?: string | number;
 }
 
 interface GroupData {
@@ -39,7 +43,8 @@ interface ParsedExpression {
   UUID?: string;
   key?: string;
   operator?: string;
-  value?: string | number;
+  value?: string | number | number[] | string[];
+  duration?: string | number;
   type?: string;
   expressions?: ParsedExpression[];
 }
@@ -65,6 +70,7 @@ interface NodeDialogProps {
     key?: string;
     operator?: string;
     value?: string | number;
+    duration?: string | number;
     config?: string;
   };
   sensors: Sensor[];
@@ -73,28 +79,209 @@ interface NodeDialogProps {
   onFetchSensorDetails: (sensorId: number) => Promise<void>;
 }
 
-const OPERATORS = ["==", "!=", ">", "<", ">=", "<="];
+const OPERATORS = [
+  // Basic comparisons
+  { value: "==", label: "Equals", category: "comparison", valueType: "single" },
+  { value: "!=", label: "Not Equals", category: "comparison", valueType: "single" },
+  { value: ">", label: "Greater Than", category: "comparison", valueType: "single" },
+  { value: "<", label: "Less Than", category: "comparison", valueType: "single" },
+  { value: ">=", label: "Greater Than or Equal", category: "comparison", valueType: "single" },
+  { value: "<=", label: "Less Than or Equal", category: "comparison", valueType: "single" },
+  
+  // Null/Empty checks
+  { value: "isNull", label: "Is Null", category: "null", valueType: "none" },
+  { value: "isNotNull", label: "Is Not Null", category: "null", valueType: "none" },
+  { value: "isEmpty", label: "Is Empty", category: "null", valueType: "none" },
+  { value: "isNotEmpty", label: "Is Not Empty", category: "null", valueType: "none" },
+  
+  // Type checks
+  { value: "isNumber", label: "Is Number", category: "type", valueType: "none" },
+  { value: "isString", label: "Is String", category: "type", valueType: "none" },
+  { value: "isBoolean", label: "Is Boolean", category: "type", valueType: "none" },
+  { value: "isArray", label: "Is Array", category: "type", valueType: "none" },
+  
+  // Numeric operations
+  { value: "between", label: "Between", category: "numeric", valueType: "range" },
+  
+  // String operations
+  { value: "contains", label: "Contains", category: "string", valueType: "single" },
+  { value: "notContains", label: "Not Contains", category: "string", valueType: "single" },
+  { value: "startsWith", label: "Starts With", category: "string", valueType: "single" },
+  { value: "endsWith", label: "Ends With", category: "string", valueType: "single" },
+  { value: "matches", label: "Matches Regex", category: "string", valueType: "single" },
+  
+  // Array operations
+  { value: "in", label: "In", category: "array", valueType: "array" },
+  { value: "notIn", label: "Not In", category: "array", valueType: "array" },
+  { value: "hasAll", label: "Has All", category: "array", valueType: "array" },
+  { value: "hasAny", label: "Has Any", category: "array", valueType: "array" },
+  { value: "hasNone", label: "Has None", category: "array", valueType: "array" },
+  
+  // Time operations
+  { value: "olderThan", label: "Older Than (s|m|h|d)", category: "time", valueType: "singleDuration" },
+  { value: "newerThan", label: "Newer Than (s|m|h|d)", category: "time", valueType: "singleDuration" },
+  { value: "inLast", label: "In Last (s|m|h|d)", category: "time", valueType: "singleDuration" },
+
+  //Time operations with value to compare with
+  { value: "valueOlderThan", label: "Value Older Than (s|m|h|d)", category: "timeValue", valueType: "compareValueDuration" },
+  { value: "valueNewerThan", label: "Value Newer Than (s|m|h|d)", category: "timeValue", valueType: "compareValueDuration" },
+  { value: "valueInLast", label: "Value In Last (s|m|h|d)", category: "timeValue", valueType: "compareValueDuration" },
+];
+
+// Helper function to get operator configuration
+const getOperatorConfig = (operatorValue: string) => {
+  return OPERATORS.find(op => op.value === operatorValue) || { value: operatorValue, label: operatorValue, category: "comparison", valueType: "single" };
+};
+
+// Value Input Component for different operator types
+const ValueInput: React.FC<{
+  operator: string;
+  value: string | number | number[] | string[];
+  duration?: string | number;
+  onChange: (value: string | number | number[] | string[]) => void;
+  onDurationChange?: (duration: string | number) => void;
+}> = ({ operator, value, duration, onChange, onDurationChange }) => {
+  const operatorConfig = getOperatorConfig(operator);
+  const { t } = useTranslation();
+
+  const handleSingleValueChange = (newValue: string) => {
+    // Try to convert to number if it looks like a number
+    const numberValue = Number(newValue);
+    if (!isNaN(numberValue) && newValue.trim() !== '') {
+      onChange(numberValue);
+    } else {
+      onChange(newValue);
+    }
+  };
+
+  const handleRangeValueChange = (index: 0 | 1, newValue: string) => {
+    const currentValue = Array.isArray(value) ? value as number[] : [0, 0];
+    const numberValue = Number(newValue);
+    const newRangeValue: number[] = [...currentValue];
+    newRangeValue[index] = !isNaN(numberValue) ? numberValue : 0;
+    onChange(newRangeValue);
+  };
+
+  const handleArrayValueChange = (newValue: string) => {
+    // Parse comma-separated values, keeping them as strings or converting to numbers
+    const arrayValue = newValue.split(',').map(item => {
+      const trimmed = item.trim();
+      const numberValue = Number(trimmed);
+      // Only convert to number if it's a valid number and not an empty string
+      return !isNaN(numberValue) && trimmed !== '' && trimmed !== '.' ? numberValue : trimmed;
+    }).filter(item => item !== '');
+    
+    // Determine if this should be a string array or number array
+    const hasNumbers = arrayValue.some(item => typeof item === 'number');
+    const hasStrings = arrayValue.some(item => typeof item === 'string' && item !== '');
+    
+    if (hasNumbers && !hasStrings) {
+      // All numbers
+      onChange(arrayValue.filter((item): item is number => typeof item === 'number'));
+    } else {
+      // Mixed or all strings - convert all to strings
+      onChange(arrayValue.map(item => String(item)));
+    }
+  };
+
+  switch (operatorConfig.valueType) {
+    case 'none':
+      return null; // No input needed for operators like isNull, isNumber, etc.
+
+    case 'range':
+      const rangeValue = Array.isArray(value) ? value : [0, 0];
+      return (
+        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', minWidth: 200 }}>
+          <TextField
+            label="Min"
+            type="number"
+            value={rangeValue[0] || ''}
+            onChange={(e) => handleRangeValueChange(0, e.target.value)}
+            size="small"
+            sx={{ flex: 1 }}
+          />
+          <Typography variant="body2">to</Typography>
+          <TextField
+            label="Max"
+            type="number"
+            value={rangeValue[1] || ''}
+            onChange={(e) => handleRangeValueChange(1, e.target.value)}
+            size="small"
+            sx={{ flex: 1 }}
+          />
+        </Box>
+      );
+
+    case 'array':
+      const displayValue = Array.isArray(value) ? value.join(', ') : String(value || '');
+      return (
+        <TextField
+          label="Values (comma-separated)"
+          value={displayValue}
+          onChange={(e) => handleArrayValueChange(e.target.value)}
+          sx={{ minWidth: 200 }}
+          placeholder="value1, value2, value3"
+          helperText="Enter values separated by commas"
+        />
+      );
+
+    case 'singleDuration':
+      return (
+        <TextField
+          label="30s | 1m | 1h | 1d"
+          value={Array.isArray(value) ? value.join(', ') : String(value || '')}
+          onChange={(e) => handleSingleValueChange(e.target.value)}
+          sx={{ minWidth: 120 }}
+          placeholder={operatorConfig.category === 'string' ? 'Enter text' : 'Enter value'}
+        />
+      );
+    case 'compareValueDuration':
+      return (
+        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', minWidth: 200 }}>
+          <TextField
+            label="Duration (30s | 1m | 1h | 1d)"
+            value={duration || ''}
+            onChange={(e) => onDurationChange?.(e.target.value)}
+            sx={{ minWidth: 120 }}
+            placeholder="Enter duration"
+          />
+          <TextField
+            label="Value"
+            value={Array.isArray(value) ? value.join(', ') : String(value || '')}
+            onChange={(e) => handleSingleValueChange(e.target.value)}
+            sx={{ minWidth: 120 }}
+            placeholder="Enter value"
+          />
+        </Box>
+      );
+    default:
+      return (
+        <TextField
+          label="Value"
+          value={Array.isArray(value) ? value.join(', ') : String(value || '')}
+          onChange={(e) => handleSingleValueChange(e.target.value)}
+          sx={{ minWidth: 120 }}
+          placeholder={operatorConfig.category === 'string' ? 'Enter text' : 'Enter value'}
+        />
+      );
+  }
+};
 
 // Function to optimize the structure by removing unnecessary single-expression groups
 const optimizeStructure = (data: GroupData | ConditionData, isRoot: boolean = true): any => {
-  console.log('Optimizing structure:', data, 'isRoot:', isRoot);
-  
   // If it's a condition, return it as-is
   if ('sourceType' in data) {
-    console.log('Found condition, returning as-is');
     return data;
   }
   
   // Only flatten single-expression groups at the ROOT level
   if (isRoot && data.expressions.length === 1) {
-    console.log('Found single-expression group at root level, flattening');
     // Recursively optimize the single expression (but it's no longer root)
     return optimizeStructure(data.expressions[0], false);
   }
   
   // For nested groups OR multiple expressions, keep the group but optimize nested expressions
   if (data.expressions.length >= 1) {
-    console.log('Found group (nested or multi-expression), preserving structure and optimizing nested expressions');
     return {
       type: data.type,
       expressions: data.expressions.map(expr => optimizeStructure(expr, false))
@@ -102,7 +289,6 @@ const optimizeStructure = (data: GroupData | ConditionData, isRoot: boolean = tr
   }
   
   // If no expressions, return null (this shouldn't happen in normal usage)
-  console.log('Found empty group, returning null');
   return null;
 };
 
@@ -117,11 +303,13 @@ const ConditionBuilder: React.FC<{
 }> = ({ condition, onChange, onDelete, sensors, devices, sensorDetails, onFetchSensorDetails }) => {
   const { t } = useTranslation();
   const [isLoadingSensorDetails, setIsLoadingSensorDetails] = useState(false);
+  const [isLoadingDeviceStates, setIsLoadingDeviceStates] = useState(false);
+  const [deviceStates, setDeviceStates] = useState<any[]>([]);
   const lastFetchTime = useRef<number>(0);
+  const organizationId = useSelector(selectSelectedOrganizationId);
 
   // Load sensor details when UUID changes or when sensors/devices update
   useEffect(() => {
-    console.log("I am called on changing the value in first dropdown");
     const loadSensorDetails = async () => {
       if (condition.sourceType === 'sensor' && condition.UUID) {
         const sensor = sensors.find(s => s.uuid === condition.UUID);
@@ -145,6 +333,31 @@ const ConditionBuilder: React.FC<{
 
     loadSensorDetails();
   }, [condition.UUID, condition.sourceType, sensors, devices, sensorDetails, onFetchSensorDetails]);
+
+  // Fetch device states when a device is selected
+  useEffect(() => {
+    const fetchDeviceStatesForDevice = async () => {
+      if (condition.sourceType === 'device' && condition.UUID && organizationId) {
+        const device = devices.find(d => d.uuid === condition.UUID);
+        if (device?.id) {
+          setIsLoadingDeviceStates(true);
+          try {
+            const states = await deviceStatesService.getDeviceStates(device.id, organizationId);
+            setDeviceStates(states || []);
+          } catch (error) {
+            console.error('Error fetching device states:', error);
+            setDeviceStates([]);
+          } finally {
+            setIsLoadingDeviceStates(false);
+          }
+        }
+      } else {
+        setDeviceStates([]);
+      }
+    };
+
+    fetchDeviceStatesForDevice();
+  }, [condition.UUID, condition.sourceType, devices, organizationId]);
 
   const handleSourceTypeChange = (newSourceType: 'sensor' | 'device') => {
     const newUUID = newSourceType === 'sensor' ? sensors[0]?.uuid : devices[0]?.uuid;
@@ -174,17 +387,16 @@ const ConditionBuilder: React.FC<{
         label: td.variableName
       })) || [];
     } else {
-      const device = devices.find(d => d.uuid === condition.UUID);
-      if (!device?.capabilities) {
+      // For devices, use the fetched device states
+      if (isLoadingDeviceStates) {
         return [];
       }
-      return Object.entries(device.capabilities).map(([key, value]) => {
-        const formattedKey = key.replace(/([A-Z])/g, "_$1").toLowerCase();
-        return {
-          value: formattedKey,
-          label: formattedKey
-        };
-      });
+      
+      // Extract stateName from device states response
+      return deviceStates.map(state => ({
+        value: state.stateName,
+        label: state.stateName
+      }));
     }
   };
 
@@ -236,13 +448,19 @@ const ConditionBuilder: React.FC<{
           value={condition.key}
           onChange={(e) => onChange({ ...condition, key: e.target.value })}
           label="Key"
-          disabled={isLoadingSensorDetails || availableKeys.length === 0}
+          disabled={isLoadingSensorDetails || isLoadingDeviceStates || availableKeys.length === 0}
         >
-          {availableKeys.map((key) => (
-            <MenuItem key={key.value} value={key.value}>
-              {key.label}
+          {availableKeys.length === 0 ? (
+            <MenuItem disabled value="">
+              {isLoadingSensorDetails || isLoadingDeviceStates ? 'Loading...' : 'No options available'}
             </MenuItem>
-          ))}
+          ) : (
+            availableKeys.map((key) => (
+              <MenuItem key={key.value} value={key.value}>
+                {key.label}
+              </MenuItem>
+            ))
+          )}
         </Select>
       </FormControl>
 
@@ -253,19 +471,93 @@ const ConditionBuilder: React.FC<{
           onChange={(e) => onChange({ ...condition, operator: e.target.value })}
           label="Operator"
         >
-          {OPERATORS.map((op) => (
-            <MenuItem key={op} value={op}>
-              {op}
+          {/* Basic Comparisons */}
+          <MenuItem disabled sx={{ fontWeight: 'bold', color: 'primary.main' }}>
+            Basic Comparisons
+          </MenuItem>
+          {OPERATORS.filter(op => op.category === 'comparison').map((op) => (
+            <MenuItem key={op.value} value={op.value} sx={{ pl: 3 }}>
+              {op.label}
+            </MenuItem>
+          ))}
+          
+          {/* Null/Empty Checks */}
+          <MenuItem disabled sx={{ fontWeight: 'bold', color: 'primary.main', mt: 1 }}>
+            Null/Empty Checks
+          </MenuItem>
+          {OPERATORS.filter(op => op.category === 'null').map((op) => (
+            <MenuItem key={op.value} value={op.value} sx={{ pl: 3 }}>
+              {op.label}
+            </MenuItem>
+          ))}
+          
+          {/* Type Checks */}
+          <MenuItem disabled sx={{ fontWeight: 'bold', color: 'primary.main', mt: 1 }}>
+            Type Checks
+          </MenuItem>
+          {OPERATORS.filter(op => op.category === 'type').map((op) => (
+            <MenuItem key={op.value} value={op.value} sx={{ pl: 3 }}>
+              {op.label}
+            </MenuItem>
+          ))}
+          
+          {/* Numeric Operations */}
+          <MenuItem disabled sx={{ fontWeight: 'bold', color: 'primary.main', mt: 1 }}>
+            Numeric Operations
+          </MenuItem>
+          {OPERATORS.filter(op => op.category === 'numeric').map((op) => (
+            <MenuItem key={op.value} value={op.value} sx={{ pl: 3 }}>
+              {op.label}
+            </MenuItem>
+          ))}
+          
+          {/* String Operations */}
+          <MenuItem disabled sx={{ fontWeight: 'bold', color: 'primary.main', mt: 1 }}>
+            String Operations
+          </MenuItem>
+          {OPERATORS.filter(op => op.category === 'string').map((op) => (
+            <MenuItem key={op.value} value={op.value} sx={{ pl: 3 }}>
+              {op.label}
+            </MenuItem>
+          ))}
+          
+          {/* Array Operations */}
+          <MenuItem disabled sx={{ fontWeight: 'bold', color: 'primary.main', mt: 1 }}>
+            Array Operations
+          </MenuItem>
+          {OPERATORS.filter(op => op.category === 'array').map((op) => (
+            <MenuItem key={op.value} value={op.value} sx={{ pl: 3 }}>
+              {op.label}
+            </MenuItem>
+          ))}
+          
+          {/* Time Operations */}
+          <MenuItem disabled sx={{ fontWeight: 'bold', color: 'primary.main', mt: 1 }}>
+            Time Operations
+          </MenuItem>
+          {OPERATORS.filter(op => op.category === 'time').map((op) => (
+            <MenuItem key={op.value} value={op.value} sx={{ pl: 3 }}>
+              {op.label}
+            </MenuItem>
+          ))}
+          {/* Time Operations with value to compare with */}
+          <MenuItem disabled sx={{ fontWeight: 'bold', color: 'primary.main', mt: 1 }}>
+            Time Operations with value to compare with
+          </MenuItem>
+          {OPERATORS.filter(op => op.category === 'timeValue').map((op) => (
+            <MenuItem key={op.value} value={op.value} sx={{ pl: 3 }}>
+              {op.label}
             </MenuItem>
           ))}
         </Select>
       </FormControl>
 
-      <TextField
-        label="Value"
+      <ValueInput
+        operator={condition.operator}
         value={condition.value}
-        onChange={(e) => onChange({ ...condition, value: e.target.value })}
-        sx={{ minWidth: 120 }}
+        duration={condition.duration}
+        onChange={(newValue) => onChange({ ...condition, value: newValue })}
+        onDurationChange={(newDuration) => onChange({ ...condition, duration: newDuration })}
       />
 
       {onDelete && (
@@ -309,7 +601,8 @@ const ExpressionGroup: React.FC<{
         UUID: sensors[0]?.uuid || '',
         key: '',
         operator: '==',
-        value: ''
+        value: '',
+        duration: undefined
       }]
     });
   };
@@ -408,77 +701,6 @@ const ExpressionGroup: React.FC<{
   );
 };
 
-const parseExistingConfig = (initialExpression: NodeDialogProps['initialExpression'], defaultUUID: string = ''): GroupData => {
-  // Default empty group
-  const defaultGroup: GroupData = {
-    type: 'AND',
-    expressions: [{
-      sourceType: 'sensor',
-      UUID: defaultUUID,
-      key: '',
-      operator: '==',
-      value: ''
-    }]
-  };
-
-  if (!initialExpression) {
-    return defaultGroup;
-  }
-
-  try {
-    if (initialExpression.config) {
-      const parsedConfig = JSON.parse(initialExpression.config) as ParsedExpression;
-      
-      // Validate the parsed config
-      if (parsedConfig && 
-          typeof parsedConfig === 'object' && 
-          'type' in parsedConfig && 
-          'expressions' in parsedConfig &&
-          Array.isArray(parsedConfig.expressions)) {
-        
-        // Validate each expression in the group
-        const validExpressions = parsedConfig.expressions.map((expr: ParsedExpression) => {
-          if (expr.sourceType && expr.UUID && expr.key && expr.operator && expr.value !== undefined) {
-            return {
-              sourceType: expr.sourceType as 'sensor' | 'device',
-              UUID: expr.UUID,
-              key: expr.key,
-              operator: expr.operator,
-              value: expr.value
-            };
-          } else if (expr.type && expr.expressions) {
-            // Handle nested groups recursively
-            return expr as GroupData;
-          }
-          return null;
-        }).filter((expr): expr is (ConditionData | GroupData) => expr !== null);
-
-        if (validExpressions.length > 0) {
-          return {
-            type: parsedConfig.type as 'AND' | 'OR',
-            expressions: validExpressions
-          };
-        }
-      }
-    }
-
-    // If config parsing fails or no config, create a single condition from individual fields
-    return {
-      type: 'AND',
-      expressions: [{
-        sourceType: (initialExpression.sourceType as 'sensor' | 'device') || 'sensor',
-        UUID: initialExpression.UUID || defaultUUID,
-        key: initialExpression.key || '',
-        operator: initialExpression.operator || '==',
-        value: initialExpression.value || ''
-      }]
-    };
-  } catch (error) {
-    console.error('Error parsing initial expression:', error);
-    return defaultGroup;
-  }
-};
-
 const NodeDialog: React.FC<NodeDialogProps> = ({
   open,
   onClose,
@@ -502,7 +724,8 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
       UUID: '',
       key: '',
       operator: '==',
-      value: ''
+      value: '',
+      duration: undefined
     }]
   }));
 
@@ -516,7 +739,6 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
 
       try {
         setIsLoading(true);
-        console.log('Initial expression full data:', JSON.stringify(initialExpression, null, 2));
         
         let parsedConfig: ParsedExpression | null = null;
 
@@ -524,37 +746,29 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
         if (typeof initialExpression.config === 'string') {
           try {
             parsedConfig = JSON.parse(initialExpression.config);
-            console.log('Parsed config from string:', parsedConfig);
           } catch (e) {
-            console.log('Failed to parse config string:', e);
+            console.error('Failed to parse config string:', e);
           }
         }
         // If config is an object, try to use it directly
         else if (initialExpression.config && typeof initialExpression.config === 'object') {
-          console.log('Using config object directly:', initialExpression.config);
           parsedConfig = initialExpression.config as ParsedExpression;
         }
 
-        console.log('Parsed/direct config:', parsedConfig);
-
-        // If we have a valid config with expressions, use it
-        if (parsedConfig?.type && Array.isArray(parsedConfig.expressions)) {
-          await handleParsedConfig(parsedConfig);
-        } 
-        // Otherwise, create a single expression from the initialExpression fields
-        else {
-          console.log('Creating single expression from fields:', initialExpression);
-          const singleExpression = {
-            type: 'AND' as const,
-            expressions: [{
-              sourceType: initialExpression.sourceType as 'sensor' | 'device',
-              UUID: initialExpression.UUID || '',
-              key: initialExpression.key || '',
-              operator: initialExpression.operator || '==',
-              value: initialExpression.value || ''
-            }]
-          };
-          await handleParsedConfig(singleExpression);
+        // If we have a valid config, process it
+        if (parsedConfig) {
+          // Handle group structure (normal case)
+          if (parsedConfig.type && Array.isArray(parsedConfig.expressions)) {
+            await handleParsedConfig(parsedConfig);
+          } 
+          // Handle flattened condition (single condition optimized by optimizeStructure)
+          else if (parsedConfig.sourceType && parsedConfig.UUID && parsedConfig.key && parsedConfig.operator && parsedConfig.value !== undefined) {
+            const wrappedConfig = {
+              type: 'AND' as const,
+              expressions: [parsedConfig]
+            };
+            await handleParsedConfig(wrappedConfig);
+          }
         }
       } catch (error) {
         console.error('Error loading expression data:', error);
@@ -599,10 +813,8 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
   }, [rootGroup, sensors, sensorDetails, onFetchSensorDetails]);
 
   const handleParsedConfig = async (config: ParsedExpression) => {
-    console.log('Handling config:', config);
-    
     if (!Array.isArray(config.expressions)) {
-      console.log('No valid expressions array found');
+      console.error('No valid expressions array found');
       return;
     }
 
@@ -615,7 +827,8 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
           UUID: expr.UUID,
           key: expr.key,
           operator: expr.operator,
-          value: expr.value
+          value: expr.value,
+          duration: expr.duration
         };
       }
       // Check if it's a group (has type and expressions)
@@ -646,14 +859,12 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
       expressions: convertedExpressions
     };
 
-    console.log('Setting new root group with nested structure:', newRootGroup);
     setRootGroup(newRootGroup);
   };
 
   // Reset form when dialog opens/closes
   useEffect(() => {
     if (open) {
-      console.log('Dialog opened with initial expression:', initialExpression);
       setNodeName(initialExpression?.name || '');
     }
   }, [open, initialExpression]);
