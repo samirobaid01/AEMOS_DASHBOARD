@@ -70,7 +70,7 @@ const ForgotPassword = () => {
             value={email}
             onChange={handleChange}
             label={t('email')}
-            placeholder={t('enter_your_email')}
+            placeholder={t('auth.email')}
             error={error || undefined}
             className="border-soil-200 focus:border-leaf-500 focus:ring-leaf-500"
           />

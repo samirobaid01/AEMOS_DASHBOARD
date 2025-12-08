@@ -107,16 +107,16 @@ const Signup = () => {
 
   const subtitle = (
     <>
-      {t('already_have_account')}{' '}
+      {t('auth.haveAccount')}{' '}
       <Link to="/login" className="font-medium text-leaf-600 hover:text-leaf-700 transition-colors duration-200">
-        {t('sign_in')}
+        {t('auth.signIn')}
       </Link>
     </>
   );
   
   return (
     <AuthCard
-      title={t('create_account')}
+      title={t('auth.createAccount')}
       subtitle={subtitle}
       icon="🌱"
     >
@@ -131,7 +131,7 @@ const Signup = () => {
             value={userData.userName}
             onChange={handleChange}
             label={t('user_name')}
-            placeholder={t('enter_your_name')}
+            placeholder={t('auth.userName')}
             error={formErrors.userName}
             className="border-soil-200 focus:border-leaf-500 focus:ring-leaf-500"
           />
@@ -145,7 +145,7 @@ const Signup = () => {
             value={userData.email}
             onChange={handleChange}
             label={t('email')}
-            placeholder={t('enter_your_email')}
+            placeholder={t('auth.email')}
             error={formErrors.email}
             className="border-soil-200 focus:border-leaf-500 focus:ring-leaf-500"
           />
@@ -159,7 +159,7 @@ const Signup = () => {
             value={userData.password}
             onChange={handleChange}
             label={t('password')}
-            placeholder={t('enter_password')}
+            placeholder={t('auth.password')}
             error={formErrors.password}
             className="border-soil-200 focus:border-leaf-500 focus:ring-leaf-500"
           />
@@ -172,8 +172,8 @@ const Signup = () => {
             required
             value={passwordConfirm}
             onChange={handleChange}
-            label={t('confirm_password')}
-            placeholder={t('confirm_your_password')}
+            label={t('auth.confirmPassword')}
+            placeholder={t('auth.confirmPassword')}
             error={formErrors.passwordConfirm}
             className="border-soil-200 focus:border-leaf-500 focus:ring-leaf-500"
           />
@@ -185,9 +185,9 @@ const Signup = () => {
             autoComplete="tel"
             value={userData.phoneNumber || ''}
             onChange={handleChange}
-            label={t('phone_number')}
-            placeholder={t('enter_phone_number')}
-            helperText={t('phone_number_description')}
+            label={t('auth.phoneNumber')}
+            placeholder={t('auth.phoneNumber')}
+            helperText={t('auth.phoneNumberDescription')}
             className="border-soil-200 focus:border-leaf-500 focus:ring-leaf-500"
           />
         </div>
@@ -203,7 +203,7 @@ const Signup = () => {
               className="h-4 w-4 text-leaf-600 focus:ring-leaf-500 border-soil-300 rounded"
             />
             <label htmlFor="notifyByEmail" className="ml-2 block text-sm text-soil-700">
-              {t('notify_by_email')}
+              {t('auth.notifications.byEmail')}
             </label>
           </div>
           
@@ -217,7 +217,7 @@ const Signup = () => {
               className="h-4 w-4 text-leaf-600 focus:ring-leaf-500 border-soil-300 rounded"
             />
             <label htmlFor="notifyBySMS" className="ml-2 block text-sm text-soil-700">
-              {t('notify_by_sms')}
+              {t('auth.notifications.bySMS')}
             </label>
           </div>
           
@@ -234,10 +234,10 @@ const Signup = () => {
             </div>
             <div className="ml-2 text-sm">
               <label htmlFor="termsAndConditions" className="font-medium text-soil-700">
-                {t('agree_to_terms')}{' '}
-                <a href="#" className="text-leaf-600 hover:text-leaf-700 transition-colors duration-200">
+                {t('auth.termsAndConditions')}{' '}
+                {/* <a href="#" className="text-leaf-600 hover:text-leaf-700 transition-colors duration-200">
                   {t('terms_and_conditions')}
-                </a>
+                </a> */}
               </label>
               {formErrors.termsAndConditions && (
                 <p className="text-red-500 text-sm mt-1">{formErrors.termsAndConditions}</p>
@@ -261,7 +261,7 @@ const Signup = () => {
             variant="primary"
             className="bg-leaf-600 hover:bg-leaf-700 focus:ring-leaf-500"
           >
-            {t('sign_up')}
+            {t('auth.signup')}
           </Button>
         </div>
       </form>

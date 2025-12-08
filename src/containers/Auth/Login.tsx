@@ -45,14 +45,14 @@ const Login = () => {
     <>
       {t('or')}{' '}
       <Link to="/signup" className="font-medium text-leaf-600 hover:text-leaf-700 transition-colors duration-200">
-        {t('create_new_account')}
+        {t('auth.createAccount')}
       </Link>
     </>
   );
   
   return (
     <AuthCard 
-      title={t('sign_in_to_account')}
+      title={t('auth.signIn')}
       subtitle={subtitle}
       icon="🌾"
     >
@@ -68,7 +68,7 @@ const Login = () => {
               value={credentials.email}
               onChange={handleChange}
               label={t('email')}
-              placeholder={t('enter_your_email')}
+              placeholder={t('auth.email')}
               error={error ? '' : undefined}
               className="border-soil-200 focus:border-leaf-500 focus:ring-leaf-500"
             />
@@ -83,7 +83,7 @@ const Login = () => {
               value={credentials.password}
               onChange={handleChange}
               label={t('password')}
-              placeholder={t('enter_your_password')}
+              placeholder={t('auth.password')}
               error={error ? '' : undefined}
               className="border-soil-200 focus:border-leaf-500 focus:ring-leaf-500"
             />
@@ -99,13 +99,13 @@ const Login = () => {
               className="h-4 w-4 text-leaf-600 focus:ring-leaf-500 border-soil-300 rounded"
             />
             <label htmlFor="remember-me" className="ml-2 block text-sm text-soil-700">
-              {t('remember_me')}
+              {t('auth.rememberMe')}
             </label>
           </div>
 
           <div className="text-sm">
             <Link to="/forgot-password" className="font-medium text-wheat-600 hover:text-wheat-700 transition-colors duration-200">
-              {t('forgot_password')}
+              {t('auth.forgotPassword')}
             </Link>
           </div>
         </div>
@@ -125,7 +125,7 @@ const Login = () => {
             variant="primary"
             className="bg-leaf-600 hover:bg-leaf-700 focus:ring-leaf-500"
           >
-            {t('sign_in')}
+            {t('auth.signIn')}
           </Button>
         </div>
       </form>
