@@ -132,7 +132,7 @@ const AreaEdit = () => {
               className="rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50"
               onClick={() => navigate('/areas')}
             >
-              {t('back_to_areas')}
+              {t('areas.backToAreas')}
             </button>
           </div>
         </div>

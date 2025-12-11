@@ -174,7 +174,7 @@ const DeviceItem: React.FC<DeviceItemProps> = ({ device, isMobile }) => {
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap'
           }}>
-            {device.description || t('devices.no_description')}
+            {device.description || t('devices.noDescription')}
           </p>
         </div>
 

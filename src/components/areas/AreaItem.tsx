@@ -85,7 +85,7 @@ const AreaItem: React.FC<AreaItemProps> = ({ area, windowWidth }) => {
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
           }}>
-            {area.description || t('no_description')}
+            {area.description || t('areas.noDescription')}
           </p>
         </div>
         

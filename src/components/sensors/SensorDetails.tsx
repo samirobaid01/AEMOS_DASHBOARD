@@ -271,7 +271,7 @@ const SensorDetails: React.FC<SensorDetailsProps> = ({
                   margin: "0 0 1rem 0",
                 }}
               >
-                {t("sensor_information")}
+                {t("sensors.sensorInformation")}
               </h2>
 
               <div style={{ marginBottom: "1rem" }}>
@@ -283,7 +283,7 @@ const SensorDetails: React.FC<SensorDetailsProps> = ({
                     margin: "0 0 0.25rem 0",
                   }}
                 >
-                  {t("sensor_name")}
+                  {t("sensors.name")}
                 </p>
                 <p
                   style={{
@@ -305,7 +305,7 @@ const SensorDetails: React.FC<SensorDetailsProps> = ({
                     margin: "0 0 0.25rem 0",
                   }}
                 >
-                  {t("sensor_type")}
+                  {t("sensors.type")}
                 </p>
                 <p
                   style={{
@@ -391,7 +391,7 @@ const SensorDetails: React.FC<SensorDetailsProps> = ({
                   margin: "0 0 1rem 0",
                 }}
               >
-                {t("additional_details")}
+                {t("sensors.additionalDetails")}
               </h2>
 
               {sensor.area && (
@@ -450,7 +450,7 @@ const SensorDetails: React.FC<SensorDetailsProps> = ({
                     lineHeight: 1.5,
                   }}
                 >
-                  {sensor.description || t("no_description")}
+                  {sensor.description || t("sensors.noDescription")}
                 </p>
               </div>
 
@@ -463,7 +463,7 @@ const SensorDetails: React.FC<SensorDetailsProps> = ({
                     margin: "0 0 0.25rem 0",
                   }}
                 >
-                  {t("created_at")}
+                  {t("sensors.createdAt")}
                 </p>
                 <p
                   style={{
@@ -590,7 +590,7 @@ const SensorDetails: React.FC<SensorDetailsProps> = ({
                   color: darkMode ? colors.textPrimary : '#111827', 
                   margin: 0
                 }}>
-                  {t('telemetry_data')}
+                  {t('sensors.telemetryData')}
                   {connected && (
                     <span style={{
                       display: 'inline-flex',
@@ -720,7 +720,7 @@ const SensorDetails: React.FC<SensorDetailsProps> = ({
                             {telemetryData 
                               ? formatTelemetryValue(telemetryData.value, variable.datatype) 
                               : <span style={{ color: darkMode ? colors.textSecondary : '#6b7280', fontSize: '1rem', fontStyle: 'italic' }}>
-                                  {t('waiting_for_data')}
+                                  {t('sensors.waitingForData')}
                                 </span>
                             }
                             {telemetryData && (

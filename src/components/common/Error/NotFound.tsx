@@ -20,7 +20,7 @@ const NotFound = () => {
             to="/"
             className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg shadow-soft text-white bg-leaf-600 hover:bg-leaf-700 transition duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-leaf-500"
           >
-            {t('back_to_home')}
+            {t('common.back')}
           </Link>
         </div>
       </div>

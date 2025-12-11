@@ -91,7 +91,7 @@ const DeviceEdit: React.FC<DeviceEditProps> = ({
                 cursor: 'pointer'
               }}
             >
-              {t('back_to_devices')}
+              {t('devices.backToDevices')}
             </button>
           </div>
         </div>

@@ -126,7 +126,7 @@ const SensorItem: React.FC<SensorItemProps> = ({ sensor, windowWidth }) => {
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
           }}>
-            {sensor.description || t('no_description')}
+            {sensor.description || t('sensors.noDescription')}
           </p>
         </div>
         
