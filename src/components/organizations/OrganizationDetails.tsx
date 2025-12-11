@@ -248,7 +248,7 @@ const OrganizationDetails: React.FC<OrganizationDetailsProps> = ({
               variant="outline"
               onClick={onBack}
             >
-              {t('organizations.back_to_organizations')}
+              {t('organizations.backToOrganizations')}
             </Button>
           </div>
         </div>
@@ -268,7 +268,7 @@ const OrganizationDetails: React.FC<OrganizationDetailsProps> = ({
               variant="outline"
               onClick={onBack}
             >
-              {t('organizations.back_to_organizations')}
+              {t('organizations.backToOrganizations')}
             </Button>
           </div>
         </div>
@@ -307,7 +307,7 @@ const OrganizationDetails: React.FC<OrganizationDetailsProps> = ({
         <div style={styles.card}>
           {/* Organization Details */}
           <div style={styles.cardSection}>
-            <h2 style={styles.cardTitle}>{t('organization_details')}</h2>
+            <h2 style={styles.cardTitle}>{t('organizations.detail')}</h2>
             <div style={styles.detailsGrid}>
               <div style={styles.detailItem}>
                 <div style={styles.detailLabel}>{t('status')}</div>
@@ -322,29 +322,29 @@ const OrganizationDetails: React.FC<OrganizationDetailsProps> = ({
               </div>
               
               <div style={styles.detailItem}>
-                <div style={styles.detailLabel}>{t('organization_type')}</div>
+                <div style={styles.detailLabel}>{t('organizations.organizationType')}</div>
                 <div style={styles.detailValue}>
-                  {organization.isParent ? t('parent_organization') : t('child_organization')}
+                  {organization.isParent ? t('organizations.parentOrganization') : t('organizations.childOrganization')}
                 </div>
               </div>
 
               {organization.email && (
                 <div style={styles.detailItem}>
-                  <div style={styles.detailLabel}>{t('email')}</div>
+                  <div style={styles.detailLabel}>{t('organizations.email')}</div>
                   <div style={styles.detailValue}>{organization.email}</div>
                 </div>
               )}
 
               {organization.contactNumber && (
                 <div style={styles.detailItem}>
-                  <div style={styles.detailLabel}>{t('contact_number')}</div>
+                  <div style={styles.detailLabel}>{t('organizations.contactNumber')}</div>
                   <div style={styles.detailValue}>{organization.contactNumber}</div>
                 </div>
               )}
 
               {organization.address && (
                 <div style={{ ...styles.detailItem, gridColumn: 'span 2' }}>
-                  <div style={styles.detailLabel}>{t('address')}</div>
+                  <div style={styles.detailLabel}>{t('organizations.address')}</div>
                   <div style={styles.detailValue}>
                     {organization.address}
                     {organization.zip && `, ${organization.zip}`}
@@ -385,7 +385,7 @@ const OrganizationDetails: React.FC<OrganizationDetailsProps> = ({
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <p style={{ fontSize: '0.875rem', fontWeight: 500, color: colors.textPrimary }}>{area.name}</p>
                         <p style={{ fontSize: '0.75rem', color: colors.textMuted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                          {area.description || t('no_description')}
+                          {area.description || t('areas.noDescription')}
                         </p>
                       </div>
                       <div>
@@ -417,7 +417,7 @@ const OrganizationDetails: React.FC<OrganizationDetailsProps> = ({
               <h2 style={styles.cardTitle}>{t('devices.title')}</h2>
               <Link to={`/devices/create?organizationId=${organization.id}`}>
                 <Button variant="outline" size="sm">
-                  {t('add_device')}
+                  {t('devices.add')}
                 </Button>
               </Link>
             </div>

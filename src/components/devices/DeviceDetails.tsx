@@ -315,7 +315,7 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({
               e.currentTarget.style.backgroundColor = darkMode ? colors.surfaceBackground : 'white';
             }}
           >
-            {t('back_to_devices')}
+            {t('common.back')}
           </button>
         </div>
       </div>

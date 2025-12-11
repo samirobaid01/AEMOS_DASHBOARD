@@ -94,7 +94,7 @@ const ForgotPassword = () => {
         <div className="flex items-center justify-between">
           <div className="text-sm">
             <Link to="/login" className="font-medium text-leaf-600 hover:text-leaf-700 transition-colors duration-200">
-              {t('back_to_login')}
+              {t('auth.backToLogin')}
             </Link>
           </div>
           <Button

@@ -96,7 +96,7 @@ const AreaDetails: React.FC<AreaDetailsProps> = ({
                   color: colors.textPrimary, 
                   margin: '0 0 1rem 0'
                 }}>
-                  {t('areas.basic_details')}
+                  {t('areas.description')}
                 </h2>
                 
                 <div style={{ marginBottom: '1rem' }}>
@@ -106,7 +106,7 @@ const AreaDetails: React.FC<AreaDetailsProps> = ({
                     color: colors.textMuted, 
                     margin: '0 0 0.25rem 0'
                   }}>
-                    {t('common.organization')}
+                    {t('common.organizations')}
                   </p>
                   <p style={{ 
                     fontSize: '1rem', 
@@ -157,7 +157,7 @@ const AreaDetails: React.FC<AreaDetailsProps> = ({
                   color: colors.textPrimary, 
                   margin: '0 0 1rem 0'
                 }}>
-                  {t('areas.additional_details')}
+                  {t('areas.additionalDetails')}
                 </h2>
               
                 <div style={{ marginBottom: '1rem' }}>
@@ -175,7 +175,7 @@ const AreaDetails: React.FC<AreaDetailsProps> = ({
                     margin: 0, 
                     lineHeight: 1.5
                   }}>
-                    {area.description || t('areas.no_description')}
+                    {area.description || t('areas.noDescription')}
                   </p>
                 </div>
               
