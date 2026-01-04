@@ -115,7 +115,7 @@ const RuleForm: React.FC<RuleFormProps> = ({
       id: node.id,
       type: node.type as 'filter' | 'action',
       name: node.name,
-      config: JSON.parse(node.config),
+      config: JSON.stringify(node.config),
     }));
   });
 
@@ -126,7 +126,7 @@ const RuleForm: React.FC<RuleFormProps> = ({
         id: node.id,
         type: node.type as 'filter' | 'action',
         name: node.name,
-        config: JSON.parse(node.config),
+        config: JSON.stringify(node.config),
         nextNodeId: node.nextNodeId
       })));
     }
