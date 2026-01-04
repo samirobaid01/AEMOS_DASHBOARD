@@ -314,7 +314,8 @@ const RuleDetails: React.FC<RuleDetailsProps> = ({
             </p>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              {rule?.nodes?.map((node, index) => {
+              {
+              rule?.nodes?.map((node, index) => {
                 // Create options for the dropdown
                 const nodeOptions = rule.nodes
                   .filter(n => n.id !== node.id) // Exclude current node
@@ -343,7 +344,7 @@ const RuleDetails: React.FC<RuleDetailsProps> = ({
 
                     <p style={labelStyle}>{t('rules.configuration')}:</p>
                     <pre style={codeBlockStyle}>
-                      {JSON.stringify(JSON.parse(node.config), null, 2)}
+                      {JSON.stringify(node.config, null, 2)}
                     </pre>
 
                     <FormControl fullWidth sx={{ mt: 2 }}>
