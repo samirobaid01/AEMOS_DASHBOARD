@@ -3,4 +3,5 @@ export interface Sensor {
   uuid: string;
   name: string;
   TelemetryData?: any[];
+  status: string;
 } 

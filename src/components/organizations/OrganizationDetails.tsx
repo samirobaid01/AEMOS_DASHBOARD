@@ -6,11 +6,13 @@ import type { Area } from '../../types/area';
 import type { Device } from '../../types/device';
 import Button from '../../components/common/Button/Button';
 import { useThemeColors } from '../../hooks/useThemeColors';
+import type { Sensor } from '../../types/sensor';
 
 interface OrganizationDetailsProps {
   organization: Organization | null;
   areas: Area[];
   devices: Device[];
+  sensors: Sensor[];
   isLoading: boolean;
   error: string | null;
   deleteModalOpen: boolean;
@@ -25,6 +27,7 @@ const OrganizationDetails: React.FC<OrganizationDetailsProps> = ({
   organization,
   areas,
   devices,
+  sensors,
   isLoading,
   error,
   deleteModalOpen,
@@ -410,7 +413,53 @@ const OrganizationDetails: React.FC<OrganizationDetailsProps> = ({
               <p style={{ fontSize: '0.875rem', color: colors.textMuted }}>{t('no_areas')}</p>
             )}
           </div>
+          {/* Sensors Section */}
+          <div style={styles.cardSection}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <h2 style={styles.cardTitle}>{t('sensors.title')}</h2>
+              <Link to={`/sensors/create?organizationId=${organization.id}`}>
+                <Button variant="outline" size="sm">
+                  {t('sensors.add')}
+                </Button>
+              </Link>
+            </div>
+            {sensors.length > 0 ? (
+              <div>
+                {devices.map(device => (
+                  <div key={device.id} style={styles.listItem}>
+                    <Link
+                      to={`/devices/${device.id}`}
+                      style={styles.link}
+                      onMouseOver={handleAreaLinkHover}
+                      onMouseOut={handleAreaLinkLeave}
+                    >
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <p style={{ fontSize: '0.875rem', fontWeight: 500, color: colors.textPrimary }}>{device.name}</p>
+                        <p style={{ fontSize: '0.75rem', color: colors.textMuted }}>{device.uuid}</p>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <span style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          padding: '0.25rem 0.75rem',
+                          borderRadius: '9999px',
+                          fontSize: '0.75rem',
+                          fontWeight: 500,
+                          backgroundColor: device.status === 'active' ? colors.successBackground : colors.dangerBackground,
+                          color: device.status === 'active' ? colors.successText : colors.dangerText,
+                        }}>
+                          {device.status === 'active' ? t('active') : t('inactive')}
+                        </span>
+                      </div>
+                    </Link>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p style={{ fontSize: '0.875rem', color: colors.textMuted }}>{t('no_sensors')}</p>
+            )}
 
+          </div>
           {/* Devices Section */}
           <div style={styles.cardSection}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
@@ -444,10 +493,10 @@ const OrganizationDetails: React.FC<OrganizationDetailsProps> = ({
                           borderRadius: '9999px',
                           fontSize: '0.75rem',
                           fontWeight: 500,
-                          backgroundColor: device.status ? colors.successBackground : colors.dangerBackground,
-                          color: device.status ? colors.successText : colors.dangerText,
+                          backgroundColor: device.status === 'active' ? colors.successBackground : colors.dangerBackground,
+                          color: device.status === 'active' ? colors.successText : colors.dangerText,
                         }}>
-                          {device.status ? t('active') : t('inactive')}
+                          {device.status === 'active' ? t('active') : t('inactive')}
                         </span>
                       </div>
                     </Link>
