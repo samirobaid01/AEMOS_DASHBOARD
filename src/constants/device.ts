@@ -11,7 +11,7 @@ export const ALLOWED_DEVICE_TYPES = [
 export const ALLOWED_CONTROL_TYPES = [
   'binary',
   'range',
-  'multi-state',
+  'multistate',
   'continuous'
 ] as const;
 

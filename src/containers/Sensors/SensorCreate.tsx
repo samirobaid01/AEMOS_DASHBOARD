@@ -4,10 +4,11 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import type { AppDispatch } from '../../state/store';
 import { createSensor, selectSensorsLoading, selectSensorsError } from '../../state/slices/sensors.slice';
 import { fetchAreas, selectAreas } from '../../state/slices/areas.slice';
-import type { SensorCreateRequest, SensorUpdateRequest } from '../../types/sensor';
+import type { SensorCreateRequest, SensorUpdateRequest } from '../../types/sensor.d';
 import SensorForm from '../../components/sensors/SensorForm';
 import LoadingScreen from '../../components/common/Loading/LoadingScreen';
 import { selectSelectedOrganization } from '../../state/slices/organizations.slice';
+import { toastService } from '../../services/toastService';
 
 const SensorCreate = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -39,21 +40,22 @@ const SensorCreate = () => {
   // Handle form submission
   const handleSubmit = async (data: SensorCreateRequest | SensorUpdateRequest) => {
     // Create a properly typed SensorCreateRequest
-    if (!organization?.id) {
-      throw new Error('Organization ID is required to create a sensor.');
-    }
+    // if (!organization?.id) {
+    //   toastService.error('Organization ID is required to create a sensor.');
+    //   throw new Error('Organization ID is required to create a sensor.');
+    // }
     const formData: SensorCreateRequest = {
-      organizationId: parseInt(organization.id.toString(), 10),
+      //organizationId: parseInt(organization.id.toString(), 10),
       name: data.name || '',
       areaId: data.areaId || (areaId ? parseInt(areaId, 10) : 0),
-      type: data.type || '',
-      status: data.status !== undefined ? data.status : true,
+    //  type: data.type || '',
+      status: data.status !== undefined ? data.status : 'active',
       description: data.description,
       metadata: data.metadata
     };
     
     // Ensure the required fields are set
-    if (!formData.name || !formData.areaId || !formData.type) {
+    if (!formData.name || !formData.areaId) {
       return;
     }
     

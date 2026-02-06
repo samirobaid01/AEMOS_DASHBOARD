@@ -3,7 +3,7 @@ export interface Sensor {
   name: string;
   areaId: number;
   type: string;
-  status: boolean;
+  status: string;
   description?: string;
   metadata?: Record<string, any>;
   createdAt?: string;
@@ -24,21 +24,21 @@ export interface TelemetryVariable {
 }
 
 export interface SensorCreateRequest {
-  organizationId: number;
+  //organizationId: number;
   name: string;
   areaId: number;
-  type: string;
-  status: boolean;
+  //type: string;
+  status: string;
   description?: string;
   metadata?: Record<string, any>;
 }
 
 export interface SensorUpdateRequest {
-  organizationId: number;
+  //organizationId: number;
   name?: string;
   areaId?: number;
   type?: string;
-  status?: boolean;
+  status?: string;
   description?: string;
   metadata?: Record<string, any>;
 }

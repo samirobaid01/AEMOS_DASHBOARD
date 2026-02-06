@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import type { Sensor, SensorCreateRequest, SensorUpdateRequest } from '../../types/sensor';
+import type { Sensor, SensorCreateRequest, SensorUpdateRequest } from '../../types/sensor.d';
 import { useTheme } from '../../context/ThemeContext';
 import { useThemeColors } from '../../hooks/useThemeColors';
 
@@ -40,11 +40,11 @@ const SensorForm: React.FC<SensorFormProps> = ({
   const safeAreas = Array.isArray(areas) ? areas : [];
 
   const [formData, setFormData] = React.useState<SensorCreateRequest | SensorUpdateRequest>({
-    organizationId: 0,
+    //organizationId: 0,
     name: sensor?.name || '',
     areaId: sensor?.areaId || (safeAreas.length > 0 ? safeAreas[0].id : 0),
     type: sensor?.type || '',
-    status: sensor?.status !== undefined ? sensor.status : true,
+    status: sensor?.status !== undefined ? sensor.status : 'active',
     description: sensor?.description || '',
     metadata: sensor?.metadata || {},
   });
@@ -342,7 +342,7 @@ const SensorForm: React.FC<SensorFormProps> = ({
                   type="text"
                   id="type"
                   name="type"
-                  value={formData.type}
+                  //value={formData.type}
                   onChange={handleChange}
                   required
                   style={inputStyle}

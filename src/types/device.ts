@@ -3,6 +3,7 @@ export interface Device {
   uuid: string;
   name: string;
   capabilities: Record<string, any>;
+  status: string;
 }
 
 export interface DeviceState {

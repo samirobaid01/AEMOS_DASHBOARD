@@ -17,7 +17,7 @@ const validateDeviceType = (type: string): DeviceType => {
 };
 
 const validateControlType = (type: string): ControlType => {
-  const validTypes: ControlType[] = ['binary', 'range', 'multi-state', 'continuous'];
+  const validTypes: ControlType[] = ['binary', 'range', 'multistate', 'continuous'];
   return validTypes.includes(type as ControlType)
     ? (type as ControlType)
     : 'binary';

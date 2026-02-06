@@ -22,8 +22,8 @@ const AreaCreate = () => {
   const [formData, setFormData] = useState<AreaCreateRequest>({
     name: '',
     organizationId: organizationId ? parseInt(organizationId, 10) : 0,
-    description: '',
-    status: true,
+    // description: '',
+    status: 'active',
   });
   
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});

@@ -11,6 +11,7 @@ import {
 } from '../../state/slices/organizations.slice';
 import { fetchAreasByOrganizationId, selectAreas } from '../../state/slices/areas.slice';
 import { fetchDevicesByOrganizationId, selectDevices } from '../../state/slices/devices.slice';
+import { fetchSensorsByOrganizationId, selectSensors } from '../../state/slices/sensors.slice';
 import LoadingScreen from '../../components/common/Loading/LoadingScreen';
 import { OrganizationDetails as OrganizationDetailsComponent } from '../../components/organizations';
 
@@ -21,6 +22,7 @@ const OrganizationDetails = () => {
   const organization = useSelector(selectSelectedOrganization);
   const areas = useSelector(selectAreas);
   const devices = useSelector(selectDevices);
+  const sensors = useSelector(selectSensors);
   const isLoading = useSelector(selectOrganizationsLoading);
   const error = useSelector(selectOrganizationsError);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -32,6 +34,7 @@ const OrganizationDetails = () => {
       dispatch(fetchOrganizationById(orgId));
       dispatch(fetchAreasByOrganizationId(orgId));
       dispatch(fetchDevicesByOrganizationId(orgId));
+      dispatch(fetchSensorsByOrganizationId(orgId));
     }
   }, [dispatch, id]);
 
@@ -73,6 +76,7 @@ const OrganizationDetails = () => {
       organization={organization}
       areas={areas}
       devices={devices}
+      sensors={sensors}
       isLoading={isLoading}
       error={error}
       deleteModalOpen={deleteModalOpen}
