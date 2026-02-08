@@ -1,18 +1,12 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import type { AppDispatch } from '../../state/store';
-import {
-  fetchSensorById,
-  selectSelectedSensor,
-  selectSensorsLoading,
-  selectSensorsError,
-  deleteSensor
-} from '../../state/slices/sensors.slice';
-import { fetchAreaById } from '../../state/slices/areas.slice';
-import LoadingScreen from '../../components/common/Loading/LoadingScreen';
 import SensorDetailsComponent from '../../components/sensors/SensorDetails';
+import LoadingScreen from '../../components/common/Loading/LoadingScreen';
+import { fetchAreaById } from '../../state/slices/areas.slice';
+import { deleteSensor, fetchSensorById, selectSelectedSensor, selectSensorsError, selectSensorsLoading } from '../../state/slices/sensors.slice';
+import type { AppDispatch } from '../../state/store';
 
 // Import modal component or use your own
 interface ConfirmModalProps {

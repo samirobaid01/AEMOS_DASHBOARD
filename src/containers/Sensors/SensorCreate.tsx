@@ -1,104 +1,119 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import type { AppDispatch } from '../../state/store';
-import { createSensor, selectSensorsLoading, selectSensorsError } from '../../state/slices/sensors.slice';
-import { fetchAreas, selectAreas } from '../../state/slices/areas.slice';
-import type { SensorCreateRequest, SensorUpdateRequest } from '../../types/sensor.d';
-import SensorForm from '../../components/sensors/SensorForm';
+import { useTranslation } from 'react-i18next';
+import SensorForm, { type TelemetryRowFormState } from '../../components/sensors/SensorForm';
 import LoadingScreen from '../../components/common/Loading/LoadingScreen';
-import { selectSelectedOrganization } from '../../state/slices/organizations.slice';
+import { fetchAreas, selectAreas } from '../../state/slices/areas.slice';
+import { createSensor, createTelemetry, selectSensorsLoading, selectSensorsError } from '../../state/slices/sensors.slice';
+import type { AppDispatch } from '../../state/store';
 import { toastService } from '../../services/toastService';
+import { ALLOWED_SENSOR_STATUSES } from '../../types/sensor';
+import type { SensorCreateRequest, SensorUpdateRequest, TelemetryDatatype } from '../../types/sensor.d';
 
 const SensorCreate = () => {
+  const { t } = useTranslation();
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const areaId = searchParams.get('areaId');
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const organization = useSelector(selectSelectedOrganization);
+  const [telemetryError, setTelemetryError] = useState<string | null>(null);
   const isLoading = useSelector(selectSensorsLoading);
   const error = useSelector(selectSensorsError);
   const areas = useSelector(selectAreas) || [];
-  
-  // Handle window resize
-  useEffect(() => {
-    const handleResize = () => {
-      setWindowWidth(window.innerWidth);
-    };
 
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-  
-  // Fetch areas
+
   useEffect(() => {
     dispatch(fetchAreas());
   }, [dispatch]);
-  
-  // Handle form submission
-  const handleSubmit = async (data: SensorCreateRequest | SensorUpdateRequest) => {
-    // Create a properly typed SensorCreateRequest
-    // if (!organization?.id) {
-    //   toastService.error('Organization ID is required to create a sensor.');
-    //   throw new Error('Organization ID is required to create a sensor.');
-    // }
-    const formData: SensorCreateRequest = {
-      //organizationId: parseInt(organization.id.toString(), 10),
-      name: data.name || '',
-      areaId: data.areaId || (areaId ? parseInt(areaId, 10) : 0),
-    //  type: data.type || '',
-      status: data.status !== undefined ? data.status : 'active',
-      description: data.description,
-      metadata: data.metadata
-    };
-    
-    // Ensure the required fields are set
-    if (!formData.name || !formData.areaId) {
+
+  const validateAndBuildTelemetryRows = (rows?: TelemetryRowFormState[]): { valid: boolean; payload: Array<{ variableName: string; datatype: TelemetryDatatype }> } => {
+    if (!rows?.length) return { valid: true, payload: [] };
+    const invalidRow = rows.some((row) => {
+      const hasVar = row.variableName.trim().length > 0;
+      const hasType = row.datatype !== '';
+      return hasVar !== hasType;
+    });
+    if (invalidRow) return { valid: false, payload: [] };
+    const payload = rows
+      .filter((row) => row.variableName.trim() && row.datatype)
+      .map((row) => ({ variableName: row.variableName.trim(), datatype: row.datatype as TelemetryDatatype }));
+    return { valid: true, payload };
+  };
+
+  const handleSubmit = async (data: SensorCreateRequest | SensorUpdateRequest, telemetryRows?: TelemetryRowFormState[]) => {
+    setTelemetryError(null);
+    const { valid, payload: validRows } = validateAndBuildTelemetryRows(telemetryRows);
+    if (!valid) {
+      setTelemetryError(t('sensors.telemetryBothRequired'));
       return;
     }
-    
+
+    const statusValue = data.status as string | undefined;
+    const status =
+      typeof statusValue === 'string' && ALLOWED_SENSOR_STATUSES.includes(statusValue as any)
+        ? statusValue
+        : 'pending';
+
+    const formData: SensorCreateRequest = {
+      name: data.name || '',
+      areaId: data.areaId || (areaId ? parseInt(areaId, 10) : 0),
+      status,
+      description: data.description,
+      uuid: (data as SensorCreateRequest).uuid?.trim() || (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : ''),
+    };
+
+    if (!formData.name || !formData.areaId) return;
+
     setIsSubmitting(true);
     try {
       const resultAction = await dispatch(createSensor(formData));
       if (createSensor.fulfilled.match(resultAction)) {
-        if (areaId) {
-          navigate(`/areas/${areaId}`);
-        } else {
-          navigate('/sensors');
+        const sensor = resultAction.payload;
+        if (validRows.length && sensor?.id) {
+          for (const item of validRows) {
+            const telemetryResult = await dispatch(
+              createTelemetry({ sensorId: sensor.id, variableName: item.variableName, datatype: item.datatype })
+            );
+            if (createTelemetry.rejected.match(telemetryResult)) {
+              toastService.error((telemetryResult.payload as string) || 'Failed to create telemetry');
+            }
+          }
         }
+        navigate(areaId ? `/areas/${areaId}` : '/sensors');
       }
-    } catch (error) {
-      console.error('Error creating sensor:', error);
+    } catch (err) {
+      console.error('Error creating sensor:', err);
     } finally {
       setIsSubmitting(false);
     }
   };
-  
-  // Handle cancel
+
   const handleCancel = () => {
-    if (areaId) {
-      navigate(`/areas/${areaId}`);
-    } else {
-      navigate('/sensors');
-    }
+    navigate(areaId ? `/areas/${areaId}` : '/sensors');
   };
-  
-  // Show loading screen if areas are still loading
+
   if (isLoading && !Array.isArray(areas)) {
     return <LoadingScreen />;
   }
-  
+
   return (
     <SensorForm
       areas={areas}
-      isLoading={isLoading}
       error={error}
-      onSubmit={handleSubmit}
-      onCancel={handleCancel}
+      isLoading={isLoading}
       isSubmitting={isSubmitting}
+      telemetryError={telemetryError}
       windowWidth={windowWidth}
+      onCancel={handleCancel}
+      onSubmit={handleSubmit}
     />
   );
 };

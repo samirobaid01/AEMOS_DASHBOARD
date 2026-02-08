@@ -1,5 +1,6 @@
 export interface Sensor {
   id: number;
+  uuid?: string;
   name: string;
   areaId: number;
   type: string;
@@ -16,6 +17,28 @@ export interface Sensor {
   TelemetryData?: TelemetryVariable[];
 }
 
+export type TelemetryDatatype = 'float' | 'int' | 'string' | 'boolean';
+
+export type SensorStatus =
+  | 'active'
+  | 'inactive'
+  | 'pending'
+  | 'calibrating'
+  | 'error'
+  | 'disconnected'
+  | 'retired';
+
+export interface TelemetryCreateRequest {
+  variableName: string;
+  datatype: TelemetryDatatype;
+  sensorId: number;
+}
+
+export interface TelemetryUpdateRequest {
+  variableName?: string;
+  datatype?: TelemetryDatatype;
+}
+
 export interface TelemetryVariable {
   id: number;
   variableName: string;
@@ -24,23 +47,19 @@ export interface TelemetryVariable {
 }
 
 export interface SensorCreateRequest {
-  //organizationId: number;
   name: string;
   areaId: number;
-  //type: string;
-  status: string;
+  status: SensorStatus | string;
+  uuid?: string;
   description?: string;
-  metadata?: Record<string, any>;
 }
 
 export interface SensorUpdateRequest {
-  //organizationId: number;
   name?: string;
   areaId?: number;
-  type?: string;
-  status?: string;
+  status?: SensorStatus | string;
   description?: string;
-  metadata?: Record<string, any>;
+  uuid?: string;
 }
 
 export interface SensorState {

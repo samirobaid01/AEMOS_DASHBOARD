@@ -175,7 +175,20 @@
     "pressure": "Presión",
     "battery_level": "Nivel de Batería",
     "signal_strength": "Intensidad de Señal",
-    "debug_socket": "Depurar Socket"
+    "debug_socket": "Depurar Socket",
+    "uuid": "UUID",
+    "uuidPlaceholder": "Dejar vacío para generar automáticamente",
+    "generateUuid": "Generar UUID",
+    "initialTelemetry": "Telemetría Inicial",
+    "initialTelemetryDescription": "Opcionalmente añade una variable de telemetría para este sensor. Ambos campos son obligatorios si rellenas uno.",
+    "editTelemetryDescription": "Edita las variables de telemetría existentes o añade nuevas. Los cambios se guardarán al guardar.",
+    "variableName": "Nombre de variable",
+    "variableNamePlaceholder": "ej. temperatura",
+    "datatype": "Tipo de dato",
+    "selectDatatype": "Seleccionar tipo de dato",
+    "telemetryBothRequired": "El nombre de variable y el tipo de dato son obligatorios al añadir telemetría inicial.",
+    "addTelemetry": "Añadir telemetría",
+    "removeTelemetry": "Quitar telemetría"
   },
   "devices": {
     "title": "Dispositivos",

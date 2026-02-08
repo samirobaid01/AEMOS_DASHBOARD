@@ -187,7 +187,20 @@
     "pressure": "Pressure",
     "battery_level": "Battery Level",
     "signal_strength": "Signal Strength",
-    "debug_socket": "Debug Socket"
+    "debug_socket": "Debug Socket",
+    "uuid": "UUID",
+    "uuidPlaceholder": "Leave empty to auto-generate",
+    "generateUuid": "Generate UUID",
+    "initialTelemetry": "Initial Telemetry",
+    "initialTelemetryDescription": "Optionally add one telemetry variable for this sensor. Both fields are required if you fill either.",
+    "editTelemetryDescription": "Edit existing telemetry variables or add new ones. Rows with changes will be updated on save.",
+    "variableName": "Variable name",
+    "variableNamePlaceholder": "e.g. temperature",
+    "datatype": "Data type",
+    "selectDatatype": "Select data type",
+    "telemetryBothRequired": "Variable name and data type are both required when adding initial telemetry.",
+    "addTelemetry": "Add telemetry",
+    "removeTelemetry": "Remove telemetry"
   },
   "devices": {
     "title": "Devices",
