@@ -230,10 +230,31 @@
     "config_key": "Clave de Configuración",
     "config_value": "Valor de Configuración",
     "add_field": "Añadir Campo",
-    "area_required": "El área es requerida"
+    "area_required": "El área es requerida",
+    "minValue": "Mín",
+    "maxValue": "Máx",
+    "deviceState": {
+      "addState": "Definir estados del dispositivo",
+      "stateName": "Nombre del estado",
+      "dataType": "Tipo de dato",
+      "defaultValue": "Valor por defecto",
+      "allowedValue": "Valores permitidos",
+      "addValues": "Añadir valores",
+      "inProgress": "En progreso",
+      "finishButton": "Finalizar",
+      "cancelButton": "Cancelar"
+    },
+    "capabilities": {
+      "title": "Capacidades del dispositivo",
+      "saveCapabilities": "Guardar capacidades",
+      "saving": "Guardando..."
+    }
   },
   "common": {
     "save": "Guardar",
+    "name_required": "El nombre es obligatorio",
+    "organization_required": "La organización es obligatoria",
+    "deviceType_required": "El tipo de dispositivo es obligatorio",
     "cancel": "Cancelar",
     "confirm": "Confirmar",
     "delete": "Eliminar",

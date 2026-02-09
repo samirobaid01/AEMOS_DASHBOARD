@@ -1,28 +1,24 @@
-export const ALLOWED_STATUSES = ['active', 'inactive', 'pending'] as const;
+export const ALLOWED_STATUSES = ['active', 'inactive', 'pending', 'maintenance', 'faulty', 'retired'] as const;
 
 export const ALLOWED_DEVICE_TYPES = [
   'actuator',
-  'sensor',
-  'gateway',
   'controller',
-  'display'
+  'gateway',
+  'sensor_hub',
+  'hybrid',
 ] as const;
 
-export const ALLOWED_CONTROL_TYPES = [
-  'binary',
-  'range',
-  'multistate',
-  'continuous'
-] as const;
+export const ALLOWED_CONTROL_TYPES = ['binary', 'percentage', 'multistate', 'custom'] as const;
 
 export const ALLOWED_PROTOCOLS = [
   'wifi',
-  'bluetooth',
+  'ble',
+  'lorawan',
   'zigbee',
-  'zwave',
-  'mqtt',
   'modbus',
-  'bacnet'
+  'mqtt',
+  'http',
+  'coap',
 ] as const;
 
 export const CONTROL_MODES = [
@@ -30,29 +26,14 @@ export const CONTROL_MODES = [
   'remote',
   'sensor',
   'scheduled',
-  'automated'
+  'automated',
 ] as const;
 
-export const METADATA_SUGGESTED_KEYS = [
-  'manufacturer',
-  'model',
-  'firmwareVersion',
-  'installationDate',
-  'location',
-  'serialNumber'
-] as const;
+export const DEVICE_STATE_UI_TYPES = ['boolean', 'enum', 'range'] as const;
 
-export const CAPABILITIES_SUGGESTED_KEYS = [
-  'canSwitch',
-  'canSetTemperature',
-  'temperatureRange',
-  'fanSpeeds',
-  'modes',
-  'supportedOperations'
-] as const;
-
-export type DeviceStatus = typeof ALLOWED_STATUSES[number];
-export type DeviceType = typeof ALLOWED_DEVICE_TYPES[number];
-export type ControlType = typeof ALLOWED_CONTROL_TYPES[number];
-export type CommunicationProtocol = typeof ALLOWED_PROTOCOLS[number];
-export type ControlMode = typeof CONTROL_MODES[number]; 
+export type DeviceStatus = (typeof ALLOWED_STATUSES)[number];
+export type DeviceType = (typeof ALLOWED_DEVICE_TYPES)[number];
+export type ControlType = (typeof ALLOWED_CONTROL_TYPES)[number];
+export type CommunicationProtocol = (typeof ALLOWED_PROTOCOLS)[number];
+export type ControlMode = (typeof CONTROL_MODES)[number];
+export type DeviceStateUIType = (typeof DEVICE_STATE_UI_TYPES)[number]; 

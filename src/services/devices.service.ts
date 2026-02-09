@@ -35,7 +35,6 @@ export const getDeviceById = async (id: number) => {
     defaultState: deviceData.defaultState,
     communicationProtocol: deviceData.communicationProtocol,
     isCritical: deviceData.isCritical || false,
-    metadata: deviceData.metadata || {},
     capabilities: deviceData.capabilities || {},
     areaId: deviceData.areaId,
     controlModes: deviceData.controlModes,
@@ -48,12 +47,13 @@ export const getDeviceById = async (id: number) => {
 };
 
 /**
- * Create a new device
+ * Create a new device. Returns the created device (with id) for use in Step 2.
  */
 export const createDevice = async (deviceData: DeviceCreateRequest) => {
   const enhancedData = withOrganizationId(deviceData);
   const response = await apiClient.post('/devices', enhancedData);
-  return response.data;
+  const created = response.data?.data?.device ?? response.data?.device ?? response.data;
+  return typeof created?.id === 'number' ? created : response.data;
 };
 
 /**

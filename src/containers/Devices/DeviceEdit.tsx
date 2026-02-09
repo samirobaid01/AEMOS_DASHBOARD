@@ -21,7 +21,7 @@ import {
 import { fetchOrganizations, selectOrganizations } from '../../state/slices/organizations.slice';
 import { fetchAreas, selectAreas } from '../../state/slices/areas.slice';
 import { selectSelectedOrganizationId } from '../../state/slices/auth.slice';
-import type { DeviceUpdateRequest } from '../../types/device';
+import type { DeviceUpdateRequest } from '../../types/device.d';
 import type { DeviceState } from '../../state/slices/deviceStates.slice';
 import DeviceEditComponent from '../../components/devices/DeviceEdit';
 import DeviceStateManager from '../../components/devices/DeviceStateManager';
@@ -59,14 +59,8 @@ const DeviceEdit = () => {
     description: '',
     status: 'pending',
     deviceType: 'actuator',
-    controlType: 'binary',
-    minValue: null,
-    maxValue: null,
-    defaultState: '',
     communicationProtocol: undefined,
     isCritical: false,
-    metadata: {},
-    capabilities: {},
     areaId: undefined,
     controlModes: '',
     organizationId: 0
@@ -126,14 +120,9 @@ const DeviceEdit = () => {
         description: device.description,
         status: device.status,
         deviceType: device.deviceType,
-        controlType: device.controlType,
-        minValue: device.minValue,
-        maxValue: device.maxValue,
-        defaultState: device.defaultState,
         communicationProtocol: device.communicationProtocol,
         isCritical: device.isCritical,
-        metadata: device.metadata || {},
-        capabilities: device.capabilities || {},
+        capabilities: device.capabilities,
         areaId: device.areaId,
         controlModes: device.controlModes || '',
         organizationId: organizationId || 0
@@ -171,20 +160,6 @@ const DeviceEdit = () => {
     setFormData(prev => ({
       ...prev,
       [name]: value,
-    }));
-  };
-
-  const handleMetadataChange = (metadata: Record<string, any>) => {
-    setFormData(prev => ({
-      ...prev,
-      metadata
-    }));
-  };
-
-  const handleCapabilitiesChange = (capabilities: Record<string, any>) => {
-    setFormData(prev => ({
-      ...prev,
-      capabilities
     }));
   };
 
@@ -262,23 +237,12 @@ const DeviceEdit = () => {
   
   const validateForm = (): boolean => {
     const errors: Record<string, string> = {};
-    
     if (!formData.name?.trim()) {
-      errors.name = t('name_required');
+      errors.name = t('common.name_required');
     }
-    
     if (!formData.deviceType) {
-      errors.deviceType = t('deviceType_required');
+      errors.deviceType = t('common.deviceType_required');
     }
-
-    if (!formData.controlType) {
-      errors.controlType = t('controlType_required');
-    }
-    
-    if (formData.organizationId && !formData.areaId) {
-      errors.areaId = t('devices.area_required');
-    }
-    
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -293,10 +257,11 @@ const DeviceEdit = () => {
     setIsSubmitting(true);
     
     try {
+      const { controlModes: _omit, ...deviceData } = formData;
       const resultAction = await dispatch(
         updateDevice({
           id: parseInt(id, 10),
-          deviceData: formData
+          deviceData
         })
       );
       
@@ -356,8 +321,6 @@ const DeviceEdit = () => {
         onCancel={handleCancel}
         onSubmit={handleSubmit}
         onChange={handleChange}
-        onMetadataChange={handleMetadataChange}
-        onCapabilitiesChange={handleCapabilitiesChange}
         onControlModesChange={handleControlModesChange}
         organizations={organizations}
         areas={areas}

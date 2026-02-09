@@ -1,11 +1,34 @@
-import type { 
-  DeviceStatus, 
-  DeviceType, 
-  ControlType, 
+import type {
   CommunicationProtocol,
-  ControlMode 
+  ControlMode,
+  DeviceStatus,
+  DeviceType,
 } from '../constants/device';
+
+export type { ControlType } from '../constants/device';
 import type { DeviceState as DeviceStateType } from '../state/slices/deviceDetails.slice';
+
+export interface DeviceCapabilityState {
+  stateName: string;
+  dataType: string;
+  defaultValue: string;
+  allowedValues: string[];
+}
+
+export type DeviceCapabilities = Record<string, DeviceCapabilityState>;
+
+export interface DeviceStateRecord {
+  id: number;
+  deviceId?: number;
+  stateName: string;
+  dataType: string;
+  defaultValue: string;
+  allowedValues: string[];
+  createdAt?: string;
+  updatedAt?: string;
+  status?: 'active' | 'inactive' | 'suspended';
+  device?: { name: string; uuid: string };
+}
 
 export interface Device {
   id: number;
@@ -15,19 +38,18 @@ export interface Device {
   uuid?: string;
   organizationId: number;
   deviceType: DeviceType;
-  controlType: ControlType;
-  minValue?: number | null;
-  maxValue?: number | null;
-  defaultState?: string;
   communicationProtocol?: CommunicationProtocol;
   isCritical: boolean;
-  metadata?: Record<string, any>;
-  capabilities?: Record<string, any>;
+  capabilities?: DeviceCapabilities;
   areaId?: number;
   controlModes?: string;
-  createdAt: string;
-  updatedAt: string;
-  states: DeviceStateType[];
+  createdAt?: string;
+  updatedAt?: string;
+  states?: DeviceStateType[];
+  controlType?: string;
+  defaultState?: string;
+  minValue?: number | null;
+  maxValue?: number | null;
 }
 
 export interface DeviceCreateRequest {
@@ -36,16 +58,12 @@ export interface DeviceCreateRequest {
   status: DeviceStatus;
   organizationId: number;
   deviceType: DeviceType;
-  controlType: ControlType;
-  minValue?: number | null;
-  maxValue?: number | null;
-  defaultState?: string;
   communicationProtocol?: CommunicationProtocol;
   isCritical: boolean;
-  metadata?: Record<string, any>;
-  capabilities?: Record<string, any>;
+  capabilities?: DeviceCapabilities;
   areaId?: number;
   controlModes?: string;
+  uuid?: string;
 }
 
 export interface DeviceUpdateRequest {
@@ -54,16 +72,12 @@ export interface DeviceUpdateRequest {
   status?: DeviceStatus;
   organizationId: number;
   deviceType?: DeviceType;
-  controlType?: ControlType;
-  minValue?: number | null;
-  maxValue?: number | null;
-  defaultState?: string;
   communicationProtocol?: CommunicationProtocol;
   isCritical?: boolean;
-  metadata?: Record<string, any>;
-  capabilities?: Record<string, any>;
+  capabilities?: DeviceCapabilities;
   areaId?: number;
   controlModes?: string;
+  uuid?: string;
 }
 
 export interface DeviceFilters {

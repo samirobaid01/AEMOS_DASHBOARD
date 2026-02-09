@@ -3,10 +3,9 @@ import type { PayloadAction } from '@reduxjs/toolkit';
 import type { RootState } from '../store';
 import type { RuleChain, RuleChainCreatePayload, RuleChainUpdatePayload } from '../../types/ruleEngine';
 import type { Sensor } from '../../types/sensor';
-import type { Device, DeviceState } from '../../types/device';
+import type { Device, DeviceStateRecord } from '../../types/device';
 import RuleEngineService from '../../services/ruleEngineService';
 
-// Define the state type here instead of importing it
 interface RuleEngineState {
   rules: RuleChain[];
   selectedRule: RuleChain | null;
@@ -17,7 +16,8 @@ interface RuleEngineState {
   };
   sensors: Sensor[];
   devices: Device[];
-  deviceStates: DeviceState[];
+  deviceStates: DeviceStateRecord[];
+  lastFetchedDeviceId: number | null;
   sensorDetails: { [uuid: string]: Sensor };
 }
 
@@ -33,6 +33,7 @@ const initialState: RuleEngineState = {
   sensors: [],
   devices: [],
   deviceStates: [],
+  lastFetchedDeviceId: null,
   sensorDetails: {},
 };
 
@@ -365,34 +366,29 @@ const ruleEngineSlice = createSlice({
       state.devices = []; // Initialize to empty array on error
     });
 
-    // Fetch Device States
+    // Fetch Device States (do not set global loading; dialog has its own loading state)
     builder.addCase(fetchDeviceStates.pending, (state) => {
-      state.loading = true;
       state.error = null;
     });
     builder.addCase(fetchDeviceStates.fulfilled, (state, action) => {
-      state.loading = false;
+      state.lastFetchedDeviceId = action.meta.arg;
       state.deviceStates = action.payload;
     });
     builder.addCase(fetchDeviceStates.rejected, (state, action) => {
-      state.loading = false;
       state.error = action.payload as string;
     });
 
-    // Fetch Sensor Details
+    // Fetch Sensor Details (do not set global loading; UI that uses sensor details has its own loading state)
     builder.addCase(fetchSensorDetails.pending, (state) => {
-      state.loading = true;
       state.error = null;
     });
     builder.addCase(fetchSensorDetails.fulfilled, (state, action) => {
-      state.loading = false;
       const { uuid, sensorDetails } = action.payload;
       if (uuid) {
         state.sensorDetails[uuid] = sensorDetails;
       }
     });
     builder.addCase(fetchSensorDetails.rejected, (state, action) => {
-      state.loading = false;
       state.error = action.payload as string;
     });
   },
@@ -409,6 +405,7 @@ export const selectRuleEngineSearchFilter = (state: RootState) => state.ruleEngi
 export const selectSensors = (state: RootState) => state.ruleEngine.sensors;
 export const selectDevices = (state: RootState) => state.ruleEngine.devices;
 export const selectDeviceStates = (state: RootState) => state.ruleEngine.deviceStates;
+export const selectLastFetchedDeviceId = (state: RootState) => state.ruleEngine.lastFetchedDeviceId;
 export const selectSensorDetails = (state: RootState) => state.ruleEngine.sensorDetails;
 
 export default ruleEngineSlice.reducer; 

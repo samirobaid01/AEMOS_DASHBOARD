@@ -1,5 +1,5 @@
 import apiClient from './api/apiClient';
-import type { DeviceState } from '../state/slices/deviceStates.slice';
+import type { DeviceStateRecord } from '../types/device';
 
 /**
  * Get all states for a device
@@ -23,7 +23,7 @@ export const getDeviceStates = async (deviceId: number, organizationId: number) 
  */
 export const createDeviceState = async (
   deviceId: number,
-  state: Omit<DeviceState, 'id' | 'createdAt' | 'updatedAt' | 'isActive'>
+  state: Omit<DeviceStateRecord, 'id' | 'createdAt' | 'updatedAt'>
 ) => {
   // For create, we send allowedValues as is (array)
   const response = await apiClient.post(`/device-states/device/${deviceId}`, state);
@@ -43,7 +43,7 @@ export const createDeviceState = async (
 export const updateDeviceState = async (
   deviceId: number,
   stateId: number,
-  state: Partial<Omit<DeviceState, 'id' | 'createdAt' | 'updatedAt'>>
+  state: Partial<Omit<DeviceStateRecord, 'id' | 'createdAt' | 'updatedAt'>>
 ) => {
   // Send allowedValues as is (array) - don't stringify
   const dataToSend = {

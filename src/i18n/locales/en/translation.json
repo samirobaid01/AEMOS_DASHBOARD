@@ -254,6 +254,8 @@
     "controlModes": "Control Modes",
     "selectDeviceType": "Select device type",
     "selectControlMode": "Select control mode",
+    "minValue": "Min",
+    "maxValue": "Max",
     "deviceState":{
       "title":"Device States",
       "description":"Description",
@@ -278,7 +280,9 @@
     "capabilities":{
       "title":"Device Capabilities",
       "key":"key",
-      "value":"value"
+      "value":"value",
+      "saveCapabilities":"Save capabilities",
+      "saving":"Saving..."
     },
     "metadata":{
       "title":"Device Meta Data",
@@ -308,6 +312,9 @@
   },
   "common": {
     "save": "Save",
+    "name_required": "Name is required",
+    "organization_required": "Organization is required",
+    "deviceType_required": "Device type is required",
     "cancel": "Cancel",
     "confirm": "Confirm",
     "delete": "Delete",

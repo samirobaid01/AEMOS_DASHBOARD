@@ -11,7 +11,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import EditIcon from '@mui/icons-material/Edit';
 import type { RuleChain } from '../../types/ruleEngine';
-import type { Device, DeviceState } from '../../types/device';
+import type { Device, DeviceStateRecord } from '../../types/device';
 import type { Sensor } from '../../types/sensor';
 import NodeDialog from './NodeDialog';
 import ActionDialog from './ActionDialog';
@@ -31,7 +31,8 @@ interface RuleFormProps {
   showNodeSection?: boolean;
   sensors: Sensor[];
   devices: Device[];
-  deviceStates: DeviceState[];
+  deviceStates: DeviceStateRecord[];
+  lastFetchedDeviceId?: number | null;
   sensorDetails: { [uuid: string]: Sensor };
   onFetchSensorDetails: (sensorId: number) => Promise<void>;
   onFetchDeviceStates: (deviceId: number) => Promise<void>;
@@ -100,6 +101,7 @@ const RuleForm: React.FC<RuleFormProps> = ({
   sensors,
   devices,
   deviceStates,
+  lastFetchedDeviceId = null,
   sensorDetails,
   onFetchSensorDetails,
   onFetchDeviceStates
@@ -636,6 +638,7 @@ const RuleForm: React.FC<RuleFormProps> = ({
               initialData={currentNodeIndex !== null && nodes[currentNodeIndex] ? getActionNodeData(nodes[currentNodeIndex]) : undefined}
               devices={devices}
               deviceStates={deviceStates}
+              lastFetchedDeviceId={lastFetchedDeviceId ?? null}
               onFetchDeviceStates={onFetchDeviceStates}
             />
           </>
