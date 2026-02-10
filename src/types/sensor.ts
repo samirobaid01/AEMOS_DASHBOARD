@@ -11,14 +11,4 @@ export type {
   SensorStatus,
 } from './sensor.d';
 
-import type { SensorStatus } from './sensor.d';
-
-export const ALLOWED_SENSOR_STATUSES: readonly SensorStatus[] = [
-  'active',
-  'inactive',
-  'pending',
-  'calibrating',
-  'error',
-  'disconnected',
-  'retired',
-]; 
+export { ALLOWED_SENSOR_STATUSES } from '../constants/sensor';

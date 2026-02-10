@@ -164,17 +164,17 @@ const OrganizationItem: React.FC<OrganizationItemProps> = ({ organization, windo
             borderRadius: '9999px',
             fontSize: '0.75rem',
             fontWeight: 500,
-            backgroundColor: organization.status ? colors.successBackground : colors.dangerBackground,
-            color: organization.status ? colors.successText : colors.dangerText,
+            backgroundColor: organization.status === 'active' ? colors.successBackground : organization.status === 'inactive' ? colors.dangerBackground : colors.border,
+            color: organization.status === 'active' ? colors.successText : organization.status === 'inactive' ? colors.dangerText : colors.textSecondary,
           }}>
             <span style={{
               width: '0.5rem',
               height: '0.5rem',
               borderRadius: '50%',
-              backgroundColor: organization.status ? colors.success : colors.danger,
+              backgroundColor: organization.status === 'active' ? colors.success : organization.status === 'inactive' ? colors.danger : colors.textMuted,
               marginRight: '0.375rem',
             }}></span>
-            {organization.status ? t('active') : t('inactive')}
+            {t(organization.status)}
           </span>
           
           <div style={{

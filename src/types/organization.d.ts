@@ -2,7 +2,7 @@ export interface Organization {
   id: number;
   name: string;
   parentId?: number | null;
-  status: boolean;
+  status: 'active' | 'inactive' | 'pending' | 'suspended' | 'archived';
   detail?: string;
   paymentMethods?: string;
   image?: string;
@@ -18,7 +18,7 @@ export interface Organization {
 export interface OrganizationCreateRequest {
   name: string;
   parentId?: number | null;
-  status: boolean;
+  status: 'active' | 'inactive' | 'pending' | 'suspended' | 'archived';
   detail?: string;
   paymentMethods?: string;
   image?: string;
@@ -33,7 +33,7 @@ export interface OrganizationUpdateRequest {
   organizationId: number;
   name?: string;
   parentId?: number | null;
-  status?: boolean;
+  status?: 'active' | 'inactive' | 'pending' | 'suspended' | 'archived';
   detail?: string;
   paymentMethods?: string;
   image?: string;
@@ -53,7 +53,7 @@ export interface OrganizationState {
 
 export interface OrganizationFilterParams {
   search?: string;
-  status?: boolean;
+  status?: 'active' | 'inactive' | 'pending' | 'suspended' | 'archived';
   parentId?: number;
   isParent?: boolean;
   page?: number;

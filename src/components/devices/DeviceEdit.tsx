@@ -1,8 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import type { DeviceUpdateRequest, DeviceCreateRequest } from '../../types/device.d';
-import type { Organization } from '../../types/organization.d';
-import type { Area } from '../../types/area.d';
+import type { DeviceUpdateRequest, DeviceCreateRequest } from '../../types/device';
+import type { Organization } from '../../types/organization';
+import type { Area } from '../../types/area';
 import LoadingScreen from '../common/Loading/LoadingScreen';
 import { useTheme } from '../../context/ThemeContext';
 import { useThemeColors } from '../../hooks/useThemeColors';

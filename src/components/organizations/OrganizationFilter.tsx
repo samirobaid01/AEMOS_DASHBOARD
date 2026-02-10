@@ -2,12 +2,13 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useThemeColors } from '../../hooks/useThemeColors';
 import Input from '../../components/common/Input/Input';
+import type { OrganizationFilterParams } from '../../types/organization';
 
 interface OrganizationFilterProps {
   searchTerm: string;
   setSearchTerm: (value: string) => void;
-  statusFilter: boolean | undefined;
-  setStatusFilter: (value: boolean | undefined) => void;
+  statusFilter: OrganizationFilterParams['status'];
+  setStatusFilter: (value: OrganizationFilterParams['status']) => void;
   onSubmit: (e: React.FormEvent) => void;
   onClear: () => void;
   windowWidth: number;
@@ -90,13 +91,10 @@ const OrganizationFilter: React.FC<OrganizationFilterProps> = ({
             backgroundSize: '1.5rem 1.5rem',
             outline: 'none',
           }}
-          value={statusFilter === undefined ? '' : statusFilter ? 'active' : 'inactive'}
+          value={statusFilter ?? ''}
           onChange={(e) => {
-            if (e.target.value === '') {
-              setStatusFilter(undefined);
-            } else {
-              setStatusFilter(e.target.value === 'active');
-            }
+            const value = e.target.value;
+            setStatusFilter(value === '' ? undefined : value as OrganizationFilterParams['status']);
           }}
           onFocus={(e) => {
             e.target.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.2)';
@@ -110,6 +108,9 @@ const OrganizationFilter: React.FC<OrganizationFilterProps> = ({
           <option value="">{t('all')}</option>
           <option value="active">{t('active')}</option>
           <option value="inactive">{t('inactive')}</option>
+          <option value="pending">{t('pending')}</option>
+          <option value="suspended">{t('suspended')}</option>
+          <option value="archived">{t('archived')}</option>
         </select>
       </div>
     </div>

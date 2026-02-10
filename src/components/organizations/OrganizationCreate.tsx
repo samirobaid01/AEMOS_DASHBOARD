@@ -236,37 +236,47 @@ const OrganizationCreate: React.FC<OrganizationCreateProps> = ({
                 />
               </div>
               
-              {/* Three column section for checkboxes */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(10rem, 1fr))', gap: '1rem', gridColumn: '1 / -1' }}>
-                {/* Is Parent */}
-                <div style={styles.checkboxContainer}>
-                  <input
-                    id="isParent"
-                    name="isParent"
-                    type="checkbox"
-                    checked={formData.isParent}
-                    onChange={onChange}
-                    style={styles.checkbox}
-                  />
-                  <label htmlFor="isParent" style={styles.checkboxLabel}>
-                    {t('is_parent_organization')}
-                  </label>
-                </div>
-                
-                {/* Status */}
-                <div style={styles.checkboxContainer}>
-                  <input
-                    id="status"
-                    name="status"
-                    type="checkbox"
-                    checked={formData.status}
-                    onChange={onChange}
-                    style={styles.checkbox}
-                  />
-                  <label htmlFor="status" style={styles.checkboxLabel}>
-                    {t('active')}
-                  </label>
-                </div>
+              {/* Status */}
+              <div style={styles.fullWidth}>
+                <label htmlFor="status" style={styles.labelText}>
+                  {t('status')}
+                </label>
+                <select
+                  id="status"
+                  name="status"
+                  value={formData.status}
+                  onChange={onChange}
+                  style={{
+                    width: '100%',
+                    padding: '0.5rem 0.75rem',
+                    borderRadius: '0.375rem',
+                    border: `1px solid ${colors.border}`,
+                    backgroundColor: colors.surfaceBackground,
+                    color: colors.textPrimary,
+                    fontSize: '0.875rem',
+                  }}
+                >
+                  <option value="active">{t('active')}</option>
+                  <option value="inactive">{t('inactive')}</option>
+                  <option value="pending">{t('pending')}</option>
+                  <option value="suspended">{t('suspended')}</option>
+                  <option value="archived">{t('archived')}</option>
+                </select>
+              </div>
+
+              {/* Is Parent */}
+              <div style={styles.checkboxContainer}>
+                <input
+                  id="isParent"
+                  name="isParent"
+                  type="checkbox"
+                  checked={formData.isParent}
+                  onChange={onChange}
+                  style={styles.checkbox}
+                />
+                <label htmlFor="isParent" style={styles.checkboxLabel}>
+                  {t('is_parent_organization')}
+                </label>
               </div>
             </div>
             

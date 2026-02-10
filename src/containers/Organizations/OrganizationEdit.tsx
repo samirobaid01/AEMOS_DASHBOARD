@@ -24,7 +24,7 @@ const OrganizationEdit = () => {
   const [formData, setFormData] = useState<OrganizationUpdateRequest>({
     organizationId: 0,
     name: '',
-    status: true,
+    status: 'active',
     detail: '',
     address: '',
     zip: '',

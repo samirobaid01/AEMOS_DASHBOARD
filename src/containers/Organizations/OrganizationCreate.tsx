@@ -16,7 +16,7 @@ const OrganizationCreate = () => {
   
   const [formData, setFormData] = useState<OrganizationCreateRequest>({
     name: '',
-    status: true,
+    status: 'active',
     detail: '',
     address: '',
     zip: '',

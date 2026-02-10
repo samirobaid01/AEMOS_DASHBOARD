@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import type { Organization } from '../../types/organization';
+import type { Organization, OrganizationFilterParams } from '../../types/organization';
 import OrganizationItem from './OrganizationItem';
 import OrganizationFilter from './OrganizationFilter';
 import EmptyState from './EmptyState';
@@ -12,8 +12,8 @@ interface OrganizationListProps {
   filteredOrganizations: Organization[];
   searchTerm: string;
   setSearchTerm: (value: string) => void;
-  statusFilter: boolean | undefined;
-  setStatusFilter: (value: boolean | undefined) => void;
+  statusFilter: OrganizationFilterParams['status'];
+  setStatusFilter: (value: OrganizationFilterParams['status']) => void;
   onSubmitFilter: (e: React.FormEvent) => void;
   onClearFilter: () => void;
   onAddOrganization: () => void;

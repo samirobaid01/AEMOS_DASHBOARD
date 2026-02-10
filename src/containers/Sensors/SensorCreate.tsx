@@ -9,7 +9,7 @@ import { createSensor, createTelemetry, selectSensorsLoading, selectSensorsError
 import type { AppDispatch } from '../../state/store';
 import { toastService } from '../../services/toastService';
 import { ALLOWED_SENSOR_STATUSES } from '../../types/sensor';
-import type { SensorCreateRequest, SensorUpdateRequest, TelemetryDatatype } from '../../types/sensor.d';
+import type { SensorCreateRequest, SensorUpdateRequest, TelemetryDatatype } from '../../types/sensor';
 
 const SensorCreate = () => {
   const { t } = useTranslation();

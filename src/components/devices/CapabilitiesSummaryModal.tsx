@@ -2,7 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 import { useThemeColors } from '../../hooks/useThemeColors';
-import type { DeviceCapabilities } from '../../types/device.d';
+import type { DeviceCapabilities } from '../../types/device';
 
 interface CapabilitiesSummaryModalProps {
   isOpen: boolean;

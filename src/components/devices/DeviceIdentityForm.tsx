@@ -8,9 +8,9 @@ import {
   ALLOWED_STATUSES,
   CONTROL_MODES,
 } from '../../constants/device';
-import type { DeviceCreateRequest } from '../../types/device.d';
-import type { Organization } from '../../types/organization.d';
-import type { Area } from '../../types/area.d';
+import type { DeviceCreateRequest } from '../../types/device';
+import type { Organization } from '../../types/organization';
+import type { Area } from '../../types/area';
 
 interface DeviceIdentityFormProps {
   formData: DeviceCreateRequest;

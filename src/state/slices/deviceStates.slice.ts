@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import type { RootState } from '../store';
-import type { DeviceStateRecord } from '../../types/device.d';
+import type { DeviceStateRecord } from '../../types/device';
 import * as deviceStatesService from '../../services/deviceStates.service';
 
 export type DeviceState = DeviceStateRecord;

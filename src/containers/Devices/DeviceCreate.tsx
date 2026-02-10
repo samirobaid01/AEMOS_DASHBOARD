@@ -7,7 +7,7 @@ import { createDevice, updateDevice, selectDevicesLoading, selectDevicesError } 
 import { createDeviceState, selectDeviceStatesLoading, selectDeviceStatesError } from '../../state/slices/deviceStates.slice';
 import { fetchOrganizations, selectOrganizations } from '../../state/slices/organizations.slice';
 import { fetchAreas, selectAreas } from '../../state/slices/areas.slice';
-import type { DeviceCreateRequest, DeviceCapabilities } from '../../types/device.d';
+import type { DeviceCreateRequest, DeviceCapabilities } from '../../types/device';
 import DeviceCreate from '../../components/devices/DeviceCreate';
 import type { DeviceStatePayload } from '../../components/devices/DeviceStatesModal';
 

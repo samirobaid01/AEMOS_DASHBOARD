@@ -17,16 +17,11 @@ export interface Sensor {
   TelemetryData?: TelemetryVariable[];
 }
 
-export type TelemetryDatatype = 'float' | 'int' | 'string' | 'boolean';
+import type { SensorStatus } from '../constants/sensor';
 
-export type SensorStatus =
-  | 'active'
-  | 'inactive'
-  | 'pending'
-  | 'calibrating'
-  | 'error'
-  | 'disconnected'
-  | 'retired';
+export type { SensorStatus };
+
+export type TelemetryDatatype = 'float' | 'int' | 'string' | 'boolean';
 
 export interface TelemetryCreateRequest {
   variableName: string;

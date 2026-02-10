@@ -1,14 +1,14 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import type { DeviceCreateRequest } from '../../types/device.d';
-import type { Organization } from '../../types/organization.d';
-import type { Area } from '../../types/area.d';
+import type { DeviceCreateRequest } from '../../types/device';
+import type { Organization } from '../../types/organization';
+import type { Area } from '../../types/area';
 import { useTheme } from '../../context/ThemeContext';
 import { useThemeColors } from '../../hooks/useThemeColors';
 import DeviceIdentityForm from './DeviceIdentityForm';
 import DeviceStatesModal, { type DeviceStatePayload } from './DeviceStatesModal';
 import CapabilitiesSummaryModal from './CapabilitiesSummaryModal';
-import type { DeviceCapabilities } from '../../types/device.d';
+import type { DeviceCapabilities } from '../../types/device';
 
 interface DeviceCreateProps {
   currentStep: 1 | 2 | 3;

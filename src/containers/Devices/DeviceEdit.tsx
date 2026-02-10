@@ -21,7 +21,7 @@ import {
 import { fetchOrganizations, selectOrganizations } from '../../state/slices/organizations.slice';
 import { fetchAreas, selectAreas } from '../../state/slices/areas.slice';
 import { selectSelectedOrganizationId } from '../../state/slices/auth.slice';
-import type { DeviceUpdateRequest } from '../../types/device.d';
+import type { DeviceUpdateRequest } from '../../types/device';
 import type { DeviceState } from '../../state/slices/deviceStates.slice';
 import DeviceEditComponent from '../../components/devices/DeviceEdit';
 import DeviceStateManager from '../../components/devices/DeviceStateManager';

@@ -16,7 +16,7 @@ import {
 } from '../../state/slices/sensors.slice';
 import type { AppDispatch } from '../../state/store';
 import { toastService } from '../../services/toastService';
-import type { SensorUpdateRequest, TelemetryDatatype } from '../../types/sensor.d';
+import type { SensorUpdateRequest, TelemetryDatatype } from '../../types/sensor';
 
 const SensorEdit = () => {
   const { t } = useTranslation();

@@ -317,9 +317,9 @@ const OrganizationDetails: React.FC<OrganizationDetailsProps> = ({
                 <div>
                   <span style={{
                     ...styles.badge,
-                    ...(organization.status ? styles.badgeSuccess : styles.badgeDanger)
+                    ...(organization.status === 'active' ? styles.badgeSuccess : organization.status === 'inactive' ? styles.badgeDanger : { backgroundColor: colors.border, color: colors.textSecondary })
                   }}>
-                    {organization.status ? t('active') : t('inactive')}
+                    {t(organization.status)}
                   </span>
                 </div>
               </div>

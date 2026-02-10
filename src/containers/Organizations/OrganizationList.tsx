@@ -22,7 +22,7 @@ const OrganizationList = () => {
   const error = useSelector(selectOrganizationsError);
   
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<boolean | undefined>(undefined);
+  const [statusFilter, setStatusFilter] = useState<OrganizationFilterParams['status']>(undefined);
   const [filters, setFilters] = useState<OrganizationFilterParams>({});
   
   useEffect(() => {
