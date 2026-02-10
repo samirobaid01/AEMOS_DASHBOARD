@@ -1,10 +1,10 @@
-import React from "react";
-import { useTranslation } from "react-i18next";
-import type { Sensor } from "../../types/sensor";
-import { useTheme } from "../../context/ThemeContext";
-import { useThemeColors } from "../../hooks/useThemeColors";
-import { useTelemetrySocket } from "../../hooks/useTelemetrySocket";
+import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
+import { useTheme } from '../../context/ThemeContext';
+import { useThemeColors } from '../../hooks/useThemeColors';
+import { useTelemetrySocket } from '../../hooks/useTelemetrySocket';
+import type { Sensor } from '../../types/sensor';
 
 interface SensorDetailsProps {
   sensor: Sensor | null;
@@ -380,6 +380,41 @@ const SensorDetails: React.FC<SensorDetailsProps> = ({
                   </span>
                 </p>
               </div>
+
+              <div style={{ marginBottom: "1rem" }}>
+                <p
+                  style={{
+                    fontSize: "0.875rem",
+                    fontWeight: 500,
+                    color: darkMode ? colors.textSecondary : "#6b7280",
+                    margin: "0 0 0.25rem 0",
+                  }}
+                >
+                  {t("sensors.area")}
+                </p>
+                <p
+                  style={{
+                    fontSize: "1rem",
+                    color: darkMode ? colors.textPrimary : "#111827",
+                    margin: 0,
+                  }}
+                >
+                  <span
+                    style={{
+                      display: "inline-block",
+                      fontSize: "0.75rem",
+                      backgroundColor: darkMode
+                        ? colors.successBackground
+                        : "#dcfce7",
+                      color: darkMode ? colors.successText : "#166534",
+                      padding: "0.125rem 0.5rem",
+                      borderRadius: "9999px",
+                    }}
+                  >
+                    {sensor.area?.name ?? (sensor.areaId != null ? String(sensor.areaId) : "-")}
+                  </span>
+                </p>
+              </div>
             </div>
 
             <div>
@@ -393,43 +428,6 @@ const SensorDetails: React.FC<SensorDetailsProps> = ({
               >
                 {t("sensors.additionalDetails")}
               </h2>
-
-              {sensor.area && (
-                <div style={{ marginBottom: "1rem" }}>
-                  <p
-                    style={{
-                      fontSize: "0.875rem",
-                      fontWeight: 500,
-                      color: darkMode ? colors.textSecondary : "#6b7280",
-                      margin: "0 0 0.25rem 0",
-                    }}
-                  >
-                    {t("area")}
-                  </p>
-                  <p
-                    style={{
-                      fontSize: "1rem",
-                      color: darkMode ? colors.textPrimary : "#111827",
-                      margin: 0,
-                    }}
-                  >
-                    <span
-                      style={{
-                        display: "inline-block",
-                        fontSize: "0.75rem",
-                        backgroundColor: darkMode
-                          ? colors.successBackground
-                          : "#dcfce7",
-                        color: darkMode ? colors.successText : "#166534",
-                        padding: "0.125rem 0.5rem",
-                        borderRadius: "9999px",
-                      }}
-                    >
-                      {sensor.area.name}
-                    </span>
-                  </p>
-                </div>
-              )}
 
               <div style={{ marginBottom: "1rem" }}>
                 <p

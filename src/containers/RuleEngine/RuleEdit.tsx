@@ -17,6 +17,7 @@ import {
   selectSensors,
   selectDevices,
   selectDeviceStates,
+  selectLastFetchedDeviceId,
   selectSensorDetails,
 } from '../../state/slices/ruleEngine.slice';
 import { selectAuthToken } from '../../state/slices/auth.slice';
@@ -43,6 +44,7 @@ const RuleEdit: React.FC = () => {
   const sensors = useSelector(selectSensors);
   const devices = useSelector(selectDevices);
   const deviceStates = useSelector(selectDeviceStates);
+  const lastFetchedDeviceId = useSelector(selectLastFetchedDeviceId);
   const sensorDetails = useSelector(selectSensorDetails);
 
   useEffect(() => {
@@ -196,6 +198,7 @@ const RuleEdit: React.FC = () => {
         sensors={sensors}
         devices={devices}
         deviceStates={deviceStates}
+        lastFetchedDeviceId={lastFetchedDeviceId}
         sensorDetails={sensorDetails}
         onFetchSensorDetails={handleFetchSensorDetails}
         onFetchDeviceStates={handleFetchDeviceStates}

@@ -1,25 +1,12 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import type { RootState } from '../store';
+import type { DeviceStateRecord } from '../../types/device.d';
 import * as deviceStatesService from '../../services/deviceStates.service';
 
-export interface DeviceState {
-  id: number;
-  deviceId?: number;
-  stateName: string;
-  dataType: string;
-  defaultValue: string;
-  allowedValues: string[];
-  createdAt: string;
-  updatedAt: string;
-  status?: 'active' | 'inactive' | 'suspended';
-  device?: {
-    name: string;
-    uuid: string;
-  };
-}
+export type DeviceState = DeviceStateRecord;
 
 interface DeviceStatesState {
-  states: DeviceState[];
+  states: DeviceStateRecord[];
   loading: boolean;
   error: string | null;
 }
@@ -47,7 +34,7 @@ export const fetchDeviceStates = createAsyncThunk(
 
 export const createDeviceState = createAsyncThunk(
   'deviceStates/create',
-  async ({ deviceId, state }: { deviceId: number; state: Omit<DeviceState, 'id' | 'createdAt' | 'updatedAt'> }, { rejectWithValue }) => {
+  async ({ deviceId, state }: { deviceId: number; state: Omit<DeviceStateRecord, 'id' | 'createdAt' | 'updatedAt'> }, { rejectWithValue }) => {
     try {
       return await deviceStatesService.createDeviceState(deviceId, state);
     } catch (error: any) {

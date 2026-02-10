@@ -771,20 +771,6 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({
             )}
           </div>
 
-          {Object.keys(device.metadata || {}).length > 0 && (
-            <div style={sectionStyle}>
-              <h3 style={sectionTitleStyle}>{t('devices.metadata')}</h3>
-              <div style={gridStyle}>
-                {Object.entries(device.metadata || {}).map(([key, value]) => (
-                  <div key={key}>
-                    <p style={labelStyle}>{key}</p>
-                    <p style={valueStyle}>{String(value)}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
           {Object.keys(device.capabilities || {}).length > 0 && (
             <div style={sectionStyle}>
               <h3 style={sectionTitleStyle}>{t('devices.capabilities')}</h3>

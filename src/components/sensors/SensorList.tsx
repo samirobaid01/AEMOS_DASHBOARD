@@ -1,11 +1,11 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import type { Sensor } from '../../types/sensor';
-import SensorItem from './SensorItem';
-import SensorFilter from './SensorFilter';
-import EmptyState from './EmptyState';
 import { useTheme } from '../../context/ThemeContext';
 import { useThemeColors } from '../../hooks/useThemeColors';
+import type { Sensor } from '../../types/sensor';
+import EmptyState from './EmptyState';
+import SensorFilter from './SensorFilter';
+import SensorItem from './SensorItem';
 
 interface SensorListProps {
   sensors: Sensor[];

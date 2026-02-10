@@ -6,7 +6,8 @@ import RuleForm from './RuleForm';
 import type { RuleChainCreatePayload, RuleChainUpdatePayload } from '../../types/ruleEngine';
 import { Button, Box } from '@mui/material';
 import type { Sensor } from '../../types/sensor';
-import type { Device, DeviceState } from '../../types/device';
+import type { Device } from '../../types/device';
+import type { DeviceStateRecord } from '../../types/device';
 
 interface RuleCreateProps {
   onSubmit: (data: RuleChainCreatePayload | RuleChainUpdatePayload) => Promise<void>;
@@ -19,7 +20,8 @@ interface RuleCreateProps {
   onNodeUpdate: (nodeId: number, data: any) => Promise<void>;
   sensors: Sensor[];
   devices: Device[];
-  deviceStates: DeviceState[];
+  deviceStates: DeviceStateRecord[];
+  lastFetchedDeviceId: number | null;
   sensorDetails: { [uuid: string]: Sensor };
   onFetchSensorDetails: (sensorId: number) => Promise<void>;
   onFetchDeviceStates: (deviceId: number) => Promise<void>;
@@ -37,6 +39,7 @@ const RuleCreate: React.FC<RuleCreateProps> = ({
   sensors,
   devices,
   deviceStates,
+  lastFetchedDeviceId,
   sensorDetails,
   onFetchSensorDetails,
   onFetchDeviceStates
@@ -70,6 +73,7 @@ const RuleCreate: React.FC<RuleCreateProps> = ({
         sensors={sensors}
         devices={devices}
         deviceStates={deviceStates}
+        lastFetchedDeviceId={lastFetchedDeviceId}
         sensorDetails={sensorDetails}
         onFetchSensorDetails={onFetchSensorDetails}
         onFetchDeviceStates={onFetchDeviceStates}

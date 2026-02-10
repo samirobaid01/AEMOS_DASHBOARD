@@ -14,6 +14,7 @@ import {
   selectSensors,
   selectDevices,
   selectDeviceStates,
+  selectLastFetchedDeviceId,
   selectSensorDetails
 } from '../../state/slices/ruleEngine.slice';
 import { useRuleEnginePermissions } from '../../hooks/useRuleEnginePermissions';
@@ -37,6 +38,7 @@ const RuleCreate: React.FC = () => {
   const sensors = useSelector(selectSensors);
   const devices = useSelector(selectDevices);
   const deviceStates = useSelector(selectDeviceStates);
+  const lastFetchedDeviceId = useSelector(selectLastFetchedDeviceId);
   const sensorDetails = useSelector(selectSensorDetails);
 
   // Fetch sensors and devices when component mounts
@@ -173,6 +175,7 @@ const RuleCreate: React.FC = () => {
       sensors={sensors}
       devices={devices}
       deviceStates={deviceStates}
+      lastFetchedDeviceId={lastFetchedDeviceId}
       sensorDetails={sensorDetails}
       onFetchSensorDetails={handleFetchSensorDetails}
       onFetchDeviceStates={handleFetchDeviceStates}

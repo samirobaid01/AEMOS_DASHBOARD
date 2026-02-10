@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -13,7 +13,7 @@ import {
   Typography,
   Box,
 } from '@mui/material';
-import type { Device, DeviceState } from '../../types/device';
+import type { Device, DeviceStateRecord } from '../../types/device';
 
 interface ActionDialogProps {
   open: boolean;
@@ -35,7 +35,8 @@ interface ActionDialogProps {
     };
   };
   devices: Device[];
-  deviceStates: DeviceState[];
+  deviceStates: DeviceStateRecord[];
+  lastFetchedDeviceId: number | null;
   onFetchDeviceStates: (deviceId: number) => Promise<void>;
 }
 
@@ -48,6 +49,7 @@ const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
   initialData,
   devices = [],
   deviceStates = [],
+  lastFetchedDeviceId = null,
   onFetchDeviceStates,
 }) => {
   const [actionType, setActionType] = useState<string>('Device');
@@ -58,9 +60,15 @@ const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
   const [nodeName, setNodeName] = useState<string>('');
   const [allowedValues, setAllowedValues] = useState<string[]>([]);
   const [isLoadingDeviceStates, setIsLoadingDeviceStates] = useState<boolean>(false);
+  const prevOpenRef = useRef(false);
 
   useEffect(() => {
-    if (open) {
+    const justOpened = open && !prevOpenRef.current;
+    prevOpenRef.current = open;
+
+    if (!open) return;
+
+    if (justOpened) {
       if (mode === 'add') {
         setActionType('Device');
         setSelectedDevice('');
@@ -68,6 +76,7 @@ const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
         setStateValue('');
         setJsonOutput('');
         setNodeName('');
+        setAllowedValues([]);
         setIsLoadingDeviceStates(false);
       } else if (mode === 'edit' && initialData) {
         try {
@@ -78,6 +87,7 @@ const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
             setStateName(command.stateName || '');
             setStateValue(command.value || '');
             setNodeName(initialData.name || '');
+            setAllowedValues([]);
             setJsonOutput(JSON.stringify({
               type: 'action',
               config: {
@@ -90,8 +100,6 @@ const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
                 }
               }
             }, null, 2));
-            
-            // Fetch device states for the initial device in edit mode
             if (command.deviceUuid) {
               const selectedDeviceObj = devices.find(d => d.uuid === command.deviceUuid);
               if (selectedDeviceObj?.id) {
@@ -141,13 +149,7 @@ const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
     // Use filtered device states instead of all device states
     const selectedState = filteredDeviceStates?.find(state => state.stateName === newStateName);
     if (selectedState) {
-      try {
-        const parsedValues = JSON.parse(selectedState.allowedValues);
-        setAllowedValues(Array.isArray(parsedValues) ? parsedValues : []);
-      } catch (error) {
-        console.error('Error parsing allowed values:', error);
-        setAllowedValues([]);
-      }
+      setAllowedValues(Array.isArray(selectedState.allowedValues) ? selectedState.allowedValues : []);
     } else {
       setAllowedValues([]);
     }
@@ -195,52 +197,15 @@ const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
     }
   };
 
-  // Add a computed property to get filtered device states for the selected device
   const filteredDeviceStates = useMemo(() => {
-    console.log('Filtering device states...', {
-      selectedDevice,
-      devicesLength: devices.length,
-      deviceStatesLength: deviceStates.length,
-      isLoadingDeviceStates
-    });
-    
-    if (!selectedDevice) {
-      console.log('No device selected');
-      return [];
-    }
-    
-    if (!devices.length) {
-      console.log('No devices available');
-      return [];
-    }
-    
-    if (!deviceStates.length) {
-      console.log('No device states available in store');
-      return [];
-    }
-    
-    // Find the selected device object to get its ID
+    if (!selectedDevice) return [];
+    if (!devices.length) return [];
+    if (!deviceStates.length) return [];
     const selectedDeviceObj = devices.find(d => d.uuid === selectedDevice);
-    if (!selectedDeviceObj) {
-      console.log('Selected device object not found for UUID:', selectedDevice);
-      return [];
-    }
-    
-    console.log('Selected device ID:', selectedDeviceObj.id);
-    
-    // Filter device states to only show states for the selected device
-    const filtered = deviceStates.filter(state => {
-      const matches = state.deviceId === selectedDeviceObj.id;
-      if (!matches) {
-        console.log(`State ${state.stateName} (deviceId: ${state.deviceId}) does not match selected device ID: ${selectedDeviceObj.id}`);
-      }
-      return matches;
-    });
-    
-    console.log(`Filtered ${filtered.length} device states for device ${selectedDeviceObj.name}:`, filtered);
-    
-    return filtered;
-  }, [selectedDevice, devices, deviceStates, isLoadingDeviceStates]);
+    if (!selectedDeviceObj) return [];
+    if (lastFetchedDeviceId == null || selectedDeviceObj.id !== lastFetchedDeviceId) return [];
+    return deviceStates;
+  }, [selectedDevice, devices, deviceStates, lastFetchedDeviceId, isLoadingDeviceStates]);
 
   return (
     <Dialog
@@ -376,11 +341,11 @@ const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
     </Dialog>
   );
 }, (prevProps, nextProps) => {
-  // Improved React.memo comparison to include device states
   return (
     prevProps.open === nextProps.open &&
     prevProps.mode === nextProps.mode &&
     prevProps.ruleChainId === nextProps.ruleChainId &&
+    prevProps.lastFetchedDeviceId === nextProps.lastFetchedDeviceId &&
     prevProps.devices.length === nextProps.devices.length &&
     prevProps.deviceStates.length === nextProps.deviceStates.length &&
     JSON.stringify(prevProps.initialData) === JSON.stringify(nextProps.initialData)

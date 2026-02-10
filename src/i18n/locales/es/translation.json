@@ -175,7 +175,20 @@
     "pressure": "Presión",
     "battery_level": "Nivel de Batería",
     "signal_strength": "Intensidad de Señal",
-    "debug_socket": "Depurar Socket"
+    "debug_socket": "Depurar Socket",
+    "uuid": "UUID",
+    "uuidPlaceholder": "Dejar vacío para generar automáticamente",
+    "generateUuid": "Generar UUID",
+    "initialTelemetry": "Telemetría Inicial",
+    "initialTelemetryDescription": "Opcionalmente añade una variable de telemetría para este sensor. Ambos campos son obligatorios si rellenas uno.",
+    "editTelemetryDescription": "Edita las variables de telemetría existentes o añade nuevas. Los cambios se guardarán al guardar.",
+    "variableName": "Nombre de variable",
+    "variableNamePlaceholder": "ej. temperatura",
+    "datatype": "Tipo de dato",
+    "selectDatatype": "Seleccionar tipo de dato",
+    "telemetryBothRequired": "El nombre de variable y el tipo de dato son obligatorios al añadir telemetría inicial.",
+    "addTelemetry": "Añadir telemetría",
+    "removeTelemetry": "Quitar telemetría"
   },
   "devices": {
     "title": "Dispositivos",
@@ -217,10 +230,31 @@
     "config_key": "Clave de Configuración",
     "config_value": "Valor de Configuración",
     "add_field": "Añadir Campo",
-    "area_required": "El área es requerida"
+    "area_required": "El área es requerida",
+    "minValue": "Mín",
+    "maxValue": "Máx",
+    "deviceState": {
+      "addState": "Definir estados del dispositivo",
+      "stateName": "Nombre del estado",
+      "dataType": "Tipo de dato",
+      "defaultValue": "Valor por defecto",
+      "allowedValue": "Valores permitidos",
+      "addValues": "Añadir valores",
+      "inProgress": "En progreso",
+      "finishButton": "Finalizar",
+      "cancelButton": "Cancelar"
+    },
+    "capabilities": {
+      "title": "Capacidades del dispositivo",
+      "saveCapabilities": "Guardar capacidades",
+      "saving": "Guardando..."
+    }
   },
   "common": {
     "save": "Guardar",
+    "name_required": "El nombre es obligatorio",
+    "organization_required": "La organización es obligatoria",
+    "deviceType_required": "El tipo de dispositivo es obligatorio",
     "cancel": "Cancelar",
     "confirm": "Confirmar",
     "delete": "Eliminar",

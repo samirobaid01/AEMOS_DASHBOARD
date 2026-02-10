@@ -1,9 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import type { Sensor } from '../../types/sensor';
 import { useTheme } from '../../context/ThemeContext';
 import { useThemeColors } from '../../hooks/useThemeColors';
+import type { Sensor } from '../../types/sensor';
 
 interface SensorItemProps {
   sensor: Sensor;

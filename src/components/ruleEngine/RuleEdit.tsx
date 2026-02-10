@@ -5,7 +5,7 @@ import { useThemeColors } from '../../hooks/useThemeColors';
 import RuleForm from './RuleForm';
 import type { RuleChain, RuleChainUpdatePayload } from '../../types/ruleEngine';
 import type { Sensor } from '../../types/sensor';
-import type { Device, DeviceState } from '../../types/device';
+import type { Device, DeviceStateRecord } from '../../types/device';
 
 interface RuleEditProps {
   rule: RuleChain | null;
@@ -19,7 +19,8 @@ interface RuleEditProps {
   onNodeUpdate: (nodeId: number, data: any) => Promise<void>;
   sensors: Sensor[];
   devices: Device[];
-  deviceStates: DeviceState[];
+  deviceStates: DeviceStateRecord[];
+  lastFetchedDeviceId: number | null;
   sensorDetails: { [uuid: string]: Sensor };
   onFetchSensorDetails: (sensorId: number) => Promise<void>;
   onFetchDeviceStates: (deviceId: number) => Promise<void>;
@@ -38,6 +39,7 @@ const RuleEdit: React.FC<RuleEditProps> = ({
   sensors,
   devices,
   deviceStates,
+  lastFetchedDeviceId,
   sensorDetails,
   onFetchSensorDetails,
   onFetchDeviceStates
@@ -123,6 +125,7 @@ const RuleEdit: React.FC<RuleEditProps> = ({
         sensors={sensors}
         devices={devices}
         deviceStates={deviceStates}
+        lastFetchedDeviceId={lastFetchedDeviceId}
         sensorDetails={sensorDetails}
         onFetchSensorDetails={onFetchSensorDetails}
         onFetchDeviceStates={onFetchDeviceStates}

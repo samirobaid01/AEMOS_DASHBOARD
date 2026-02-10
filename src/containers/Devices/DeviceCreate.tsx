@@ -3,192 +3,234 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import type { AppDispatch } from '../../state/store';
-import { createDevice, selectDevicesLoading, selectDevicesError } from '../../state/slices/devices.slice';
+import { createDevice, updateDevice, selectDevicesLoading, selectDevicesError } from '../../state/slices/devices.slice';
+import { createDeviceState, selectDeviceStatesLoading, selectDeviceStatesError } from '../../state/slices/deviceStates.slice';
 import { fetchOrganizations, selectOrganizations } from '../../state/slices/organizations.slice';
 import { fetchAreas, selectAreas } from '../../state/slices/areas.slice';
-import type { DeviceCreateRequest } from '../../types/device';
+import type { DeviceCreateRequest, DeviceCapabilities } from '../../types/device.d';
 import DeviceCreate from '../../components/devices/DeviceCreate';
-import { ALLOWED_STATUSES } from '../../constants/device';
+import type { DeviceStatePayload } from '../../components/devices/DeviceStatesModal';
 
 const DeviceCreateContainer = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const organizationId = searchParams.get('organizationId');
-  
-  const isLoading = useSelector(selectDevicesLoading);
-  const error = useSelector(selectDevicesError);
+  const organizationIdParam = searchParams.get('organizationId');
+
+  const devicesLoading = useSelector(selectDevicesLoading);
+  const devicesError = useSelector(selectDevicesError);
+  const statesLoading = useSelector(selectDeviceStatesLoading);
+  const statesError = useSelector(selectDeviceStatesError);
   const organizations = useSelector(selectOrganizations);
   const areas = useSelector(selectAreas);
-  
+
+  const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
+  const [createdDeviceId, setCreatedDeviceId] = useState<number | null>(null);
+  const [addedStates, setAddedStates] = useState<DeviceStatePayload[]>([]);
+  const [capabilitiesSaving, setCapabilitiesSaving] = useState(false);
+  const [capabilitiesError, setCapabilitiesError] = useState<string | null>(null);
+
   const [formData, setFormData] = useState<DeviceCreateRequest>({
     name: '',
     description: '',
     status: 'pending',
-    organizationId: organizationId ? parseInt(organizationId, 10) : 0,
+    organizationId: organizationIdParam ? parseInt(organizationIdParam, 10) : 0,
     deviceType: 'actuator',
-    controlType: 'binary',
-    minValue: null,
-    maxValue: null,
-    defaultState: '',
     communicationProtocol: undefined,
     isCritical: false,
-    metadata: {},
-    capabilities: {},
     areaId: undefined,
-    controlModes: ''
+    controlModes: '',
   });
-  
+
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-  
+
   useEffect(() => {
     dispatch(fetchOrganizations());
     dispatch(fetchAreas());
   }, [dispatch]);
-  
+
   useEffect(() => {
-    if (organizationId) {
-      setFormData(prev => ({
+    if (organizationIdParam) {
+      setFormData((prev) => ({
         ...prev,
-        organizationId: parseInt(organizationId, 10)
+        organizationId: parseInt(organizationIdParam, 10),
       }));
     }
-  }, [organizationId]);
-  
+  }, [organizationIdParam]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    
     if ((e.target as HTMLInputElement).type === 'checkbox') {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         [name]: (e.target as HTMLInputElement).checked,
       }));
       return;
     }
-    
     if (name === 'organizationId' || name === 'areaId') {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         [name]: value ? parseInt(value, 10) : undefined,
+        ...(name === 'organizationId' ? { areaId: undefined } : {}),
       }));
-      
-      if (name === 'organizationId') {
-        setFormData(prev => ({
-          ...prev,
-          areaId: undefined
-        }));
-      }
-      
       return;
     }
-    
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
   };
 
-  const handleMetadataChange = (metadata: Record<string, any>) => {
-    console.log('Container handling metadata change:', metadata);
-    setFormData(prev => ({
-      ...prev,
-      metadata: metadata
-    }));
-  };
-
-  const handleCapabilitiesChange = (capabilities: Record<string, any>) => {
-    console.log('Container handling capabilities change:', capabilities);
-    setFormData(prev => ({
-      ...prev,
-      capabilities: capabilities
-    }));
-  };
-
   const handleControlModesChange = (modes: string[]) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      controlModes: modes.join(',')
+      controlModes: modes.join(','),
     }));
   };
-  
+
   const validateForm = (): boolean => {
     const errors: Record<string, string> = {};
-    
     if (!formData.name.trim()) {
-      errors.name = t('name_required');
+      errors.name = t('common.name_required');
     }
-    
     if (!formData.organizationId) {
-      errors.organizationId = t('organization_required');
+      errors.organizationId = t('common.organization_required');
     }
-    
     if (!formData.deviceType) {
-      errors.deviceType = t('deviceType_required');
+      errors.deviceType = t('common.deviceType_required');
     }
-
-    if (!formData.controlType) {
-      errors.controlType = t('controlType_required');
-    }
-    
-    if (formData.organizationId && !formData.areaId) {
-      errors.areaId = t('devices.area_required');
-    }
-    
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
-  
-  const handleSubmit = async (e: React.FormEvent) => {
+
+  const handleStep1Submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!validateForm()) {
-      return;
-    }
-    
-    try {
-      const resultAction = await dispatch(createDevice(formData));
-      if (createDevice.fulfilled.match(resultAction)) {
-        return resultAction.payload.data.device;
+    if (!validateForm()) return;
+    const resultAction = await dispatch(createDevice(formData));
+    if (createDevice.fulfilled.match(resultAction)) {
+      const device = resultAction.payload as { id: number };
+      if (device?.id) {
+        setCreatedDeviceId(device.id);
+        setCurrentStep(2);
       }
-    } catch (error) {
-      console.error('Error creating device:', error);
+    }
+  };
+
+  const handleStatesNext = async (payload: DeviceStatePayload) => {
+    if (!createdDeviceId || !formData.organizationId) return;
+    const resultAction = await dispatch(
+      createDeviceState({
+        deviceId: createdDeviceId,
+        state: {
+          stateName: payload.stateName,
+          dataType: payload.dataType,
+          defaultValue: payload.defaultValue,
+          allowedValues: payload.allowedValues,
+        },
+      })
+    );
+    if (createDeviceState.fulfilled.match(resultAction)) {
+      setAddedStates((prev) => [...prev, payload]);
+    }
+  };
+
+  const handleStatesFinish = async (payload: DeviceStatePayload) => {
+    if (!createdDeviceId || !formData.organizationId) return;
+    const resultAction = await dispatch(
+      createDeviceState({
+        deviceId: createdDeviceId,
+        state: {
+          stateName: payload.stateName,
+          dataType: payload.dataType,
+          defaultValue: payload.defaultValue,
+          allowedValues: payload.allowedValues,
+        },
+      })
+    );
+    if (createDeviceState.fulfilled.match(resultAction)) {
+      setAddedStates((prev) => [...prev, payload]);
+      setCurrentStep(3);
+    }
+  };
+
+  const buildCapabilities = (): DeviceCapabilities => {
+    return addedStates.reduce<DeviceCapabilities>((acc, s) => {
+      acc[s.stateName] = {
+        stateName: s.stateName,
+        dataType: s.dataType,
+        defaultValue: s.defaultValue,
+        allowedValues: s.allowedValues,
+      };
+      return acc;
+    }, {});
+  };
+
+  const handleSaveCapabilities = async () => {
+    if (!createdDeviceId || !formData.organizationId) return;
+    setCapabilitiesSaving(true);
+    setCapabilitiesError(null);
+    const capabilities = buildCapabilities();
+    const resultAction = await dispatch(
+      updateDevice({
+        id: createdDeviceId,
+        deviceData: { organizationId: formData.organizationId, capabilities },
+      })
+    );
+    setCapabilitiesSaving(false);
+    if (updateDevice.fulfilled.match(resultAction)) {
+      if (organizationIdParam) {
+        navigate(`/organizations/${organizationIdParam}`);
+      } else {
+        navigate('/devices');
+      }
+    } else if (updateDevice.rejected.match(resultAction)) {
+      setCapabilitiesError((resultAction.payload as string) || 'Failed to save capabilities');
     }
   };
 
   const handleCancel = () => {
-    if (organizationId) {
-      navigate(`/organizations/${organizationId}`);
+    if (organizationIdParam) {
+      navigate(`/organizations/${organizationIdParam}`);
     } else {
       navigate('/devices');
     }
   };
 
-  const handleComplete = () => {
-    if (organizationId) {
-      navigate(`/organizations/${organizationId}`);
+  const handleCapabilitiesClose = () => {
+    if (organizationIdParam) {
+      navigate(`/organizations/${organizationIdParam}`);
     } else {
       navigate('/devices');
     }
   };
-  
+
   return (
     <DeviceCreate
+      currentStep={currentStep}
       formData={formData}
       formErrors={formErrors}
-      isLoading={isLoading}
-      error={error}
+      isLoading={devicesLoading}
+      error={devicesError}
       organizations={organizations}
       areas={areas}
-      onSubmit={handleSubmit}
       onChange={handleChange}
-      onMetadataChange={handleMetadataChange}
-      onCapabilitiesChange={handleCapabilitiesChange}
       onControlModesChange={handleControlModesChange}
+      onSubmit={handleStep1Submit}
       onCancel={handleCancel}
-      onComplete={handleComplete}
+      createdDeviceId={createdDeviceId}
+      statesError={statesError}
+      statesLoading={statesLoading}
+      onStatesNext={handleStatesNext}
+      onStatesFinish={handleStatesFinish}
+      onStatesCancel={handleCancel}
+      capabilities={buildCapabilities()}
+      capabilitiesSaving={capabilitiesSaving}
+      capabilitiesError={capabilitiesError}
+      onSaveCapabilities={handleSaveCapabilities}
+      onCapabilitiesClose={handleCapabilitiesClose}
     />
   );
 };
 
-export default DeviceCreateContainer; 
+export default DeviceCreateContainer;

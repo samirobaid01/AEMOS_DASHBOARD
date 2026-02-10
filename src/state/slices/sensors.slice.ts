@@ -1,8 +1,17 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
-import type { SensorState, Sensor, SensorCreateRequest, SensorUpdateRequest, SensorFilterParams } from '../../types/sensor';
+import type {
+  SensorState,
+  Sensor,
+  SensorCreateRequest,
+  SensorUpdateRequest,
+  SensorFilterParams,
+  TelemetryCreateRequest,
+  TelemetryUpdateRequest,
+} from '../../types/sensor';
 import type { RootState } from '../store';
 import * as sensorsService from '../../services/sensors.service';
+import * as telemetryService from '../../services/telemetry.service';
 
 // Initial state
 const initialState: SensorState = {
@@ -87,6 +96,28 @@ export const deleteSensor = createAsyncThunk(
       return id;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || 'Failed to delete sensor');
+    }
+  }
+);
+
+export const createTelemetry = createAsyncThunk(
+  'sensors/createTelemetry',
+  async (data: TelemetryCreateRequest, { rejectWithValue }) => {
+    try {
+      return await telemetryService.createTelemetry(data);
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to create telemetry');
+    }
+  }
+);
+
+export const updateTelemetry = createAsyncThunk(
+  'sensors/updateTelemetry',
+  async ({ id, data }: { id: number; data: TelemetryUpdateRequest }, { rejectWithValue }) => {
+    try {
+      return await telemetryService.updateTelemetry(id, data);
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to update telemetry');
     }
   }
 );

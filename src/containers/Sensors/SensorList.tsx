@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import type { AppDispatch } from '../../state/store';
-import { fetchSensors, selectSensors, selectSensorsLoading, selectSensorsError, fetchSensorsByOrganizationId } from '../../state/slices/sensors.slice';
-import LoadingScreen from '../../components/common/Loading/LoadingScreen';
 import SensorListComponent from '../../components/sensors/SensorList';
-import type { Sensor } from '../../types/sensor';
+import LoadingScreen from '../../components/common/Loading/LoadingScreen';
 import { selectSelectedOrganizationId } from '../../state/slices/auth.slice';
+import { fetchSensors, fetchSensorsByOrganizationId, selectSensors, selectSensorsError, selectSensorsLoading } from '../../state/slices/sensors.slice';
+import type { AppDispatch } from '../../state/store';
+import type { Sensor } from '../../types/sensor';
+
 const SensorList = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
@@ -28,63 +29,49 @@ const SensorList = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
   
-  // Fetch sensors
   useEffect(() => {
-    console.log('SensorList selectedOrganizationId', selectedOrganizationId);
-    if(selectedOrganizationId){
+    if (selectedOrganizationId) {
       dispatch(fetchSensorsByOrganizationId(parseInt(selectedOrganizationId.toString(), 10)));
-    }else{
+    } else {
       dispatch(fetchSensors());
     }
   }, [dispatch, selectedOrganizationId]);
-  
-  // Log sensors when they update
-  useEffect(() => {
-    if (sensors.length > 0) {
-      console.log("Sensors updated:", sensors.length);
-    }
-  }, [sensors]);
-  
-  // Filter sensors based on search term and type filter
-  const filteredSensors = Array.isArray(sensors) 
+
+  const filteredSensors = Array.isArray(sensors)
     ? sensors.filter((sensor: Sensor) => {
-        const matchesSearch = 
+        const matchesSearch =
           sensor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
           (sensor.description && sensor.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
-          sensor.type.toLowerCase().includes(searchTerm.toLowerCase());
-        
+          (sensor.type && sensor.type.toLowerCase().includes(searchTerm.toLowerCase()));
         const matchesType = typeFilter === '' || sensor.type === typeFilter;
-        
         return matchesSearch && matchesType;
       })
     : [];
-  
-  // Get unique sensor types for filter
-  const sensorTypes = Array.isArray(sensors) 
-    ? Array.from(new Set(sensors.map((sensor: Sensor) => sensor.type)))
+
+  const sensorTypes = Array.isArray(sensors)
+    ? Array.from(new Set(sensors.map((sensor: Sensor) => sensor.type).filter(Boolean)))
     : [];
-  
-  // Handle adding a new sensor
+
   const handleAddSensor = () => {
     navigate('/sensors/create');
   };
-  
+
   if (isLoading && (!sensors || sensors.length === 0)) {
     return <LoadingScreen />;
   }
-  
+
   return (
     <SensorListComponent
-      sensors={sensors}
-      isLoading={isLoading}
+      sensors={filteredSensors}
       error={error}
+      isLoading={isLoading}
       searchTerm={searchTerm}
-      setSearchTerm={setSearchTerm}
-      typeFilter={typeFilter}
-      setTypeFilter={setTypeFilter}
       sensorTypes={sensorTypes}
-      onAddSensor={handleAddSensor}
+      typeFilter={typeFilter}
       windowWidth={windowWidth}
+      onAddSensor={handleAddSensor}
+      setSearchTerm={setSearchTerm}
+      setTypeFilter={setTypeFilter}
     />
   );
 };

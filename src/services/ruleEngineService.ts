@@ -1,5 +1,5 @@
 import apiClient from './api/apiClient';
-import type { RuleChain, RuleChainCreatePayload, RuleChainUpdatePayload } from '../types/ruleEngine';
+import type { RuleChainCreatePayload, RuleChainUpdatePayload } from '../types/ruleEngine';
 import { withOrganizationId } from './api/organizationContext';
 
 /**
@@ -123,19 +123,15 @@ export const fetchDevices = async () => {
  */
 export const fetchDeviceStates = async (deviceId: number) => {
   const params = withOrganizationId();
-  console.log('RuleEngineService: Fetching device states for device:', deviceId, 'with params:', params);
   const response = await apiClient.get(`/device-states/device/${deviceId}`, { params });
-  console.log('RuleEngineService: Device states response:', response.data);
-  
-  // Parse allowedValues from JSON string to array if needed and ensure proper format
-  const states = response.data.data?.map((state: any) => ({
+  const raw = response.data?.data;
+  if (!Array.isArray(raw)) return [];
+  const states = raw.map((state: any) => ({
     ...state,
-    allowedValues: typeof state.allowedValues === 'string' 
-      ? state.allowedValues 
-      : JSON.stringify(state.allowedValues || [])
-  })) || [];
-  
-  console.log('RuleEngineService: Processed device states:', states);
+    allowedValues: typeof state.allowedValues === 'string'
+      ? (() => { try { return JSON.parse(state.allowedValues); } catch { return []; } })()
+      : Array.isArray(state.allowedValues) ? state.allowedValues : []
+  }));
   return states;
 };
 

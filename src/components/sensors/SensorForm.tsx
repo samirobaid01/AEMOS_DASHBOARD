@@ -1,8 +1,15 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import type { Sensor, SensorCreateRequest, SensorUpdateRequest } from '../../types/sensor.d';
 import { useTheme } from '../../context/ThemeContext';
 import { useThemeColors } from '../../hooks/useThemeColors';
+import { ALLOWED_SENSOR_STATUSES } from '../../types/sensor';
+import type { Sensor, SensorCreateRequest, SensorUpdateRequest, TelemetryDatatype } from '../../types/sensor.d';
+
+export interface TelemetryRowPayload {
+  id?: number;
+  variableName: string;
+  datatype: TelemetryDatatype;
+}
 
 interface Area {
   id: number;
@@ -10,23 +17,32 @@ interface Area {
   organizationId: number;
 }
 
+export interface TelemetryRowFormState {
+  id?: number;
+  variableName: string;
+  datatype: TelemetryDatatype | '';
+}
+
 interface SensorFormProps {
   sensor?: Sensor | null;
   areas: Area[];
   isLoading: boolean;
   error: string | null;
-  onSubmit: (data: SensorCreateRequest | SensorUpdateRequest) => void;
+  telemetryError?: string | null;
+  onSubmit: (data: SensorCreateRequest | SensorUpdateRequest, telemetryRows?: TelemetryRowFormState[]) => void;
   onCancel: () => void;
   isSubmitting: boolean;
   windowWidth: number;
   isEditMode?: boolean;
 }
 
+const TELEMETRY_DATATYPES: TelemetryDatatype[] = ['float', 'int', 'string', 'boolean'];
+
 const SensorForm: React.FC<SensorFormProps> = ({
   sensor,
   areas = [],
-  isLoading,
   error,
+  telemetryError = null,
   onSubmit,
   onCancel,
   isSubmitting,
@@ -40,14 +56,54 @@ const SensorForm: React.FC<SensorFormProps> = ({
   const safeAreas = Array.isArray(areas) ? areas : [];
 
   const [formData, setFormData] = React.useState<SensorCreateRequest | SensorUpdateRequest>({
-    //organizationId: 0,
     name: sensor?.name || '',
     areaId: sensor?.areaId || (safeAreas.length > 0 ? safeAreas[0].id : 0),
-    type: sensor?.type || '',
-    status: sensor?.status !== undefined ? sensor.status : 'active',
+    status: sensor?.status !== undefined ? sensor.status : 'pending',
     description: sensor?.description || '',
-    metadata: sensor?.metadata || {},
+    uuid: sensor?.uuid || '',
   });
+
+  const [telemetryRows, setTelemetryRows] = React.useState<TelemetryRowFormState[]>([
+    { variableName: '', datatype: '' },
+  ]);
+
+  React.useEffect(() => {
+    if (isEditMode && sensor) {
+      setFormData((prev) => ({
+        ...prev,
+        name: sensor.name ?? prev.name,
+        areaId: sensor.areaId ?? prev.areaId,
+        status: sensor.status !== undefined ? sensor.status : prev.status,
+        description: sensor.description ?? prev.description,
+        uuid: sensor.uuid ?? prev.uuid,
+      }));
+    }
+  }, [isEditMode, sensor?.id, sensor?.name, sensor?.areaId, sensor?.status, sensor?.description, sensor?.uuid]);
+
+  React.useEffect(() => {
+    if (isEditMode && sensor?.TelemetryData?.length) {
+      const rows = sensor.TelemetryData.map((t) => ({
+        id: t.id,
+        variableName: t.variableName,
+        datatype: (t.datatype as TelemetryDatatype) || '',
+      }));
+      setTelemetryRows([...rows, { variableName: '', datatype: '' }]);
+    }
+  }, [isEditMode, sensor?.TelemetryData]);
+
+  const handleAddTelemetryRow = () => {
+    setTelemetryRows((prev) => [...prev, { variableName: '', datatype: '' }]);
+  };
+
+  const handleRemoveTelemetryRow = (index: number) => {
+    setTelemetryRows((prev) => (prev.length > 1 ? prev.filter((_, i) => i !== index) : prev));
+  };
+
+  const handleTelemetryRowChange = (index: number, field: 'variableName' | 'datatype', value: string) => {
+    setTelemetryRows((prev) =>
+      prev.map((row, i) => (i === index ? { ...row, [field]: value } : row))
+    );
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -65,50 +121,16 @@ const SensorForm: React.FC<SensorFormProps> = ({
     }
   };
 
-  const handleMetadataChange = (key: string, value: string) => {
+  const handleGenerateUuid = () => {
     setFormData({
       ...formData,
-      metadata: {
-        ...formData.metadata,
-        [key]: value,
-      },
-    });
-  };
-
-  const handleMetadataDelete = (key: string) => {
-    const newMetadata = { ...formData.metadata };
-    delete newMetadata[key];
-    setFormData({
-      ...formData,
-      metadata: newMetadata,
-    });
-  };
-
-  const handleAddMetadata = () => {
-    setFormData({
-      ...formData,
-      metadata: {
-        ...formData.metadata,
-        '': '',
-      },
+      uuid: crypto.randomUUID?.() ?? '',
     });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Clean up empty metadata fields
-    const cleanMetadata = { ...formData.metadata };
-    Object.entries(cleanMetadata).forEach(([key, value]) => {
-      if (key.trim() === '' || value.toString().trim() === '') {
-        delete cleanMetadata[key];
-      }
-    });
-    
-    onSubmit({
-      ...formData,
-      metadata: Object.keys(cleanMetadata).length > 0 ? cleanMetadata : undefined,
-    });
+    onSubmit({ ...formData }, telemetryRows);
   };
 
   const formStyle = {
@@ -186,18 +208,6 @@ const SensorForm: React.FC<SensorFormProps> = ({
     outline: 'none',
   } as React.CSSProperties;
 
-  const checkboxWrapperStyle = {
-    display: 'flex',
-    alignItems: 'center',
-  };
-
-  const checkboxStyle = {
-    width: '1rem',
-    height: '1rem',
-    marginRight: '0.5rem',
-    accentColor: darkMode ? '#4d7efa' : '#3b82f6',
-  };
-
   const textareaStyle = {
     display: 'block',
     width: '100%',
@@ -270,11 +280,6 @@ const SensorForm: React.FC<SensorFormProps> = ({
     marginTop: '0.5rem',
   };
 
-  const metadataInputStyle = {
-    ...inputStyle,
-    flexGrow: 1,
-  };
-
   const metadataRemoveButtonStyle = {
     display: 'flex',
     alignItems: 'center',
@@ -310,53 +315,62 @@ const SensorForm: React.FC<SensorFormProps> = ({
               </div>
             )}
 
-            <div style={{ ...fieldGroupStyle, display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '1rem' }}>
-              <div>
-                <label htmlFor="name" style={labelStyle}>
-                  {t('sensors.name')} <span style={{ color: darkMode ? '#ef5350' : '#ef4444' }}>*</span>
-                </label>
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  required
-                  style={inputStyle}
-                  onFocus={(e) => {
-                    e.target.style.boxShadow = `0 0 0 3px ${darkMode ? 'rgba(77, 126, 250, 0.3)' : 'rgba(59, 130, 246, 0.2)'}`;
-                    e.target.style.borderColor = darkMode ? '#4d7efa' : '#3b82f6';
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.boxShadow = 'none';
-                    e.target.style.borderColor = darkMode ? colors.border : '#d1d5db';
-                  }}
-                />
-              </div>
-
-              <div>
-                <label htmlFor="type" style={labelStyle}>
-                  {t('sensors.type')} <span style={{ color: darkMode ? '#ef5350' : '#ef4444' }}>*</span>
-                </label>
-                <input
-                  type="text"
-                  id="type"
-                  name="type"
-                  //value={formData.type}
-                  onChange={handleChange}
-                  required
-                  style={inputStyle}
-                  onFocus={(e) => {
-                    e.target.style.boxShadow = `0 0 0 3px ${darkMode ? 'rgba(77, 126, 250, 0.3)' : 'rgba(59, 130, 246, 0.2)'}`;
-                    e.target.style.borderColor = darkMode ? '#4d7efa' : '#3b82f6';
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.boxShadow = 'none';
-                    e.target.style.borderColor = darkMode ? colors.border : '#d1d5db';
-                  }}
-                />
-              </div>
+            <div style={fieldGroupStyle}>
+              <label htmlFor="name" style={labelStyle}>
+                {t('sensors.name')} <span style={{ color: darkMode ? '#ef5350' : '#ef4444' }}>*</span>
+              </label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                required
+                style={inputStyle}
+                onFocus={(e) => {
+                  e.target.style.boxShadow = `0 0 0 3px ${darkMode ? 'rgba(77, 126, 250, 0.3)' : 'rgba(59, 130, 246, 0.2)'}`;
+                  e.target.style.borderColor = darkMode ? '#4d7efa' : '#3b82f6';
+                }}
+                onBlur={(e) => {
+                  e.target.style.boxShadow = 'none';
+                  e.target.style.borderColor = darkMode ? colors.border : '#d1d5db';
+                }}
+              />
             </div>
+
+            {!isEditMode && (
+              <div style={fieldGroupStyle}>
+                <label htmlFor="uuid" style={labelStyle}>
+                  {t('sensors.uuid')}
+                </label>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <input
+                    type="text"
+                    id="uuid"
+                    name="uuid"
+                    value={formData.uuid ?? ''}
+                    onChange={handleChange}
+                    placeholder={t('sensors.uuidPlaceholder')}
+                    style={{ ...inputStyle, flex: 1 }}
+                    onFocus={(e) => {
+                      e.target.style.boxShadow = `0 0 0 3px ${darkMode ? 'rgba(77, 126, 250, 0.3)' : 'rgba(59, 130, 246, 0.2)'}`;
+                      e.target.style.borderColor = darkMode ? '#4d7efa' : '#3b82f6';
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.boxShadow = 'none';
+                      e.target.style.borderColor = darkMode ? colors.border : '#d1d5db';
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={handleGenerateUuid}
+                    style={{ ...metadataButtonStyle, whiteSpace: 'nowrap' }}
+                  >
+                    {t('sensors.generateUuid')}
+                  </button>
+                </div>
+              </div>
+            )}
 
             <div style={fieldGroupStyle}>
               <label htmlFor="areaId" style={labelStyle}>
@@ -390,19 +404,31 @@ const SensorForm: React.FC<SensorFormProps> = ({
             </div>
 
             <div style={fieldGroupStyle}>
-              <div style={checkboxWrapperStyle}>
-                <input
-                  type="checkbox"
-                  id="status"
-                  name="status"
-                  checked={!!formData.status}
-                  onChange={handleChange}
-                  style={checkboxStyle}
-                />
-                <label htmlFor="status" style={{ fontSize: '0.875rem', color: darkMode ? colors.textSecondary : '#374151' }}>
-                  {t('sensors.active')}
-                </label>
-              </div>
+              <label htmlFor="status" style={labelStyle}>
+                {t('sensors.status')} <span style={{ color: darkMode ? '#ef5350' : '#ef4444' }}>*</span>
+              </label>
+              <select
+                id="status"
+                name="status"
+                value={formData.status ?? 'pending'}
+                onChange={handleChange}
+                required
+                style={selectStyle}
+                onFocus={(e) => {
+                  e.target.style.boxShadow = `0 0 0 3px ${darkMode ? 'rgba(77, 126, 250, 0.3)' : 'rgba(59, 130, 246, 0.2)'}`;
+                  e.target.style.borderColor = darkMode ? '#4d7efa' : '#3b82f6';
+                }}
+                onBlur={(e) => {
+                  e.target.style.boxShadow = 'none';
+                  e.target.style.borderColor = darkMode ? colors.border : '#d1d5db';
+                }}
+              >
+                {ALLOWED_SENSOR_STATUSES.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div style={fieldGroupStyle}>
@@ -427,74 +453,82 @@ const SensorForm: React.FC<SensorFormProps> = ({
             </div>
 
             <div style={fieldGroupStyle}>
-              <label style={labelStyle}>{t('sensors.metadata')}</label>
-              
-              {Object.entries(formData.metadata || {}).map(([key, value], index) => (
-                <div key={index} style={metadataItemStyle}>
-                  <input
-                    type="text"
-                    placeholder={t('property')}
-                    value={key}
-                    onChange={(e) => {
-                      const newKey = e.target.value;
-                      const newMetadata = { ...formData.metadata };
-                      const currentValue = newMetadata[key];
-                      delete newMetadata[key];
-                      newMetadata[newKey] = currentValue;
-                      setFormData({
-                        ...formData,
-                        metadata: newMetadata,
-                      });
-                    }}
-                    style={metadataInputStyle}
-                    onFocus={(e) => {
-                      e.target.style.boxShadow = `0 0 0 3px ${darkMode ? 'rgba(77, 126, 250, 0.3)' : 'rgba(59, 130, 246, 0.2)'}`;
-                      e.target.style.borderColor = darkMode ? '#4d7efa' : '#3b82f6';
-                    }}
-                    onBlur={(e) => {
-                      e.target.style.boxShadow = 'none';
-                      e.target.style.borderColor = darkMode ? colors.border : '#d1d5db';
-                    }}
-                  />
-                  <input
-                    type="text"
-                    placeholder={t('value')}
-                    value={value}
-                    onChange={(e) => handleMetadataChange(key, e.target.value)}
-                    style={metadataInputStyle}
-                    onFocus={(e) => {
-                      e.target.style.boxShadow = `0 0 0 3px ${darkMode ? 'rgba(77, 126, 250, 0.3)' : 'rgba(59, 130, 246, 0.2)'}`;
-                      e.target.style.borderColor = darkMode ? '#4d7efa' : '#3b82f6';
-                    }}
-                    onBlur={(e) => {
-                      e.target.style.boxShadow = 'none';
-                      e.target.style.borderColor = darkMode ? colors.border : '#d1d5db';
-                    }}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => handleMetadataDelete(key)}
-                    style={metadataRemoveButtonStyle}
-                  >
-                    ×
-                  </button>
-                </div>
-              ))}
-              
-              <button
-                type="button"
-                onClick={handleAddMetadata}
-                style={metadataButtonStyle}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.backgroundColor = darkMode ? '#5d8efa' : '#2563eb';
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.backgroundColor = darkMode ? '#4d7efa' : '#3b82f6';
-                }}
-              >
-                {t('sensors.addMetadata')}
-              </button>
-            </div>
+              <label style={labelStyle}>
+                {isEditMode ? t('sensors.telemetryData') : t('sensors.initialTelemetry')}
+              </label>
+              <p style={headerDescriptionStyle}>
+                {isEditMode ? t('sensors.editTelemetryDescription') : t('sensors.initialTelemetryDescription')}
+              </p>
+                {telemetryError && (
+                  <div style={{ ...errorMessageStyle, marginBottom: '0.75rem' }}>{telemetryError}</div>
+                )}
+                {telemetryRows.map((row, index) => (
+                  <div key={index} style={{ ...metadataItemStyle, alignItems: 'flex-end', gap: '0.75rem', marginBottom: '1rem' }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <label htmlFor={`telemetryVariableName-${index}`} style={{ ...labelStyle, marginBottom: '0.25rem' }}>
+                        {t('sensors.variableName')}
+                      </label>
+                      <input
+                        type="text"
+                        id={`telemetryVariableName-${index}`}
+                        value={row.variableName}
+                        onChange={(e) => handleTelemetryRowChange(index, 'variableName', e.target.value)}
+                        placeholder={t('sensors.variableNamePlaceholder')}
+                        style={inputStyle}
+                        onFocus={(e) => {
+                          e.target.style.boxShadow = `0 0 0 3px ${darkMode ? 'rgba(77, 126, 250, 0.3)' : 'rgba(59, 130, 246, 0.2)'}`;
+                          e.target.style.borderColor = darkMode ? '#4d7efa' : '#3b82f6';
+                        }}
+                        onBlur={(e) => {
+                          e.target.style.boxShadow = 'none';
+                          e.target.style.borderColor = darkMode ? colors.border : '#d1d5db';
+                        }}
+                      />
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <label htmlFor={`telemetryDatatype-${index}`} style={{ ...labelStyle, marginBottom: '0.25rem' }}>
+                        {t('sensors.datatype')}
+                      </label>
+                      <select
+                        id={`telemetryDatatype-${index}`}
+                        value={row.datatype}
+                        onChange={(e) => handleTelemetryRowChange(index, 'datatype', e.target.value || '')}
+                        style={selectStyle}
+                        onFocus={(e) => {
+                          e.target.style.boxShadow = `0 0 0 3px ${darkMode ? 'rgba(77, 126, 250, 0.3)' : 'rgba(59, 130, 246, 0.2)'}`;
+                          e.target.style.borderColor = darkMode ? '#4d7efa' : '#3b82f6';
+                        }}
+                        onBlur={(e) => {
+                          e.target.style.boxShadow = 'none';
+                          e.target.style.borderColor = darkMode ? colors.border : '#d1d5db';
+                        }}
+                      >
+                        <option value="">{t('sensors.selectDatatype')}</option>
+                        {TELEMETRY_DATATYPES.map((dt) => (
+                          <option key={dt} value={dt}>
+                            {dt}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveTelemetryRow(index)}
+                      style={{
+                        ...metadataRemoveButtonStyle,
+                        height: '2.25rem',
+                        flexShrink: 0,
+                      }}
+                      title={t('sensors.removeTelemetry')}
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+                <button type="button" onClick={handleAddTelemetryRow} style={metadataButtonStyle}>
+                  {t('sensors.addTelemetry')}
+                </button>
+              </div>
 
             <div style={buttonGroupStyle}>
               <button
