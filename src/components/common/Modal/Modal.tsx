@@ -1,13 +1,10 @@
 import React, { useEffect } from 'react';
 import { useTheme } from '../../../context/ThemeContext';
 import { useThemeColors } from '../../../hooks/useThemeColors';
+import type { ModalBaseProps } from '../../../types/ui';
 
-export interface ModalProps {
-  isOpen: boolean;
-  onClose: () => void;
+export interface ModalProps extends ModalBaseProps {
   title: string;
-  children: React.ReactNode;
-  footer?: React.ReactNode;
 }
 
 const Modal: React.FC<ModalProps> = ({

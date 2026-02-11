@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import type { AppDispatch } from '../../state/store';
 import { createOrganization, selectOrganizationsLoading, selectOrganizationsError } from '../../state/slices/organizations.slice';
 import type { OrganizationCreateRequest } from '../../types/organization';
+import type { FormErrors } from '../../types/ui';
 import { OrganizationCreate as OrganizationCreateComponent } from '../../components/organizations';
 
 const OrganizationCreate = () => {
@@ -25,7 +26,7 @@ const OrganizationCreate = () => {
     isParent: true,
   });
   
-  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [formErrors, setFormErrors] = useState<FormErrors>({});
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -45,7 +46,7 @@ const OrganizationCreate = () => {
   };
   
   const validateForm = (): boolean => {
-    const errors: Record<string, string> = {};
+    const errors: FormErrors = {};
     
     if (!formData.name.trim()) {
       errors.name = t('name_required');

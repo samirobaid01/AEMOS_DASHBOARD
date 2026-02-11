@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import type { DeviceCreateRequest } from '../../types/device';
 import type { Organization } from '../../types/organization';
 import type { Area } from '../../types/area';
+import type { FormErrors } from '../../types/ui';
 import { useTheme } from '../../context/ThemeContext';
 import { useThemeColors } from '../../hooks/useThemeColors';
 import DeviceIdentityForm from './DeviceIdentityForm';
@@ -13,7 +14,7 @@ import type { DeviceCapabilities } from '../../types/device';
 interface DeviceCreateProps {
   currentStep: 1 | 2 | 3;
   formData: DeviceCreateRequest;
-  formErrors: Record<string, string>;
+  formErrors: FormErrors;
   isLoading: boolean;
   error: string | null;
   organizations: Organization[];

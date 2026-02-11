@@ -1,9 +1,11 @@
+export type AreaStatus = 'active' | 'inactive' | 'under_review' | 'archived';
+
 export interface Area {
   id: number;
   name: string;
   organizationId: number;
   description?: string;
-  status: string;
+  status: AreaStatus;
   createdAt?: string;
   updatedAt?: string;
   organization?: {
@@ -16,14 +18,14 @@ export interface AreaCreateRequest {
   name: string;
   organizationId: number;
   description?: string;
-  status: string;
+  status: AreaStatus;
 }
 
 export interface AreaUpdateRequest {
   name?: string;
   organizationId: number;
   description?: string;
-  status?: string;
+  status?: AreaStatus;
 }
 
 export interface AreaState {
@@ -35,7 +37,7 @@ export interface AreaState {
 
 export interface AreaFilterParams {
   search?: string;
-  status?: boolean;
+  status?: AreaStatus;
   organizationId?: number;
   page?: number;
   limit?: number;

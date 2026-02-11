@@ -1,4 +1,5 @@
 export type {
+  AreaStatus,
   Area,
   AreaCreateRequest,
   AreaUpdateRequest,

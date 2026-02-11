@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import type { AppDispatch } from '../../state/store';
 import { signup, selectAuthLoading, selectAuthError } from '../../state/slices/auth.slice';
 import type { SignupRequest } from '../../types/auth';
+import type { FormErrors } from '../../types/ui';
 import Input from '../../components/common/Input/Input';
 import Button from '../../components/common/Button/Button';
 import AuthCard from '../../components/auth/AuthCard';
@@ -27,7 +28,7 @@ const Signup = () => {
   });
   
   const [passwordConfirm, setPasswordConfirm] = useState('');
-  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [formErrors, setFormErrors] = useState<FormErrors>({});
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -58,7 +59,7 @@ const Signup = () => {
   };
   
   const validateForm = (): boolean => {
-    const errors: Record<string, string> = {};
+    const errors: FormErrors = {};
     
     if (!userData.userName.trim()) {
       errors.userName = t('name_required');

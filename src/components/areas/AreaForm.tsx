@@ -52,7 +52,7 @@ const AreaForm: React.FC<AreaFormProps> = ({
     name: area?.name || '',
     organizationId: area?.organizationId || (safeOrganizations.length > 0 ? safeOrganizations[0].id : 0),
     description: area?.description || '',
-    status: area?.status !== undefined ? area.status : true,
+    status: area?.status ?? 'active',
     parentAreaId: undefined,
   });
 
@@ -330,19 +330,24 @@ const AreaForm: React.FC<AreaFormProps> = ({
             )}
 
             <div style={fieldGroupStyle}>
-              <div style={checkboxWrapperStyle}>
-                <input
-                  type="checkbox"
-                  id="status"
-                  name="status"
-                  checked={!!formData.status}
-                  onChange={handleChange}
-                  style={checkboxStyle}
-                />
-                <label htmlFor="status" style={{ fontSize: '0.875rem', color: colors.textPrimary }}>
-                  {t('areas.active_area')}
-                </label>
-              </div>
+              <label htmlFor="status" style={labelStyle}>
+                {t('status')}
+              </label>
+              <select
+                id="status"
+                name="status"
+                value={typeof formData.status === 'string' ? formData.status : 'active'}
+                onChange={handleChange}
+                style={{
+                  ...inputStyle,
+                  width: '100%',
+                }}
+              >
+                <option value="active">{t('active')}</option>
+                <option value="inactive">{t('inactive')}</option>
+                <option value="under_review">{t('under_review')}</option>
+                <option value="archived">{t('archived')}</option>
+              </select>
             </div>
 
             <div style={fieldGroupStyle}>

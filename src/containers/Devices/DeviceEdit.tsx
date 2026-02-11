@@ -22,6 +22,7 @@ import { fetchOrganizations, selectOrganizations } from '../../state/slices/orga
 import { fetchAreas, selectAreas } from '../../state/slices/areas.slice';
 import { selectSelectedOrganizationId } from '../../state/slices/auth.slice';
 import type { DeviceUpdateRequest } from '../../types/device';
+import type { FormErrors } from '../../types/ui';
 import type { DeviceState } from '../../state/slices/deviceStates.slice';
 import DeviceEditComponent from '../../components/devices/DeviceEdit';
 import DeviceStateManager from '../../components/devices/DeviceStateManager';
@@ -66,7 +67,7 @@ const DeviceEdit = () => {
     organizationId: 0
   });
   
-  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [formErrors, setFormErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   useEffect(() => {
@@ -236,7 +237,7 @@ const DeviceEdit = () => {
   };
   
   const validateForm = (): boolean => {
-    const errors: Record<string, string> = {};
+    const errors: FormErrors = {};
     if (!formData.name?.trim()) {
       errors.name = t('common.name_required');
     }

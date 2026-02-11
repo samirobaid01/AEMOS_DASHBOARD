@@ -2,11 +2,9 @@ import React, { forwardRef } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { useTheme } from '../../../context/ThemeContext';
 import { useThemeColors } from '../../../hooks/useThemeColors';
+import type { SelectOption } from '../../../types/ui';
 
-export interface SelectOption {
-  value: string | number;
-  label: string;
-}
+export type { SelectOption };
 
 export interface SelectProps extends Omit<React.SelectHTMLAttributes<HTMLSelectElement>, 'children'> {
   label?: string;
