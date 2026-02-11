@@ -18,7 +18,7 @@ interface RuleListProps {
 }
 
 const RuleList: React.FC<RuleListProps> = ({
-  rules,
+  rules = [],
   isLoading,
   error,
   searchTerm,
@@ -26,6 +26,7 @@ const RuleList: React.FC<RuleListProps> = ({
   onAddRule,
   windowWidth = window.innerWidth,
 }) => {
+  const safeRules = rules ?? [];
   const { t } = useTranslation();
   const { darkMode } = useTheme();
   const colors = useThemeColors();
@@ -167,7 +168,7 @@ const RuleList: React.FC<RuleListProps> = ({
         windowWidth={windowWidth}
       />
 
-      {rules.length === 0 ? (
+      {safeRules.length === 0 ? (
         <EmptyState
           message={t("ruleEngine.noRules")}
           description={t("ruleEngine.noRuleFound")}
@@ -176,7 +177,7 @@ const RuleList: React.FC<RuleListProps> = ({
         />
       ) : (
         <div>
-          {rules.map((rule) => (
+          {safeRules.map((rule) => (
             <RuleItem key={rule.id} rule={rule} windowWidth={windowWidth} />
           ))}
         </div>

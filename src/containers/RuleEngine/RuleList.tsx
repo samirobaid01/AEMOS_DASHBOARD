@@ -20,15 +20,16 @@ const RuleList: React.FC = () => {
   const loading = useSelector(selectRuleEngineLoading);
   const error = useSelector(selectRuleEngineError);
 
-  // Filter rules locally
+  const safeRules = rules ?? [];
+
   const filteredRules = useMemo(() => {
-    if (!searchTerm) return rules;
+    if (!searchTerm) return safeRules;
     const searchLower = searchTerm.toLowerCase();
-    return rules.filter(rule => 
+    return safeRules.filter(rule => 
       rule.name.toLowerCase().includes(searchLower) ||
       (rule.description && rule.description.toLowerCase().includes(searchLower))
     );
-  }, [rules, searchTerm]);
+  }, [safeRules, searchTerm]);
 
   // Fetch rules only once
   useEffect(() => {

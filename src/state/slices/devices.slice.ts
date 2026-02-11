@@ -1,6 +1,8 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import type { DeviceState, Device, DeviceCreateRequest, DeviceUpdateRequest, DeviceFilterParams } from '../../types/device';
+import type { ApiRejectPayload } from '../../types/api';
+import { getErrorMessage } from '../../utils/getErrorMessage';
 import type { RootState } from '../store';
 import * as devicesService from '../../services/devices.service';
 
@@ -13,69 +15,93 @@ const initialState: DeviceState = {
 };
 
 // Async thunks
-export const fetchDevices = createAsyncThunk(
+export const fetchDevices = createAsyncThunk<
+  Awaited<ReturnType<typeof devicesService.getDevices>>,
+  DeviceFilterParams | undefined,
+  { rejectValue: ApiRejectPayload }
+>(
   'devices/fetchAll',
-  async (params: DeviceFilterParams | undefined = undefined, { rejectWithValue }) => {
+  async (params = undefined, { rejectWithValue }) => {
     try {
       return await devicesService.getDevices(params);
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to fetch devices');
+    } catch (error: unknown) {
+      return rejectWithValue({ message: getErrorMessage(error, 'Failed to fetch devices') });
     }
   }
 );
 
-export const fetchDeviceById = createAsyncThunk(
+export const fetchDeviceById = createAsyncThunk<
+  Awaited<ReturnType<typeof devicesService.getDeviceById>>,
+  number,
+  { rejectValue: ApiRejectPayload }
+>(
   'devices/fetchById',
-  async (id: number, { rejectWithValue }) => {
+  async (id, { rejectWithValue }) => {
     try {
       return await devicesService.getDeviceById(id);
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to fetch device');
+    } catch (error: unknown) {
+      return rejectWithValue({ message: getErrorMessage(error, 'Failed to fetch device') });
     }
   }
 );
 
-export const fetchDevicesByOrganizationId = createAsyncThunk(
+export const fetchDevicesByOrganizationId = createAsyncThunk<
+  Awaited<ReturnType<typeof devicesService.getDevicesByOrganizationId>>,
+  number,
+  { rejectValue: ApiRejectPayload }
+>(
   'devices/fetchByOrganizationId',
-  async (organizationId: number, { rejectWithValue }) => {
+  async (organizationId, { rejectWithValue }) => {
     try {
       return await devicesService.getDevicesByOrganizationId(organizationId);
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to fetch devices by organization');
+    } catch (error: unknown) {
+      return rejectWithValue({ message: getErrorMessage(error, 'Failed to fetch devices by organization') });
     }
   }
 );
 
-export const createDevice = createAsyncThunk(
+export const createDevice = createAsyncThunk<
+  Awaited<ReturnType<typeof devicesService.createDevice>>,
+  DeviceCreateRequest,
+  { rejectValue: ApiRejectPayload }
+>(
   'devices/create',
-  async (deviceData: DeviceCreateRequest, { rejectWithValue }) => {
+  async (deviceData, { rejectWithValue }) => {
     try {
       return await devicesService.createDevice(deviceData);
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to create device');
+    } catch (error: unknown) {
+      return rejectWithValue({ message: getErrorMessage(error, 'Failed to create device') });
     }
   }
 );
 
-export const updateDevice = createAsyncThunk(
+export const updateDevice = createAsyncThunk<
+  Awaited<ReturnType<typeof devicesService.updateDevice>>,
+  { id: number; deviceData: DeviceUpdateRequest },
+  { rejectValue: ApiRejectPayload }
+>(
   'devices/update',
-  async ({ id, deviceData }: { id: number; deviceData: DeviceUpdateRequest }, { rejectWithValue }) => {
+  async ({ id, deviceData }, { rejectWithValue }) => {
     try {
       return await devicesService.updateDevice(id, deviceData);
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to update device');
+    } catch (error: unknown) {
+      return rejectWithValue({ message: getErrorMessage(error, 'Failed to update device') });
     }
   }
 );
 
-export const deleteDevice = createAsyncThunk(
+export const deleteDevice = createAsyncThunk<
+  number,
+  number,
+  { rejectValue: ApiRejectPayload }
+>(
   'devices/delete',
-  async (id: number, { rejectWithValue }) => {
+  async (id, { rejectWithValue }) => {
     try {
       await devicesService.deleteDevice(id);
       return id;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to delete device');
+    } catch (error: unknown) {
+      return rejectWithValue({ message: getErrorMessage(error, 'Failed to delete device') });
     }
   }
 );
@@ -98,13 +124,13 @@ const devicesSlice = createSlice({
       state.loading = true;
       state.error = null;
     });
-    builder.addCase(fetchDevices.fulfilled, (state, action) => {
+    builder.addCase(fetchDevices.fulfilled, (state, action: PayloadAction<Device[]>) => {
       state.loading = false;
       state.devices = action.payload;
     });
     builder.addCase(fetchDevices.rejected, (state, action) => {
       state.loading = false;
-      state.error = action.payload as string;
+      state.error = action.payload?.message ?? null;
     });
 
     // Fetch Devices By Organization ID
@@ -112,13 +138,13 @@ const devicesSlice = createSlice({
       state.loading = true;
       state.error = null;
     });
-    builder.addCase(fetchDevicesByOrganizationId.fulfilled, (state, action) => {
+    builder.addCase(fetchDevicesByOrganizationId.fulfilled, (state, action: PayloadAction<Device[]>) => {
       state.loading = false;
       state.devices = action.payload;
     });
     builder.addCase(fetchDevicesByOrganizationId.rejected, (state, action) => {
       state.loading = false;
-      state.error = action.payload as string;
+      state.error = action.payload?.message ?? null;
     });
 
     // Fetch Device By ID
@@ -126,13 +152,13 @@ const devicesSlice = createSlice({
       state.loading = true;
       state.error = null;
     });
-    builder.addCase(fetchDeviceById.fulfilled, (state, action) => {
+    builder.addCase(fetchDeviceById.fulfilled, (state, action: PayloadAction<Device>) => {
       state.loading = false;
       state.selectedDevice = action.payload;
     });
     builder.addCase(fetchDeviceById.rejected, (state, action) => {
       state.loading = false;
-      state.error = action.payload as string;
+      state.error = action.payload?.message ?? null;
     });
 
     // Create Device
@@ -140,13 +166,13 @@ const devicesSlice = createSlice({
       state.loading = true;
       state.error = null;
     });
-    builder.addCase(createDevice.fulfilled, (state, action) => {
+    builder.addCase(createDevice.fulfilled, (state, action: PayloadAction<Device>) => {
       state.loading = false;
       state.devices.push(action.payload);
     });
     builder.addCase(createDevice.rejected, (state, action) => {
       state.loading = false;
-      state.error = action.payload as string;
+      state.error = action.payload?.message ?? null;
     });
 
     // Update Device
@@ -154,7 +180,7 @@ const devicesSlice = createSlice({
       state.loading = true;
       state.error = null;
     });
-    builder.addCase(updateDevice.fulfilled, (state, action) => {
+    builder.addCase(updateDevice.fulfilled, (state, action: PayloadAction<Device>) => {
       state.loading = false;
       const index = state.devices.findIndex((device) => device.id === action.payload.id);
       if (index !== -1) {
@@ -166,7 +192,7 @@ const devicesSlice = createSlice({
     });
     builder.addCase(updateDevice.rejected, (state, action) => {
       state.loading = false;
-      state.error = action.payload as string;
+      state.error = action.payload?.message ?? null;
     });
 
     // Delete Device
@@ -174,7 +200,7 @@ const devicesSlice = createSlice({
       state.loading = true;
       state.error = null;
     });
-    builder.addCase(deleteDevice.fulfilled, (state, action) => {
+    builder.addCase(deleteDevice.fulfilled, (state, action: PayloadAction<number>) => {
       state.loading = false;
       state.devices = state.devices.filter((device) => device.id !== action.payload);
       if (state.selectedDevice?.id === action.payload) {
@@ -183,7 +209,7 @@ const devicesSlice = createSlice({
     });
     builder.addCase(deleteDevice.rejected, (state, action) => {
       state.loading = false;
-      state.error = action.payload as string;
+      state.error = action.payload?.message ?? null;
     });
   },
 });

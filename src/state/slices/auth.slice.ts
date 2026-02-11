@@ -2,6 +2,8 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { createSelector } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import type { AuthState, LoginRequest, LoginResponse, SignupRequest, User } from '../../types/auth';
+import type { ApiRejectPayload } from '../../types/api';
+import { getErrorMessage } from '../../utils/getErrorMessage';
 import type { RootState } from '../store';
 import * as authService from '../../services/auth.service';
 import { TOKEN_STORAGE_KEY, REFRESH_TOKEN_STORAGE_KEY } from '../../config';
@@ -23,48 +25,63 @@ const initialState: AuthState = {
 };
 
 // Async thunks
-export const login = createAsyncThunk(
+export const login = createAsyncThunk<
+  Awaited<ReturnType<typeof authService.login>>,
+  LoginRequest,
+  { rejectValue: ApiRejectPayload }
+>(
   'auth/login',
-  async (credentials: LoginRequest, { rejectWithValue }) => {
+  async (credentials, { rejectWithValue }) => {
     try {
       return await authService.login(credentials);
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Login failed');
+    } catch (error: unknown) {
+      return rejectWithValue({ message: getErrorMessage(error, 'Login failed') });
     }
   }
 );
 
-export const signup = createAsyncThunk(
+export const signup = createAsyncThunk<
+  Awaited<ReturnType<typeof authService.signup>>,
+  SignupRequest,
+  { rejectValue: ApiRejectPayload }
+>(
   'auth/signup',
-  async (userData: SignupRequest, { rejectWithValue }) => {
+  async (userData, { rejectWithValue }) => {
     try {
       return await authService.signup(userData);
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Signup failed');
+    } catch (error: unknown) {
+      return rejectWithValue({ message: getErrorMessage(error, 'Signup failed') });
     }
   }
 );
 
-export const logout = createAsyncThunk(
+export const logout = createAsyncThunk<
+  boolean,
+  void,
+  { rejectValue: ApiRejectPayload }
+>(
   'auth/logout',
   async (_, { rejectWithValue }) => {
     try {
       await authService.logout();
       return true;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Logout failed');
+    } catch (error: unknown) {
+      return rejectWithValue({ message: getErrorMessage(error, 'Logout failed') });
     }
   }
 );
 
-export const fetchUserProfile = createAsyncThunk(
+export const fetchUserProfile = createAsyncThunk<
+  Awaited<ReturnType<typeof authService.getCurrentUser>>,
+  void,
+  { rejectValue: ApiRejectPayload }
+>(
   'auth/fetchUserProfile',
   async (_, { rejectWithValue }) => {
     try {
-      const user = await authService.getCurrentUser();
-      return user;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to fetch user profile');
+      return await authService.getCurrentUser();
+    } catch (error: unknown) {
+      return rejectWithValue({ message: getErrorMessage(error, 'Failed to fetch user profile') });
     }
   }
 );
@@ -176,15 +193,13 @@ const authSlice = createSlice({
       state.loading = true;
       state.error = null;
     });
-    builder.addCase(login.fulfilled, (state, action) => {
+    builder.addCase(login.fulfilled, (state, action: PayloadAction<Awaited<ReturnType<typeof authService.login>>>) => {
       state.loading = false;
       state.user = action.payload.user;
       state.token = action.payload.token;
       state.refreshToken = action.payload.refreshToken;
       state.isAuthenticated = true;
       state.permissions = action.payload.permissions || [];
-      console.log('Auth slice: Login fulfilled with permissions:', action.payload.permissions);
-      // Save user to localStorage on successful login
       saveUserToLocalStorage({
         ...action.payload.user,
         permissions: action.payload.permissions
@@ -192,23 +207,21 @@ const authSlice = createSlice({
     });
     builder.addCase(login.rejected, (state, action) => {
       state.loading = false;
-      state.error = action.payload as string;
+      state.error = action.payload?.message ?? null;
     });
-    
+
     // Signup
     builder.addCase(signup.pending, (state) => {
       state.loading = true;
       state.error = null;
     });
-    builder.addCase(signup.fulfilled, (state, action) => {
+    builder.addCase(signup.fulfilled, (state, action: PayloadAction<Awaited<ReturnType<typeof authService.signup>>>) => {
       state.loading = false;
       state.user = action.payload.user;
       state.token = action.payload.token;
       state.refreshToken = action.payload.refreshToken;
       state.isAuthenticated = true;
       state.permissions = action.payload.permissions || [];
-      console.log('Auth slice: Signup fulfilled with permissions:', action.payload.permissions);
-      // Save user to localStorage on successful signup
       saveUserToLocalStorage({
         ...action.payload.user,
         permissions: action.payload.permissions
@@ -216,7 +229,7 @@ const authSlice = createSlice({
     });
     builder.addCase(signup.rejected, (state, action) => {
       state.loading = false;
-      state.error = action.payload as string;
+      state.error = action.payload?.message ?? null;
     });
     
     // Logout
@@ -235,15 +248,14 @@ const authSlice = createSlice({
       state.loading = true;
       state.error = null;
     });
-    builder.addCase(fetchUserProfile.fulfilled, (state, action) => {
+    builder.addCase(fetchUserProfile.fulfilled, (state, action: PayloadAction<User>) => {
       state.loading = false;
       state.user = action.payload;
-      // Save updated user profile to localStorage
       saveUserToLocalStorage(action.payload);
     });
     builder.addCase(fetchUserProfile.rejected, (state, action) => {
       state.loading = false;
-      state.error = action.payload as string;
+      state.error = action.payload?.message ?? null;
     });
   },
 });

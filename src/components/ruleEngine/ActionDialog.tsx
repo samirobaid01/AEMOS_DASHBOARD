@@ -207,6 +207,34 @@ const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
     return deviceStates;
   }, [selectedDevice, devices, deviceStates, lastFetchedDeviceId, isLoadingDeviceStates]);
 
+  const deviceStateSelectValue =
+    !isLoadingDeviceStates &&
+    filteredDeviceStates.length > 0 &&
+    filteredDeviceStates.some((s) => s.stateName === stateName)
+      ? stateName
+      : '';
+  const stateValueSelectValue = (allowedValues || []).includes(stateValue) ? stateValue : '';
+
+  useEffect(() => {
+    if (mode !== 'edit' || !stateName || filteredDeviceStates.length === 0) return;
+    const state = filteredDeviceStates.find((s) => s.stateName === stateName);
+    if (!state) return;
+    const raw = state.allowedValues;
+    const next =
+      Array.isArray(raw)
+        ? raw
+        : typeof raw === 'string'
+          ? (() => {
+              try {
+                return JSON.parse(raw) as string[];
+              } catch {
+                return [];
+              }
+            })()
+          : [];
+    setAllowedValues(next);
+  }, [mode, stateName, filteredDeviceStates]);
+
   return (
     <Dialog
       open={open}
@@ -263,7 +291,7 @@ const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
                 <FormControl fullWidth>
                   <InputLabel>Device State</InputLabel>
                   <Select
-                    value={stateName}
+                    value={deviceStateSelectValue}
                     onChange={(e) => handleStateNameChange(e.target.value)}
                     label="Device State"
                     disabled={isLoadingDeviceStates}
@@ -291,7 +319,7 @@ const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
                 <FormControl fullWidth>
                   <InputLabel>State Value</InputLabel>
                   <Select
-                    value={stateValue}
+                    value={stateValueSelectValue}
                     onChange={(e) => setStateValue(e.target.value)}
                     label="State Value"
                   >

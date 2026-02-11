@@ -9,6 +9,8 @@ import type {
   TelemetryCreateRequest,
   TelemetryUpdateRequest,
 } from '../../types/sensor';
+import type { ApiRejectPayload } from '../../types/api';
+import { getErrorMessage } from '../../utils/getErrorMessage';
 import type { RootState } from '../store';
 import * as sensorsService from '../../services/sensors.service';
 import * as telemetryService from '../../services/telemetry.service';
@@ -22,102 +24,138 @@ const initialState: SensorState = {
 };
 
 // Async thunks
-export const fetchSensors = createAsyncThunk(
+export const fetchSensors = createAsyncThunk<
+  Awaited<ReturnType<typeof sensorsService.getSensors>>,
+  SensorFilterParams | undefined,
+  { rejectValue: ApiRejectPayload }
+>(
   'sensors/fetchAll',
-  async (params: SensorFilterParams | undefined = undefined, { rejectWithValue }) => {
+  async (params = undefined, { rejectWithValue }) => {
     try {
       return await sensorsService.getSensors(params);
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to fetch sensors');
+    } catch (error: unknown) {
+      return rejectWithValue({ message: getErrorMessage(error, 'Failed to fetch sensors') });
     }
   }
 );
 
-export const fetchSensorById = createAsyncThunk(
+export const fetchSensorById = createAsyncThunk<
+  Awaited<ReturnType<typeof sensorsService.getSensorById>>,
+  number,
+  { rejectValue: ApiRejectPayload }
+>(
   'sensors/fetchById',
-  async (id: number, { rejectWithValue }) => {
+  async (id, { rejectWithValue }) => {
     try {
       return await sensorsService.getSensorById(id);
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to fetch sensor');
+    } catch (error: unknown) {
+      return rejectWithValue({ message: getErrorMessage(error, 'Failed to fetch sensor') });
     }
   }
 );
 
-export const fetchSensorsByAreaId = createAsyncThunk(
+export const fetchSensorsByAreaId = createAsyncThunk<
+  Awaited<ReturnType<typeof sensorsService.getSensorsByAreaId>>,
+  number,
+  { rejectValue: ApiRejectPayload }
+>(
   'sensors/fetchByAreaId',
-  async (areaId: number, { rejectWithValue }) => {
+  async (areaId, { rejectWithValue }) => {
     try {
       return await sensorsService.getSensorsByAreaId(areaId);
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to fetch sensors by area');
+    } catch (error: unknown) {
+      return rejectWithValue({ message: getErrorMessage(error, 'Failed to fetch sensors by area') });
     }
   }
 );
 
-export const fetchSensorsByOrganizationId = createAsyncThunk(
+export const fetchSensorsByOrganizationId = createAsyncThunk<
+  Awaited<ReturnType<typeof sensorsService.getSensorsByOrganizationId>>,
+  number,
+  { rejectValue: ApiRejectPayload }
+>(
   'sensors/fetchByOrganizationId',
-  async (organizationId: number, { rejectWithValue }) => {
+  async (organizationId, { rejectWithValue }) => {
     try {
       return await sensorsService.getSensorsByOrganizationId(organizationId);
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to fetch sensors by organization');
+    } catch (error: unknown) {
+      return rejectWithValue({ message: getErrorMessage(error, 'Failed to fetch sensors by organization') });
     }
   }
 );
 
-export const createSensor = createAsyncThunk(
+export const createSensor = createAsyncThunk<
+  Awaited<ReturnType<typeof sensorsService.createSensor>>,
+  SensorCreateRequest,
+  { rejectValue: ApiRejectPayload }
+>(
   'sensors/create',
-  async (sensorData: SensorCreateRequest, { rejectWithValue }) => {
+  async (sensorData, { rejectWithValue }) => {
     try {
       return await sensorsService.createSensor(sensorData);
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to create sensor');
+    } catch (error: unknown) {
+      return rejectWithValue({ message: getErrorMessage(error, 'Failed to create sensor') });
     }
   }
 );
 
-export const updateSensor = createAsyncThunk(
+export const updateSensor = createAsyncThunk<
+  Awaited<ReturnType<typeof sensorsService.updateSensor>>,
+  { id: number; sensorData: SensorUpdateRequest },
+  { rejectValue: ApiRejectPayload }
+>(
   'sensors/update',
-  async ({ id, sensorData }: { id: number; sensorData: SensorUpdateRequest }, { rejectWithValue }) => {
+  async ({ id, sensorData }, { rejectWithValue }) => {
     try {
       return await sensorsService.updateSensor(id, sensorData);
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to update sensor');
+    } catch (error: unknown) {
+      return rejectWithValue({ message: getErrorMessage(error, 'Failed to update sensor') });
     }
   }
 );
 
-export const deleteSensor = createAsyncThunk(
+export const deleteSensor = createAsyncThunk<
+  number,
+  number,
+  { rejectValue: ApiRejectPayload }
+>(
   'sensors/delete',
-  async (id: number, { rejectWithValue }) => {
+  async (id, { rejectWithValue }) => {
     try {
       await sensorsService.deleteSensor(id);
       return id;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to delete sensor');
+    } catch (error: unknown) {
+      return rejectWithValue({ message: getErrorMessage(error, 'Failed to delete sensor') });
     }
   }
 );
 
-export const createTelemetry = createAsyncThunk(
+export const createTelemetry = createAsyncThunk<
+  Awaited<ReturnType<typeof telemetryService.createTelemetry>>,
+  TelemetryCreateRequest,
+  { rejectValue: ApiRejectPayload }
+>(
   'sensors/createTelemetry',
-  async (data: TelemetryCreateRequest, { rejectWithValue }) => {
+  async (data, { rejectWithValue }) => {
     try {
       return await telemetryService.createTelemetry(data);
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to create telemetry');
+    } catch (error: unknown) {
+      return rejectWithValue({ message: getErrorMessage(error, 'Failed to create telemetry') });
     }
   }
 );
 
-export const updateTelemetry = createAsyncThunk(
+export const updateTelemetry = createAsyncThunk<
+  Awaited<ReturnType<typeof telemetryService.updateTelemetry>>,
+  { id: number; data: TelemetryUpdateRequest },
+  { rejectValue: ApiRejectPayload }
+>(
   'sensors/updateTelemetry',
-  async ({ id, data }: { id: number; data: TelemetryUpdateRequest }, { rejectWithValue }) => {
+  async ({ id, data }, { rejectWithValue }) => {
     try {
       return await telemetryService.updateTelemetry(id, data);
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to update telemetry');
+    } catch (error: unknown) {
+      return rejectWithValue({ message: getErrorMessage(error, 'Failed to update telemetry') });
     }
   }
 );
@@ -140,13 +178,13 @@ const sensorsSlice = createSlice({
       state.loading = true;
       state.error = null;
     });
-    builder.addCase(fetchSensors.fulfilled, (state, action) => {
+    builder.addCase(fetchSensors.fulfilled, (state, action: PayloadAction<Sensor[]>) => {
       state.loading = false;
       state.sensors = action.payload;
     });
     builder.addCase(fetchSensors.rejected, (state, action) => {
       state.loading = false;
-      state.error = action.payload as string;
+      state.error = action.payload?.message ?? null;
     });
 
     // Fetch Sensors By Organization ID
@@ -154,13 +192,13 @@ const sensorsSlice = createSlice({
       state.loading = true;
       state.error = null;
     });
-    builder.addCase(fetchSensorsByOrganizationId.fulfilled, (state, action) => {
+    builder.addCase(fetchSensorsByOrganizationId.fulfilled, (state, action: PayloadAction<Sensor[]>) => {
       state.loading = false;
       state.sensors = action.payload;
     });
     builder.addCase(fetchSensorsByOrganizationId.rejected, (state, action) => {
       state.loading = false;
-      state.error = action.payload as string;
+      state.error = action.payload?.message ?? null;
     });
 
     // Fetch Sensors By Area ID
@@ -168,13 +206,13 @@ const sensorsSlice = createSlice({
       state.loading = true;
       state.error = null;
     });
-    builder.addCase(fetchSensorsByAreaId.fulfilled, (state, action) => {
+    builder.addCase(fetchSensorsByAreaId.fulfilled, (state, action: PayloadAction<Sensor[]>) => {
       state.loading = false;
       state.sensors = action.payload;
     });
     builder.addCase(fetchSensorsByAreaId.rejected, (state, action) => {
       state.loading = false;
-      state.error = action.payload as string;
+      state.error = action.payload?.message ?? null;
     });
 
     // Fetch Sensor By ID
@@ -182,13 +220,13 @@ const sensorsSlice = createSlice({
       state.loading = true;
       state.error = null;
     });
-    builder.addCase(fetchSensorById.fulfilled, (state, action) => {
+    builder.addCase(fetchSensorById.fulfilled, (state, action: PayloadAction<Sensor>) => {
       state.loading = false;
       state.selectedSensor = action.payload;
     });
     builder.addCase(fetchSensorById.rejected, (state, action) => {
       state.loading = false;
-      state.error = action.payload as string;
+      state.error = action.payload?.message ?? null;
     });
 
     // Create Sensor
@@ -196,13 +234,13 @@ const sensorsSlice = createSlice({
       state.loading = true;
       state.error = null;
     });
-    builder.addCase(createSensor.fulfilled, (state, action) => {
+    builder.addCase(createSensor.fulfilled, (state, action: PayloadAction<Sensor>) => {
       state.loading = false;
       state.sensors.push(action.payload);
     });
     builder.addCase(createSensor.rejected, (state, action) => {
       state.loading = false;
-      state.error = action.payload as string;
+      state.error = action.payload?.message ?? null;
     });
 
     // Update Sensor
@@ -210,7 +248,7 @@ const sensorsSlice = createSlice({
       state.loading = true;
       state.error = null;
     });
-    builder.addCase(updateSensor.fulfilled, (state, action) => {
+    builder.addCase(updateSensor.fulfilled, (state, action: PayloadAction<Sensor>) => {
       state.loading = false;
       const index = state.sensors.findIndex((sensor) => sensor.id === action.payload.id);
       if (index !== -1) {
@@ -222,7 +260,7 @@ const sensorsSlice = createSlice({
     });
     builder.addCase(updateSensor.rejected, (state, action) => {
       state.loading = false;
-      state.error = action.payload as string;
+      state.error = action.payload?.message ?? null;
     });
 
     // Delete Sensor
@@ -230,7 +268,7 @@ const sensorsSlice = createSlice({
       state.loading = true;
       state.error = null;
     });
-    builder.addCase(deleteSensor.fulfilled, (state, action) => {
+    builder.addCase(deleteSensor.fulfilled, (state, action: PayloadAction<number>) => {
       state.loading = false;
       state.sensors = state.sensors.filter((sensor) => sensor.id !== action.payload);
       if (state.selectedSensor?.id === action.payload) {
@@ -239,7 +277,7 @@ const sensorsSlice = createSlice({
     });
     builder.addCase(deleteSensor.rejected, (state, action) => {
       state.loading = false;
-      state.error = action.payload as string;
+      state.error = action.payload?.message ?? null;
     });
   },
 });

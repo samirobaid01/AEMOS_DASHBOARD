@@ -44,8 +44,8 @@ export interface DeviceDetails {
   defaultState?: string;
   communicationProtocol?: CommunicationProtocol;
   isCritical: boolean;
-  metadata?: Record<string, any>;
-  capabilities?: Record<string, any>;
+  metadata?: Record<string, unknown>;
+  capabilities?: Record<string, unknown>;
   areaId?: number;
   controlModes?: string;
   createdAt: string;
@@ -125,7 +125,7 @@ const deviceDetailsSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchDeviceDetails.fulfilled, (state, action) => {
+      .addCase(fetchDeviceDetails.fulfilled, (state, action: PayloadAction<DeviceDetails>) => {
         state.loading = false;
         state.data = action.payload;
         console.log('DeviceDetails payload', action.payload);
@@ -135,7 +135,7 @@ const deviceDetailsSlice = createSlice({
         state.loading = false;
         state.error = action.error.message || 'Failed to fetch device details';
       })
-      .addCase(updateDeviceState.fulfilled, (state, action) => {
+      .addCase(updateDeviceState.fulfilled, (state, action: PayloadAction<DeviceState>) => {
         if (state.data && state.data.states) {
           const updatedState = action.payload;
           const stateIndex = state.data.states.findIndex(s => s.id === updatedState.id);

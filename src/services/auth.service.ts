@@ -1,4 +1,5 @@
 import apiClient from './api/apiClient';
+import type { ApiDataWrapper } from '../types/api';
 import type { LoginRequest, LoginResponse, SignupRequest, User } from '../types/auth';
 import { TOKEN_STORAGE_KEY, REFRESH_TOKEN_STORAGE_KEY } from '../config';
 
@@ -6,13 +7,10 @@ import { TOKEN_STORAGE_KEY, REFRESH_TOKEN_STORAGE_KEY } from '../config';
  * Login user
  */
 export const login = async (credentials: LoginRequest): Promise<LoginResponse> => {
-  const response = await apiClient.post('/auth/login', credentials);
+  const response = await apiClient.post<ApiDataWrapper<LoginResponse>>('/auth/login', credentials);
   const data = response.data.data;
-  
-  // Store tokens in localStorage
   localStorage.setItem(TOKEN_STORAGE_KEY, data.token);
   localStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, data.refreshToken);
-  
   return data;
 };
 
@@ -20,13 +18,10 @@ export const login = async (credentials: LoginRequest): Promise<LoginResponse> =
  * Signup user
  */
 export const signup = async (userData: SignupRequest): Promise<LoginResponse> => {
-  const response = await apiClient.post('/auth/signup', userData);
+  const response = await apiClient.post<ApiDataWrapper<LoginResponse>>('/auth/signup', userData);
   const data = response.data.data;
-  
-  // Store tokens in localStorage
   localStorage.setItem(TOKEN_STORAGE_KEY, data.token);
   localStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, data.refreshToken);
-  
   return data;
 };
 
@@ -47,7 +42,7 @@ export const logout = async (): Promise<void> => {
  * Get current user profile
  */
 export const getCurrentUser = async (): Promise<User> => {
-  const response = await apiClient.get('/auth/me');
+  const response = await apiClient.get<ApiDataWrapper<User>>('/auth/me');
   return response.data.data;
 };
 
@@ -55,7 +50,7 @@ export const getCurrentUser = async (): Promise<User> => {
  * Forgot password
  */
 export const forgotPassword = async (email: string): Promise<{ message: string }> => {
-  const response = await apiClient.post('/auth/forgot-password', { email });
+  const response = await apiClient.post<{ message: string }>('/auth/forgot-password', { email });
   return response.data;
 };
 
@@ -63,7 +58,7 @@ export const forgotPassword = async (email: string): Promise<{ message: string }
  * Reset password
  */
 export const resetPassword = async (token: string, password: string): Promise<{ message: string }> => {
-  const response = await apiClient.post('/auth/reset-password', { token, password });
+  const response = await apiClient.post<{ message: string }>('/auth/reset-password', { token, password });
   return response.data;
 };
 
@@ -71,25 +66,22 @@ export const resetPassword = async (token: string, password: string): Promise<{ 
  * Verify email
  */
 export const verifyEmail = async (token: string): Promise<{ message: string }> => {
-  const response = await apiClient.post('/auth/verify-email', { token });
+  const response = await apiClient.post<{ message: string }>('/auth/verify-email', { token });
   return response.data;
 };
 
 /**
  * Refresh access token
  */
-export const refreshToken = async (refreshToken: string) => {
-  const response = await apiClient.post('/auth/refresh-token', { refreshToken });
+export const refreshToken = async (refreshTokenValue: string): Promise<LoginResponse> => {
+  const response = await apiClient.post<ApiDataWrapper<LoginResponse>>('/auth/refresh-token', { refreshToken: refreshTokenValue });
   const data = response.data.data;
-  
   if (data.token) {
     localStorage.setItem(TOKEN_STORAGE_KEY, data.token);
   }
-  
   if (data.refreshToken) {
     localStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, data.refreshToken);
   }
-  
   return data;
 };
 
