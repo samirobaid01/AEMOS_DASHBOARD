@@ -1,4 +1,4 @@
-import { useSelector } from 'react-redux';
+import { useAppSelector } from '../state/store';
 import { selectCurrentUser, selectSelectedOrganizationId } from '../state/slices/auth.slice';
 import type { RootState } from '../state/store';
 import { createSelector } from '@reduxjs/toolkit';
@@ -10,9 +10,9 @@ const selectPermissions = createSelector(
 );
 
 export const usePermissions = () => {
-  const user = useSelector(selectCurrentUser);
-  const selectedOrganizationId = useSelector(selectSelectedOrganizationId);
-  const permissions = useSelector(selectPermissions);
+  const user = useAppSelector(selectCurrentUser);
+  const selectedOrganizationId = useAppSelector(selectSelectedOrganizationId);
+  const permissions = useAppSelector(selectPermissions);
 
   console.log('usePermissions: Checking permissions', {
     availablePermissions: permissions,

@@ -1,20 +1,19 @@
 import { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useAppDispatch, useAppSelector } from '../../state/store';
 import { useNavigate } from 'react-router-dom';
 import SensorListComponent from '../../components/sensors/SensorList';
 import LoadingScreen from '../../components/common/Loading/LoadingScreen';
 import { selectSelectedOrganizationId } from '../../state/slices/auth.slice';
 import { fetchSensors, fetchSensorsByOrganizationId, selectSensors, selectSensorsError, selectSensorsLoading } from '../../state/slices/sensors.slice';
-import type { AppDispatch } from '../../state/store';
 import type { Sensor } from '../../types/sensor';
 
 const SensorList = () => {
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const sensors = useSelector(selectSensors) || [];
-  const isLoading = useSelector(selectSensorsLoading);
-  const selectedOrganizationId = useSelector(selectSelectedOrganizationId);
-  const error = useSelector(selectSensorsError);
+  const sensors = useAppSelector(selectSensors) || [];
+  const isLoading = useAppSelector(selectSensorsLoading);
+  const selectedOrganizationId = useAppSelector(selectSelectedOrganizationId);
+  const error = useAppSelector(selectSensorsError);
   const [searchTerm, setSearchTerm] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('');
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);

@@ -1,28 +1,27 @@
 import { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useAppDispatch, useAppSelector } from '../../state/store';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import SensorForm, { type TelemetryRowFormState } from '../../components/sensors/SensorForm';
 import LoadingScreen from '../../components/common/Loading/LoadingScreen';
 import { fetchAreas, selectAreas } from '../../state/slices/areas.slice';
 import { createSensor, createTelemetry, selectSensorsLoading, selectSensorsError } from '../../state/slices/sensors.slice';
-import type { AppDispatch } from '../../state/store';
 import { toastService } from '../../services/toastService';
 import { ALLOWED_SENSOR_STATUSES } from '../../types/sensor';
 import type { SensorCreateRequest, SensorUpdateRequest, TelemetryDatatype } from '../../types/sensor';
 
 const SensorCreate = () => {
   const { t } = useTranslation();
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const areaId = searchParams.get('areaId');
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [telemetryError, setTelemetryError] = useState<string | null>(null);
-  const isLoading = useSelector(selectSensorsLoading);
-  const error = useSelector(selectSensorsError);
-  const areas = useSelector(selectAreas) || [];
+  const isLoading = useAppSelector(selectSensorsLoading);
+  const error = useAppSelector(selectSensorsError);
+  const areas = useAppSelector(selectAreas) || [];
 
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth);

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useAppDispatch, useAppSelector } from '../../state/store';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import SensorForm, { type TelemetryRowFormState } from '../../components/sensors/SensorForm';
@@ -14,19 +14,18 @@ import {
   updateSensor,
   updateTelemetry,
 } from '../../state/slices/sensors.slice';
-import type { AppDispatch } from '../../state/store';
 import { toastService } from '../../services/toastService';
 import type { SensorUpdateRequest, TelemetryDatatype } from '../../types/sensor';
 
 const SensorEdit = () => {
   const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const sensor = useSelector(selectSelectedSensor);
-  const areas = useSelector(selectAreas) || [];
-  const isLoading = useSelector(selectSensorsLoading);
-  const error = useSelector(selectSensorsError);
+  const sensor = useAppSelector(selectSelectedSensor);
+  const areas = useAppSelector(selectAreas) || [];
+  const isLoading = useAppSelector(selectSensorsLoading);
+  const error = useAppSelector(selectSensorsError);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [telemetryError, setTelemetryError] = useState<string | null>(null);

@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useAppDispatch, useAppSelector } from '../../state/store';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import type { AppDispatch } from '../../state/store';
 import { createArea, selectAreasLoading, selectAreasError } from '../../state/slices/areas.slice';
 import { fetchOrganizations, selectOrganizations } from '../../state/slices/organizations.slice';
 import type { AreaCreateRequest } from '../../types/area';
@@ -11,14 +10,14 @@ import { AreaCreate as AreaCreateComponent } from '../../components/areas';
 
 const AreaCreate = () => {
   const { t } = useTranslation();
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const organizationId = searchParams.get('organizationId');
   
-  const isLoading = useSelector(selectAreasLoading);
-  const error = useSelector(selectAreasError);
-  const organizations = useSelector(selectOrganizations);
+  const isLoading = useAppSelector(selectAreasLoading);
+  const error = useAppSelector(selectAreasError);
+  const organizations = useAppSelector(selectOrganizations);
   
   const [formData, setFormData] = useState<AreaCreateRequest>({
     name: '',

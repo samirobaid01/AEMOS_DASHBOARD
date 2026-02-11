@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import type { AppDispatch } from '../../state/store';
+import { useAppDispatch, useAppSelector } from '../../state/store';
 import { selectOrganizations, fetchOrganizations } from '../../state/slices/organizations.slice';
 import { selectAreas, fetchAreas } from '../../state/slices/areas.slice';
 import { selectSensors, fetchSensors } from '../../state/slices/sensors.slice';
@@ -19,16 +18,16 @@ import AdminTools from '../../components/dashboard/AdminTools';
 
 const Dashboard = () => {
   const { t } = useTranslation();
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch();
   const [loading, setLoading] = useState(true);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const { darkMode } = useTheme();
   const colors = useThemeColors();
 
-  const organizations = useSelector(selectOrganizations);
-  const areas = useSelector(selectAreas);
-  const sensors = useSelector(selectSensors);
-  const devices = useSelector(selectDevices);
+  const organizations = useAppSelector(selectOrganizations);
+  const areas = useAppSelector(selectAreas);
+  const sensors = useAppSelector(selectSensors);
+  const devices = useAppSelector(selectDevices);
 
   useEffect(() => {
     const handleResize = () => {

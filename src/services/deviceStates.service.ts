@@ -37,35 +37,44 @@ export const createDeviceState = async (
   };
 };
 
+function parseAllowedValues(raw: unknown): string[] {
+  if (Array.isArray(raw)) return raw as string[];
+  if (typeof raw === 'string') {
+    try { return JSON.parse(raw) as string[]; } catch { return []; }
+  }
+  return [];
+}
+
 /**
- * Update an existing device state
+ * Update an existing device state.
+ * API returns { status, data: state } or sometimes { status, data: { data: state } }.
  */
 export const updateDeviceState = async (
-  deviceId: number,
+  _deviceId: number,
   stateId: number,
   state: Partial<Omit<DeviceStateRecord, 'id' | 'createdAt' | 'updatedAt'>>
 ): Promise<DeviceStateRecord> => {
   const dataToSend = {
     ...state,
-    allowedValues: typeof state.allowedValues === 'string'
-      ? JSON.parse(state.allowedValues)
-      : state.allowedValues
+    allowedValues: state.allowedValues == null ? undefined : parseAllowedValues(state.allowedValues)
   };
-  const response = await apiClient.patch<ApiDataWrapper<{ state: DeviceStateRecordApi }>>(`/device-states/${stateId}`, dataToSend);
-  const updatedState = response.data.data.state;
+  const response = await apiClient.patch<ApiDataWrapper<DeviceStateRecordApi>>(`/device-states/${stateId}`, dataToSend);
+  const data = response.data.data;
+  const raw = (data && typeof data === 'object' && 'data' in data ? (data as { data: DeviceStateRecordApi }).data : data) as DeviceStateRecordApi;
+  if (!raw || typeof raw !== 'object' || !('id' in raw)) {
+    throw new Error('Invalid response: device state not returned');
+  }
   return {
-    ...updatedState,
-    allowedValues: Array.isArray(updatedState.allowedValues)
-      ? updatedState.allowedValues as string[]
-      : JSON.parse(updatedState.allowedValues) as string[]
-  };
+    ...raw,
+    allowedValues: parseAllowedValues(raw.allowedValues)
+  } as DeviceStateRecord;
 };
 
 /**
  * Deactivate a device state
  */
 export const deactivateDeviceState = async (
-  deviceId: number,
+  _deviceId: number,
   stateId: number
 ): Promise<{ stateId: number; success: boolean }> => {
   const response = await apiClient.delete<ApiDeleteResponse & { status?: string }>(`/device-states/${stateId}`);

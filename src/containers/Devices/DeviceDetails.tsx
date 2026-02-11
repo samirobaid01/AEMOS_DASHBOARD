@@ -1,7 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import type { AppDispatch, RootState } from "../../state/store";
+import { useAppDispatch, useAppSelector } from "../../state/store";
 import {
   fetchDeviceDetails,
   updateDeviceState,
@@ -39,16 +38,16 @@ interface DeviceState {
 
 const DeviceDetails = () => {
   const { id } = useParams<{ id: string }>();
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  const device = useSelector(selectDeviceDetails);
-  const organization = useSelector(selectSelectedOrganization);
-  const organizationId = useSelector(selectSelectedOrganizationId);
-  const authToken = useSelector((state: RootState) => state.auth.token) || "";
-  const area = useSelector(selectSelectedArea);
-  const isLoading = useSelector(selectDeviceDetailsLoading);
-  const error = useSelector(selectDeviceDetailsError);
+  const device = useAppSelector(selectDeviceDetails);
+  const organization = useAppSelector(selectSelectedOrganization);
+  const organizationId = useAppSelector(selectSelectedOrganizationId);
+  const authToken = useAppSelector((state) => state.auth.token) || "";
+  const area = useAppSelector(selectSelectedArea);
+  const isLoading = useAppSelector(selectDeviceDetailsLoading);
+  const error = useAppSelector(selectDeviceDetailsError);
 
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);

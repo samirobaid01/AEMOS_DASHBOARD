@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useAppDispatch, useAppSelector } from '../../state/store';
 import { useTranslation } from 'react-i18next';
-import type { AppDispatch } from '../../state/store';
 import { selectCurrentUser, fetchUserProfile } from '../../state/slices/auth.slice';
 import Input from '../../components/common/Input/Input';
 import Button from '../../components/common/Button/Button';
@@ -17,8 +16,8 @@ type ProfileFormData = {
 
 const Profile = () => {
   const { t } = useTranslation();
-  const dispatch = useDispatch<AppDispatch>();
-  const user = useSelector(selectCurrentUser);
+  const dispatch = useAppDispatch();
+  const user = useAppSelector(selectCurrentUser);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState<ProfileFormData>({

@@ -1,4 +1,4 @@
-import { useSelector } from 'react-redux';
+import { useAppSelector } from '../state/store';
 import { useMemo } from 'react';
 import type { RootState } from '../state/store';
 
@@ -16,7 +16,7 @@ const selectAuthPermissions = (state: RootState) => state.auth.permissions || []
 
 export const useRuleEnginePermissions = () => {
   // Get permissions array once
-  const permissions = useSelector(selectAuthPermissions);
+  const permissions = useAppSelector(selectAuthPermissions);
 
   // Compute all permission checks in one memo
   return useMemo(() => ({

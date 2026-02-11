@@ -1,8 +1,7 @@
 import { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useAppDispatch, useAppSelector } from '../../state/store';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import type { AppDispatch } from '../../state/store';
 import { signup, selectAuthLoading, selectAuthError } from '../../state/slices/auth.slice';
 import type { SignupRequest } from '../../types/auth';
 import type { FormErrors } from '../../types/ui';
@@ -12,10 +11,10 @@ import AuthCard from '../../components/auth/AuthCard';
 
 const Signup = () => {
   const { t } = useTranslation();
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const isLoading = useSelector(selectAuthLoading);
-  const error = useSelector(selectAuthError);
+  const isLoading = useAppSelector(selectAuthLoading);
+  const error = useAppSelector(selectAuthError);
   
   const [userData, setUserData] = useState<SignupRequest>({
     userName: '',

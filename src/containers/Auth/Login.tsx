@@ -1,8 +1,7 @@
 import { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useAppDispatch, useAppSelector } from '../../state/store';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import type { AppDispatch } from '../../state/store';
 import { login, selectAuthLoading, selectAuthError } from '../../state/slices/auth.slice';
 import type { LoginRequest } from '../../types/auth';
 import Input from '../../components/common/Input/Input';
@@ -11,10 +10,10 @@ import AuthCard from '../../components/auth/AuthCard';
 
 const Login = () => {
   const { t } = useTranslation();
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const isLoading = useSelector(selectAuthLoading);
-  const error = useSelector(selectAuthError);
+  const isLoading = useAppSelector(selectAuthLoading);
+  const error = useAppSelector(selectAuthError);
   
   const [credentials, setCredentials] = useState<LoginRequest>({
     email: '',

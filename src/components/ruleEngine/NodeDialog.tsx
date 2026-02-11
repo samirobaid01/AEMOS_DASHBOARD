@@ -21,7 +21,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import type { Device } from "../../types/device";
 import type { Sensor } from "../../types/sensor";
 import * as deviceStatesService from '../../services/deviceStates.service';
-import { useSelector } from 'react-redux';
+import { useAppSelector } from '../../state/store';
 import { selectSelectedOrganizationId } from '../../state/slices/auth.slice';
 
 interface ConditionData {
@@ -306,7 +306,7 @@ const ConditionBuilder: React.FC<{
   const [isLoadingDeviceStates, setIsLoadingDeviceStates] = useState(false);
   const [deviceStates, setDeviceStates] = useState<any[]>([]);
   const lastFetchTime = useRef<number>(0);
-  const organizationId = useSelector(selectSelectedOrganizationId);
+  const organizationId = useAppSelector(selectSelectedOrganizationId);
 
   // Load sensor details when UUID changes or when sensors/devices update
   useEffect(() => {

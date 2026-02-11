@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useAppDispatch, useAppSelector } from '../../state/store';
 import { useNavigate, useParams } from 'react-router-dom';
-import type { AppDispatch } from '../../state/store';
 import {
   fetchDeviceById,
   updateDevice,
@@ -30,30 +29,18 @@ import { useTranslation } from 'react-i18next';
 
 const DeviceEdit = () => {
   const { id } = useParams<{ id: string }>();
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const device = useSelector(selectSelectedDevice);
-  const isLoading = useSelector(selectDevicesLoading);
-  const error = useSelector(selectDevicesError);
-  const organizations = useSelector(selectOrganizations);
-  const areas = useSelector(selectAreas);
-  const states = useSelector(selectDeviceStates) || [];
-  const statesLoading = useSelector(selectDeviceStatesLoading);
-  const statesError = useSelector(selectDeviceStatesError);
-  const organizationId = useSelector(selectSelectedOrganizationId);
+  const device = useAppSelector(selectSelectedDevice);
+  const isLoading = useAppSelector(selectDevicesLoading);
+  const error = useAppSelector(selectDevicesError);
+  const organizations = useAppSelector(selectOrganizations);
+  const areas = useAppSelector(selectAreas);
+  const states = useAppSelector(selectDeviceStates) || [];
+  const statesLoading = useAppSelector(selectDeviceStatesLoading);
+  const statesError = useAppSelector(selectDeviceStatesError);
+  const organizationId = useAppSelector(selectSelectedOrganizationId);
   const { t } = useTranslation();
-  
-  // Debug logging for initial state
-  useEffect(() => {
-    console.log('DeviceEdit: Initial mount', {
-      id,
-      organizationId,
-      device: !!device,
-      statesCount: states.length,
-      statesLoading,
-      statesError
-    });
-  }, []);
   
   const [formData, setFormData] = useState<DeviceUpdateRequest>({
     name: '',
@@ -72,17 +59,9 @@ const DeviceEdit = () => {
   
   useEffect(() => {
     if (id && organizationId) {
-      console.log('DeviceEdit: Fetching data', { id, organizationId });
-      
       dispatch(fetchDeviceById(parseInt(id, 10)));
       dispatch(fetchOrganizations());
       dispatch(fetchAreas());
-      
-      console.log('DeviceEdit: Fetching states', {
-        deviceId: parseInt(id, 10),
-        organizationId
-      });
-      
       dispatch(fetchDeviceStates({ 
         deviceId: parseInt(id, 10), 
         organizationId 
@@ -90,32 +69,8 @@ const DeviceEdit = () => {
     }
   }, [dispatch, id, organizationId]);
 
-  // Debug logging for states changes
-  useEffect(() => {
-    console.log('DeviceEdit: States updated', {
-      statesCount: states.length,
-      states,
-      statesLoading,
-      statesError
-    });
-  }, [states, statesLoading, statesError]);
-
-  // Debug logging for device changes
-  useEffect(() => {
-    console.log('DeviceEdit: Device updated', {
-      deviceId: device?.id,
-      deviceName: device?.name,
-      deviceStates: device?.states
-    });
-  }, [device]);
-  
   useEffect(() => {
     if (device) {
-      console.log('DeviceEdit: Setting form data', {
-        deviceId: device.id,
-        organizationId
-      });
-      
       setFormData({
         name: device.name,
         description: device.description,
@@ -173,20 +128,11 @@ const DeviceEdit = () => {
 
   const handleAddState = async (state: Omit<DeviceState, 'id' | 'createdAt' | 'updatedAt'>) => {
     if (!id || !organizationId) return;
-    
-    console.log('DeviceEdit: Adding state', {
-      deviceId: id,
-      organizationId,
-      state
-    });
-    
     try {
-      const result = await dispatch(createDeviceState({
+      await dispatch(createDeviceState({
         deviceId: parseInt(id, 10),
         state
       })).unwrap();
-      
-      console.log('DeviceEdit: State added successfully', result);
     } catch (error) {
       console.error('DeviceEdit: Error creating device state:', error);
     }
@@ -194,22 +140,12 @@ const DeviceEdit = () => {
 
   const handleUpdateState = async (stateId: number, state: Partial<Omit<DeviceState, 'id' | 'createdAt' | 'updatedAt'>>) => {
     if (!id || !organizationId) return;
-    
-    console.log('DeviceEdit: Updating state', {
-      deviceId: id,
-      stateId,
-      organizationId,
-      state
-    });
-    
     try {
-      const result = await dispatch(updateDeviceState({
+      await dispatch(updateDeviceState({
         deviceId: parseInt(id, 10),
         stateId,
         state
       })).unwrap();
-      
-      console.log('DeviceEdit: State updated successfully', result);
     } catch (error) {
       console.error('DeviceEdit: Error updating device state:', error);
     }
@@ -217,20 +153,11 @@ const DeviceEdit = () => {
 
   const handleDeactivateState = async (stateId: number) => {
     if (!id || !organizationId) return;
-    
-    console.log('DeviceEdit: Deactivating state', {
-      deviceId: id,
-      stateId,
-      organizationId
-    });
-    
     try {
-      const result = await dispatch(deactivateDeviceState({
+      await dispatch(deactivateDeviceState({
         deviceId: parseInt(id, 10),
         stateId
       })).unwrap();
-      
-      console.log('DeviceEdit: State deactivated successfully', result);
     } catch (error) {
       console.error('DeviceEdit: Error deactivating device state:', error);
     }
@@ -285,7 +212,6 @@ const DeviceEdit = () => {
   };
 
   if (!organizationId) {
-    console.log('DeviceEdit: No organization selected');
     return (
       <div style={{ padding: '1.5rem' }}>
         <div style={{ 
@@ -301,15 +227,6 @@ const DeviceEdit = () => {
     );
   }
 
-  console.log('DeviceEdit: Rendering', {
-    hasDevice: !!device,
-    statesCount: states.length,
-    isLoading,
-    statesLoading,
-    error,
-    statesError
-  });
-  
   return (
     <div style={{ padding: '1.5rem' }}>
       <DeviceEditComponent
