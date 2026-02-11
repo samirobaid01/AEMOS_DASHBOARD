@@ -1,6 +1,8 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import type { OrganizationState, Organization, OrganizationCreateRequest, OrganizationUpdateRequest, OrganizationFilterParams } from '../../types/organization';
+import type { ApiRejectPayload } from '../../types/api';
+import { getErrorMessage } from '../../utils/getErrorMessage';
 import type { RootState } from '../store';
 import * as organizationsService from '../../services/organizations.service';
 
@@ -13,58 +15,78 @@ const initialState: OrganizationState = {
 };
 
 // Async thunks
-export const fetchOrganizations = createAsyncThunk(
+export const fetchOrganizations = createAsyncThunk<
+  Awaited<ReturnType<typeof organizationsService.getOrganizations>>,
+  OrganizationFilterParams | undefined,
+  { rejectValue: ApiRejectPayload }
+>(
   'organizations/fetchAll',
-  async (params: OrganizationFilterParams | undefined = undefined, { rejectWithValue }) => {
+  async (params = undefined, { rejectWithValue }) => {
     try {
       return await organizationsService.getOrganizations(params);
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to fetch organizations');
+    } catch (error: unknown) {
+      return rejectWithValue({ message: getErrorMessage(error, 'Failed to fetch organizations') });
     }
   }
 );
 
-export const fetchOrganizationById = createAsyncThunk(
+export const fetchOrganizationById = createAsyncThunk<
+  Awaited<ReturnType<typeof organizationsService.getOrganizationById>>,
+  number,
+  { rejectValue: ApiRejectPayload }
+>(
   'organizations/fetchById',
-  async (id: number, { rejectWithValue }) => {
+  async (id, { rejectWithValue }) => {
     try {
       return await organizationsService.getOrganizationById(id);
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to fetch organization');
+    } catch (error: unknown) {
+      return rejectWithValue({ message: getErrorMessage(error, 'Failed to fetch organization') });
     }
   }
 );
 
-export const createOrganization = createAsyncThunk(
+export const createOrganization = createAsyncThunk<
+  Awaited<ReturnType<typeof organizationsService.createOrganization>>,
+  OrganizationCreateRequest,
+  { rejectValue: ApiRejectPayload }
+>(
   'organizations/create',
-  async (organizationData: OrganizationCreateRequest, { rejectWithValue }) => {
+  async (organizationData, { rejectWithValue }) => {
     try {
       return await organizationsService.createOrganization(organizationData);
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to create organization');
+    } catch (error: unknown) {
+      return rejectWithValue({ message: getErrorMessage(error, 'Failed to create organization') });
     }
   }
 );
 
-export const updateOrganization = createAsyncThunk(
+export const updateOrganization = createAsyncThunk<
+  Awaited<ReturnType<typeof organizationsService.updateOrganization>>,
+  { id: number; organizationData: OrganizationUpdateRequest },
+  { rejectValue: ApiRejectPayload }
+>(
   'organizations/update',
-  async ({ id, organizationData }: { id: number; organizationData: OrganizationUpdateRequest }, { rejectWithValue }) => {
+  async ({ id, organizationData }, { rejectWithValue }) => {
     try {
       return await organizationsService.updateOrganization(id, organizationData);
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to update organization');
+    } catch (error: unknown) {
+      return rejectWithValue({ message: getErrorMessage(error, 'Failed to update organization') });
     }
   }
 );
 
-export const deleteOrganization = createAsyncThunk(
+export const deleteOrganization = createAsyncThunk<
+  number,
+  number,
+  { rejectValue: ApiRejectPayload }
+>(
   'organizations/delete',
-  async (id: number, { rejectWithValue }) => {
+  async (id, { rejectWithValue }) => {
     try {
       await organizationsService.deleteOrganization(id);
       return id;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to delete organization');
+    } catch (error: unknown) {
+      return rejectWithValue({ message: getErrorMessage(error, 'Failed to delete organization') });
     }
   }
 );
@@ -78,26 +100,22 @@ const organizationsSlice = createSlice({
       state.selectedOrganization = null;
     },
     setSelectedOrganization: (state, action: PayloadAction<Organization>) => {
-      console.log('Organizations Slice: setSelectedOrganization action received', action.payload);
       state.selectedOrganization = action.payload;
     },
   },
   extraReducers: (builder) => {
     // Fetch Organizations
     builder.addCase(fetchOrganizations.pending, (state) => {
-      console.log('Organizations: Fetch pending');
       state.loading = true;
       state.error = null;
     });
-    builder.addCase(fetchOrganizations.fulfilled, (state, action) => {
-      console.log('Organizations: Fetch fulfilled', action.payload);
+    builder.addCase(fetchOrganizations.fulfilled, (state, action: PayloadAction<Organization[]>) => {
       state.loading = false;
       state.organizations = action.payload;
     });
     builder.addCase(fetchOrganizations.rejected, (state, action) => {
-      console.log('Organizations: Fetch rejected', action.payload);
       state.loading = false;
-      state.error = action.payload as string;
+      state.error = action.payload?.message ?? null;
     });
 
     // Fetch Organization By ID
@@ -105,13 +123,13 @@ const organizationsSlice = createSlice({
       state.loading = true;
       state.error = null;
     });
-    builder.addCase(fetchOrganizationById.fulfilled, (state, action) => {
+    builder.addCase(fetchOrganizationById.fulfilled, (state, action: PayloadAction<Organization>) => {
       state.loading = false;
       state.selectedOrganization = action.payload;
     });
     builder.addCase(fetchOrganizationById.rejected, (state, action) => {
       state.loading = false;
-      state.error = action.payload as string;
+      state.error = action.payload?.message ?? null;
     });
 
     // Create Organization
@@ -119,13 +137,13 @@ const organizationsSlice = createSlice({
       state.loading = true;
       state.error = null;
     });
-    builder.addCase(createOrganization.fulfilled, (state, action) => {
+    builder.addCase(createOrganization.fulfilled, (state, action: PayloadAction<Organization>) => {
       state.loading = false;
       state.organizations.push(action.payload);
     });
     builder.addCase(createOrganization.rejected, (state, action) => {
       state.loading = false;
-      state.error = action.payload as string;
+      state.error = action.payload?.message ?? null;
     });
 
     // Update Organization
@@ -133,7 +151,7 @@ const organizationsSlice = createSlice({
       state.loading = true;
       state.error = null;
     });
-    builder.addCase(updateOrganization.fulfilled, (state, action) => {
+    builder.addCase(updateOrganization.fulfilled, (state, action: PayloadAction<Organization>) => {
       state.loading = false;
       const index = state.organizations.findIndex((org) => org.id === action.payload.id);
       if (index !== -1) {
@@ -145,7 +163,7 @@ const organizationsSlice = createSlice({
     });
     builder.addCase(updateOrganization.rejected, (state, action) => {
       state.loading = false;
-      state.error = action.payload as string;
+      state.error = action.payload?.message ?? null;
     });
 
     // Delete Organization
@@ -153,7 +171,7 @@ const organizationsSlice = createSlice({
       state.loading = true;
       state.error = null;
     });
-    builder.addCase(deleteOrganization.fulfilled, (state, action) => {
+    builder.addCase(deleteOrganization.fulfilled, (state, action: PayloadAction<number>) => {
       state.loading = false;
       state.organizations = state.organizations.filter((org) => org.id !== action.payload);
       if (state.selectedOrganization?.id === action.payload) {
@@ -162,7 +180,7 @@ const organizationsSlice = createSlice({
     });
     builder.addCase(deleteOrganization.rejected, (state, action) => {
       state.loading = false;
-      state.error = action.payload as string;
+      state.error = action.payload?.message ?? null;
     });
   },
 });

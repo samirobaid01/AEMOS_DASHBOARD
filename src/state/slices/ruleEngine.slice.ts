@@ -1,5 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
+import type { ApiRejectPayload } from '../../types/api';
+import { getErrorMessage } from '../../utils/getErrorMessage';
 import type { RootState } from '../store';
 import type { RuleChain, RuleChainCreatePayload, RuleChainUpdatePayload } from '../../types/ruleEngine';
 import type { Sensor } from '../../types/sensor';
@@ -38,164 +40,190 @@ const initialState: RuleEngineState = {
 };
 
 // Async thunks
-export const fetchRules = createAsyncThunk(
+export const fetchRules = createAsyncThunk<
+  Awaited<ReturnType<typeof RuleEngineService.getRules>>,
+  void,
+  { rejectValue: ApiRejectPayload }
+>(
   'ruleEngine/fetchRules',
   async (_, { rejectWithValue }) => {
     try {
       return await RuleEngineService.getRules();
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to fetch rules');
+    } catch (error: unknown) {
+      return rejectWithValue({ message: getErrorMessage(error, 'Failed to fetch rules') });
     }
   }
 );
 
-export const fetchRuleDetails = createAsyncThunk(
+export const fetchRuleDetails = createAsyncThunk<
+  Awaited<ReturnType<typeof RuleEngineService.getRuleDetails>>,
+  number,
+  { rejectValue: ApiRejectPayload }
+>(
   'ruleEngine/fetchRuleDetails',
-  async (ruleId: number, { rejectWithValue }) => {
+  async (ruleId, { rejectWithValue }) => {
     try {
-      const result = await RuleEngineService.getRuleDetails(ruleId);
-      console.log('RuleEngine - Fetched rule details:', {
-        ruleId,
-        result,
-        hasNodes: !!result?.nodes,
-        nodes: result?.nodes
-      });
-      return result;
-    } catch (error: any) {
-      console.error('RuleEngine - Error fetching rule details:', error);
-      return rejectWithValue(error.response?.data?.message || 'Failed to fetch rule details');
+      return await RuleEngineService.getRuleDetails(ruleId);
+    } catch (error: unknown) {
+      return rejectWithValue({ message: getErrorMessage(error, 'Failed to fetch rule details') });
     }
   }
 );
 
-export const createRule = createAsyncThunk(
+export const createRule = createAsyncThunk<
+  Awaited<ReturnType<typeof RuleEngineService.createRule>>,
+  RuleChainCreatePayload,
+  { rejectValue: ApiRejectPayload }
+>(
   'ruleEngine/createRule',
-  async (payload: RuleChainCreatePayload, { rejectWithValue }) => {
+  async (payload, { rejectWithValue }) => {
     try {
       return await RuleEngineService.createRule(payload);
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to create rule');
+    } catch (error: unknown) {
+      return rejectWithValue({ message: getErrorMessage(error, 'Failed to create rule') });
     }
   }
 );
 
-export const updateRule = createAsyncThunk(
+export const updateRule = createAsyncThunk<
+  Awaited<ReturnType<typeof RuleEngineService.updateRule>>,
+  { id: number; payload: RuleChainUpdatePayload },
+  { rejectValue: ApiRejectPayload }
+>(
   'ruleEngine/updateRule',
-  async ({ id, payload }: { id: number; payload: RuleChainUpdatePayload }, { rejectWithValue }) => {
+  async ({ id, payload }, { rejectWithValue }) => {
     try {
       return await RuleEngineService.updateRule(id, payload);
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to update rule');
+    } catch (error: unknown) {
+      return rejectWithValue({ message: getErrorMessage(error, 'Failed to update rule') });
     }
   }
 );
 
-export const deleteRule = createAsyncThunk(
+export const deleteRule = createAsyncThunk<
+  number,
+  number,
+  { rejectValue: ApiRejectPayload }
+>(
   'ruleEngine/deleteRule',
-  async (ruleId: number, { rejectWithValue }) => {
+  async (ruleId, { rejectWithValue }) => {
     try {
       await RuleEngineService.deleteRule(ruleId);
       return ruleId;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to delete rule');
+    } catch (error: unknown) {
+      return rejectWithValue({ message: getErrorMessage(error, 'Failed to delete rule') });
     }
   }
 );
 
-export const createRuleNode = createAsyncThunk(
+export const createRuleNode = createAsyncThunk<
+  Awaited<ReturnType<typeof RuleEngineService.createRuleNode>>,
+  { ruleChainId: number; type: string; name: string; config: string; nextNodeId: number | null },
+  { rejectValue: ApiRejectPayload }
+>(
   'ruleEngine/createRuleNode',
-  async (payload: {
-    ruleChainId: number;
-    type: string;
-    name: string;
-    config: string;
-    nextNodeId: number | null;
-  }, { rejectWithValue }) => {
+  async (payload, { rejectWithValue }) => {
     try {
       return await RuleEngineService.createRuleNode(payload);
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to create rule node');
+    } catch (error: unknown) {
+      return rejectWithValue({ message: getErrorMessage(error, 'Failed to create rule node') });
     }
   }
 );
 
-export const updateRuleNode = createAsyncThunk(
+export const updateRuleNode = createAsyncThunk<
+  Awaited<ReturnType<typeof RuleEngineService.updateRuleNode>>,
+  { nodeId: number; payload: { name: string; config: string; nextNodeId?: number | null } },
+  { rejectValue: ApiRejectPayload }
+>(
   'ruleEngine/updateRuleNode',
-  async ({ nodeId, payload }: { 
-    nodeId: number;
-    payload: {
-      name: string;
-      config: string;
-      nextNodeId?: number | null;
-    }
-  }, { rejectWithValue }) => {
+  async ({ nodeId, payload }, { rejectWithValue }) => {
     try {
       return await RuleEngineService.updateRuleNode(nodeId, payload);
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to update rule node');
+    } catch (error: unknown) {
+      return rejectWithValue({ message: getErrorMessage(error, 'Failed to update rule node') });
     }
   }
 );
 
-export const deleteRuleNode = createAsyncThunk(
+export const deleteRuleNode = createAsyncThunk<
+  number,
+  number,
+  { rejectValue: ApiRejectPayload }
+>(
   'ruleEngine/deleteRuleNode',
-  async (nodeId: number, { rejectWithValue }) => {
+  async (nodeId, { rejectWithValue }) => {
     try {
       await RuleEngineService.deleteRuleNode(nodeId);
       return nodeId;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to delete rule node');
+    } catch (error: unknown) {
+      return rejectWithValue({ message: getErrorMessage(error, 'Failed to delete rule node') });
     }
   }
 );
 
-export const fetchSensors = createAsyncThunk(
+export const fetchSensors = createAsyncThunk<
+  Awaited<ReturnType<typeof RuleEngineService.fetchSensors>>,
+  void,
+  { rejectValue: ApiRejectPayload }
+>(
   'ruleEngine/fetchSensors',
   async (_, { rejectWithValue }) => {
     try {
       return await RuleEngineService.fetchSensors();
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to fetch sensors');
+    } catch (error: unknown) {
+      return rejectWithValue({ message: getErrorMessage(error, 'Failed to fetch sensors') });
     }
   }
 );
 
-export const fetchSensorDetails = createAsyncThunk(
+export const fetchSensorDetails = createAsyncThunk<
+  { uuid: string; sensorDetails: Sensor },
+  number,
+  { rejectValue: ApiRejectPayload; state: RootState }
+>(
   'ruleEngine/fetchSensorDetails',
-  async (sensorId: number, { getState, rejectWithValue }) => {
+  async (sensorId, { getState, rejectWithValue }) => {
     try {
-      const state = getState() as RootState;
+      const state = getState();
       const sensor = state.ruleEngine.sensors.find(s => s.id === sensorId);
       const sensorDetails = await RuleEngineService.fetchSensorDetails(sensorId);
-      
       return {
         uuid: sensor?.uuid || '',
         sensorDetails
       };
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to fetch sensor details');
+    } catch (error: unknown) {
+      return rejectWithValue({ message: getErrorMessage(error, 'Failed to fetch sensor details') });
     }
   }
 );
 
-export const fetchDevices = createAsyncThunk(
+export const fetchDevices = createAsyncThunk<
+  Awaited<ReturnType<typeof RuleEngineService.fetchDevices>>,
+  void,
+  { rejectValue: ApiRejectPayload }
+>(
   'ruleEngine/fetchDevices',
   async (_, { rejectWithValue }) => {
     try {
       return await RuleEngineService.fetchDevices();
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to fetch devices');
+    } catch (error: unknown) {
+      return rejectWithValue({ message: getErrorMessage(error, 'Failed to fetch devices') });
     }
   }
 );
 
-export const fetchDeviceStates = createAsyncThunk(
+export const fetchDeviceStates = createAsyncThunk<
+  Awaited<ReturnType<typeof RuleEngineService.fetchDeviceStates>>,
+  number,
+  { rejectValue: ApiRejectPayload }
+>(
   'ruleEngine/fetchDeviceStates',
-  async (deviceId: number, { rejectWithValue }) => {
+  async (deviceId, { rejectWithValue }) => {
     try {
       return await RuleEngineService.fetchDeviceStates(deviceId);
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to fetch device states');
+    } catch (error: unknown) {
+      return rejectWithValue({ message: getErrorMessage(error, 'Failed to fetch device states') });
     }
   }
 );
@@ -227,7 +255,7 @@ const ruleEngineSlice = createSlice({
     });
     builder.addCase(fetchRules.rejected, (state, action) => {
       state.loading = false;
-      state.error = action.payload as string;
+      state.error = action.payload?.message ?? null;
     });
 
     // Fetch Rule Details
@@ -241,7 +269,7 @@ const ruleEngineSlice = createSlice({
     });
     builder.addCase(fetchRuleDetails.rejected, (state, action) => {
       state.loading = false;
-      state.error = action.payload as string;
+      state.error = action.payload?.message ?? null;
     });
 
     // Create Rule
@@ -255,7 +283,7 @@ const ruleEngineSlice = createSlice({
     });
     builder.addCase(createRule.rejected, (state, action) => {
       state.loading = false;
-      state.error = action.payload as string;
+      state.error = action.payload?.message ?? null;
     });
 
     // Update Rule
@@ -275,7 +303,7 @@ const ruleEngineSlice = createSlice({
     });
     builder.addCase(updateRule.rejected, (state, action) => {
       state.loading = false;
-      state.error = action.payload as string;
+      state.error = action.payload?.message ?? null;
     });
 
     // Delete Rule
@@ -292,7 +320,7 @@ const ruleEngineSlice = createSlice({
     });
     builder.addCase(deleteRule.rejected, (state, action) => {
       state.loading = false;
-      state.error = action.payload as string;
+      state.error = action.payload?.message ?? null;
     });
 
     // Create Rule Node
@@ -308,7 +336,7 @@ const ruleEngineSlice = createSlice({
     });
     builder.addCase(createRuleNode.rejected, (state, action) => {
       state.loading = false;
-      state.error = action.payload as string;
+      state.error = action.payload?.message ?? null;
     });
 
     // Update Rule Node
@@ -327,7 +355,7 @@ const ruleEngineSlice = createSlice({
     });
     builder.addCase(updateRuleNode.rejected, (state, action) => {
       state.loading = false;
-      state.error = action.payload as string;
+      state.error = action.payload?.message ?? null;
     });
 
     // Fetch Sensors
@@ -344,7 +372,7 @@ const ruleEngineSlice = createSlice({
     builder.addCase(fetchSensors.rejected, (state, action) => {
       console.log('fetchSensors: rejected', action.payload);
       state.loading = false;
-      state.error = action.payload as string;
+      state.error = action.payload?.message ?? null;
       state.sensors = []; // Initialize to empty array on error
     });
 
@@ -362,7 +390,7 @@ const ruleEngineSlice = createSlice({
     builder.addCase(fetchDevices.rejected, (state, action) => {
       console.log('fetchDevices: rejected', action.payload);
       state.loading = false;
-      state.error = action.payload as string;
+      state.error = action.payload?.message ?? null;
       state.devices = []; // Initialize to empty array on error
     });
 
@@ -375,7 +403,7 @@ const ruleEngineSlice = createSlice({
       state.deviceStates = action.payload;
     });
     builder.addCase(fetchDeviceStates.rejected, (state, action) => {
-      state.error = action.payload as string;
+      state.error = action.payload?.message ?? null;
     });
 
     // Fetch Sensor Details (do not set global loading; UI that uses sensor details has its own loading state)
@@ -389,7 +417,7 @@ const ruleEngineSlice = createSlice({
       }
     });
     builder.addCase(fetchSensorDetails.rejected, (state, action) => {
-      state.error = action.payload as string;
+      state.error = action.payload?.message ?? null;
     });
   },
 });

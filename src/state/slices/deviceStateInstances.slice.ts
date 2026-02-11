@@ -1,4 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import type { ApiRejectPayload } from '../../types/api';
+import { getErrorMessage } from '../../utils/getErrorMessage';
 import type { RootState } from '../store';
 import { createDeviceStateInstance as createDeviceStateInstanceService, 
   type CreateDeviceStateInstancePayload } from '../../services/deviceStateInstances.service';
@@ -15,19 +17,23 @@ const initialState: DeviceStateInstancesState = {
   lastUpdated: null
 };
 
-export const createDeviceStateInstance = createAsyncThunk(
+export const createDeviceStateInstance = createAsyncThunk<
+  unknown,
+  CreateDeviceStateInstancePayload,
+  { rejectValue: ApiRejectPayload }
+>(
   'deviceStateInstances/create',
-  async (payload: CreateDeviceStateInstancePayload, { rejectWithValue }) => {
+  async (payload, { rejectWithValue }) => {
     try {
       const response = await createDeviceStateInstanceService(payload);
-      
       if (!response.success) {
         throw new Error(response.message);
       }
-
       return response.data;
-    } catch (error) {
-      return rejectWithValue(error instanceof Error ? error.message : 'Failed to create device state instance');
+    } catch (error: unknown) {
+      return rejectWithValue({
+        message: getErrorMessage(error, 'Failed to create device state instance'),
+      });
     }
   }
 );
@@ -53,7 +59,7 @@ const deviceStateInstancesSlice = createSlice({
       })
       .addCase(createDeviceStateInstance.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload as string || 'An error occurred';
+        state.error = action.payload?.message ?? null;
       });
   }
 });
