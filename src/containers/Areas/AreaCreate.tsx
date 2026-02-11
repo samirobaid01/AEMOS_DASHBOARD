@@ -6,6 +6,7 @@ import type { AppDispatch } from '../../state/store';
 import { createArea, selectAreasLoading, selectAreasError } from '../../state/slices/areas.slice';
 import { fetchOrganizations, selectOrganizations } from '../../state/slices/organizations.slice';
 import type { AreaCreateRequest } from '../../types/area';
+import type { FormErrors } from '../../types/ui';
 import { AreaCreate as AreaCreateComponent } from '../../components/areas';
 
 const AreaCreate = () => {
@@ -26,7 +27,7 @@ const AreaCreate = () => {
     status: 'active',
   });
   
-  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [formErrors, setFormErrors] = useState<FormErrors>({});
   
   useEffect(() => {
     dispatch(fetchOrganizations());
@@ -67,7 +68,7 @@ const AreaCreate = () => {
   };
   
   const validateForm = (): boolean => {
-    const errors: Record<string, string> = {};
+    const errors: FormErrors = {};
     
     if (!formData.name.trim()) {
       errors.name = t('name_required');

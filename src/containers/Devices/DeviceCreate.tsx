@@ -8,6 +8,7 @@ import { createDeviceState, selectDeviceStatesLoading, selectDeviceStatesError }
 import { fetchOrganizations, selectOrganizations } from '../../state/slices/organizations.slice';
 import { fetchAreas, selectAreas } from '../../state/slices/areas.slice';
 import type { DeviceCreateRequest, DeviceCapabilities } from '../../types/device';
+import type { FormErrors } from '../../types/ui';
 import DeviceCreate from '../../components/devices/DeviceCreate';
 import type { DeviceStatePayload } from '../../components/devices/DeviceStatesModal';
 
@@ -43,7 +44,7 @@ const DeviceCreateContainer = () => {
     controlModes: '',
   });
 
-  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [formErrors, setFormErrors] = useState<FormErrors>({});
 
   useEffect(() => {
     dispatch(fetchOrganizations());
@@ -90,7 +91,7 @@ const DeviceCreateContainer = () => {
   };
 
   const validateForm = (): boolean => {
-    const errors: Record<string, string> = {};
+    const errors: FormErrors = {};
     if (!formData.name.trim()) {
       errors.name = t('common.name_required');
     }

@@ -1,13 +1,14 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import type { OrganizationCreateRequest } from '../../types/organization';
+import type { FormErrors } from '../../types/ui';
 import Input from '../../components/common/Input/Input';
 import Button from '../../components/common/Button/Button';
 import { useThemeColors } from '../../hooks/useThemeColors';
 
 interface OrganizationCreateProps {
   formData: OrganizationCreateRequest;
-  formErrors: Record<string, string>;
+  formErrors: FormErrors;
   isLoading: boolean;
   error: string | null;
   onSubmit: (e: React.FormEvent) => void;

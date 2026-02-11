@@ -134,17 +134,17 @@ const AreaDetails: React.FC<AreaDetailsProps> = ({
                       borderRadius: '9999px',
                       fontSize: '0.75rem',
                       fontWeight: 500,
-                      backgroundColor: area.status ? colors.successBackground : colors.dangerBackground,
-                      color: area.status ? colors.successText : colors.dangerText,
+                      backgroundColor: area.status === 'active' ? colors.successBackground : area.status === 'inactive' ? colors.dangerBackground : colors.border,
+                      color: area.status === 'active' ? colors.successText : area.status === 'inactive' ? colors.dangerText : colors.textSecondary,
                     }}>
                       <span style={{
                         width: '0.5rem',
                         height: '0.5rem',
                         borderRadius: '50%',
-                        backgroundColor: area.status ? colors.success : colors.danger,
+                        backgroundColor: area.status === 'active' ? colors.success : area.status === 'inactive' ? colors.danger : colors.textMuted,
                         marginRight: '0.375rem',
                       }}></span>
-                      {area.status ? t('active') : t('inactive')}
+                      {t(area.status)}
                     </span>
                   </p>
                 </div>

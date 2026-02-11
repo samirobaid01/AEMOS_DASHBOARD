@@ -1,13 +1,14 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import type { AreaUpdateRequest } from '../../types/area';
+import type { FormErrors } from '../../types/ui';
 import Input from '../../components/common/Input/Input';
 import Button from '../../components/common/Button/Button';
 import { useThemeColors } from '../../hooks/useThemeColors';
 
 interface AreaEditProps {
   formData: AreaUpdateRequest;
-  formErrors: Record<string, string>;
+  formErrors: FormErrors;
   isLoading: boolean;
   isSubmitting: boolean;
   error: string | null;
@@ -183,20 +184,30 @@ const AreaEdit: React.FC<AreaEditProps> = ({
               </div>
               
               {/* Status */}
-              <div>
-                <div style={styles.checkboxContainer}>
-                  <input
-                    id="status"
-                    name="status"
-                    type="checkbox"
-                    checked={formData.status}
-                    onChange={onChange}
-                    style={styles.checkbox}
-                  />
-                  <label htmlFor="status" style={styles.checkboxLabel}>
-                    {t('active')}
-                  </label>
-                </div>
+              <div style={styles.fullWidth}>
+                <label htmlFor="status" style={styles.labelText}>
+                  {t('status')}
+                </label>
+                <select
+                  id="status"
+                  name="status"
+                  value={formData.status ?? 'active'}
+                  onChange={onChange}
+                  style={{
+                    width: '100%',
+                    padding: '0.5rem 0.75rem',
+                    borderRadius: '0.375rem',
+                    border: `1px solid ${colors.border}`,
+                    backgroundColor: colors.surfaceBackground,
+                    color: colors.textPrimary,
+                    fontSize: '0.875rem',
+                  }}
+                >
+                  <option value="active">{t('active')}</option>
+                  <option value="inactive">{t('inactive')}</option>
+                  <option value="under_review">{t('under_review')}</option>
+                  <option value="archived">{t('archived')}</option>
+                </select>
               </div>
             </div>
             

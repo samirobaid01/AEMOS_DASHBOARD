@@ -12,6 +12,7 @@ import {
 } from '../../state/slices/areas.slice';
 import { fetchOrganizations, selectOrganizations } from '../../state/slices/organizations.slice';
 import type { AreaUpdateRequest } from '../../types/area';
+import type { FormErrors } from '../../types/ui';
 import LoadingScreen from '../../components/common/Loading/LoadingScreen';
 import { AreaEdit as AreaEditComponent } from '../../components/areas';
 
@@ -29,10 +30,10 @@ const AreaEdit = () => {
     name: '',
     organizationId: 0,
     description: '',
-    status: "pending",
+    status: 'active',
   });
   
-  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [formErrors, setFormErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   useEffect(() => {
@@ -71,7 +72,7 @@ const AreaEdit = () => {
   };
   
   const validateForm = (): boolean => {
-    const errors: Record<string, string> = {};
+    const errors: FormErrors = {};
     
     if (!formData.name?.trim()) {
       errors.name = t('name_required');

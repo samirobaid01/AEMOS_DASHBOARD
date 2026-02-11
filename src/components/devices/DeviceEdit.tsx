@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import type { DeviceUpdateRequest, DeviceCreateRequest } from '../../types/device';
 import type { Organization } from '../../types/organization';
 import type { Area } from '../../types/area';
+import type { FormErrors } from '../../types/ui';
 import LoadingScreen from '../common/Loading/LoadingScreen';
 import { useTheme } from '../../context/ThemeContext';
 import { useThemeColors } from '../../hooks/useThemeColors';
@@ -10,7 +11,7 @@ import DeviceIdentityForm from './DeviceIdentityForm';
 
 interface DeviceEditProps {
   formData: DeviceUpdateRequest;
-  formErrors: Record<string, string>;
+  formErrors: FormErrors;
   isLoading: boolean;
   isSubmitting: boolean;
   error: string | null;

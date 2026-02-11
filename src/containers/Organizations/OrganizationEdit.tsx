@@ -10,6 +10,7 @@ import {
   selectOrganizationsError
 } from '../../state/slices/organizations.slice';
 import type { OrganizationUpdateRequest } from '../../types/organization';
+import type { FormErrors } from '../../types/ui';
 import LoadingScreen from '../../components/common/Loading/LoadingScreen';
 import { OrganizationEdit as OrganizationEditComponent } from '../../components/organizations';
 
@@ -33,7 +34,7 @@ const OrganizationEdit = () => {
     isParent: true,
   });
   
-  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [formErrors, setFormErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   useEffect(() => {
@@ -76,7 +77,7 @@ const OrganizationEdit = () => {
   };
   
   const validateForm = (): boolean => {
-    const errors: Record<string, string> = {};
+    const errors: FormErrors = {};
     
     if (!formData.name?.trim()) {
       errors.name = 'Name is required';

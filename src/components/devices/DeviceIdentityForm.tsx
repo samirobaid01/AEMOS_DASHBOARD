@@ -11,10 +11,11 @@ import {
 import type { DeviceCreateRequest } from '../../types/device';
 import type { Organization } from '../../types/organization';
 import type { Area } from '../../types/area';
+import type { FormErrors } from '../../types/ui';
 
 interface DeviceIdentityFormProps {
   formData: DeviceCreateRequest;
-  formErrors: Record<string, string>;
+  formErrors: FormErrors;
   isLoading: boolean;
   error: string | null;
   organizations: Organization[];

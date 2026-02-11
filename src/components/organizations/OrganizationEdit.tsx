@@ -1,13 +1,14 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import type { OrganizationUpdateRequest } from '../../types/organization';
+import type { FormErrors } from '../../types/ui';
 import Input from '../../components/common/Input/Input';
 import Button from '../../components/common/Button/Button';
 import { useThemeColors } from '../../hooks/useThemeColors';
 
 interface OrganizationEditProps {
   formData: OrganizationUpdateRequest;
-  formErrors: Record<string, string>;
+  formErrors: FormErrors;
   isLoading: boolean;
   isSubmitting: boolean;
   error: string | null;
