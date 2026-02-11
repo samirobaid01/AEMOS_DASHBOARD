@@ -136,9 +136,11 @@ const RuleEdit: React.FC = () => {
       const currentNode = selectedRule?.nodes.find(n => n.id === nodeId);
       if (!currentNode) return;
 
-      // Get the current nextNodeId from the existing node
-      const currentConfig = JSON.parse(currentNode.config);
-      const nextNodeId = currentConfig.nextNodeId;
+      const rawConfig = currentNode.config;
+      const currentConfig = typeof rawConfig === 'string'
+        ? JSON.parse(rawConfig)
+        : (rawConfig as Record<string, unknown>);
+      const nextNodeId = currentConfig?.nextNodeId;
 
       await dispatch(updateRuleNode({ 
         nodeId, 
@@ -215,11 +217,12 @@ const RuleEdit: React.FC = () => {
         mode="add"
       />
       <ActionDialog
-        open={false} // Control this with state if needed
-        onClose={() => {}} // Add close handler if needed
+        open={false}
+        onClose={() => {}}
         onSave={handleNodeCreate}
         devices={devices}
         deviceStates={deviceStates}
+        lastFetchedDeviceId={lastFetchedDeviceId}
         onFetchDeviceStates={handleFetchDeviceStates}
         mode="add"
         ruleChainId={id ? parseInt(id) : 0}

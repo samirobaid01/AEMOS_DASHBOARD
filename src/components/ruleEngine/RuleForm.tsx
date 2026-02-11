@@ -607,14 +607,12 @@ const RuleForm: React.FC<RuleFormProps> = ({
                 }}
                 onUpdate={async (nodeId, data) => {
                   await onNodeUpdate(nodeId, data);
-                  // Update local state after successful update
-                  setNodes(prev => prev.map(node => 
-                    node.id === nodeId 
-                      ? {
-                          ...node,
-                          name: data.name,
-                          config: JSON.parse(data.config)
-                        }
+                  const configValue = typeof data.config === 'string'
+                    ? JSON.parse(data.config)
+                    : data.config;
+                  setNodes(prev => prev.map(node =>
+                    node.id === nodeId
+                      ? { ...node, name: data.name, config: configValue }
                       : node
                   ));
                   handleNodeDialogClose();

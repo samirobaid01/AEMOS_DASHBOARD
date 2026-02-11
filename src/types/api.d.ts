@@ -11,3 +11,7 @@ export interface ApiError {
 export interface ApiDataWrapper<T> {
   data: T;
 }
+
+export interface ApiDeleteResponse {
+  status?: string;
+}

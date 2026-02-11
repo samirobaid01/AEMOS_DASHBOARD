@@ -1,20 +1,22 @@
 import apiClient from './api/apiClient';
+import type { ApiDataWrapper, ApiDeleteResponse } from '../types/api';
 import type { DeviceStateRecord } from '../types/device';
+
+interface DeviceStateRecordApi extends Omit<DeviceStateRecord, 'allowedValues'> {
+  allowedValues: string;
+}
 
 /**
  * Get all states for a device
  */
-export const getDeviceStates = async (deviceId: number, organizationId: number) => {
-  const response = await apiClient.get(`/device-states/device/${deviceId}`, {
+export const getDeviceStates = async (deviceId: number, organizationId: number): Promise<DeviceStateRecord[]> => {
+  const response = await apiClient.get<ApiDataWrapper<DeviceStateRecordApi[]>>(`/device-states/device/${deviceId}`, {
     params: { organizationId }
   });
-  
-  // Parse allowedValues from JSON string to array
-  const states = response.data.data.map((state: any) => ({
+  const states = response.data.data.map((state: DeviceStateRecordApi) => ({
     ...state,
-    allowedValues: JSON.parse(state.allowedValues)
+    allowedValues: JSON.parse(state.allowedValues) as string[]
   }));
-  
   return states;
 };
 
@@ -24,16 +26,14 @@ export const getDeviceStates = async (deviceId: number, organizationId: number) 
 export const createDeviceState = async (
   deviceId: number,
   state: Omit<DeviceStateRecord, 'id' | 'createdAt' | 'updatedAt'>
-) => {
-  // For create, we send allowedValues as is (array)
-  const response = await apiClient.post(`/device-states/device/${deviceId}`, state);
-  
+): Promise<DeviceStateRecord> => {
+  const response = await apiClient.post<ApiDataWrapper<DeviceStateRecordApi>>(`/device-states/device/${deviceId}`, state);
   const createdState = response.data.data;
   return {
     ...createdState,
-    allowedValues: Array.isArray(createdState.allowedValues) 
-      ? createdState.allowedValues 
-      : JSON.parse(createdState.allowedValues)
+    allowedValues: Array.isArray(createdState.allowedValues)
+      ? createdState.allowedValues as string[]
+      : JSON.parse(createdState.allowedValues) as string[]
   };
 };
 
@@ -44,24 +44,20 @@ export const updateDeviceState = async (
   deviceId: number,
   stateId: number,
   state: Partial<Omit<DeviceStateRecord, 'id' | 'createdAt' | 'updatedAt'>>
-) => {
-  // Send allowedValues as is (array) - don't stringify
+): Promise<DeviceStateRecord> => {
   const dataToSend = {
     ...state,
-    // If allowedValues is a string, parse it, otherwise use as is
-    allowedValues: typeof state.allowedValues === 'string' 
-      ? JSON.parse(state.allowedValues) 
+    allowedValues: typeof state.allowedValues === 'string'
+      ? JSON.parse(state.allowedValues)
       : state.allowedValues
   };
-  
-  const response = await apiClient.patch(`/device-states/${stateId}`, dataToSend);
+  const response = await apiClient.patch<ApiDataWrapper<{ state: DeviceStateRecordApi }>>(`/device-states/${stateId}`, dataToSend);
   const updatedState = response.data.data.state;
-  
   return {
     ...updatedState,
-    allowedValues: Array.isArray(updatedState.allowedValues) 
-      ? updatedState.allowedValues 
-      : JSON.parse(updatedState.allowedValues)
+    allowedValues: Array.isArray(updatedState.allowedValues)
+      ? updatedState.allowedValues as string[]
+      : JSON.parse(updatedState.allowedValues) as string[]
   };
 };
 
@@ -71,7 +67,7 @@ export const updateDeviceState = async (
 export const deactivateDeviceState = async (
   deviceId: number,
   stateId: number
-) => {
-  const response = await apiClient.delete(`/device-states/${stateId}`);
+): Promise<{ stateId: number; success: boolean }> => {
+  const response = await apiClient.delete<ApiDeleteResponse & { status?: string }>(`/device-states/${stateId}`);
   return { stateId, success: response.data.status === 'success' };
 };

@@ -1,4 +1,5 @@
 import apiClient from './api/apiClient';
+import type { ApiDataWrapper } from '../types/api';
 
 export interface CreateDeviceStateInstancePayload {
   deviceUuid: string;
@@ -10,22 +11,20 @@ export interface CreateDeviceStateInstancePayload {
 export interface DeviceStateInstanceResponse {
   success: boolean;
   message: string;
-  data?: any;
+  data?: unknown;
 }
 
 export const createDeviceStateInstance = async (
   payload: CreateDeviceStateInstancePayload
 ): Promise<DeviceStateInstanceResponse> => {
   try {
-    const response = await apiClient.post('/device-state-instances', payload);
-
+    const response = await apiClient.post<ApiDataWrapper<unknown>>('/device-state-instances', payload);
     return {
       success: true,
       message: 'Device state instance created successfully',
-      data: response.data
+      data: response.data.data
     };
   } catch (error) {
-    console.error('Error creating device state instance:', error);
     return {
       success: false,
       message: error instanceof Error ? error.message : 'Failed to create device state instance'
