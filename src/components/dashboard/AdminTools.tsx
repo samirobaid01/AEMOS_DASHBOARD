@@ -1,12 +1,12 @@
 import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useAppDispatch, useAppSelector } from '../../state/store';
 import { selectCurrentUser, updateUser } from '../../state/slices/auth.slice';
 import usePermissions from '../../hooks/usePermissions';
 
 // Function to update user in Redux with permissions
 const AdminTools: React.FC = () => {
-  const dispatch = useDispatch();
-  const user = useSelector(selectCurrentUser);
+  const dispatch = useAppDispatch();
+  const user = useAppSelector(selectCurrentUser);
   const { isSystemAdmin } = usePermissions();
 
   // List of all possible permissions in the system

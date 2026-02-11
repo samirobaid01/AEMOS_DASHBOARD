@@ -1,24 +1,20 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { useAppDispatch, useAppSelector } from '../../state/store';
 import { fetchRules, selectRules, selectRuleEngineLoading, selectRuleEngineError } from '../../state/slices/ruleEngine.slice';
 import RuleListComponent from '../../components/ruleEngine/RuleList';
 import { useRuleEnginePermissions } from '../../hooks/useRuleEnginePermissions';
-import type { AppDispatch } from '../../state/store';
 
 const RuleList: React.FC = () => {
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Get permissions once
   const { canCreate } = useRuleEnginePermissions();
-  
-  // Get other data
-  const rules = useSelector(selectRules);
-  const loading = useSelector(selectRuleEngineLoading);
-  const error = useSelector(selectRuleEngineError);
+  const rules = useAppSelector(selectRules);
+  const loading = useAppSelector(selectRuleEngineLoading);
+  const error = useAppSelector(selectRuleEngineError);
 
   const safeRules = rules ?? [];
 

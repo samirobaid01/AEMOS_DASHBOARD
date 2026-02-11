@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useAppDispatch, useAppSelector } from '../../state/store';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import LoadingScreen from '../common/Loading/LoadingScreen';
@@ -10,8 +10,6 @@ import type { DeviceStatus } from '../../constants/device';
 import { useTheme } from '../../context/ThemeContext';
 import { useThemeColors } from '../../hooks/useThemeColors';
 import { fetchDeviceStates, selectDeviceStates, selectDeviceStatesLoading, selectDeviceStatesError } from '../../state/slices/deviceStates.slice';
-import type { RootState } from '../../state/store';
-import type { AppDispatch } from '../../state/store';
 import StateDropdown from '../common/Select/StateDropdown';
 import { API_URL } from '../../config';
 import { useDeviceStateSocket } from '../../hooks/useDeviceStateSocket';
@@ -79,11 +77,11 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({
   const { t } = useTranslation();
   const { darkMode } = useTheme();
   const colors = useThemeColors();
-  const dispatch = useDispatch<AppDispatch>();
-  const deviceStates = useSelector(selectDeviceStates);
-  const statesLoading = useSelector(selectDeviceStatesLoading);
-  const statesError = useSelector(selectDeviceStatesError);
-  const authToken = useSelector((state: RootState) => state.auth.token);
+  const dispatch = useAppDispatch();
+  const deviceStates = useAppSelector(selectDeviceStates);
+  const statesLoading = useAppSelector(selectDeviceStatesLoading);
+  const statesError = useAppSelector(selectDeviceStatesError);
+  const authToken = useAppSelector((state) => state.auth.token);
   const isMobile = window.innerWidth < 768;
 
   // Remove socket connection since we're getting it from props now

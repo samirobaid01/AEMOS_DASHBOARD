@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+import { useAppDispatch, useAppSelector } from '../../state/store';
 import { useTranslation } from 'react-i18next';
-import type { AppDispatch } from '../../state/store';
 import {
   fetchAreaById,
   selectSelectedArea,
@@ -18,13 +17,13 @@ import AreaDetails from '../../components/areas/AreaDetails';
 const AreaDetailsContainer = () => {
   const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const area = useSelector(selectSelectedArea);
-  const sensors = useSelector(selectSensors);
-  const isLoading = useSelector(selectAreasLoading);
-  const error = useSelector(selectAreasError);
-  const organization = useSelector(selectSelectedOrganization);
+  const area = useAppSelector(selectSelectedArea);
+  const sensors = useAppSelector(selectSensors);
+  const isLoading = useAppSelector(selectAreasLoading);
+  const error = useAppSelector(selectAreasError);
+  const organization = useAppSelector(selectSelectedOrganization);
   const [isDeleting, setIsDeleting] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 

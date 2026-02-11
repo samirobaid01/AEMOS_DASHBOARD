@@ -1,8 +1,7 @@
 import { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useAppDispatch, useAppSelector } from '../../state/store';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import type { AppDispatch } from '../../state/store';
 import { createOrganization, selectOrganizationsLoading, selectOrganizationsError } from '../../state/slices/organizations.slice';
 import type { OrganizationCreateRequest } from '../../types/organization';
 import type { FormErrors } from '../../types/ui';
@@ -10,10 +9,10 @@ import { OrganizationCreate as OrganizationCreateComponent } from '../../compone
 
 const OrganizationCreate = () => {
   const { t } = useTranslation();
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const isLoading = useSelector(selectOrganizationsLoading);
-  const error = useSelector(selectOrganizationsError);
+  const isLoading = useAppSelector(selectOrganizationsLoading);
+  const error = useAppSelector(selectOrganizationsError);
   
   const [formData, setFormData] = useState<OrganizationCreateRequest>({
     name: '',

@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useAppDispatch, useAppSelector } from '../../state/store';
 import { useNavigate, useParams } from 'react-router-dom';
-import type { AppDispatch } from '../../state/store';
 import {
   fetchOrganizationById,
   updateOrganization,
@@ -16,11 +15,11 @@ import { OrganizationEdit as OrganizationEditComponent } from '../../components/
 
 const OrganizationEdit = () => {
   const { id } = useParams<{ id: string }>();
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const organization = useSelector(selectSelectedOrganization);
-  const isLoading = useSelector(selectOrganizationsLoading);
-  const error = useSelector(selectOrganizationsError);
+  const organization = useAppSelector(selectSelectedOrganization);
+  const isLoading = useAppSelector(selectOrganizationsLoading);
+  const error = useAppSelector(selectOrganizationsError);
   
   const [formData, setFormData] = useState<OrganizationUpdateRequest>({
     organizationId: 0,

@@ -211,7 +211,7 @@ const DeviceStateManager: React.FC<DeviceStateManagerProps> = ({
             }}>
               <div>Type: {state.dataType}</div>
               <div>Default: {state.defaultValue}</div>
-              <div>Allowed: {state.allowedValues.join(', ')}</div>
+              <div>Allowed: {(Array.isArray(state.allowedValues) ? state.allowedValues : []).join(', ')}</div>
             </div>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               <Button
@@ -223,7 +223,7 @@ const DeviceStateManager: React.FC<DeviceStateManagerProps> = ({
                     stateName: state.stateName,
                     dataType: state.dataType,
                     defaultValue: state.defaultValue,
-                    allowedValues: state.allowedValues,
+                    allowedValues: Array.isArray(state.allowedValues) ? state.allowedValues : [],
                     status: state.status
                   }
                 })}

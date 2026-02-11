@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useAppDispatch, useAppSelector } from '../../state/store';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import type { AppDispatch } from '../../state/store';
 import { 
   fetchOrganizations, 
   selectOrganizations, 
@@ -14,12 +13,12 @@ import type { OrganizationFilterParams } from '../../types/organization';
 
 const OrganizationList = () => {
   const { t } = useTranslation();
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-  const organizations = useSelector(selectOrganizations);
-  const isLoading = useSelector(selectOrganizationsLoading);
-  const error = useSelector(selectOrganizationsError);
+  const organizations = useAppSelector(selectOrganizations);
+  const isLoading = useAppSelector(selectOrganizationsLoading);
+  const error = useAppSelector(selectOrganizationsError);
   
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<OrganizationFilterParams['status']>(undefined);

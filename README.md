@@ -31,6 +31,10 @@ The AEMOS Dashboard is built with a modern tech stack:
 - **HTTP Client**: Axios
 - **Build Tool**: Vite
 
+## Conventions
+
+- **Feature boundary:** Features may only import from `common/`, `types/`, and their own feature folder—not from other features. See [docs/FEATURE_BOUNDARY_RULE.md](docs/FEATURE_BOUNDARY_RULE.md).
+
 ## Responsive Design
 
 The application is fully responsive and optimized for both desktop and mobile devices:

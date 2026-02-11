@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useAppDispatch, useAppSelector } from '../../state/store';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import type { AppDispatch } from '../../state/store';
 import { createDevice, updateDevice, selectDevicesLoading, selectDevicesError } from '../../state/slices/devices.slice';
 import { createDeviceState, selectDeviceStatesLoading, selectDeviceStatesError } from '../../state/slices/deviceStates.slice';
 import { fetchOrganizations, selectOrganizations } from '../../state/slices/organizations.slice';
@@ -14,17 +13,17 @@ import type { DeviceStatePayload } from '../../components/devices/DeviceStatesMo
 
 const DeviceCreateContainer = () => {
   const { t } = useTranslation();
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const organizationIdParam = searchParams.get('organizationId');
 
-  const devicesLoading = useSelector(selectDevicesLoading);
-  const devicesError = useSelector(selectDevicesError);
-  const statesLoading = useSelector(selectDeviceStatesLoading);
-  const statesError = useSelector(selectDeviceStatesError);
-  const organizations = useSelector(selectOrganizations);
-  const areas = useSelector(selectAreas);
+  const devicesLoading = useAppSelector(selectDevicesLoading);
+  const devicesError = useAppSelector(selectDevicesError);
+  const statesLoading = useAppSelector(selectDeviceStatesLoading);
+  const statesError = useAppSelector(selectDeviceStatesError);
+  const organizations = useAppSelector(selectOrganizations);
+  const areas = useAppSelector(selectAreas);
 
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
   const [createdDeviceId, setCreatedDeviceId] = useState<number | null>(null);

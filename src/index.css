@@ -1,4 +1,6 @@
-@import './styles/walkthrough.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* Base styles */
 * {

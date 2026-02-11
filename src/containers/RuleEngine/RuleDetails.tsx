@@ -1,30 +1,29 @@
 import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useAppDispatch, useAppSelector } from '../../state/store';
 import { useParams, Navigate, useNavigate } from 'react-router-dom';
-import { 
-  fetchRuleDetails, 
-  selectSelectedRule, 
-  selectRuleEngineLoading, 
+import {
+  fetchRuleDetails,
+  selectSelectedRule,
+  selectRuleEngineLoading,
   selectRuleEngineError,
   deleteRule,
   updateRuleNode,
 } from '../../state/slices/ruleEngine.slice';
 import { useRuleEnginePermissions } from '../../hooks/useRuleEnginePermissions';
-import type { AppDispatch } from '../../state/store';
 import { RuleDetails as RuleDetailsComponent } from '../../components/ruleEngine';
 import { toastService } from '../../services/toastService';
 import { useTranslation } from 'react-i18next';
 
 const RuleDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch();
   const { t } = useTranslation();
   const { canView } = useRuleEnginePermissions();
   const navigate = useNavigate();
 
-  const selectedRule = useSelector(selectSelectedRule);
-  const loading = useSelector(selectRuleEngineLoading);
-  const error = useSelector(selectRuleEngineError);
+  const selectedRule = useAppSelector(selectSelectedRule);
+  const loading = useAppSelector(selectRuleEngineLoading);
+  const error = useAppSelector(selectRuleEngineError);
 
   useEffect(() => {
     if (id) {

@@ -3,10 +3,18 @@ export interface ApiRejectPayload {
 }
 
 export interface ApiError {
+  success: false;
   message: string;
   code?: string;
   details?: unknown;
 }
+
+export interface ApiSuccess<T> {
+  success: true;
+  data: T;
+}
+
+export type ApiResponse<T> = ApiSuccess<T> | ApiError;
 
 export interface ApiDataWrapper<T> {
   data: T;

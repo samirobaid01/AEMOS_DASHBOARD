@@ -1,10 +1,10 @@
 import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import { useParams, Navigate } from 'react-router-dom';
-import { 
-  fetchRuleDetails, 
-  selectSelectedRule, 
-  selectRuleEngineLoading, 
+import { useAppDispatch, useAppSelector } from '../../state/store';
+import {
+  fetchRuleDetails,
+  selectSelectedRule,
+  selectRuleEngineLoading,
   selectRuleEngineError,
   updateRule,
   deleteRuleNode,
@@ -20,10 +20,8 @@ import {
   selectLastFetchedDeviceId,
   selectSensorDetails,
 } from '../../state/slices/ruleEngine.slice';
-import { selectAuthToken } from '../../state/slices/auth.slice';
-import { selectSelectedOrganizationId } from '../../state/slices/auth.slice';
+import { selectAuthToken, selectSelectedOrganizationId } from '../../state/slices/auth.slice';
 import { useRuleEnginePermissions } from '../../hooks/useRuleEnginePermissions';
-import type { AppDispatch } from '../../state/store';
 import RuleForm from '../../components/ruleEngine/RuleForm';
 import NodeDialog from '../../components/ruleEngine/NodeDialog';
 import ActionDialog from '../../components/ruleEngine/ActionDialog';
@@ -32,20 +30,18 @@ import { useTranslation } from 'react-i18next';
 
 const RuleEdit: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch();
   const { t } = useTranslation();
   const { canUpdate } = useRuleEnginePermissions();
 
-  const selectedRule = useSelector(selectSelectedRule);
-  const loading = useSelector(selectRuleEngineLoading);
-  const error = useSelector(selectRuleEngineError);
-  const token = useSelector(selectAuthToken);
-  const organizationId = useSelector(selectSelectedOrganizationId);
-  const sensors = useSelector(selectSensors);
-  const devices = useSelector(selectDevices);
-  const deviceStates = useSelector(selectDeviceStates);
-  const lastFetchedDeviceId = useSelector(selectLastFetchedDeviceId);
-  const sensorDetails = useSelector(selectSensorDetails);
+  const selectedRule = useAppSelector(selectSelectedRule);
+  const loading = useAppSelector(selectRuleEngineLoading);
+  const error = useAppSelector(selectRuleEngineError);
+  const sensors = useAppSelector(selectSensors);
+  const devices = useAppSelector(selectDevices);
+  const deviceStates = useAppSelector(selectDeviceStates);
+  const lastFetchedDeviceId = useAppSelector(selectLastFetchedDeviceId);
+  const sensorDetails = useAppSelector(selectSensorDetails);
 
   useEffect(() => {
     if (id) {

@@ -1,20 +1,19 @@
 import { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useAppDispatch, useAppSelector } from '../../state/store';
 import { useNavigate } from 'react-router-dom';
-import type { AppDispatch } from '../../state/store';
 import { fetchAreas, selectAreas, selectAreasLoading, selectAreasError, selectSelectedArea, fetchAreasByOrganizationId } from '../../state/slices/areas.slice';
 import LoadingScreen from '../../components/common/Loading/LoadingScreen';
 import { AreaList } from '../../components/areas';
 import { selectSelectedOrganizationId } from '../../state/slices/auth.slice';
 
 const AreaListContainer = () => {
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const areasData = useSelector(selectAreas);
-  const isLoading = useSelector(selectAreasLoading);
-  const organization = useSelector(selectSelectedOrganizationId);
-  const error = useSelector(selectAreasError);
-  const selectedArea = useSelector(selectSelectedArea);
+  const areasData = useAppSelector(selectAreas);
+  const isLoading = useAppSelector(selectAreasLoading);
+  const organization = useAppSelector(selectSelectedOrganizationId);
+  const error = useAppSelector(selectAreasError);
+  const selectedArea = useAppSelector(selectSelectedArea);
   const [searchTerm, setSearchTerm] = useState('');
   const [organizationFilter, setOrganizationFilter] = useState<string>('');
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);

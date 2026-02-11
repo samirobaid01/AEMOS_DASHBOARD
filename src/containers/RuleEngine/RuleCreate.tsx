@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useAppDispatch, useAppSelector } from '../../state/store';
 import { useNavigate, Navigate } from 'react-router-dom';
-import { 
-  createRule, 
+import {
+  createRule,
   selectRuleEngineLoading,
   createRuleNode,
   updateRuleNode,
@@ -18,7 +18,6 @@ import {
   selectSensorDetails
 } from '../../state/slices/ruleEngine.slice';
 import { useRuleEnginePermissions } from '../../hooks/useRuleEnginePermissions';
-import type { AppDispatch } from '../../state/store';
 import type { RuleChainCreatePayload, RuleChainUpdatePayload } from '../../types/ruleEngine';
 import { selectSelectedOrganizationId } from '../../state/slices/auth.slice';
 import { RuleCreate as RuleCreateComponent } from '../../components/ruleEngine';
@@ -26,20 +25,20 @@ import { toastService } from '../../services/toastService';
 import { useTranslation } from 'react-i18next';
 
 const RuleCreate: React.FC = () => {
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { canCreate } = useRuleEnginePermissions();
-  const loading = useSelector(selectRuleEngineLoading);
-  const selectedOrganizationId = useSelector(selectSelectedOrganizationId);
+  const loading = useAppSelector(selectRuleEngineLoading);
+  const selectedOrganizationId = useAppSelector(selectSelectedOrganizationId);
   const [createdRuleId, setCreatedRuleId] = useState<number | null>(null);
 
   // Select sensors and devices from state
-  const sensors = useSelector(selectSensors);
-  const devices = useSelector(selectDevices);
-  const deviceStates = useSelector(selectDeviceStates);
-  const lastFetchedDeviceId = useSelector(selectLastFetchedDeviceId);
-  const sensorDetails = useSelector(selectSensorDetails);
+  const sensors = useAppSelector(selectSensors);
+  const devices = useAppSelector(selectDevices);
+  const deviceStates = useAppSelector(selectDeviceStates);
+  const lastFetchedDeviceId = useAppSelector(selectLastFetchedDeviceId);
+  const sensorDetails = useAppSelector(selectSensorDetails);
 
   // Fetch sensors and devices when component mounts
   useEffect(() => {

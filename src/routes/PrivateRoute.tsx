@@ -1,5 +1,5 @@
 import { Navigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useAppSelector } from '../state/store';
 import { selectIsAuthenticated } from '../state/slices/auth.slice';
 import type { ReactNode } from 'react';
 import MainLayout from '../components/layout/MainLayout';
@@ -18,7 +18,7 @@ const PrivateRoute = ({
   requiredPermissions,
   anyPermission
 }: PrivateRouteProps) => {
-  const isAuthenticated = useSelector(selectIsAuthenticated);
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
   
   console.log('PrivateRoute: Checking authentication and permissions', {
     isAuthenticated,

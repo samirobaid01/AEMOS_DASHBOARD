@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useAppDispatch, useAppSelector } from '../../state/store';
 import { useNavigate } from 'react-router-dom';
-import type { AppDispatch } from '../../state/store';
 import { fetchDevices, selectDevices, selectDevicesLoading, selectDevicesError } from '../../state/slices/devices.slice';
 import LoadingScreen from '../../components/common/Loading/LoadingScreen';
 import DeviceList from '../../components/devices/DeviceList';
@@ -10,12 +9,12 @@ import { fetchDevicesByOrganizationId } from '../../state/slices/devices.slice';
 import type { DeviceType } from '../../constants/device';
 
 const DeviceListContainer = () => {
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const devicesData = useSelector(selectDevices);
-  const selectedOrganizationId = useSelector(selectSelectedOrganizationId);
-  const isLoading = useSelector(selectDevicesLoading);
-  const error = useSelector(selectDevicesError);
+  const devicesData = useAppSelector(selectDevices);
+  const selectedOrganizationId = useAppSelector(selectSelectedOrganizationId);
+  const isLoading = useAppSelector(selectDevicesLoading);
+  const error = useAppSelector(selectDevicesError);
   const [searchTerm, setSearchTerm] = useState('');
   const [typeFilter, setTypeFilter] = useState<DeviceType | ''>('');
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useAppDispatch, useAppSelector } from '../../state/store';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import SensorDetailsComponent from '../../components/sensors/SensorDetails';
@@ -155,11 +155,11 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
 const SensorDetails = () => {
   const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const sensor = useSelector(selectSelectedSensor);
-  const isLoading = useSelector(selectSensorsLoading);
-  const error = useSelector(selectSensorsError);
+  const sensor = useAppSelector(selectSelectedSensor);
+  const isLoading = useAppSelector(selectSensorsLoading);
+  const error = useAppSelector(selectSensorsError);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);

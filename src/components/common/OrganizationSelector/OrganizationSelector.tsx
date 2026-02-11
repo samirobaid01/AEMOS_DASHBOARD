@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useAppDispatch, useAppSelector } from '../../../state/store';
 import { useTranslation } from 'react-i18next';
 import { fetchOrganizations, selectOrganizations } from '../../../state/slices/organizations.slice';
 import { selectSelectedOrganizationId, setSelectedOrganization } from '../../../state/slices/auth.slice';
@@ -8,9 +8,9 @@ import { useTheme } from '../../../context/ThemeContext';
 
 const OrganizationSelector: React.FC = () => {
   const { t } = useTranslation();
-  const dispatch = useDispatch<AppDispatch>();
-  const organizations = useSelector(selectOrganizations);
-  const selectedOrganizationId = useSelector(selectSelectedOrganizationId);
+  const dispatch = useAppDispatch();
+  const organizations = useAppSelector(selectOrganizations);
+  const selectedOrganizationId = useAppSelector(selectSelectedOrganizationId);
   const [isOpen, setIsOpen] = useState(false);
   const { darkMode } = useTheme();
 

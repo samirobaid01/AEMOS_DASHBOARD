@@ -1,5 +1,5 @@
 import { Navigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useAppSelector } from '../state/store';
 import { selectIsAuthenticated } from '../state/slices/auth.slice';
 import type { ReactNode } from 'react';
 
@@ -9,7 +9,7 @@ interface PublicRouteProps {
 }
 
 const PublicRoute = ({ children, redirectTo = '/dashboard' }: PublicRouteProps) => {
-  const isAuthenticated = useSelector(selectIsAuthenticated);
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
   
   if (isAuthenticated) {
     // Redirect to dashboard if already authenticated
