@@ -147,25 +147,40 @@ const Settings = () => {
         {/* Notifications Section */}
         <div style={styles.sectionStyle}>
           <h2 style={styles.sectionTitleStyle}>{t('notifications')}</h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <Toggle
-              label={t('email_notifications')}
-              helperText={t('email_notifications_desc')}
-              isChecked={notifications.email}
-              onChange={() => handleNotificationChange('email')}
-            />
-            <Toggle
-              label={t('sms_notifications')}
-              helperText={t('sms_notifications_desc')}
-              isChecked={notifications.sms}
-              onChange={() => handleNotificationChange('sms')}
-            />
-            <Toggle
-              label={t('app_notifications')}
-              helperText={t('app_notifications_desc')}
-              isChecked={notifications.app}
-              onChange={() => handleNotificationChange('app')}
-            />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+              <div style={{ flex: '1 1 0', minWidth: 0 }}>
+                <div style={{ fontSize: '0.875rem', fontWeight: 500, color: darkMode ? '#d1d5db' : '#4b5563' }}>
+                  {t('email_notifications')}
+                </div>
+                <div style={{ fontSize: '0.875rem', color: darkMode ? '#9ca3af' : '#6b7280', marginTop: '0.25rem' }}>
+                  {t('email_notifications_desc')}
+                </div>
+              </div>
+              <Toggle isChecked={notifications.email} onChange={() => handleNotificationChange('email')} />
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+              <div style={{ flex: '1 1 0', minWidth: 0 }}>
+                <div style={{ fontSize: '0.875rem', fontWeight: 500, color: darkMode ? '#d1d5db' : '#4b5563' }}>
+                  {t('sms_notifications')}
+                </div>
+                <div style={{ fontSize: '0.875rem', color: darkMode ? '#9ca3af' : '#6b7280', marginTop: '0.25rem' }}>
+                  {t('sms_notifications_desc')}
+                </div>
+              </div>
+              <Toggle isChecked={notifications.sms} onChange={() => handleNotificationChange('sms')} />
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+              <div style={{ flex: '1 1 0', minWidth: 0 }}>
+                <div style={{ fontSize: '0.875rem', fontWeight: 500, color: darkMode ? '#d1d5db' : '#4b5563' }}>
+                  {t('app_notifications')}
+                </div>
+                <div style={{ fontSize: '0.875rem', color: darkMode ? '#9ca3af' : '#6b7280', marginTop: '0.25rem' }}>
+                  {t('app_notifications_desc')}
+                </div>
+              </div>
+              <Toggle isChecked={notifications.app} onChange={() => handleNotificationChange('app')} />
+            </div>
           </div>
         </div>
         
