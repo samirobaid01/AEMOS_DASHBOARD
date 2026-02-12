@@ -5,6 +5,7 @@ import i18n from '../../i18n/i18n';
 import { useTheme } from '../../context/ThemeContext';
 import { useWalkthrough } from '../../context/WalkthroughContext';
 import Toggle from '../../components/common/Toggle';
+import Button from '../../components/common/Button/Button';
 
 const Settings = () => {
   const { t } = useTranslation();
@@ -74,96 +75,16 @@ const Settings = () => {
         color: darkMode ? '#f9fafb' : '#1f2937',
         marginBottom: '1rem',
       },
-      toggleLabelStyle: {
-        fontSize: '0.875rem',
-        fontWeight: 500,
-        color: darkMode ? '#d1d5db' : '#4b5563',
-        marginRight: '0.5rem',
-      },
-      notificationTitleStyle: {
-        fontSize: '0.875rem',
-        fontWeight: 500,
-        color: darkMode ? '#d1d5db' : '#4b5563',
-      },
-      notificationDescStyle: {
-        fontSize: '0.875rem',
-        color: darkMode ? '#9ca3af' : '#6b7280',
-      },
     };
   };
 
   const styles = getThemeStyles();
-  
-  // Original styles that don't need dark mode logic directly
-  const languageButtonStyle = (isActive: boolean) => ({
-    padding: '0.5rem 1rem',
-    borderRadius: '0.375rem',
-    display: 'flex',
-    alignItems: 'center',
-    backgroundColor: isActive 
-      ? '#3b82f6' 
-      : darkMode ? '#374151' : '#f3f4f6',
-    color: isActive 
-      ? 'white' 
-      : darkMode ? '#d1d5db' : '#1f2937',
-    cursor: 'pointer',
-    transition: 'background-color 0.2s',
-  });
 
   const languageGridStyle = {
     display: 'grid',
     gridTemplateColumns: windowWidth >= 640 ? 'repeat(2, 1fr)' : '1fr',
     gap: '1rem',
   };
-
-  const toggleWrapperStyle = {
-    display: 'flex',
-    alignItems: 'center',
-  };
-
-  const toggleSwitchStyle = (isActive: boolean) => ({
-    width: '2.75rem',
-    height: '1.5rem',
-    display: 'flex',
-    alignItems: 'center',
-    borderRadius: '9999px',
-    padding: '0.25rem',
-    transition: 'background-color 0.2s',
-    backgroundColor: isActive ? '#3b82f6' : darkMode ? '#4b5563' : '#d1d5db',
-    cursor: 'pointer',
-  });
-
-  const toggleKnobStyle = (isActive: boolean) => ({
-    backgroundColor: 'white',
-    width: '1rem',
-    height: '1rem',
-    borderRadius: '9999px',
-    boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-    transform: isActive ? 'translateX(1.25rem)' : 'translateX(0)',
-    transition: 'transform 0.2s',
-  });
-
-  const notificationItemStyle = {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: '1rem',
-  };
-
-  const notificationTextWrapperStyle = {
-    flex: 1,
-  };
-
-  const buttonStyle = (colorScheme: 'blue' | 'red') => ({
-    padding: '0.5rem 1rem',
-    backgroundColor: colorScheme === 'blue' ? '#3b82f6' : '#ef4444',
-    color: 'white',
-    borderRadius: '0.375rem',
-    fontWeight: 500,
-    cursor: 'pointer',
-    transition: 'background-color 0.2s',
-    marginRight: colorScheme === 'blue' ? '1rem' : 0,
-  });
 
   return (
     <div style={styles.containerStyle}>
@@ -174,114 +95,91 @@ const Settings = () => {
         <div style={styles.sectionStyle}>
           <h2 style={styles.sectionTitleStyle}>{t('language')}</h2>
           <div style={languageGridStyle}>
-            <button
+            <Button
               type="button"
+              variant={language === 'en' ? 'primary' : 'secondary'}
               onClick={() => handleLanguageChange('en')}
-              style={languageButtonStyle(language === 'en')}
             >
               <span style={{ marginRight: '0.5rem' }}>🇺🇸</span> English
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
+              variant={language === 'es' ? 'primary' : 'secondary'}
               onClick={() => handleLanguageChange('es')}
-              style={languageButtonStyle(language === 'es')}
             >
               <span style={{ marginRight: '0.5rem' }}>🇪🇸</span> Español
-            </button>
+            </Button>
           </div>
         </div>
         
         {/* Theme Section */}
         <div style={styles.sectionStyle}>
           <h2 style={styles.sectionTitleStyle}>{t('theme')}</h2>
-          <div style={toggleWrapperStyle}>
-            <span style={styles.toggleLabelStyle}>{t('dark_mode')}</span>
-            <button 
-              type="button"
-              onClick={toggleDarkMode}
-              style={toggleSwitchStyle(darkMode)}
-            >
-              <span style={toggleKnobStyle(darkMode)} />
-            </button>
-          </div>
+          <Toggle
+            label={t('dark_mode')}
+            isChecked={darkMode}
+            onChange={toggleDarkMode}
+          />
         </div>
         
         {/* Walkthrough Section */}
         <div style={styles.sectionStyle}>
           <h2 style={styles.sectionTitleStyle}>{t('walkthrough')}</h2>
-          <div style={toggleWrapperStyle}>
-            <Toggle 
-              label={t('enable_walkthrough')}
-              isChecked={isWalkthroughEnabled}
-              onChange={toggleWalkthroughEnabled}
-              helperText={t('walkthrough_description')}
-            />
-          </div>
+          <Toggle
+            label={t('enable_walkthrough')}
+            isChecked={isWalkthroughEnabled}
+            onChange={toggleWalkthroughEnabled}
+            helperText={t('walkthrough_description')}
+          />
           <div style={{ marginTop: '1rem' }}>
-            <button
+            <Button
               type="button"
               onClick={() => {
                 resetCompletedWalkthroughs();
                 alert('Walkthroughs have been reset. You will see them again on your next visit.');
               }}
-              style={{
-                padding: '0.5rem 1rem',
-                backgroundColor: '#3b82f6',
-                color: 'white',
-                borderRadius: '0.375rem',
-                fontSize: '0.875rem',
-                fontWeight: 500,
-                border: 'none',
-                cursor: 'pointer'
-              }}
             >
               Reset Walkthroughs
-            </button>
+            </Button>
           </div>
         </div>
         
         {/* Notifications Section */}
         <div style={styles.sectionStyle}>
           <h2 style={styles.sectionTitleStyle}>{t('notifications')}</h2>
-          <div>
-            <div style={notificationItemStyle}>
-              <div style={notificationTextWrapperStyle}>
-                <h3 style={styles.notificationTitleStyle}>{t('email_notifications')}</h3>
-                <p style={styles.notificationDescStyle}>{t('email_notifications_desc')}</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+              <div style={{ flex: '1 1 0', minWidth: 0 }}>
+                <div style={{ fontSize: '0.875rem', fontWeight: 500, color: darkMode ? '#d1d5db' : '#4b5563' }}>
+                  {t('email_notifications')}
+                </div>
+                <div style={{ fontSize: '0.875rem', color: darkMode ? '#9ca3af' : '#6b7280', marginTop: '0.25rem' }}>
+                  {t('email_notifications_desc')}
+                </div>
               </div>
-              <button 
-                type="button"
-                onClick={() => handleNotificationChange('email')}
-                style={toggleSwitchStyle(notifications.email)}
-              >
-                <span style={toggleKnobStyle(notifications.email)} />
-              </button>
+              <Toggle isChecked={notifications.email} onChange={() => handleNotificationChange('email')} />
             </div>
-            <div style={notificationItemStyle}>
-              <div style={notificationTextWrapperStyle}>
-                <h3 style={styles.notificationTitleStyle}>{t('sms_notifications')}</h3>
-                <p style={styles.notificationDescStyle}>{t('sms_notifications_desc')}</p>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+              <div style={{ flex: '1 1 0', minWidth: 0 }}>
+                <div style={{ fontSize: '0.875rem', fontWeight: 500, color: darkMode ? '#d1d5db' : '#4b5563' }}>
+                  {t('sms_notifications')}
+                </div>
+                <div style={{ fontSize: '0.875rem', color: darkMode ? '#9ca3af' : '#6b7280', marginTop: '0.25rem' }}>
+                  {t('sms_notifications_desc')}
+                </div>
               </div>
-              <button 
-                type="button"
-                onClick={() => handleNotificationChange('sms')}
-                style={toggleSwitchStyle(notifications.sms)}
-              >
-                <span style={toggleKnobStyle(notifications.sms)} />
-              </button>
+              <Toggle isChecked={notifications.sms} onChange={() => handleNotificationChange('sms')} />
             </div>
-            <div style={notificationItemStyle}>
-              <div style={notificationTextWrapperStyle}>
-                <h3 style={styles.notificationTitleStyle}>{t('app_notifications')}</h3>
-                <p style={styles.notificationDescStyle}>{t('app_notifications_desc')}</p>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+              <div style={{ flex: '1 1 0', minWidth: 0 }}>
+                <div style={{ fontSize: '0.875rem', fontWeight: 500, color: darkMode ? '#d1d5db' : '#4b5563' }}>
+                  {t('app_notifications')}
+                </div>
+                <div style={{ fontSize: '0.875rem', color: darkMode ? '#9ca3af' : '#6b7280', marginTop: '0.25rem' }}>
+                  {t('app_notifications_desc')}
+                </div>
               </div>
-              <button 
-                type="button"
-                onClick={() => handleNotificationChange('app')}
-                style={toggleSwitchStyle(notifications.app)}
-              >
-                <span style={toggleKnobStyle(notifications.app)} />
-              </button>
+              <Toggle isChecked={notifications.app} onChange={() => handleNotificationChange('app')} />
             </div>
           </div>
         </div>
@@ -289,19 +187,13 @@ const Settings = () => {
         {/* Account Section */}
         <div style={styles.sectionStyle}>
           <h2 style={styles.sectionTitleStyle}>{t('account')}</h2>
-          <div style={{ marginTop: '0.75rem' }}>
-            <button 
-              type="button" 
-              style={buttonStyle('blue')}
-            >
+          <div style={{ marginTop: '0.75rem', display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+            <Button type="button">
               {t('change_password')}
-            </button>
-            <button 
-              type="button" 
-              style={buttonStyle('red')}
-            >
+            </Button>
+            <Button type="button" variant="danger">
               {t('delete_account')}
-            </button>
+            </Button>
           </div>
         </div>
       </div>

@@ -2,6 +2,9 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Area, AreaCreateRequest, AreaUpdateRequest } from '../../types/area';
 import { useThemeColors } from '../../hooks/useThemeColors';
+import FormField from '../common/FormField';
+import FormActions from '../common/FormActions';
+import Button from '../common/Button/Button';
 
 interface Organization {
   id: number;
@@ -34,7 +37,6 @@ const AreaForm: React.FC<AreaFormProps> = ({
   area,
   organizations = [],
   parentAreas = [],
-  isLoading,
   error,
   onSubmit,
   onCancel,
@@ -113,18 +115,6 @@ const AreaForm: React.FC<AreaFormProps> = ({
     padding: '1.5rem',
   };
 
-  const fieldGroupStyle = {
-    marginBottom: '1.5rem',
-  };
-
-  const labelStyle = {
-    display: 'block',
-    fontSize: '0.875rem',
-    fontWeight: 500,
-    color: colors.textSecondary,
-    marginBottom: '0.5rem',
-  };
-
   const inputStyle = {
     display: 'block',
     width: '100%',
@@ -156,18 +146,6 @@ const AreaForm: React.FC<AreaFormProps> = ({
     appearance: 'none',
   } as React.CSSProperties;
 
-  const checkboxWrapperStyle = {
-    display: 'flex',
-    alignItems: 'center',
-  };
-
-  const checkboxStyle = {
-    width: '1rem',
-    height: '1rem',
-    marginRight: '0.5rem',
-    accentColor: colors.buttonPrimary,
-  };
-
   const textareaStyle = {
     display: 'block',
     width: '100%',
@@ -181,39 +159,6 @@ const AreaForm: React.FC<AreaFormProps> = ({
     outline: 'none',
     minHeight: '6rem',
     resize: 'vertical' as const,
-  };
-
-  const buttonGroupStyle = {
-    display: 'flex',
-    justifyContent: 'flex-end',
-    marginTop: '2rem',
-    gap: '0.75rem',
-    flexDirection: isMobile ? 'column-reverse' as const : 'row' as const,
-  };
-
-  const buttonBaseStyle = {
-    padding: '0.5rem 1rem',
-    borderRadius: '0.375rem',
-    fontSize: '0.875rem',
-    fontWeight: 500,
-    cursor: 'pointer',
-    textAlign: 'center' as const,
-  };
-
-  const cancelButtonStyle = {
-    ...buttonBaseStyle,
-    backgroundColor: colors.surfaceBackground,
-    color: colors.textSecondary,
-    border: `1px solid ${colors.border}`,
-  };
-
-  const submitButtonStyle = {
-    ...buttonBaseStyle,
-    backgroundColor: colors.buttonPrimary,
-    color: colors.buttonPrimaryText,
-    border: 'none',
-    opacity: isSubmitting ? 0.7 : 1,
-    cursor: isSubmitting ? 'not-allowed' : 'pointer',
   };
 
   const errorMessageStyle = {
@@ -245,10 +190,7 @@ const AreaForm: React.FC<AreaFormProps> = ({
               </div>
             )}
 
-            <div style={fieldGroupStyle}>
-              <label htmlFor="name" style={labelStyle}>
-                {t('areas.area_name')} <span style={{ color: colors.danger }}>*</span>
-              </label>
+            <FormField label={t('areas.area_name')} id="name" required>
               <input
                 type="text"
                 id="name"
@@ -266,12 +208,9 @@ const AreaForm: React.FC<AreaFormProps> = ({
                   e.target.style.borderColor = colors.border;
                 }}
               />
-            </div>
+            </FormField>
 
-            <div style={fieldGroupStyle}>
-              <label htmlFor="organizationId" style={labelStyle}>
-                {t('areas.organization')} <span style={{ color: colors.danger }}>*</span>
-              </label>
+            <FormField label={t('areas.organization')} id="organizationId" required>
               <select
                 id="organizationId"
                 name="organizationId"
@@ -297,13 +236,10 @@ const AreaForm: React.FC<AreaFormProps> = ({
                   </option>
                 ))}
               </select>
-            </div>
+            </FormField>
 
             {safeParentAreas.length > 0 && (
-              <div style={fieldGroupStyle}>
-                <label htmlFor="parentAreaId" style={labelStyle}>
-                  {t('areas.parent_area')}
-                </label>
+              <FormField label={t('areas.parent_area')} id="parentAreaId">
                 <select
                   id="parentAreaId"
                   name="parentAreaId"
@@ -326,13 +262,10 @@ const AreaForm: React.FC<AreaFormProps> = ({
                     </option>
                   ))}
                 </select>
-              </div>
+              </FormField>
             )}
 
-            <div style={fieldGroupStyle}>
-              <label htmlFor="status" style={labelStyle}>
-                {t('status')}
-              </label>
+            <FormField label={t('status')} id="status">
               <select
                 id="status"
                 name="status"
@@ -348,12 +281,9 @@ const AreaForm: React.FC<AreaFormProps> = ({
                 <option value="under_review">{t('under_review')}</option>
                 <option value="archived">{t('archived')}</option>
               </select>
-            </div>
+            </FormField>
 
-            <div style={fieldGroupStyle}>
-              <label htmlFor="description" style={labelStyle}>
-                {t('areas.description')}
-              </label>
+            <FormField label={t('areas.description')} id="description">
               <textarea
                 id="description"
                 name="description"
@@ -369,40 +299,16 @@ const AreaForm: React.FC<AreaFormProps> = ({
                   e.target.style.borderColor = colors.border;
                 }}
               />
-            </div>
+            </FormField>
 
-            <div style={buttonGroupStyle}>
-              <button
-                type="button"
-                onClick={onCancel}
-                style={cancelButtonStyle}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.backgroundColor = colors.sidebarItemHover;
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.backgroundColor = colors.surfaceBackground;
-                }}
-              >
+            <FormActions>
+              <Button type="button" variant="secondary" onClick={onCancel}>
                 {t('areas.cancel')}
-              </button>
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                style={submitButtonStyle}
-                onMouseOver={(e) => {
-                  if (!isSubmitting) {
-                    e.currentTarget.style.backgroundColor = colors.buttonPrimaryHover;
-                  }
-                }}
-                onMouseOut={(e) => {
-                  if (!isSubmitting) {
-                    e.currentTarget.style.backgroundColor = colors.buttonPrimary;
-                  }
-                }}
-              >
+              </Button>
+              <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting ? t('areas.saving') : isEditMode ? t('areas.update') : t('areas.create')}
-              </button>
-            </div>
+              </Button>
+            </FormActions>
           </div>
         </div>
       </form>

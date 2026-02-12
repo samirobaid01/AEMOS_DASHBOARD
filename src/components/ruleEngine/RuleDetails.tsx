@@ -5,6 +5,7 @@ import { useThemeColors } from '../../hooks/useThemeColors';
 import { useTranslation } from 'react-i18next';
 import { useRuleEnginePermissions } from '../../hooks/useRuleEnginePermissions';
 import Modal from '../../components/common/Modal/Modal';
+import Button from '../common/Button/Button';
 import { FormControl, Select, MenuItem } from '@mui/material';
 
 interface RuleDetailsProps {
@@ -86,26 +87,6 @@ const RuleDetails: React.FC<RuleDetailsProps> = ({
     flexWrap: isMobile ? 'wrap' as const : 'nowrap' as const,
     width: isMobile ? '100%' : 'auto',
   };
-
-  const buttonStyle = (variant: 'primary' | 'danger') => ({
-    padding: '0.5rem 1rem',
-    backgroundColor:
-      variant === 'primary'
-        ? darkMode ? '#4d7efa' : '#3b82f6'
-        : darkMode ? '#ef5350' : '#ef4444',
-    color: 'white',
-    border: 'none',
-    borderRadius: '0.375rem',
-    fontSize: '0.875rem',
-    fontWeight: 500,
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    transition: 'all 0.2s',
-    flexGrow: isMobile ? 1 : 0,
-    minWidth: isMobile ? '0' : '5rem',
-  });
 
   const dividerStyle = {
     height: '1px',
@@ -192,27 +173,16 @@ const RuleDetails: React.FC<RuleDetailsProps> = ({
       <div style={headerStyle}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           {onBack && (
-            <button
+            <Button
+              type="button"
+              variant="secondary"
               onClick={onBack}
-              style={{
-                backgroundColor: 'transparent',
-                border: 'none',
-                padding: '0.5rem',
-                cursor: 'pointer',
-                borderRadius: '0.375rem',
-                color: darkMode ? colors.textSecondary : '#6b7280',
-              }}
-              onMouseOver={(e) => {
-                e.currentTarget.style.backgroundColor = darkMode ? colors.surfaceBackground : '#f3f4f6';
-              }}
-              onMouseOut={(e) => {
-                e.currentTarget.style.backgroundColor = 'transparent';
-              }}
+              style={{ padding: '0.5rem', minWidth: 'auto' }}
             >
               <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
               </svg>
-            </button>
+            </Button>
           )}
           <h1 style={titleStyle}>{rule.name}</h1>
         </div>
@@ -220,16 +190,7 @@ const RuleDetails: React.FC<RuleDetailsProps> = ({
         {(canUpdate || canDelete) && (
           <div style={buttonGroupStyle}>
             {canUpdate && (
-              <button
-                onClick={() => rule && onEdit(rule.id)} // explanation:  if (rule) { onEdit(rule.id); }
-                style={buttonStyle('primary')}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.backgroundColor = darkMode ? '#5d8efa' : '#2563eb';
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.backgroundColor = darkMode ? '#4d7efa' : '#3b82f6';
-                }}
-              >
+              <Button type="button" variant="primary" onClick={() => rule && onEdit(rule.id)}>
                 <svg
                   style={{ width: '1rem', height: '1rem', marginRight: '0.375rem' }}
                   fill="none"
@@ -244,19 +205,10 @@ const RuleDetails: React.FC<RuleDetailsProps> = ({
                   />
                 </svg>
                 {t('common.edit')}
-              </button>
+              </Button>
             )}
             {canDelete && (
-              <button
-                onClick={handleDeleteClick}
-                style={buttonStyle('danger')}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.backgroundColor = darkMode ? '#f44336' : '#dc2626';
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.backgroundColor = darkMode ? '#ef5350' : '#ef4444';
-                }}
-              >
+              <Button type="button" variant="danger" onClick={handleDeleteClick}>
                 <svg
                   style={{ width: '1rem', height: '1rem', marginRight: '0.375rem' }}
                   fill="none"
@@ -271,7 +223,7 @@ const RuleDetails: React.FC<RuleDetailsProps> = ({
                   />
                 </svg>
                 {t('common.delete')}
-              </button>
+              </Button>
             )}
           </div>
         )}
@@ -380,59 +332,21 @@ const RuleDetails: React.FC<RuleDetailsProps> = ({
         title={t('ruleEngine.deleteConfirmation')}
         footer={(
           <>
-            <button
-              onClick={() => setShowDeleteModal(false)}
-              style={{
-                padding: '0.5rem 1rem',
-                backgroundColor: darkMode ? colors.surfaceBackground : 'white',
-                color: darkMode ? colors.textSecondary : '#4b5563',
-                border: `1px solid ${darkMode ? colors.border : '#d1d5db'}`,
-                borderRadius: '0.375rem',
-                fontSize: '0.875rem',
-                fontWeight: 500,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                transition: 'all 0.2s',
-              }}
-              onMouseOver={(e) => {
-                e.currentTarget.style.backgroundColor = darkMode ? colors.background : '#f3f4f6';
-              }}
-              onMouseOut={(e) => {
-                e.currentTarget.style.backgroundColor = darkMode ? colors.surfaceBackground : 'white';
-              }}
-            >
+            <Button type="button" variant="secondary" onClick={() => setShowDeleteModal(false)}>
               {t('common.cancel')}
-            </button>
-            <button
+            </Button>
+            <Button
+              type="button"
+              variant="danger"
               onClick={async () => {
                 if (rule) {
                   await onDelete(rule.id);
                   setShowDeleteModal(false);
                 }
               }}
-              style={{
-                padding: '0.5rem 1rem',
-                backgroundColor: darkMode ? '#ef5350' : '#ef4444',
-                color: 'white',
-                border: 'none',
-                borderRadius: '0.375rem',
-                fontSize: '0.875rem',
-                fontWeight: 500,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                transition: 'all 0.2s',
-              }}
-              onMouseOver={(e) => {
-                e.currentTarget.style.backgroundColor = darkMode ? '#f44336' : '#dc2626';
-              }}
-              onMouseOut={(e) => {
-                e.currentTarget.style.backgroundColor = darkMode ? '#ef5350' : '#ef4444';
-              }}
             >
               {t('common.delete')}
-            </button>
+            </Button>
           </>
         )}
       >

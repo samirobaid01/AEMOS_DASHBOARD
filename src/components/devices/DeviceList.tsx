@@ -5,6 +5,7 @@ import type { DeviceType } from '../../constants/device';
 import DeviceItem from './DeviceItem';
 import DeviceFilter from './DeviceFilter';
 import EmptyState from './EmptyState';
+import Button from '../common/Button/Button';
 import ErrorDisplay from './ErrorDisplay';
 import { useTheme } from '../../context/ThemeContext';
 import { useThemeColors } from '../../hooks/useThemeColors';
@@ -85,43 +86,25 @@ const DeviceList: React.FC<DeviceListProps> = ({
         }}>
           {t('devices.title')}
         </h1>
-        <button
+        <Button
+          type="button"
           onClick={onAddDevice}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            padding: '0.5rem 1rem',
-            backgroundColor: darkMode ? '#4d7efa' : '#3b82f6',
-            color: 'white',
-            border: 'none',
-            borderRadius: '0.375rem',
-            fontSize: '0.875rem',
-            fontWeight: 500,
-            cursor: 'pointer',
-            transition: 'all 0.2s',
-            width: isMobile ? '100%' : 'auto',
-            justifyContent: 'center'
-          }}
-          onMouseOver={(e) => {
-            e.currentTarget.style.backgroundColor = darkMode ? '#5d8efa' : '#2563eb';
-          }}
-          onMouseOut={(e) => {
-            e.currentTarget.style.backgroundColor = darkMode ? '#4d7efa' : '#3b82f6';
-          }}
+          fullWidth={isMobile}
+          style={isMobile ? { width: '100%' } : undefined}
         >
-          <svg 
+          <svg
             style={{ width: '1rem', height: '1rem', marginRight: '0.375rem' }}
-            fill="currentColor" 
+            fill="currentColor"
             viewBox="0 0 20 20"
           >
-            <path 
-              fillRule="evenodd" 
-              d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" 
-              clipRule="evenodd" 
+            <path
+              fillRule="evenodd"
+              d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+              clipRule="evenodd"
             />
           </svg>
           {t('devices.add')}
-        </button>
+        </Button>
       </div>
 
       <DeviceFilter

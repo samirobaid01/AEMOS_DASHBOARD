@@ -2,6 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 import { useThemeColors } from '../../hooks/useThemeColors';
+import FormField from '../common/FormField';
 
 interface RuleFilterProps {
   searchTerm: string;
@@ -39,13 +40,6 @@ const RuleFilter: React.FC<RuleFilterProps> = ({
     flex: 1,
   };
 
-  const labelStyle = {
-    fontSize: '0.875rem',
-    fontWeight: 500,
-    color: darkMode ? colors.textSecondary : '#4b5563',
-    marginBottom: '0.5rem',
-  };
-
   const inputStyle = {
     padding: '0.5rem 0.75rem',
     fontSize: '0.875rem',
@@ -62,17 +56,16 @@ const RuleFilter: React.FC<RuleFilterProps> = ({
   return (
     <div style={filterContainerStyle}>
       <div style={inputGroupStyle}>
-        <label htmlFor="ruleSearch" style={labelStyle}>
-          {t('common.search')}
-        </label>
-        <input
-          id="ruleSearch"
-          type="text"
-          placeholder={t('ruleEngine.searchRule')}
-          value={searchTerm}
-          onChange={(e) => onSearchChange(e.target.value)}
-          style={inputStyle}
-        />
+        <FormField label={t('common.search')} id="ruleSearch">
+          <input
+            id="ruleSearch"
+            type="text"
+            placeholder={t('ruleEngine.searchRule')}
+            value={searchTerm}
+            onChange={(e) => onSearchChange(e.target.value)}
+            style={inputStyle}
+          />
+        </FormField>
       </div>
     </div>
   );

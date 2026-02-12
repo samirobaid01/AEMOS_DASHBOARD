@@ -4,6 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import SensorForm, { type TelemetryRowFormState } from '../../components/sensors/SensorForm';
 import LoadingScreen from '../../components/common/Loading/LoadingScreen';
+import Button from '../../components/common/Button/Button';
 import { fetchAreas, selectAreas } from '../../state/slices/areas.slice';
 import {
   createTelemetry,
@@ -15,6 +16,7 @@ import {
   updateTelemetry,
 } from '../../state/slices/sensors.slice';
 import { toastService } from '../../services/toastService';
+import type { ApiRejectPayload } from '../../types/api';
 import type { SensorUpdateRequest, TelemetryDatatype } from '../../types/sensor';
 
 const SensorEdit = () => {
@@ -94,14 +96,16 @@ const SensorEdit = () => {
               updateTelemetry({ id: row.id, data: { variableName: row.variableName, datatype: row.datatype } })
             );
             if (updateTelemetry.rejected.match(updateResult)) {
-              toastService.error((updateResult.payload as string) || 'Failed to update telemetry');
+              const payload = updateResult.payload as ApiRejectPayload | undefined;
+              toastService.error(payload?.message ?? 'Failed to update telemetry');
             }
           } else {
             const createResult = await dispatch(
               createTelemetry({ sensorId: sensor.id, variableName: row.variableName, datatype: row.datatype as TelemetryDatatype })
             );
             if (createTelemetry.rejected.match(createResult)) {
-              toastService.error((createResult.payload as string) || 'Failed to create telemetry');
+              const payload = createResult.payload as ApiRejectPayload | undefined;
+              toastService.error(payload?.message ?? 'Failed to create telemetry');
             }
           }
         }
@@ -138,21 +142,9 @@ const SensorEdit = () => {
         <h3 style={{ fontSize: '1.125rem', fontWeight: 600, color: '#854d0e', marginBottom: '1rem' }}>
           Sensor not found
         </h3>
-        <button
-          onClick={() => navigate('/sensors')}
-          style={{
-            padding: '0.5rem 1rem',
-            backgroundColor: '#3b82f6',
-            color: 'white',
-            border: 'none',
-            borderRadius: '0.375rem',
-            fontSize: '0.875rem',
-            fontWeight: 500,
-            cursor: 'pointer',
-          }}
-        >
+        <Button type="button" onClick={() => navigate('/sensors')}>
           Back to sensors
-        </button>
+        </Button>
       </div>
     );
   }

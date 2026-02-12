@@ -4,6 +4,9 @@ import { useTheme } from '../../context/ThemeContext';
 import { useThemeColors } from '../../hooks/useThemeColors';
 import { ALLOWED_SENSOR_STATUSES } from '../../types/sensor';
 import type { Sensor, SensorCreateRequest, SensorUpdateRequest, TelemetryDatatype } from '../../types/sensor';
+import FormField from '../common/FormField';
+import FormActions from '../common/FormActions';
+import Button from '../common/Button/Button';
 
 export interface TelemetryRowPayload {
   id?: number;
@@ -166,10 +169,6 @@ const SensorForm: React.FC<SensorFormProps> = ({
     padding: '1.5rem',
   };
 
-  const fieldGroupStyle = {
-    marginBottom: '1.5rem',
-  };
-
   const labelStyle = {
     display: 'block',
     fontSize: '0.875rem',
@@ -223,39 +222,6 @@ const SensorForm: React.FC<SensorFormProps> = ({
     resize: 'vertical' as const,
   };
 
-  const buttonGroupStyle = {
-    display: 'flex',
-    justifyContent: 'flex-end',
-    marginTop: '2rem',
-    gap: '0.75rem',
-    flexDirection: isMobile ? 'column-reverse' as const : 'row' as const,
-  };
-
-  const buttonBaseStyle = {
-    padding: '0.5rem 1rem',
-    borderRadius: '0.375rem',
-    fontSize: '0.875rem',
-    fontWeight: 500,
-    cursor: 'pointer',
-    textAlign: 'center' as const,
-  };
-
-  const cancelButtonStyle = {
-    ...buttonBaseStyle,
-    backgroundColor: darkMode ? colors.surfaceBackground : 'white',
-    color: darkMode ? colors.textSecondary : '#4b5563',
-    border: `1px solid ${darkMode ? colors.border : '#d1d5db'}`,
-  };
-
-  const submitButtonStyle = {
-    ...buttonBaseStyle,
-    backgroundColor: darkMode ? '#4d7efa' : '#3b82f6',
-    color: 'white',
-    border: 'none',
-    opacity: isSubmitting ? 0.7 : 1,
-    cursor: isSubmitting ? 'not-allowed' : 'pointer',
-  };
-
   const errorMessageStyle = {
     backgroundColor: darkMode ? colors.dangerBackground : '#fee2e2',
     color: darkMode ? colors.dangerText : '#b91c1c',
@@ -272,24 +238,16 @@ const SensorForm: React.FC<SensorFormProps> = ({
   };
 
   const metadataButtonStyle = {
-    ...buttonBaseStyle,
     padding: '0.25rem 0.5rem',
+    borderRadius: '0.375rem',
+    fontSize: '0.875rem',
+    fontWeight: 500,
+    cursor: 'pointer',
+    textAlign: 'center' as const,
     backgroundColor: darkMode ? '#4d7efa' : '#3b82f6',
     color: 'white',
     border: 'none',
     marginTop: '0.5rem',
-  };
-
-  const metadataRemoveButtonStyle = {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '2rem',
-    backgroundColor: darkMode ? colors.dangerBackground : '#fee2e2',
-    color: darkMode ? colors.dangerText : '#b91c1c',
-    border: 'none',
-    borderRadius: '0.375rem',
-    cursor: 'pointer',
   };
 
   return (
@@ -315,10 +273,7 @@ const SensorForm: React.FC<SensorFormProps> = ({
               </div>
             )}
 
-            <div style={fieldGroupStyle}>
-              <label htmlFor="name" style={labelStyle}>
-                {t('sensors.name')} <span style={{ color: darkMode ? '#ef5350' : '#ef4444' }}>*</span>
-              </label>
+            <FormField label={t('sensors.name')} id="name" required>
               <input
                 type="text"
                 id="name"
@@ -336,13 +291,10 @@ const SensorForm: React.FC<SensorFormProps> = ({
                   e.target.style.borderColor = darkMode ? colors.border : '#d1d5db';
                 }}
               />
-            </div>
+            </FormField>
 
             {!isEditMode && (
-              <div style={fieldGroupStyle}>
-                <label htmlFor="uuid" style={labelStyle}>
-                  {t('sensors.uuid')}
-                </label>
+              <FormField label={t('sensors.uuid')} id="uuid">
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
                   <input
                     type="text"
@@ -361,21 +313,19 @@ const SensorForm: React.FC<SensorFormProps> = ({
                       e.target.style.borderColor = darkMode ? colors.border : '#d1d5db';
                     }}
                   />
-                  <button
+                  <Button
                     type="button"
+                    size="sm"
                     onClick={handleGenerateUuid}
-                    style={{ ...metadataButtonStyle, whiteSpace: 'nowrap' }}
+                    style={{ whiteSpace: 'nowrap' }}
                   >
                     {t('sensors.generateUuid')}
-                  </button>
+                  </Button>
                 </div>
-              </div>
+              </FormField>
             )}
 
-            <div style={fieldGroupStyle}>
-              <label htmlFor="areaId" style={labelStyle}>
-                {t('sensors.area')} <span style={{ color: darkMode ? '#ef5350' : '#ef4444' }}>*</span>
-              </label>
+            <FormField label={t('sensors.area')} id="areaId" required>
               <select
                 id="areaId"
                 name="areaId"
@@ -401,12 +351,9 @@ const SensorForm: React.FC<SensorFormProps> = ({
                   </option>
                 )) : null}
               </select>
-            </div>
+            </FormField>
 
-            <div style={fieldGroupStyle}>
-              <label htmlFor="status" style={labelStyle}>
-                {t('sensors.status')} <span style={{ color: darkMode ? '#ef5350' : '#ef4444' }}>*</span>
-              </label>
+            <FormField label={t('sensors.status')} id="status" required>
               <select
                 id="status"
                 name="status"
@@ -429,12 +376,9 @@ const SensorForm: React.FC<SensorFormProps> = ({
                   </option>
                 ))}
               </select>
-            </div>
+            </FormField>
 
-            <div style={fieldGroupStyle}>
-              <label htmlFor="description" style={labelStyle}>
-                {t('sensors.description')}
-              </label>
+            <FormField label={t('sensors.description')} id="description">
               <textarea
                 id="description"
                 name="description"
@@ -450,9 +394,9 @@ const SensorForm: React.FC<SensorFormProps> = ({
                   e.target.style.borderColor = darkMode ? colors.border : '#d1d5db';
                 }}
               />
-            </div>
+            </FormField>
 
-            <div style={fieldGroupStyle}>
+            <div style={{ marginBottom: '1.5rem' }}>
               <label style={labelStyle}>
                 {isEditMode ? t('sensors.telemetryData') : t('sensors.initialTelemetry')}
               </label>
@@ -511,52 +455,33 @@ const SensorForm: React.FC<SensorFormProps> = ({
                         ))}
                       </select>
                     </div>
-                    <button
+                    <Button
                       type="button"
+                      variant="danger"
+                      size="sm"
                       onClick={() => handleRemoveTelemetryRow(index)}
+                      title={t('sensors.removeTelemetry')}
                       style={{
-                        ...metadataRemoveButtonStyle,
                         height: '2.25rem',
                         flexShrink: 0,
+                        minWidth: '2rem',
+                        padding: '0.25rem',
                       }}
-                      title={t('sensors.removeTelemetry')}
                     >
                       ×
-                    </button>
+                    </Button>
                   </div>
                 ))}
-                <button type="button" onClick={handleAddTelemetryRow} style={metadataButtonStyle}>
+                <Button type="button" size="sm" onClick={handleAddTelemetryRow} style={metadataButtonStyle}>
                   {t('sensors.addTelemetry')}
-                </button>
+                </Button>
               </div>
 
-            <div style={buttonGroupStyle}>
-              <button
-                type="button"
-                onClick={onCancel}
-                style={cancelButtonStyle}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.backgroundColor = darkMode ? colors.surfaceBackground : '#f3f4f6';
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.backgroundColor = darkMode ? colors.surfaceBackground : 'white';
-                }}
-              >
+            <FormActions>
+              <Button type="button" variant="secondary" onClick={onCancel}>
                 {t('common.cancel')}
-              </button>
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                style={submitButtonStyle}
-                onMouseOver={(e) => {
-                  if (!isSubmitting) {
-                    e.currentTarget.style.backgroundColor = darkMode ? '#5d8efa' : '#2563eb';
-                  }
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.backgroundColor = darkMode ? '#4d7efa' : '#3b82f6';
-                }}
-              >
+              </Button>
+              <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting
                   ? isEditMode
                     ? t('updating')
@@ -565,8 +490,8 @@ const SensorForm: React.FC<SensorFormProps> = ({
                   ? t('common.update')
                   : t('common.create_new')
                 }
-              </button>
-            </div>
+              </Button>
+            </FormActions>
           </div>
         </div>
       </form>

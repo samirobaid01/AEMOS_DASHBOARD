@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 import { useThemeColors } from '../../hooks/useThemeColors';
 import type { DeviceType } from '../../constants/device';
+import FormField from '../common/FormField';
 
 interface DeviceFilterProps {
   searchTerm: string;
@@ -39,16 +40,8 @@ const DeviceFilter: React.FC<DeviceFilterProps> = ({
     border: `1px solid ${darkMode ? colors.border : '#e5e7eb'}`
   };
 
-  const fieldGroupStyle = {
-    flex: 1
-  };
-
-  const labelStyle = {
-    display: 'block',
-    fontSize: '0.875rem',
-    fontWeight: 500,
-    color: darkMode ? colors.textSecondary : '#374151',
-    marginBottom: '0.5rem'
+  const fieldWrapperStyle = {
+    flex: 1,
   };
 
   const inputStyle = {
@@ -75,53 +68,51 @@ const DeviceFilter: React.FC<DeviceFilterProps> = ({
 
   return (
     <div style={containerStyle}>
-      <div style={fieldGroupStyle}>
-        <label htmlFor="deviceSearch" style={labelStyle}>
-          {t('common.search')}
-        </label>
-        <input
-          id="deviceSearch"
-          type="text"
-          placeholder={t('devices.searchDevice')}
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          style={inputStyle}
-          onFocus={(e) => {
-            e.target.style.boxShadow = `0 0 0 3px ${darkMode ? 'rgba(77, 126, 250, 0.3)' : 'rgba(59, 130, 246, 0.2)'}`;
-            e.target.style.borderColor = darkMode ? '#4d7efa' : '#3b82f6';
-          }}
-          onBlur={(e) => {
-            e.target.style.boxShadow = 'none';
-            e.target.style.borderColor = darkMode ? colors.border : '#d1d5db';
-          }}
-        />
+      <div style={fieldWrapperStyle}>
+        <FormField label={t('common.search')} id="deviceSearch">
+          <input
+            id="deviceSearch"
+            type="text"
+            placeholder={t('devices.searchDevice')}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            style={inputStyle}
+            onFocus={(e) => {
+              e.target.style.boxShadow = `0 0 0 3px ${darkMode ? 'rgba(77, 126, 250, 0.3)' : 'rgba(59, 130, 246, 0.2)'}`;
+              e.target.style.borderColor = darkMode ? '#4d7efa' : '#3b82f6';
+            }}
+            onBlur={(e) => {
+              e.target.style.boxShadow = 'none';
+              e.target.style.borderColor = darkMode ? colors.border : '#d1d5db';
+            }}
+          />
+        </FormField>
       </div>
 
-      <div style={fieldGroupStyle}>
-        <label htmlFor="deviceTypeFilter" style={labelStyle}>
-          {t('devices.type')}
-        </label>
-        <select
-          id="deviceTypeFilter"
-          value={typeFilter}
-          onChange={(e) => setTypeFilter(e.target.value as DeviceType | '')}
-          style={selectStyle}
-          onFocus={(e) => {
-            e.target.style.boxShadow = `0 0 0 3px ${darkMode ? 'rgba(77, 126, 250, 0.3)' : 'rgba(59, 130, 246, 0.2)'}`;
-            e.target.style.borderColor = darkMode ? '#4d7efa' : '#3b82f6';
-          }}
-          onBlur={(e) => {
-            e.target.style.boxShadow = 'none';
-            e.target.style.borderColor = darkMode ? colors.border : '#d1d5db';
-          }}
-        >
-          <option value="">{t('common.all')}</option>
-          {deviceTypes.map((type) => (
-            <option key={type} value={type}>
-              {type}
-            </option>
-          ))}
-        </select>
+      <div style={fieldWrapperStyle}>
+        <FormField label={t('devices.type')} id="deviceTypeFilter">
+          <select
+            id="deviceTypeFilter"
+            value={typeFilter}
+            onChange={(e) => setTypeFilter(e.target.value as DeviceType | '')}
+            style={selectStyle}
+            onFocus={(e) => {
+              e.target.style.boxShadow = `0 0 0 3px ${darkMode ? 'rgba(77, 126, 250, 0.3)' : 'rgba(59, 130, 246, 0.2)'}`;
+              e.target.style.borderColor = darkMode ? '#4d7efa' : '#3b82f6';
+            }}
+            onBlur={(e) => {
+              e.target.style.boxShadow = 'none';
+              e.target.style.borderColor = darkMode ? colors.border : '#d1d5db';
+            }}
+          >
+            <option value="">{t('common.all')}</option>
+            {deviceTypes.map((type) => (
+              <option key={type} value={type}>
+                {type}
+              </option>
+            ))}
+          </select>
+        </FormField>
       </div>
     </div>
   );

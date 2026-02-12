@@ -1,10 +1,11 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../context/ThemeContext';
 import { useThemeColors } from '../../hooks/useThemeColors';
 import { useTelemetrySocket } from '../../hooks/useTelemetrySocket';
 import type { Sensor } from '../../types/sensor';
+import Button from '../common/Button/Button';
 
 interface SensorDetailsProps {
   sensor: Sensor | null;
@@ -26,6 +27,7 @@ const SensorDetails: React.FC<SensorDetailsProps> = ({
   windowWidth,
 }) => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { darkMode } = useTheme();
   const colors = useThemeColors();
   const isMobile = windowWidth < 768;
@@ -58,42 +60,6 @@ const SensorDetails: React.FC<SensorDetailsProps> = ({
     flexWrap: isMobile ? ("wrap" as const) : ("nowrap" as const),
     width: isMobile ? "100%" : "auto",
   };
-
-  const buttonStyle = (variant: "primary" | "secondary" | "danger") => ({
-    padding: "0.5rem 1rem",
-    backgroundColor:
-      variant === "primary"
-        ? darkMode
-          ? "#4d7efa"
-          : "#3b82f6"
-        : variant === "danger"
-        ? darkMode
-          ? "#ef5350"
-          : "#ef4444"
-        : darkMode
-        ? colors.surfaceBackground
-        : "white",
-    color:
-      variant === "secondary"
-        ? darkMode
-          ? colors.textSecondary
-          : "#4b5563"
-        : "white",
-    border:
-      variant === "secondary"
-        ? `1px solid ${darkMode ? colors.border : "#d1d5db"}`
-        : "none",
-    borderRadius: "0.375rem",
-    fontSize: "0.875rem",
-    fontWeight: 500,
-    cursor: "pointer",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    transition: "all 0.2s",
-    flexGrow: isMobile ? 1 : 0,
-    minWidth: isMobile ? "0" : "5rem",
-  });
 
   // Helper function to format telemetry values based on their type
   const formatTelemetryValue = (value: any, datatype: string) => {
@@ -138,26 +104,14 @@ const SensorDetails: React.FC<SensorDetailsProps> = ({
     >
       <div style={headerStyle}>
         <div style={{ display: "flex", alignItems: "center" }}>
-          <button
+          <Button
+            type="button"
+            variant="secondary"
             onClick={onBack}
             style={{
-              backgroundColor: "transparent",
-              border: "none",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
               marginRight: "0.75rem",
               padding: "0.5rem",
-              borderRadius: "0.375rem",
-              cursor: "pointer",
-            }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.backgroundColor = darkMode
-                ? colors.surfaceBackground
-                : "#f3f4f6";
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.backgroundColor = "transparent";
+              minWidth: "auto",
             }}
           >
             <svg
@@ -177,25 +131,12 @@ const SensorDetails: React.FC<SensorDetailsProps> = ({
                 d="M10 19l-7-7m0 0l7-7m-7 7h18"
               />
             </svg>
-          </button>
+          </Button>
           <h1 style={titleStyle}>{sensor.name}</h1>
         </div>
 
         <div style={buttonGroupStyle}>
-          <button
-            onClick={onEdit}
-            style={buttonStyle("primary")}
-            onMouseOver={(e) => {
-              e.currentTarget.style.backgroundColor = darkMode
-                ? "#5d8efa"
-                : "#2563eb";
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.backgroundColor = darkMode
-                ? "#4d7efa"
-                : "#3b82f6";
-            }}
-          >
+          <Button type="button" variant="primary" onClick={onEdit}>
             <svg
               style={{ width: "1rem", height: "1rem", marginRight: "0.375rem" }}
               fill="none"
@@ -210,21 +151,8 @@ const SensorDetails: React.FC<SensorDetailsProps> = ({
               />
             </svg>
             {t("edit")}
-          </button>
-          <button
-            onClick={onDelete}
-            style={buttonStyle("danger")}
-            onMouseOver={(e) => {
-              e.currentTarget.style.backgroundColor = darkMode
-                ? "#f44336"
-                : "#dc2626";
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.backgroundColor = darkMode
-                ? "#ef5350"
-                : "#ef4444";
-            }}
-          >
+          </Button>
+          <Button type="button" variant="danger" onClick={onDelete}>
             <svg
               style={{ width: "1rem", height: "1rem", marginRight: "0.375rem" }}
               fill="none"
@@ -239,7 +167,7 @@ const SensorDetails: React.FC<SensorDetailsProps> = ({
               />
             </svg>
             {t("delete")}
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -611,27 +539,26 @@ const SensorDetails: React.FC<SensorDetailsProps> = ({
                   )}
                 </h2>
                 
-                <Link to={`/debug/socket-tester`} style={{ textDecoration: 'none' }}>
-                  <button
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      padding: '0.5rem 0.75rem',
-                      backgroundColor: darkMode ? colors.infoBackground : '#dbeafe',
-                      color: darkMode ? colors.infoText : '#1e40af',
-                      border: 'none',
-                      borderRadius: '0.375rem',
-                      fontSize: '0.75rem',
-                      fontWeight: 500,
-                      cursor: 'pointer',
-                    }}
-                  >
-                    <svg style={{ width: '0.875rem', height: '0.875rem', marginRight: '0.375rem' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
-                    {t('debug_socket')}
-                  </button>
-                </Link>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigate('/debug/socket-tester')}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    padding: '0.5rem 0.75rem',
+                    fontSize: '0.75rem',
+                    backgroundColor: darkMode ? colors.infoBackground : '#dbeafe',
+                    color: darkMode ? colors.infoText : '#1e40af',
+                    border: 'none',
+                  }}
+                >
+                  <svg style={{ width: '0.875rem', height: '0.875rem', marginRight: '0.375rem' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                  {t('debug_socket')}
+                </Button>
               </div>
               
               <div style={{ 

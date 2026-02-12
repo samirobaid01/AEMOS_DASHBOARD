@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { PlusIcon, MinusCircleIcon } from '@heroicons/react/24/outline';
+import Button from '../Button/Button';
 
 interface KeyValuePair {
   key: string;
@@ -181,30 +182,28 @@ const DynamicKeyValueInput: React.FC<DynamicKeyValueInputProps> = ({
          </div>
        
          {/* Remove button */}
-         <button
+         <Button
            type="button"
+           variant="danger"
+           size="sm"
            onClick={() => handleRemove(index)}
-           className="flex items-center justify-center w-8 h-8 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-full transition-colors duration-200"
            title="Remove field"
+           style={{ minWidth: '2rem', padding: '0.25rem' }}
          >
            <MinusCircleIcon className="h-6 w-6" />
-         </button>
+         </Button>
        </div>
         ))}
       </div>
-      <button
+      <Button
         type="button"
-        onClick={() => {
-          console.log('Add button clicked');
-          handleAdd();
-        }}
-        className="mt-2 inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-md text-blue-700 bg-blue-50 
-        hover:bg-blue-100 dark:text-blue-400 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 focus:outline-none focus:ring-2 
-        focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+        size="sm"
+        onClick={() => handleAdd()}
+        style={{ marginTop: '0.5rem' }}
       >
         <PlusIcon className="h-4 w-4 mr-1.5" />
         {t('common.addField')}
-      </button>
+      </Button>
       {error && (
         <p className="mt-2 text-sm text-red-600 dark:text-red-500">{error}</p>
       )}

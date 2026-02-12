@@ -1,5 +1,6 @@
 import React from 'react';
 import { useTheme } from '../../context/ThemeContext';
+import Button from '../common/Button/Button';
 
 interface EmptyStateProps {
   message: string;
@@ -51,17 +52,9 @@ const EmptyState: React.FC<EmptyStateProps> = ({
         {description}
       </p>
       
-      <button 
-        onClick={onAddDevice}
-        className={`
-          mt-6 px-4 py-2 text-sm font-medium rounded-md shadow-sm
-          text-white bg-blue-600 hover:bg-blue-700
-          focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500
-          transition-colors duration-200
-        `}
-      >
+      <Button type="button" onClick={onAddDevice} className="mt-6">
         {actionLabel}
-      </button>
+      </Button>
     </div>
   );
 };
