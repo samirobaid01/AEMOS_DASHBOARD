@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import type { ModalBaseProps } from '../../../types/ui';
+import { cn } from '../../../utils/cn';
 import Button from '../Button/Button';
 
 export interface ModalProps extends ModalBaseProps {
@@ -39,7 +40,7 @@ const Modal: React.FC<ModalProps> = ({
       onClick={onClose}
     >
       <div
-        className={`w-full ${sizeClasses[size]} max-h-[90vh] overflow-auto rounded-lg border border-border dark:border-border-dark bg-card dark:bg-card-dark shadow-xl relative ${className}`}
+        className={cn('w-full max-h-[90vh] overflow-auto rounded-lg border border-border dark:border-border-dark bg-card dark:bg-card-dark shadow-xl relative', sizeClasses[size], className)}
         onClick={e => e.stopPropagation()}
         role="dialog"
         aria-modal="true"

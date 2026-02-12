@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import type { SensorItemProps } from './types';
 
-const SensorItem: React.FC<SensorItemProps> = ({ sensor, windowWidth }) => {
+const SensorItem: React.FC<SensorItemProps> = React.memo(({ sensor, windowWidth }) => {
   const { t } = useTranslation();
   const isMobile = windowWidth < 768;
 
@@ -50,6 +50,6 @@ const SensorItem: React.FC<SensorItemProps> = ({ sensor, windowWidth }) => {
       </div>
     </Link>
   );
-};
+});
 
 export default SensorItem;

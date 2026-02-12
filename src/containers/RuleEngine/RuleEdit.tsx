@@ -28,6 +28,7 @@ import { toastService } from '../../services/toastService';
 import { useTranslation } from 'react-i18next';
 import type { RuleChainUpdatePayload } from '../../types/ruleEngine';
 import type { RuleFormSubmitData } from '../../components/ruleEngine/types';
+import type { NodeCreatePayload, NodeUpdatePayload } from '../../types/ruleEngine';
 
 const RuleEdit: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -113,16 +114,16 @@ const RuleEdit: React.FC = () => {
     }
   };
 
-  const handleNodeCreate = async (data: any) => {
+  const handleNodeCreate = async (data: NodeCreatePayload) => {
     console.log("called handleNodeCreate from container");
     try {
       if (!id) return;
       
       await dispatch(createRuleNode({
         ruleChainId: parseInt(id),
-        type: data.type,
-        name: data.name,
-        config: data.config,
+        type: data.type ?? 'filter',
+        name: data.name ?? '',
+        config: typeof data.config === 'string' ? data.config : JSON.stringify(data.config ?? {}),
         nextNodeId: null
       })).unwrap();
       
@@ -133,7 +134,7 @@ const RuleEdit: React.FC = () => {
     }
   };
 
-  const handleNodeUpdate = async (nodeId: number, data: any) => {
+  const handleNodeUpdate = async (nodeId: number, data: NodeUpdatePayload) => {
     try {
       const currentNode = selectedRule?.nodes.find(n => n.id === nodeId);
       if (!currentNode) return;
@@ -147,9 +148,9 @@ const RuleEdit: React.FC = () => {
       await dispatch(updateRuleNode({ 
         nodeId, 
         payload: {
-          name: data.name,
-          config: data.config,
-          ...(nextNodeId !== undefined ? { nextNodeId } : {})  // Only include nextNodeId if it exists
+          name: data.name ?? '',
+          config: typeof data.config === 'string' ? data.config : JSON.stringify(data.config ?? {}),
+          ...(nextNodeId !== undefined ? { nextNodeId } : {})
         }
       })).unwrap();
       

@@ -9,7 +9,7 @@ import Button from '../common/Button/Button';
 import Modal from '../common/Modal/Modal';
 import type { RuleItemProps } from './types';
 
-const RuleItem: React.FC<RuleItemProps> = ({ rule }) => {
+const RuleItem: React.FC<RuleItemProps> = React.memo(({ rule }) => {
   const [showMenu, setShowMenu] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -177,6 +177,6 @@ const RuleItem: React.FC<RuleItemProps> = ({ rule }) => {
       </Modal>
     </>
   );
-};
+});
 
 export default RuleItem;

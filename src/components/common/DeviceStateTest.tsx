@@ -5,7 +5,7 @@ import { TOKEN_STORAGE_KEY } from '../../config';
 
 interface LogEvent {
   event: string;
-  data: any;
+  data: unknown;
   priority?: 'high' | 'normal';
   timestamp: Date;
 }
@@ -18,7 +18,7 @@ const DeviceStateTest: React.FC = () => {
 
   const authToken = localStorage.getItem(TOKEN_STORAGE_KEY) || '';
 
-  const logEvent = (event: string, data: any, priority: 'high' | 'normal' = 'normal') => {
+  const logEvent = (event: string, data: unknown, priority: 'high' | 'normal' = 'normal') => {
     setEvents(prev => [{ event, data, priority, timestamp: new Date() }, ...prev]);
   };
 

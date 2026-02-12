@@ -9,6 +9,7 @@ import { createSensor, createTelemetry, selectSensorsLoading, selectSensorsError
 import { toastService } from '../../services/toastService';
 import type { ApiRejectPayload } from '../../types/api';
 import { ALLOWED_SENSOR_STATUSES } from '../../types/sensor';
+import type { SensorStatus } from '../../constants/sensor';
 import type { SensorCreateRequest, SensorUpdateRequest, TelemetryDatatype } from '../../types/sensor';
 
 const SensorCreate = () => {
@@ -58,7 +59,7 @@ const SensorCreate = () => {
 
     const statusValue = data.status as string | undefined;
     const status =
-      typeof statusValue === 'string' && ALLOWED_SENSOR_STATUSES.includes(statusValue as any)
+      typeof statusValue === 'string' && ALLOWED_SENSOR_STATUSES.includes(statusValue as SensorStatus)
         ? statusValue
         : 'pending';
 

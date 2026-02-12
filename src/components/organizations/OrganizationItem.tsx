@@ -17,7 +17,7 @@ const ViewIcon = () => (
   </svg>
 );
 
-const OrganizationItem: React.FC<OrganizationItemProps> = ({ organization, windowWidth }) => {
+const OrganizationItem: React.FC<OrganizationItemProps> = React.memo(({ organization, windowWidth }) => {
   const { t } = useTranslation();
   const isMobile = windowWidth < 768;
 
@@ -106,6 +106,6 @@ const OrganizationItem: React.FC<OrganizationItemProps> = ({ organization, windo
       </div>
     </div>
   );
-};
+});
 
 export default OrganizationItem;

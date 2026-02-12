@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import type { AreaItemProps } from './types';
 
-const AreaItem: React.FC<AreaItemProps> = ({ area, windowWidth }) => {
+const AreaItem: React.FC<AreaItemProps> = React.memo(({ area, windowWidth }) => {
   const { t } = useTranslation();
   const isMobile = windowWidth < 768;
 
@@ -51,6 +51,6 @@ const AreaItem: React.FC<AreaItemProps> = ({ area, windowWidth }) => {
       </div>
     </Link>
   );
-};
+});
 
 export default AreaItem;

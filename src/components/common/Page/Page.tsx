@@ -1,4 +1,5 @@
 import React from 'react';
+import { cn } from '../../../utils/cn';
 
 export interface PageProps {
   children: React.ReactNode;
@@ -7,9 +8,9 @@ export interface PageProps {
   className?: string;
 }
 
-const Page: React.FC<PageProps> = ({ children, title, description, className = '' }) => {
+const Page: React.FC<PageProps> = ({ children, title, description, className }) => {
   return (
-    <div className={`py-6 px-4 sm:px-6 lg:px-8 max-w-[1400px] mx-auto ${className}`}>
+    <div className={cn('py-6 px-4 sm:px-6 lg:px-8 max-w-[1400px] mx-auto', className)}>
       {(title || description) && (
         <div className="mb-6">
           {title && (

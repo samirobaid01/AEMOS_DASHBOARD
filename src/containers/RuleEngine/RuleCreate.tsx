@@ -20,6 +20,7 @@ import {
 import { useRuleEnginePermissions } from '../../hooks/useRuleEnginePermissions';
 import type { RuleChainCreatePayload } from '../../types/ruleEngine';
 import type { RuleFormSubmitData } from '../../components/ruleEngine/types';
+import type { NodeCreatePayload, NodeUpdatePayload } from '../../types/ruleEngine';
 import { selectSelectedOrganizationId } from '../../state/slices/auth.slice';
 import { RuleCreate as RuleCreateComponent } from '../../components/ruleEngine';
 import { toastService } from '../../services/toastService';
@@ -97,15 +98,15 @@ const RuleCreate: React.FC = () => {
     }
   };
 
-  const handleNodeCreate = async (data: any) => {
+  const handleNodeCreate = async (data: NodeCreatePayload) => {
     try {
       if (!createdRuleId) return;
       
       await dispatch(createRuleNode({
         ruleChainId: createdRuleId,
-        type: data.type,
-        name: data.name,
-        config: data.config,
+        type: data.type ?? 'filter',
+        name: data.name ?? '',
+        config: typeof data.config === 'string' ? data.config : JSON.stringify(data.config ?? {}),
         nextNodeId: null
       })).unwrap();
       
@@ -116,13 +117,13 @@ const RuleCreate: React.FC = () => {
     }
   };
 
-  const handleNodeUpdate = async (nodeId: number, data: any) => {
+  const handleNodeUpdate = async (nodeId: number, data: NodeUpdatePayload) => {
     try {
       await dispatch(updateRuleNode({ 
         nodeId, 
         payload: {
-          name: data.name,
-          config: data.config
+          name: data.name ?? '',
+          config: typeof data.config === 'string' ? data.config : JSON.stringify(data.config ?? {})
         }
       })).unwrap();
       

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import type { Device } from "../../types/device";
+import type { Device, DeviceStateRecord } from "../../types/device";
 import type { Sensor } from "../../types/sensor";
 import * as deviceStatesService from '../../services/deviceStates.service';
 import { useAppSelector } from '../../state/store';
@@ -238,8 +238,7 @@ const ValueInput: React.FC<{
   }
 };
 
-// Function to optimize the structure by removing unnecessary single-expression groups
-const optimizeStructure = (data: GroupData | ConditionData, isRoot: boolean = true): any => {
+const optimizeStructure = (data: GroupData | ConditionData, isRoot: boolean = true): GroupData | ConditionData | null => {
   // If it's a condition, return it as-is
   if ('sourceType' in data) {
     return data;
@@ -253,10 +252,10 @@ const optimizeStructure = (data: GroupData | ConditionData, isRoot: boolean = tr
   
   // For nested groups OR multiple expressions, keep the group but optimize nested expressions
   if (data.expressions.length >= 1) {
-    return {
-      type: data.type,
-      expressions: data.expressions.map(expr => optimizeStructure(expr, false))
-    };
+    const expressions = data.expressions
+      .map(expr => optimizeStructure(expr, false))
+      .filter((x): x is ConditionData | GroupData => x != null);
+    return { type: data.type, expressions };
   }
   
   // If no expressions, return null (this shouldn't happen in normal usage)
@@ -274,7 +273,7 @@ const ConditionBuilder: React.FC<{
 }> = ({ condition, onChange, onDelete, sensors, devices, sensorDetails, onFetchSensorDetails }) => {
   const [isLoadingSensorDetails, setIsLoadingSensorDetails] = useState(false);
   const [isLoadingDeviceStates, setIsLoadingDeviceStates] = useState(false);
-  const [deviceStates, setDeviceStates] = useState<any[]>([]);
+  const [deviceStates, setDeviceStates] = useState<DeviceStateRecord[]>([]);
   const lastFetchTime = useRef<number>(0);
   const organizationId = useAppSelector(selectSelectedOrganizationId);
 
