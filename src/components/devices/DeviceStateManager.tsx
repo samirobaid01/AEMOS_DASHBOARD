@@ -4,15 +4,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { useThemeColors } from '../../hooks/useThemeColors';
 import type { DeviceState } from '../../state/slices/deviceStates.slice';
 import Button from '../common/Button/Button';
-
-interface DeviceStateManagerProps {
-  states: DeviceState[];
-  onAddState: (state: Omit<DeviceState, 'id' | 'createdAt' | 'updatedAt'>) => void;
-  onUpdateState: (stateId: number, state: Partial<Omit<DeviceState, 'id' | 'createdAt' | 'updatedAt'>>) => void;
-  onDeactivateState: (stateId: number) => void;
-  isLoading: boolean;
-  error: string | null;
-}
+import type { DeviceStateManagerProps } from './types';
 
 const DeviceStateManager: React.FC<DeviceStateManagerProps> = ({
   states = [],

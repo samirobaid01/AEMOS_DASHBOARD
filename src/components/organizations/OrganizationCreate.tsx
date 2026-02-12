@@ -1,19 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import type { OrganizationCreateRequest } from '../../types/organization';
-import type { FormErrors } from '../../types/ui';
 import Input from '../../components/common/Input/Input';
 import Button from '../../components/common/Button/Button';
-
-interface OrganizationCreateProps {
-  formData: OrganizationCreateRequest;
-  formErrors: FormErrors;
-  isLoading: boolean;
-  error: string | null;
-  onSubmit: (e: React.FormEvent) => void;
-  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
-  onCancel: () => void;
-}
+import type { OrganizationCreateProps } from './types';
 
 const OrganizationCreate: React.FC<OrganizationCreateProps> = ({
   formData,

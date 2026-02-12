@@ -1,23 +1,10 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import type { Sensor } from '../../types/sensor';
 import EmptyState from '../common/EmptyState';
 import SensorFilter from './SensorFilter';
 import SensorItem from './SensorItem';
 import Button from '../common/Button/Button';
-
-interface SensorListProps {
-  sensors: Sensor[];
-  isLoading: boolean;
-  error: string | null;
-  searchTerm: string;
-  setSearchTerm: (value: string) => void;
-  typeFilter: string;
-  setTypeFilter: (value: string) => void;
-  sensorTypes: string[];
-  onAddSensor: () => void;
-  windowWidth: number;
-}
+import type { SensorListProps } from './types';
 
 const SensorList: React.FC<SensorListProps> = ({
   sensors,

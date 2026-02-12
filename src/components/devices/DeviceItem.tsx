@@ -1,15 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import type { Device } from '../../types/device';
 import type { DeviceStatus } from '../../constants/device';
 import { useTheme } from '../../context/ThemeContext';
 import { useThemeColors } from '../../hooks/useThemeColors';
-
-interface DeviceItemProps {
-  device: Device;
-  isMobile: boolean;
-}
+import type { DeviceItemProps } from './types';
 
 const DeviceItem: React.FC<DeviceItemProps> = ({ device, isMobile }) => {
   const { t } = useTranslation();

@@ -2,18 +2,8 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useTelemetrySocket } from '../../hooks/useTelemetrySocket';
-import type { Sensor } from '../../types/sensor';
 import Button from '../common/Button/Button';
-
-interface SensorDetailsProps {
-  sensor: Sensor | null;
-  isLoading: boolean;
-  error: string | null;
-  onEdit: () => void;
-  onDelete: () => void;
-  onBack: () => void;
-  windowWidth: number;
-}
+import type { SensorDetailsProps } from './types';
 
 const SensorDetails: React.FC<SensorDetailsProps> = ({
   sensor,
@@ -34,7 +24,7 @@ const SensorDetails: React.FC<SensorDetailsProps> = ({
   }
 
   // Helper function to format telemetry values based on their type
-  const formatTelemetryValue = (value: any, datatype: string) => {
+  const formatTelemetryValue = (value: string | number | boolean | null | undefined, datatype: string) => {
     if (value === undefined || value === null) return "-";
     
     switch (datatype.toLowerCase()) {

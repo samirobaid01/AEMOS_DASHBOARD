@@ -1,12 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import FormField from '../common/FormField';
-
-interface RuleFilterProps {
-  searchTerm: string;
-  onSearchChange: (term: string) => void;
-  windowWidth?: number;
-}
+import type { RuleFilterProps } from './types';
 
 const inputClasses =
   'w-full px-3 py-2 text-sm text-textPrimary dark:text-textPrimary-dark bg-surface dark:bg-surface-dark rounded border border-border dark:border-border-dark outline-none focus:ring-2 focus:ring-primary shadow-sm';

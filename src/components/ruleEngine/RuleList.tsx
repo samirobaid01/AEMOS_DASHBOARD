@@ -1,20 +1,10 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import type { RuleChain } from "../../types/ruleEngine";
 import RuleItem from "./RuleItem";
 import RuleFilter from "./RuleFilter";
 import EmptyState from '../common/EmptyState';
 import Button from "../common/Button/Button";
-
-interface RuleListProps {
-  rules: RuleChain[];
-  isLoading: boolean;
-  error: string | null;
-  searchTerm: string;
-  onSearchChange: (term: string) => void;
-  onAddRule: () => void;
-  windowWidth?: number;
-}
+import type { RuleListProps } from './types';
 
 const RuleList: React.FC<RuleListProps> = ({
   rules = [],

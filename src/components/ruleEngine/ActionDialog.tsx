@@ -1,38 +1,14 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import type { Device, DeviceStateRecord } from '../../types/device';
+import type { Device } from '../../types/device';
 import Modal from '../common/Modal/Modal';
 import Button from '../common/Button/Button';
 import FormField from '../common/FormField';
+import type { ActionDialogProps } from './types';
 
 const inputClasses =
   'w-full px-3 py-2 rounded border border-border dark:border-border-dark bg-surface dark:bg-surface-dark text-textPrimary dark:text-textPrimary-dark text-sm outline-none focus:ring-2 focus:ring-primary';
 const selectClasses =
   'w-full px-3 py-2 rounded border border-border dark:border-border-dark bg-surface dark:bg-surface-dark text-textPrimary dark:text-textPrimary-dark text-sm outline-none focus:ring-2 focus:ring-primary';
-
-interface ActionDialogProps {
-  open: boolean;
-  onClose: () => void;
-  onSave?: (data: any) => void;
-  ruleChainId: number;
-  mode?: 'add' | 'edit';
-  initialData?: {
-    type: 'action';
-    name?: string;
-    config: {
-      type: 'DEVICE_COMMAND';
-      command: {
-        deviceUuid: string;
-        stateName: string;
-        value: string;
-        initiatedBy: 'device';
-      };
-    };
-  };
-  devices: Device[];
-  deviceStates: DeviceStateRecord[];
-  lastFetchedDeviceId: number | null;
-  onFetchDeviceStates: (deviceId: number) => Promise<void>;
-}
 
 const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
   open,
@@ -180,7 +156,7 @@ const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
       const parsedOutput = JSON.parse(jsonOutput);
       const requestBody = {
         ruleChainId,
-        type: 'action',
+        type: 'action' as const,
         name: nodeName.trim(),
         config: JSON.stringify(parsedOutput.config),
         nextNodeId: null,

@@ -1,13 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import type { Organization } from '../../types/organization';
 import Button from '../common/Button/Button';
-
-interface OrganizationItemProps {
-  organization: Organization;
-  windowWidth: number;
-}
+import type { OrganizationItemProps } from './types';
 
 const EditIcon = () => (
   <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

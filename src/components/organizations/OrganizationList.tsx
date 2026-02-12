@@ -1,25 +1,10 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import type { Organization, OrganizationFilterParams } from '../../types/organization';
 import OrganizationItem from './OrganizationItem';
 import OrganizationFilter from './OrganizationFilter';
 import EmptyState from '../common/EmptyState';
 import Button from '../common/Button/Button';
-
-interface OrganizationListProps {
-  organizations: Organization[];
-  filteredOrganizations: Organization[];
-  searchTerm: string;
-  setSearchTerm: (value: string) => void;
-  statusFilter: OrganizationFilterParams['status'];
-  setStatusFilter: (value: OrganizationFilterParams['status']) => void;
-  onSubmitFilter: (e: React.FormEvent) => void;
-  onClearFilter: () => void;
-  onAddOrganization: () => void;
-  isLoading: boolean;
-  error: string | null;
-  windowWidth: number;
-}
+import type { OrganizationListProps } from './types';
 
 const AddIcon = () => (
   <svg className="w-4 h-4 mr-1.5 inline" fill="currentColor" viewBox="0 0 20 20">

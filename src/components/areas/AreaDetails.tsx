@@ -1,17 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import type { Area } from '../../types/area';
 import Button from '../common/Button/Button';
-
-interface AreaDetailsProps {
-  area: Area | null;
-  isLoading: boolean;
-  error: string | null;
-  onEdit: () => void;
-  onDelete: () => void;
-  onBack: () => void;
-  windowWidth: number;
-}
+import type { AreaDetailsProps } from './types';
 
 const AreaDetails: React.FC<AreaDetailsProps> = ({
   area,

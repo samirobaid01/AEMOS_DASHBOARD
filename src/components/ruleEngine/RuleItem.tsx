@@ -1,18 +1,13 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import type { RuleChain } from '../../types/ruleEngine';
 import { useRuleEnginePermissions } from '../../hooks/useRuleEnginePermissions';
 import { useAppDispatch } from '../../state/store';
 import { deleteRule } from '../../state/slices/ruleEngine.slice';
 import { toastService } from '../../services/toastService';
 import Button from '../common/Button/Button';
 import Modal from '../common/Modal/Modal';
-
-interface RuleItemProps {
-  rule: RuleChain;
-  windowWidth: number;
-}
+import type { RuleItemProps } from './types';
 
 const RuleItem: React.FC<RuleItemProps> = ({ rule }) => {
   const [showMenu, setShowMenu] = useState(false);

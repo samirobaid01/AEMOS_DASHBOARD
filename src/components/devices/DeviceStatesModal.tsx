@@ -1,27 +1,17 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useTheme } from '../../context/ThemeContext';
-import { useThemeColors } from '../../hooks/useThemeColors';
 import { DEVICE_STATE_UI_TYPES } from '../../constants/device';
 import FormField from '../common/FormField';
-import FormActions from '../common/FormActions';
 import Button from '../common/Button/Button';
+import Modal from '../common/Modal/Modal';
+import type { DeviceStatesModalProps, DeviceStatePayload } from './types';
 
-export interface DeviceStatePayload {
-  stateName: string;
-  dataType: string;
-  defaultValue: string;
-  allowedValues: string[];
-}
+export type { DeviceStatePayload };
 
-interface DeviceStatesModalProps {
-  isOpen: boolean;
-  isSubmitting: boolean;
-  error: string | null;
-  onNext: (payload: DeviceStatePayload) => void;
-  onFinish: (payload: DeviceStatePayload) => void;
-  onCancel: () => void;
-}
+const inputClasses =
+  'block w-full px-3 py-2 rounded border border-border dark:border-border-dark bg-surface dark:bg-surface-dark text-textPrimary dark:text-textPrimary-dark text-sm outline-none focus:ring-2 focus:ring-primary';
+const selectClasses =
+  'block w-full px-3 py-2 pr-10 rounded border border-border dark:border-border-dark bg-surface dark:bg-surface-dark text-textPrimary dark:text-textPrimary-dark text-sm outline-none focus:ring-2 focus:ring-primary appearance-none bg-no-repeat bg-[length:1.5rem_1.5rem] bg-[right_0.5rem_center] bg-[url("data:image/svg+xml,%3csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 20 20\'%3e%3cpath stroke=\'%236b7280\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1.5\' d=\'M6 8l4 4 4-4\'/%3e%3c/svg%3e")]';
 
 const DeviceStatesModal: React.FC<DeviceStatesModalProps> = ({
   isOpen,
@@ -32,9 +22,6 @@ const DeviceStatesModal: React.FC<DeviceStatesModalProps> = ({
   onCancel,
 }) => {
   const { t } = useTranslation();
-  const { darkMode } = useTheme();
-  const colors = useThemeColors();
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
   const [stateName, setStateName] = React.useState('');
   const [uiType, setUiType] = React.useState<'boolean' | 'enum' | 'range'>('boolean');
@@ -118,239 +105,177 @@ const DeviceStatesModal: React.FC<DeviceStatesModalProps> = ({
     }
   };
 
-  const inputStyle = {
-    display: 'block' as const,
-    width: '100%',
-    padding: '0.5rem 0.75rem',
-    borderRadius: '0.375rem',
-    border: `1px solid ${darkMode ? colors.border : '#d1d5db'}`,
-    fontSize: '0.875rem',
-    backgroundColor: darkMode ? colors.background : 'white',
-    color: darkMode ? colors.textPrimary : '#111827',
-    outline: 'none',
-  };
-  const selectStyle = {
-    ...inputStyle,
-    backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
-    backgroundPosition: 'right 0.5rem center',
-    backgroundRepeat: 'no-repeat',
-    backgroundSize: '1.5rem 1.5rem',
-    paddingRight: '2.5rem',
-  };
-  if (!isOpen) return null;
+  const footer = (
+    <div className="flex flex-wrap justify-end gap-2">
+      <Button type="button" variant="secondary" onClick={onCancel}>
+        {t('devices.deviceState.cancelButton')}
+      </Button>
+      <Button
+        type="button"
+        onClick={handleNext}
+        disabled={isSubmitting || !stateName.trim()}
+      >
+        {isSubmitting ? t('devices.deviceState.inProgress') : t('common.next')}
+      </Button>
+      <Button
+        type="button"
+        onClick={handleFinish}
+        disabled={isSubmitting || !stateName.trim()}
+      >
+        {isSubmitting ? t('devices.deviceState.inProgress') : t('devices.deviceState.finishButton')}
+      </Button>
+    </div>
+  );
 
   return (
-    <>
-      <div
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          zIndex: 1000,
-        }}
-        onClick={onCancel}
-      />
-      <div
-        style={{
-          position: 'fixed',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          backgroundColor: darkMode ? colors.cardBackground : 'white',
-          padding: '2rem',
-          borderRadius: '0.5rem',
-          width: isMobile ? '90%' : '28rem',
-          maxHeight: '90vh',
-          overflowY: 'auto',
-          zIndex: 1001,
-          border: `1px solid ${darkMode ? colors.border : '#e5e7eb'}`,
-        }}
-      >
-        <h3
-          style={{
-            fontSize: '1.25rem',
-            fontWeight: 600,
-            color: darkMode ? colors.textPrimary : '#111827',
-            marginBottom: '1.5rem',
-          }}
+    <Modal
+      isOpen={isOpen}
+      onClose={onCancel}
+      title={t('devices.deviceState.addState')}
+      footer={footer}
+      size="md"
+    >
+      {error && (
+        <div className="mb-4 p-3 rounded text-sm bg-dangerBg dark:bg-dangerBg-dark text-dangerText dark:text-dangerText-dark">
+          {error}
+        </div>
+      )}
+
+      <FormField label={t('devices.deviceState.stateName')} id="stateName" required>
+        <input
+          type="text"
+          id="stateName"
+          value={stateName}
+          onChange={(e) => setStateName(e.target.value)}
+          placeholder={t('devices.deviceState.stateName')}
+          className={inputClasses}
+        />
+      </FormField>
+
+      <FormField label={t('devices.deviceState.dataType')} id="uiType" required>
+        <select
+          id="uiType"
+          value={uiType}
+          onChange={(e) => setUiType(e.target.value as 'boolean' | 'enum' | 'range')}
+          className={selectClasses}
         >
-          {t('devices.deviceState.addState')}
-        </h3>
+          {DEVICE_STATE_UI_TYPES.map((type) => (
+            <option key={type} value={type}>
+              {type}
+            </option>
+          ))}
+        </select>
+      </FormField>
 
-        {error && (
-          <div
-            style={{
-              backgroundColor: darkMode ? colors.dangerBackground : '#fee2e2',
-              color: darkMode ? colors.dangerText : '#b91c1c',
-              padding: '0.75rem',
-              borderRadius: '0.375rem',
-              fontSize: '0.875rem',
-              marginBottom: '1rem',
-            }}
-          >
-            {error}
+      {uiType === 'boolean' && (
+        <FormField label={t('devices.deviceState.defaultValue')}>
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant="secondary"
+              className={`flex-1 ${defaultValueBoolean === 'true' ? 'bg-primary text-white dark:bg-primary-dark dark:text-white' : ''}`}
+              onClick={() => setDefaultValueBoolean('true')}
+            >
+              {t('sensors.true')}
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              className={`flex-1 ${defaultValueBoolean === 'false' ? 'bg-primary text-white dark:bg-primary-dark dark:text-white' : ''}`}
+              onClick={() => setDefaultValueBoolean('false')}
+            >
+              {t('sensors.false')}
+            </Button>
           </div>
-        )}
-
-        <FormField label={t('devices.deviceState.stateName')} id="stateName" required>
-          <input
-            type="text"
-            id="stateName"
-            value={stateName}
-            onChange={(e) => setStateName(e.target.value)}
-            placeholder={t('devices.deviceState.stateName')}
-            style={inputStyle}
-          />
         </FormField>
+      )}
 
-        <FormField label={t('devices.deviceState.dataType')} id="uiType" required>
-          <select
-            id="uiType"
-            value={uiType}
-            onChange={(e) => setUiType(e.target.value as 'boolean' | 'enum' | 'range')}
-            style={selectStyle}
-          >
-            {DEVICE_STATE_UI_TYPES.map((type) => (
-              <option key={type} value={type}>
-                {type}
-              </option>
+      {uiType === 'enum' && (
+        <>
+          <FormField label={t('devices.deviceState.allowedValue')}>
+            {enumValues.map((value, index) => (
+              <div key={index} className="flex gap-2 mb-2">
+                <input
+                  type="text"
+                  value={value}
+                  onChange={(e) => {
+                    const next = [...enumValues];
+                    next[index] = e.target.value;
+                    setEnumValues(next);
+                  }}
+                  className={`${inputClasses} flex-1`}
+                  placeholder={t('devices.deviceState.allowedValue')}
+                />
+                {enumValues.length > 1 && (
+                  <Button
+                    type="button"
+                    variant="danger"
+                    size="sm"
+                    onClick={() => setEnumValues(enumValues.filter((_, i) => i !== index))}
+                    className="p-2 min-w-[2rem]"
+                  >
+                    ×
+                  </Button>
+                )}
+              </div>
             ))}
-          </select>
-        </FormField>
-
-        {uiType === 'boolean' && (
-          <FormField label={t('devices.deviceState.defaultValue')}>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <Button
-                type="button"
-                variant="secondary"
-                style={{ flex: 1, ...(defaultValueBoolean === 'true' ? { backgroundColor: darkMode ? '#4d7efa' : '#3b82f6', color: 'white' } : {}) }}
-                onClick={() => setDefaultValueBoolean('true')}
-              >
-                {t('sensors.true')}
-              </Button>
-              <Button
-                type="button"
-                variant="secondary"
-                style={{ flex: 1, ...(defaultValueBoolean === 'false' ? { backgroundColor: darkMode ? '#4d7efa' : '#3b82f6', color: 'white' } : {}) }}
-                onClick={() => setDefaultValueBoolean('false')}
-              >
-                {t('sensors.false')}
-              </Button>
-            </div>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => setEnumValues([...enumValues, ''])}
+              className="mt-2"
+            >
+              + {t('devices.deviceState.addValues')}
+            </Button>
           </FormField>
-        )}
-
-        {uiType === 'enum' && (
-          <>
-            <FormField label={t('devices.deviceState.allowedValue')}>
-              {enumValues.map((value, index) => (
-                <div key={index} style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                  <input
-                    type="text"
-                    value={value}
-                    onChange={(e) => {
-                      const next = [...enumValues];
-                      next[index] = e.target.value;
-                      setEnumValues(next);
-                    }}
-                    style={{ ...inputStyle, flex: 1 }}
-                    placeholder={t('devices.deviceState.allowedValue')}
-                  />
-                  {enumValues.length > 1 && (
-                    <Button
-                      type="button"
-                      variant="danger"
-                      size="sm"
-                      onClick={() => setEnumValues(enumValues.filter((_, i) => i !== index))}
-                      style={{ padding: '0.5rem', minWidth: '2rem' }}
-                    >
-                      ×
-                    </Button>
-                  )}
-                </div>
+          <FormField label={t('devices.deviceState.defaultValue')}>
+            <select
+              value={enumDefault}
+              onChange={(e) => setEnumDefault(e.target.value)}
+              className={selectClasses}
+            >
+              <option value="">{t('devices.selectArea')}</option>
+              {enumValues.filter((v) => v.trim()).map((v) => (
+                <option key={v} value={v}>
+                  {v}
+                </option>
               ))}
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={() => setEnumValues([...enumValues, ''])}
-                style={{ marginTop: '0.5rem' }}
-              >
-                + {t('devices.deviceState.addValues')}
-              </Button>
-            </FormField>
-            <FormField label={t('devices.deviceState.defaultValue')}>
-              <select
-                value={enumDefault}
-                onChange={(e) => setEnumDefault(e.target.value)}
-                style={selectStyle}
-              >
-                <option value="">{t('devices.selectArea')}</option>
-                {enumValues.filter((v) => v.trim()).map((v) => (
-                  <option key={v} value={v}>
-                    {v}
-                  </option>
-                ))}
-              </select>
-            </FormField>
-          </>
-        )}
+            </select>
+          </FormField>
+        </>
+      )}
 
-        {uiType === 'range' && (
-          <>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
-              <FormField label={t('devices.minValue')}>
-                <input
-                  type="number"
-                  value={rangeMin}
-                  onChange={(e) => setRangeMin(e.target.value)}
-                  style={inputStyle}
-                />
-              </FormField>
-              <FormField label={t('devices.maxValue')}>
-                <input
-                  type="number"
-                  value={rangeMax}
-                  onChange={(e) => setRangeMax(e.target.value)}
-                  style={inputStyle}
-                />
-              </FormField>
-            </div>
-            <FormField label={t('devices.deviceState.defaultValue')}>
+      {uiType === 'range' && (
+        <>
+          <div className="grid grid-cols-2 gap-4 mb-4">
+            <FormField label={t('devices.minValue')}>
               <input
                 type="number"
-                value={rangeDefault}
-                onChange={(e) => setRangeDefault(e.target.value)}
-                style={inputStyle}
+                value={rangeMin}
+                onChange={(e) => setRangeMin(e.target.value)}
+                className={inputClasses}
               />
             </FormField>
-          </>
-        )}
-
-        <FormActions>
-          <Button type="button" variant="secondary" onClick={onCancel}>
-            {t('devices.deviceState.cancelButton')}
-          </Button>
-          <Button
-            type="button"
-            onClick={handleNext}
-            disabled={isSubmitting || !stateName.trim()}
-          >
-            {isSubmitting ? t('devices.deviceState.inProgress') : t('common.next')}
-          </Button>
-          <Button
-            type="button"
-            onClick={handleFinish}
-            disabled={isSubmitting || !stateName.trim()}
-          >
-            {isSubmitting ? t('devices.deviceState.inProgress') : t('devices.deviceState.finishButton')}
-          </Button>
-        </FormActions>
-      </div>
-    </>
+            <FormField label={t('devices.maxValue')}>
+              <input
+                type="number"
+                value={rangeMax}
+                onChange={(e) => setRangeMax(e.target.value)}
+                className={inputClasses}
+              />
+            </FormField>
+          </div>
+          <FormField label={t('devices.deviceState.defaultValue')}>
+            <input
+              type="number"
+              value={rangeDefault}
+              onChange={(e) => setRangeDefault(e.target.value)}
+              className={inputClasses}
+            />
+          </FormField>
+        </>
+      )}
+    </Modal>
   );
 };
 

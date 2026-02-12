@@ -1,29 +1,12 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import type { DeviceUpdateRequest, DeviceCreateRequest } from '../../types/device';
-import type { Organization } from '../../types/organization';
-import type { Area } from '../../types/area';
-import type { FormErrors } from '../../types/ui';
+import type { DeviceCreateRequest } from '../../types/device';
 import LoadingScreen from '../common/Loading/LoadingScreen';
 import { useTheme } from '../../context/ThemeContext';
 import { useThemeColors } from '../../hooks/useThemeColors';
 import Button from '../common/Button/Button';
 import DeviceIdentityForm from './DeviceIdentityForm';
-
-interface DeviceEditProps {
-  formData: DeviceUpdateRequest;
-  formErrors: FormErrors;
-  isLoading: boolean;
-  isSubmitting: boolean;
-  error: string | null;
-  deviceName: string | undefined;
-  organizations: Organization[];
-  areas: Area[];
-  onCancel: () => void;
-  onSubmit: (e: React.FormEvent) => void;
-  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
-  onControlModesChange: (modes: string[]) => void;
-}
+import type { DeviceEditProps } from './types';
 
 const DeviceEdit: React.FC<DeviceEditProps> = ({
   formData,

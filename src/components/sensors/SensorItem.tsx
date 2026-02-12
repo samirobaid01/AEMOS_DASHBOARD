@@ -1,12 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import type { Sensor } from '../../types/sensor';
-
-interface SensorItemProps {
-  sensor: Sensor;
-  windowWidth: number;
-}
+import type { SensorItemProps } from './types';
 
 const SensorItem: React.FC<SensorItemProps> = ({ sensor, windowWidth }) => {
   const { t } = useTranslation();

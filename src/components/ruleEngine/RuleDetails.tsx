@@ -1,23 +1,12 @@
 import React from 'react';
-import type { RuleChain } from '../../types/ruleEngine';
 import { useTranslation } from 'react-i18next';
 import { useRuleEnginePermissions } from '../../hooks/useRuleEnginePermissions';
 import Modal from '../common/Modal/Modal';
 import Button from '../common/Button/Button';
+import type { RuleDetailsProps } from './types';
 
 const selectClasses =
   'w-full mt-2 px-3 py-2 rounded border border-border dark:border-border-dark bg-surface dark:bg-surface-dark text-textPrimary dark:text-textPrimary-dark text-sm outline-none focus:ring-2 focus:ring-primary';
-
-interface RuleDetailsProps {
-  rule: RuleChain | null;
-  isLoading: boolean;
-  error?: string | null;
-  onBack?: () => void;
-  onEdit: (ruleId: number) => void;
-  onDelete: (ruleId: number) => Promise<void>;
-  onNextNodeChange: (nodeId: number, nextNodeId: number | null) => Promise<void>;
-  windowWidth?: number;
-}
 
 const RuleDetails: React.FC<RuleDetailsProps> = ({
   rule,

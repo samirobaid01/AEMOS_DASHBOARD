@@ -1,15 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import FormField from '../common/FormField';
-
-interface SensorFilterProps {
-  searchTerm: string;
-  setSearchTerm: (value: string) => void;
-  typeFilter: string;
-  setTypeFilter: (value: string) => void;
-  sensorTypes: string[];
-  windowWidth: number;
-}
+import type { SensorFilterProps } from './types';
 
 const SensorFilter: React.FC<SensorFilterProps> = ({
   searchTerm,

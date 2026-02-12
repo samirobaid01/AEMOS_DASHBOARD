@@ -1,12 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import type { Area } from '../../types/area';
-
-interface AreaItemProps {
-  area: Area;
-  windowWidth: number;
-}
+import type { AreaItemProps } from './types';
 
 const AreaItem: React.FC<AreaItemProps> = ({ area, windowWidth }) => {
   const { t } = useTranslation();

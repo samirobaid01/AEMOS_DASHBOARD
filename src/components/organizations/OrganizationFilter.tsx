@@ -2,16 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import Input from '../common/Input/Input';
 import type { OrganizationFilterParams } from '../../types/organization';
-
-interface OrganizationFilterProps {
-  searchTerm: string;
-  setSearchTerm: (value: string) => void;
-  statusFilter: OrganizationFilterParams['status'];
-  setStatusFilter: (value: OrganizationFilterParams['status']) => void;
-  onSubmit: (e: React.FormEvent) => void;
-  onClear: () => void;
-  windowWidth: number;
-}
+import type { OrganizationFilterProps } from './types';
 
 const SearchIcon = () => (
   <svg className="w-5 h-5 text-textMuted dark:text-textMuted-dark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">

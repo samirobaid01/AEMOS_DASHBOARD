@@ -1,7 +1,5 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import type { Device } from '../../types/device';
-import type { DeviceType } from '../../constants/device';
 import DeviceItem from './DeviceItem';
 import DeviceFilter from './DeviceFilter';
 import EmptyState from '../common/EmptyState';
@@ -9,20 +7,7 @@ import Button from '../common/Button/Button';
 import ErrorDisplay from './ErrorDisplay';
 import { useTheme } from '../../context/ThemeContext';
 import { useThemeColors } from '../../hooks/useThemeColors';
-
-interface DeviceListProps {
-  devices: Device[];
-  filteredDevices: Device[];
-  searchTerm: string;
-  setSearchTerm: (term: string) => void;
-  typeFilter: DeviceType | '';
-  setTypeFilter: (filter: DeviceType | '') => void;
-  deviceTypes: DeviceType[];
-  onAddDevice: () => void;
-  isLoading: boolean;
-  error: string | null;
-  windowWidth: number;
-}
+import type { DeviceListProps } from './types';
 
 const DeviceList: React.FC<DeviceListProps> = ({
   devices,

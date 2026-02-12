@@ -1,28 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import RuleForm from './RuleForm';
-import type { RuleChain, RuleChainUpdatePayload } from '../../types/ruleEngine';
-import type { Sensor } from '../../types/sensor';
-import type { Device, DeviceStateRecord } from '../../types/device';
-
-interface RuleEditProps {
-  rule: RuleChain | null;
-  isLoading: boolean;
-  error?: string | null;
-  onSubmit: (data: RuleChainUpdatePayload) => Promise<void>;
-  windowWidth?: number;
-  ruleChainId: number;
-  onNodeDelete: (nodeId: number) => Promise<void>;
-  onNodeCreate: (data: any) => Promise<void>;
-  onNodeUpdate: (nodeId: number, data: any) => Promise<void>;
-  sensors: Sensor[];
-  devices: Device[];
-  deviceStates: DeviceStateRecord[];
-  lastFetchedDeviceId: number | null;
-  sensorDetails: { [uuid: string]: Sensor };
-  onFetchSensorDetails: (sensorId: number) => Promise<void>;
-  onFetchDeviceStates: (deviceId: number) => Promise<void>;
-}
+import type { RuleEditProps } from './types';
 
 const RuleEdit: React.FC<RuleEditProps> = ({
   rule,

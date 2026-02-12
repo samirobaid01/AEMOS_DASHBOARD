@@ -3,17 +3,7 @@ import Modal from '../common/Modal/Modal';
 import Button from '../common/Button/Button';
 import StateDropdown from '../common/Select/StateDropdown';
 import { useTranslation } from 'react-i18next';
-
-interface DeviceStateModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  stateName: string;
-  currentValue: string;
-  defaultValue: string;
-  allowedValues: string[];
-  onSave: (value: string) => void;
-  isLoading: boolean;
-}
+import type { DeviceStateModalProps } from './types';
 
 const DeviceStateModal: React.FC<DeviceStateModalProps> = ({
   isOpen,

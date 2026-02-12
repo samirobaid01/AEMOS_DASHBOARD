@@ -8,27 +8,10 @@ import {
   ALLOWED_STATUSES,
   CONTROL_MODES,
 } from '../../constants/device';
-import type { DeviceCreateRequest } from '../../types/device';
-import type { Organization } from '../../types/organization';
-import type { Area } from '../../types/area';
-import type { FormErrors } from '../../types/ui';
 import FormField from '../common/FormField';
 import FormActions from '../common/FormActions';
 import Button from '../common/Button/Button';
-
-interface DeviceIdentityFormProps {
-  formData: DeviceCreateRequest;
-  formErrors: FormErrors;
-  isLoading: boolean;
-  error: string | null;
-  organizations: Organization[];
-  areas: Area[];
-  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
-  onControlModesChange: (modes: string[]) => void;
-  onSubmit: (e: React.FormEvent) => void;
-  onCancel: () => void;
-  submitLabel?: string;
-}
+import type { DeviceIdentityFormProps } from './types';
 
 const DeviceIdentityForm: React.FC<DeviceIdentityFormProps> = ({
   formData,

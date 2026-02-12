@@ -1,23 +1,10 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import type { Area } from '../../types/area';
 import AreaItem from './AreaItem';
 import AreaFilter from './AreaFilter';
 import EmptyState from '../common/EmptyState';
 import Button from '../common/Button/Button';
-
-interface AreaListProps {
-  areas: Area[];
-  isLoading: boolean;
-  error: string | null;
-  searchTerm: string;
-  setSearchTerm: (value: string) => void;
-  organizationFilter: string;
-  setOrganizationFilter: (value: string) => void;
-  organizations: string[];
-  onAddArea: () => void;
-  windowWidth: number;
-}
+import type { AreaListProps } from './types';
 
 const AreaList: React.FC<AreaListProps> = ({
   areas,

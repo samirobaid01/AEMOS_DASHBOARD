@@ -26,6 +26,8 @@ import NodeDialog from '../../components/ruleEngine/NodeDialog';
 import ActionDialog from '../../components/ruleEngine/ActionDialog';
 import { toastService } from '../../services/toastService';
 import { useTranslation } from 'react-i18next';
+import type { RuleChainUpdatePayload } from '../../types/ruleEngine';
+import type { RuleFormSubmitData } from '../../components/ruleEngine/types';
 
 const RuleEdit: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -84,11 +86,16 @@ const RuleEdit: React.FC = () => {
     });
   }, [devices, loading, error]);
 
-  const handleSubmit = async (data: any) => {
-    if (!id) return;
+  const handleSubmit = async (data: RuleFormSubmitData) => {
+    if (!id || !selectedRule) return;
 
     try {
-      await dispatch(updateRule({ id: parseInt(id), payload: data })).unwrap();
+      const payload: RuleChainUpdatePayload = {
+        organizationId: selectedRule.organizationId,
+        ...(data.name !== undefined && { name: data.name }),
+        ...(data.description !== undefined && { description: data.description }),
+      };
+      await dispatch(updateRule({ id: parseInt(id), payload })).unwrap();
       toastService.success(t('ruleEngine.updateSuccess'));
     } catch (error) {
       toastService.error(t('ruleEngine.updateError'));

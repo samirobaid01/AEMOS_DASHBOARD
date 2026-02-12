@@ -7,6 +7,7 @@ import { selectSelectedOrganizationId } from '../../state/slices/auth.slice';
 import Modal from '../common/Modal/Modal';
 import Button from '../common/Button/Button';
 import FormField from '../common/FormField';
+import type { NodeDialogProps } from './types';
 
 const inputClasses =
   'block w-full min-w-0 px-3 py-2 rounded border border-border dark:border-border-dark bg-surface dark:bg-surface-dark text-textPrimary dark:text-textPrimary-dark text-sm outline-none focus:ring-2 focus:ring-primary';
@@ -36,31 +37,6 @@ interface ParsedExpression {
   duration?: string | number;
   type?: string;
   expressions?: ParsedExpression[];
-}
-
-interface NodeDialogProps {
-  open: boolean;
-  onClose: () => void;
-  onSave?: (data: any) => void;
-  onUpdate?: (nodeId: number, data: any) => void;
-  ruleChainId?: number;
-  mode: 'add' | 'edit';
-  initialExpression?: {
-    id?: number;
-    name?: string;
-    type: 'filter' | 'action';
-    sourceType?: string;
-    UUID?: string;
-    key?: string;
-    operator?: string;
-    value?: string | number;
-    duration?: string | number;
-    config?: string;
-  };
-  sensors: Sensor[];
-  devices: Device[];
-  sensorDetails: { [uuid: string]: Sensor };
-  onFetchSensorDetails: (sensorId: number) => Promise<void>;
 }
 
 const OPERATORS = [
@@ -371,6 +347,20 @@ const ConditionBuilder: React.FC<{
     });
   };
 
+  const sourceOptions = (condition.sourceType === 'sensor' ? sensors : devices) || [];
+
+  useEffect(() => {
+    const single = sourceOptions[0];
+    const singleUuid = single?.uuid;
+    if (sourceOptions.length === 1 && singleUuid && condition.UUID !== singleUuid) {
+      onChange({
+        ...condition,
+        UUID: singleUuid,
+        key: ''
+      });
+    }
+  }, [sourceOptions.length, sourceOptions[0]?.uuid, condition.UUID, condition.sourceType, condition, onChange]);
+
   const getAvailableKeys = () => {
     if (condition.sourceType === 'sensor') {
       if (isLoadingSensorDetails || !sensorDetails[condition.UUID]) {
@@ -407,8 +397,6 @@ const ConditionBuilder: React.FC<{
     }
   }, [availableKeys, currentKey]);
 
-  const sourceOptions = (condition.sourceType === 'sensor' ? sensors : devices) || [];
-
   return (
     <div className="flex flex-wrap gap-4 items-center w-full">
       <FormField label="Source Type" id={`source-type-${condition.UUID}`}>
@@ -428,6 +416,11 @@ const ConditionBuilder: React.FC<{
           value={condition.UUID}
           onChange={(e) => handleUUIDChange(e.target.value)}
         >
+          <option value="">
+            {sourceOptions.length === 0
+              ? (condition.sourceType === 'sensor' ? 'No sensors available' : 'No devices available')
+              : (condition.sourceType === 'sensor' ? 'Select sensor...' : 'Select device...')}
+          </option>
           {sourceOptions.map((item) => (
             <option key={item.uuid} value={item.uuid}>
               {item.name}
@@ -441,18 +434,23 @@ const ConditionBuilder: React.FC<{
           className={selectClasses}
           value={condition.key}
           onChange={(e) => onChange({ ...condition, key: e.target.value })}
-          disabled={isLoadingSensorDetails || isLoadingDeviceStates || availableKeys.length === 0}
+          disabled={!condition.UUID || isLoadingSensorDetails || isLoadingDeviceStates || availableKeys.length === 0}
         >
           {availableKeys.length === 0 ? (
             <option value="">
-              {isLoadingSensorDetails || isLoadingDeviceStates ? 'Loading...' : 'No options available'}
+              {!condition.UUID
+                ? (condition.sourceType === 'sensor' ? 'Select a sensor first' : 'Select a device first')
+                : (isLoadingSensorDetails || isLoadingDeviceStates ? 'Loading...' : 'No keys available')}
             </option>
           ) : (
-            availableKeys.map((key) => (
-              <option key={key.value} value={key.value}>
-                {key.label}
-              </option>
-            ))
+            <>
+              <option value="">Select key...</option>
+              {availableKeys.map((key) => (
+                <option key={key.value} value={key.value}>
+                  {key.label}
+                </option>
+              ))}
+            </>
           )}
         </select>
       </FormField>

@@ -4,41 +4,12 @@ import { fetchDeviceStates } from '../../state/slices/deviceStates.slice';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import LoadingScreen from '../common/Loading/LoadingScreen';
-import type { Device } from '../../types/device';
-import type { Organization } from '../../types/organization';
-import type { Area } from '../../types/area';
 import type { DeviceStatus } from '../../constants/device';
 import { useTheme } from '../../context/ThemeContext';
 import { useThemeColors } from '../../hooks/useThemeColors';
 import Button from '../common/Button/Button';
 import DeviceStateModal from './DeviceStateModal';
-
-interface DeviceDetailsProps {
-  device: Device | null;
-  organization: Organization | null;
-  area: Area | null;
-  isLoading: boolean;
-  error: string | null;
-  isDeleting: boolean;
-  deleteModalOpen: boolean;
-  onDelete: () => void;
-  onOpenDeleteModal: () => void;
-  onCloseDeleteModal: () => void;
-  onNavigateBack: () => void;
-  onStateButtonClick: (state: any) => void;
-  selectedState: {
-    id: number;
-    name: string;
-    value: string;
-    defaultValue: string;
-    allowedValues: string[];
-  } | null;
-  onStateModalClose: () => void;
-  onStateModalSave: (value: string) => void;
-  isStateUpdating: boolean;
-  isSocketConnected: boolean;
-  socketError: Error | null;
-}
+import type { DeviceDetailsProps } from './types';
 
 const DeviceDetails: React.FC<DeviceDetailsProps> = ({
   device,

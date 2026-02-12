@@ -1,21 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import type { AreaCreateRequest } from '../../types/area';
-import type { Organization } from '../../types/organization';
-import type { FormErrors } from '../../types/ui';
 import Input from '../common/Input/Input';
 import Button from '../common/Button/Button';
-
-interface AreaCreateProps {
-  formData: AreaCreateRequest;
-  formErrors: FormErrors;
-  isLoading: boolean;
-  error: string | null;
-  organizations: Organization[];
-  onSubmit: (e: React.FormEvent) => void;
-  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
-  onCancel: () => void;
-}
+import type { AreaCreateProps } from './types';
 
 const selectBaseClasses =
   'w-full px-3 py-2 rounded border text-sm bg-surface dark:bg-surface-dark text-textPrimary dark:text-textPrimary-dark outline-none focus:ring-2 focus:ring-primary';
