@@ -9,7 +9,7 @@ import {
   selectAreasLoading,
   selectAreasError
 } from '../../state/slices/areas.slice';
-import { fetchOrganizations, selectOrganizations } from '../../state/slices/organizations.slice';
+import { fetchOrganizations } from '../../state/slices/organizations.slice';
 import type { AreaUpdateRequest } from '../../types/area';
 import type { FormErrors } from '../../types/ui';
 import LoadingScreen from '../../components/common/Loading/LoadingScreen';
@@ -22,7 +22,6 @@ const AreaEdit = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const area = useAppSelector(selectSelectedArea);
-  const organizations = useAppSelector(selectOrganizations);
   const isLoading = useAppSelector(selectAreasLoading);
   const error = useAppSelector(selectAreasError);
   

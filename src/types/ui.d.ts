@@ -13,6 +13,7 @@ export interface ModalBaseProps {
   title?: string;
   children: ReactNode;
   footer?: ReactNode;
+  className?: string;
 }
 
 export interface FormPropsBase {
@@ -21,4 +22,12 @@ export interface FormPropsBase {
   error: string | null;
   onSubmit: (e: FormEvent) => void;
   onCancel: () => void;
+}
+
+export type AsyncStatus = 'idle' | 'loading' | 'success' | 'error';
+
+export interface AsyncState<T> {
+  status: AsyncStatus;
+  data?: T;
+  error?: string;
 }

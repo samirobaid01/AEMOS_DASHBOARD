@@ -1,5 +1,4 @@
 import React, { forwardRef } from "react";
-import { twMerge } from "tailwind-merge";
 import { useTheme } from "../../../context/ThemeContext";
 import { useThemeColors } from "../../../hooks/useThemeColors";
 
@@ -33,15 +32,6 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     ref
   ) => {
     const inputId = id || `input-${Math.random().toString(36).substring(2, 9)}`;
-
-    const baseClasses =
-      "block w-full px-4 py-2.5 sm:py-3 border-2 rounded-lg shadow-sm appearance-none focus:outline-none transition-all duration-200 text-base sm:text-sm backdrop-blur-sm";
-
-    const stateClasses = error
-      ? "border-red-300 text-red-900 placeholder-red-300 dark:border-red-600 dark:text-red-200 dark:placeholder-red-600 dark:bg-red-900/10"
-      : "border-soil-200 text-soil-800 placeholder-soil-400 dark:border-soil-700 dark:text-soil-200 dark:placeholder-soil-500 dark:bg-soil-800/80";
-
-    const widthClass = fullWidth ? "w-full" : "";
     const { darkMode } = useTheme();
     const colors = useThemeColors();
 
@@ -57,13 +47,6 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       color: darkMode ? colors.textPrimary : "#111827",
       outline: "none",
     };
-
-    const inputClasses = twMerge(
-      baseClasses,
-      stateClasses,
-      widthClass,
-      className
-    );
 
     const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
       // Apply custom focus styling

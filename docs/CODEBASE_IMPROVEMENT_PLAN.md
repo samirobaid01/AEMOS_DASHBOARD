@@ -75,6 +75,8 @@ Reusable UI, typing, state shape, and rule-engine abstractions.
 
 **P1 exit criteria:** FormField/FormActions in use; Page/Card + shared EmptyState; feature props in types; one feature on Tailwind; modals consistent; component/smart rule documented; AsyncState in use; normalized state and memoized selectors in at least one feature; cn() in use; rule engine has RuleNodeDefinition + ConfigField.
 
+**Docs:** P1-4–P1-6: `docs/P1-4-P1-5-P1-6-PAGE-CARD-EMPTYSTATE.md`. P1-12–P1-15: `docs/P1-12-P1-13-P1-14-P1-15-ASYNC-STATE-SELECTORS-CN.md`.
+
 ---
 
 ## P2 – Nice-to-have (polish and scale)
@@ -145,8 +147,8 @@ You can merge PR-2 and PR-3 if preferred (e.g. one “foundation” PR after PR-
 5. P1-4 → P1-5 → P1-6 (Page, Card, EmptyState)
 6. P1-12 → P1-13 → P1-14 → P1-15 (AsyncState, normalization, selectors, cn())
 7. P1-9 (Tailwind one feature)
-8. P1-R1 → P1-R2 (rule engine)
-9. P1-7 → P1-8 → P1-10 → P1-11 (props, modals, component rule)
+8. P1-R1 → P1-R2 (rule engine) TO DO
+9. P1-7 → P1-8 → P1-10 → P1-11 (props, modals, component rule) To DO
 10. P2-* in any order
 
 Update this doc as tasks are completed or scope changes.

@@ -1,4 +1,4 @@
-import EmptyState from './EmptyState';
+import EmptyState from '../common/EmptyState';
 import OrganizationFilter from './OrganizationFilter';
 import OrganizationItem from './OrganizationItem';
 import OrganizationList from './OrganizationList';

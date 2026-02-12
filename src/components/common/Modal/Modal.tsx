@@ -4,14 +4,24 @@ import Button from '../Button/Button';
 
 export interface ModalProps extends ModalBaseProps {
   title: string;
+  size?: 'sm' | 'md' | 'lg' | 'xl';
 }
+
+const sizeClasses = {
+  sm: 'max-w-sm',
+  md: 'max-w-md',
+  lg: 'max-w-2xl',
+  xl: 'max-w-4xl',
+};
 
 const Modal: React.FC<ModalProps> = ({
   isOpen,
   onClose,
   title,
   children,
-  footer
+  footer,
+  className = '',
+  size = 'md',
 }) => {
   useEffect(() => {
     const handleEsc = (event: KeyboardEvent) => {
@@ -29,7 +39,7 @@ const Modal: React.FC<ModalProps> = ({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md max-h-[90vh] overflow-auto rounded-lg border border-border dark:border-border-dark bg-card dark:bg-card-dark shadow-xl relative"
+        className={`w-full ${sizeClasses[size]} max-h-[90vh] overflow-auto rounded-lg border border-border dark:border-border-dark bg-card dark:bg-card-dark shadow-xl relative ${className}`}
         onClick={e => e.stopPropagation()}
         role="dialog"
         aria-modal="true"

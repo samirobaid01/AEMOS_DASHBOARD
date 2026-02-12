@@ -862,6 +862,7 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
         onClose={onClose}
         title={mode === 'edit' ? 'Edit Node' : 'Create Node'}
         footer={null}
+        size="xl"
       >
         <div className="flex justify-center items-center min-h-[200px] text-textMuted dark:text-textMuted-dark">
           Loading...
@@ -876,8 +877,9 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
       onClose={onClose}
       title={mode === 'edit' ? 'Edit Node' : 'Create Node'}
       footer={footer}
+      size="xl"
     >
-      <div className="flex flex-col gap-4 py-2 max-h-[70vh] overflow-y-auto">
+      <div className="flex flex-col gap-4 py-2 min-h-[280px] max-h-[70vh] overflow-y-auto pr-1">
         <FormField label="Node Name" id="node-dialog-name" required>
           <input
             id="node-dialog-name"

@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../../state/store';
 import { useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import { 
   fetchOrganizations, 
   selectOrganizations, 
@@ -12,7 +11,6 @@ import { OrganizationList as OrganizationListComponent } from '../../components/
 import type { OrganizationFilterParams } from '../../types/organization';
 
 const OrganizationList = () => {
-  const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);

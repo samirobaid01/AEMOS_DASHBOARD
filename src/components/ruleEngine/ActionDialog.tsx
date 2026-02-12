@@ -56,6 +56,15 @@ const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
   const [isLoadingDeviceStates, setIsLoadingDeviceStates] = useState<boolean>(false);
   const prevOpenRef = useRef(false);
 
+  const getDeviceValue = (device: Device) => device.uuid ?? `id:${device.id}`;
+  const getDeviceByValue = (value: string): Device | undefined => {
+    if (value.startsWith('id:')) {
+      const id = Number(value.slice(3));
+      return devices.find((d) => d.id === id);
+    }
+    return devices.find((d) => d.uuid === value);
+  };
+
   useEffect(() => {
     const justOpened = open && !prevOpenRef.current;
     prevOpenRef.current = open;
@@ -95,7 +104,7 @@ const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
               }
             }, null, 2));
             if (command.deviceUuid) {
-              const selectedDeviceObj = devices.find(d => d.uuid === command.deviceUuid);
+              const selectedDeviceObj = devices.find((d) => d.uuid === command.deviceUuid);
               if (selectedDeviceObj?.id) {
                 setIsLoadingDeviceStates(true);
                 onFetchDeviceStates(selectedDeviceObj.id).finally(() => {
@@ -111,12 +120,12 @@ const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
     }
   }, [open, mode, initialData, devices, onFetchDeviceStates]);
 
-  const handleDeviceChange = async (deviceUuid: string) => {
-    setSelectedDevice(deviceUuid);
+  const handleDeviceChange = async (value: string) => {
+    setSelectedDevice(value);
     setStateName('');
     setStateValue('');
     setAllowedValues([]);
-    const selectedDeviceObj = devices.find(d => d.uuid === deviceUuid);
+    const selectedDeviceObj = getDeviceByValue(value);
     if (selectedDeviceObj?.id) {
       try {
         setIsLoadingDeviceStates(true);
@@ -131,23 +140,27 @@ const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
 
   const handleStateNameChange = (newStateName: string) => {
     setStateName(newStateName);
-    setStateValue('');
     const selectedState = filteredDeviceStates?.find(state => state.stateName === newStateName);
     if (selectedState) {
-      setAllowedValues(Array.isArray(selectedState.allowedValues) ? selectedState.allowedValues : []);
+      const values = Array.isArray(selectedState.allowedValues) ? selectedState.allowedValues : [];
+      setAllowedValues(values);
+      setStateValue(values.length === 1 ? values[0] : '');
     } else {
       setAllowedValues([]);
+      setStateValue('');
     }
   };
 
   useEffect(() => {
     if (actionType === 'Device' && selectedDevice && stateName && stateValue) {
+      const dev = getDeviceByValue(selectedDevice);
+      const deviceUuid = dev?.uuid ?? (selectedDevice.startsWith('id:') ? '' : selectedDevice);
       const outputData = {
         type: 'action',
         config: {
           type: 'DEVICE_COMMAND',
           command: {
-            deviceUuid: selectedDevice,
+            deviceUuid: deviceUuid,
             stateName: stateName,
             value: stateValue,
             initiatedBy: 'device'
@@ -186,11 +199,15 @@ const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
     if (!selectedDevice) return [];
     if (!devices.length) return [];
     if (!deviceStates.length) return [];
-    const selectedDeviceObj = devices.find(d => d.uuid === selectedDevice);
+    const selectedDeviceObj = getDeviceByValue(selectedDevice);
     if (!selectedDeviceObj) return [];
     if (lastFetchedDeviceId == null || selectedDeviceObj.id !== lastFetchedDeviceId) return [];
     return deviceStates;
-  }, [selectedDevice, devices, deviceStates, lastFetchedDeviceId, isLoadingDeviceStates]);
+  }, [selectedDevice, devices, deviceStates, lastFetchedDeviceId]);
+
+  const deviceOptions = useMemo(() => {
+    return (devices || []).filter((d) => d.uuid != null || d.id != null);
+  }, [devices]);
 
   const deviceStateSelectValue =
     !isLoadingDeviceStates &&
@@ -198,7 +215,8 @@ const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
     filteredDeviceStates.some((s) => s.stateName === stateName)
       ? stateName
       : '';
-  const stateValueSelectValue = (allowedValues || []).includes(stateValue) ? stateValue : '';
+  const stateValueSelectValue =
+    stateValue && (allowedValues || []).includes(stateValue) ? stateValue : '';
 
   useEffect(() => {
     if (mode !== 'edit' || !stateName || filteredDeviceStates.length === 0) return;
@@ -244,8 +262,9 @@ const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
       onClose={onClose}
       title={mode === 'edit' ? 'Edit Action' : 'Add Action'}
       footer={footer}
+      size="xl"
     >
-      <div className="flex flex-col gap-4 max-h-[70vh] overflow-y-auto">
+      <div className="flex flex-col gap-4 min-h-[520px] max-h-[70vh] overflow-y-auto pr-1">
         <FormField label="Node Name" id="action-node-name" required>
           <input
             id="action-node-name"
@@ -280,10 +299,11 @@ const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
                 value={selectedDevice}
                 onChange={(e) => handleDeviceChange(e.target.value)}
                 className={selectClasses}
+                aria-label="Select device"
               >
                 <option value="">Select device</option>
-                {(devices || []).map((device) => (
-                  <option key={device.uuid} value={device.uuid}>
+                {deviceOptions.map((device) => (
+                  <option key={device.id} value={getDeviceValue(device)}>
                     {device.name}
                   </option>
                 ))}
@@ -291,44 +311,54 @@ const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
             </FormField>
 
             {selectedDevice && (
-              <FormField label="Device State" id="action-device-state">
-                <select
-                  id="action-device-state"
-                  value={deviceStateSelectValue}
-                  onChange={(e) => handleStateNameChange(e.target.value)}
-                  disabled={isLoadingDeviceStates}
-                  className={selectClasses}
-                >
-                  {isLoadingDeviceStates ? (
-                    <option>Loading device states...</option>
-                  ) : filteredDeviceStates.length === 0 ? (
-                    <option>No device states available</option>
-                  ) : (
-                    filteredDeviceStates.map((state) => (
-                      <option key={state.id} value={state.stateName}>
-                        {state.stateName}
-                      </option>
-                    ))
-                  )}
-                </select>
-              </FormField>
-            )}
+              <>
+                <FormField label="Device State" id="action-device-state">
+                  <select
+                    id="action-device-state"
+                    value={deviceStateSelectValue}
+                    onChange={(e) => handleStateNameChange(e.target.value)}
+                    disabled={isLoadingDeviceStates}
+                    className={selectClasses}
+                    aria-label="Select device state"
+                  >
+                    {isLoadingDeviceStates ? (
+                      <option value="">Loading device states...</option>
+                    ) : filteredDeviceStates.length === 0 ? (
+                      <option value="">No device states available</option>
+                    ) : (
+                      <>
+                        <option value="">Select device state</option>
+                        {filteredDeviceStates.map((state) => (
+                          <option key={state.id} value={state.stateName}>
+                            {state.stateName}
+                          </option>
+                        ))}
+                      </>
+                    )}
+                  </select>
+                </FormField>
 
-            {stateName && (
-              <FormField label="State Value" id="action-state-value">
-                <select
-                  id="action-state-value"
-                  value={stateValueSelectValue}
-                  onChange={(e) => setStateValue(e.target.value)}
-                  className={selectClasses}
-                >
-                  {(allowedValues || []).map((value) => (
-                    <option key={value} value={value}>
-                      {value}
+                <FormField label="State Value" id="action-state-value">
+                  <select
+                    id="action-state-value"
+                    value={stateValueSelectValue}
+                    onChange={(e) => setStateValue(e.target.value)}
+                    disabled={!stateName}
+                    className={selectClasses}
+                    aria-label="Select state value"
+                    title={!stateName ? 'Select a device state first' : undefined}
+                  >
+                    <option value="">
+                      {stateName ? 'Select value' : 'Select device state first'}
                     </option>
-                  ))}
-                </select>
-              </FormField>
+                    {(allowedValues || []).map((value) => (
+                      <option key={value} value={value}>
+                        {value}
+                      </option>
+                    ))}
+                  </select>
+                </FormField>
+              </>
             )}
           </>
         )}

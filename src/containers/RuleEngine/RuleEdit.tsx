@@ -20,7 +20,6 @@ import {
   selectLastFetchedDeviceId,
   selectSensorDetails,
 } from '../../state/slices/ruleEngine.slice';
-import { selectAuthToken, selectSelectedOrganizationId } from '../../state/slices/auth.slice';
 import { useRuleEnginePermissions } from '../../hooks/useRuleEnginePermissions';
 import RuleForm from '../../components/ruleEngine/RuleForm';
 import NodeDialog from '../../components/ruleEngine/NodeDialog';

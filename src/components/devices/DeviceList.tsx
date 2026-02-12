@@ -4,7 +4,7 @@ import type { Device } from '../../types/device';
 import type { DeviceType } from '../../constants/device';
 import DeviceItem from './DeviceItem';
 import DeviceFilter from './DeviceFilter';
-import EmptyState from './EmptyState';
+import EmptyState from '../common/EmptyState';
 import Button from '../common/Button/Button';
 import ErrorDisplay from './ErrorDisplay';
 import { useTheme } from '../../context/ThemeContext';
@@ -117,14 +117,14 @@ const DeviceList: React.FC<DeviceListProps> = ({
       />
 
       {filteredDevices.length === 0 ? (
-        <EmptyState 
-          message={searchTerm || typeFilter ? t('devices.noDevicesFound') : t('devices.noDevices')}
-          description={searchTerm || typeFilter 
+        <EmptyState
+          title={searchTerm || typeFilter ? t('devices.noDevicesFound') : t('devices.noDevices')}
+          description={searchTerm || typeFilter
             ? t('devices.noDevicesFoundWithFilters')
             : t('devices.noDevicesDescription')
           }
           actionLabel={t('devices.add')}
-          onAddDevice={onAddDevice} 
+          onAction={onAddDevice}
         />
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '1rem' }}>

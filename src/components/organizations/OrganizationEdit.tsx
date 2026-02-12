@@ -20,7 +20,6 @@ interface OrganizationEditProps {
 const OrganizationEdit: React.FC<OrganizationEditProps> = ({
   formData,
   formErrors,
-  isLoading,
   isSubmitting,
   error,
   organizationName,

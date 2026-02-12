@@ -3,7 +3,7 @@ import AreaForm from './AreaForm';
 import AreaList from './AreaList';
 import AreaFilter from './AreaFilter';
 import AreaItem from './AreaItem';
-import EmptyState from './EmptyState';
+import EmptyState from '../common/EmptyState';
 import AreaCreate from './AreaCreate';
 import AreaEdit from './AreaEdit';
 

@@ -4,7 +4,7 @@ import Button from '../common/Button/Button';
 import type { Area } from '../../types/area';
 import AreaItem from './AreaItem';
 import AreaFilter from './AreaFilter';
-import EmptyState from './EmptyState';
+import EmptyState from '../common/EmptyState';
 
 interface AreaListComponentProps {
   areas: Area[];
@@ -71,7 +71,7 @@ const AreaListComponent: React.FC<AreaListComponentProps> = ({
       />
       {filteredAreas.length === 0 ? (
         <EmptyState
-          message={t('no_areas_found')}
+          title={t('no_areas_found')}
           description={t('no_areas_found_description')}
           actionLabel={t('add_area')}
           onAction={onAddArea}

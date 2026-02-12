@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Sensor } from '../../types/sensor';
-import EmptyState from './EmptyState';
+import EmptyState from '../common/EmptyState';
 import SensorFilter from './SensorFilter';
 import SensorItem from './SensorItem';
 import Button from '../common/Button/Button';
@@ -78,7 +78,7 @@ const SensorList: React.FC<SensorListProps> = ({
 
       {sensors.length === 0 ? (
         <EmptyState
-          message={t('sensors.noSensors')}
+          title={t('sensors.noSensors')}
           description={t('sensors.no_sensors_found_description')}
           actionLabel={t('sensors.add')}
           onAction={onAddSensor}

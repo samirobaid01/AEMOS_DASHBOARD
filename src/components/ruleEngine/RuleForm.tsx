@@ -410,7 +410,7 @@ const RuleForm: React.FC<RuleFormProps> = ({
   });
 
   return (
-    <div className="p-6">
+    <div>
       <form
         onSubmit={(e) => {
           e.preventDefault();

@@ -187,10 +187,13 @@ const RuleDetails: React.FC<RuleDetailsProps> = ({
                     <p className="text-sm font-medium text-textSecondary dark:text-textSecondary-dark mb-1 m-0">
                       {t('rules.configuration')}:
                     </p>
-                    <pre className="bg-surfaceHover dark:bg-surfaceHover-dark rounded border border-border dark:border-border-dark p-4 font-mono text-sm overflow-x-auto text-textPrimary dark:text-textPrimary-dark m-0">
+                    <pre className="bg-surfaceHover dark:bg-surfaceHover-dark rounded border border-border dark:border-border-dark p-4 font-mono text-sm overflow-x-auto text-textPrimary dark:text-textPrimary-dark m-0 mb-4">
                       {JSON.stringify(node.config, null, 2)}
                     </pre>
 
+                    <label className="block text-sm font-medium text-textSecondary dark:text-textSecondary-dark mb-2">
+                      {t('ruleEngine.nextNode')}
+                    </label>
                     <select
                       className={selectClasses}
                       value={node.nextNodeId === null ? '' : node.nextNodeId.toString()}

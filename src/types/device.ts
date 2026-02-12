@@ -1,6 +1,7 @@
 export type {
   Device,
   DeviceState,
+  NormalizedState,
   DeviceStateRecord,
   DeviceCreateRequest,
   DeviceUpdateRequest,

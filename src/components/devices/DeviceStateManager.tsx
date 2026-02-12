@@ -96,16 +96,6 @@ const DeviceStateManager: React.FC<DeviceStateManagerProps> = ({
     color: darkMode ? colors.textPrimary : '#111827'
   };
 
-  const buttonStyle = {
-    padding: '0.5rem 1rem',
-    borderRadius: '0.375rem',
-    border: 'none',
-    backgroundColor: darkMode ? '#4d7efa' : '#3b82f6',
-    color: 'white',
-    cursor: isLoading ? 'not-allowed' : 'pointer',
-    opacity: isLoading ? 0.7 : 1
-  };
-
   const stateListStyle = {
     display: 'grid',
     gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(300px, 1fr))',

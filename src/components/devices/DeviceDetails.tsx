@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
-import { useAppDispatch, useAppSelector } from '../../state/store';
+import { useAppDispatch } from '../../state/store';
+import { fetchDeviceStates } from '../../state/slices/deviceStates.slice';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import LoadingScreen from '../common/Loading/LoadingScreen';
@@ -9,11 +10,6 @@ import type { Area } from '../../types/area';
 import type { DeviceStatus } from '../../constants/device';
 import { useTheme } from '../../context/ThemeContext';
 import { useThemeColors } from '../../hooks/useThemeColors';
-import { fetchDeviceStates, selectDeviceStates, selectDeviceStatesLoading, selectDeviceStatesError } from '../../state/slices/deviceStates.slice';
-import StateDropdown from '../common/Select/StateDropdown';
-import { API_URL } from '../../config';
-import { useDeviceStateSocket } from '../../hooks/useDeviceStateSocket';
-import type { DeviceStateNotification } from '../../hooks/useDeviceStateSocket';
 import Button from '../common/Button/Button';
 import DeviceStateModal from './DeviceStateModal';
 
@@ -44,16 +40,6 @@ interface DeviceDetailsProps {
   socketError: Error | null;
 }
 
-interface DeviceState {
-  id: number;
-  stateName: string;
-  dataType: string;
-  defaultValue: string;
-  allowedValues: string[];
-  createdAt: string;
-  updatedAt: string;
-}
-
 const DeviceDetails: React.FC<DeviceDetailsProps> = ({
   device,
   organization,
@@ -76,13 +62,9 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({
 }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
   const { darkMode } = useTheme();
   const colors = useThemeColors();
-  const dispatch = useAppDispatch();
-  const deviceStates = useAppSelector(selectDeviceStates);
-  const statesLoading = useAppSelector(selectDeviceStatesLoading);
-  const statesError = useAppSelector(selectDeviceStatesError);
-  const authToken = useAppSelector((state) => state.auth.token);
   const isMobile = window.innerWidth < 768;
 
   // Remove socket connection since we're getting it from props now
@@ -424,7 +406,6 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({
 
         <div style={statesGridStyle}>
           {device.states.map((state) => {
-            const allowedValues = JSON.parse(state.allowedValues);
             const currentValue = state.instances[0]?.value || state.defaultValue;
 
             return (

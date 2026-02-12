@@ -44,18 +44,15 @@ const AreaListContainer = () => {
     }
   }, [dispatch,organization]);
   
-  // Apply defensive check before filtering
   const filteredAreas = areas.filter(area => {
-    const matchesSearch = 
+    const matchesSearch =
       area.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (area.description && area.description.toLowerCase().includes(searchTerm.toLowerCase()));
-    
-    const matchesOrganization = organizationFilter === '' || 
+    const matchesOrganization = organizationFilter === '' ||
       (area.organization && area.organization.name === organizationFilter);
-    
     return matchesSearch && matchesOrganization;
   });
-  
+
   // Get unique organization names for filter
   const organizations = Array.from(new Set(
     areas
@@ -73,7 +70,7 @@ const AreaListContainer = () => {
   
   return (
     <AreaList
-      areas={selectedArea ? [selectedArea] : areas}
+      areas={selectedArea ? [selectedArea] : filteredAreas}
       isLoading={isLoading}
       error={error}
       searchTerm={searchTerm}

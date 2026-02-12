@@ -88,8 +88,14 @@ export interface DeviceFilters {
   search?: string;
 }
 
+export interface NormalizedState<T> {
+  byId: Record<string, T>;
+  allIds: string[];
+}
+
 export interface DeviceState {
-  devices: Device[];
+  byId: Record<string, Device>;
+  allIds: string[];
   selectedDevice: Device | null;
   loading: boolean;
   error: string | null;
