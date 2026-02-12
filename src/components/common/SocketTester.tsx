@@ -525,7 +525,7 @@ const SocketTester: React.FC = () => {
             </div>
           ) : (
             logs.map((log, index) => (
-              <div key={index} style={{ marginBottom: '0.5rem', color: getLogColor(log.type) }}>
+              <div key={`log-${log.timestamp.getTime()}-${index}`} style={{ marginBottom: '0.5rem', color: getLogColor(log.type) }}>
                 <span style={{ color: darkMode ? '#6b7280' : '#9ca3af' }}>
                   [{log.timestamp.toLocaleTimeString()}]
                 </span>

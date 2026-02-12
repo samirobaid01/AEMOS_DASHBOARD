@@ -194,7 +194,7 @@ const DeviceStatesModal: React.FC<DeviceStatesModalProps> = ({
         <>
           <FormField label={t('devices.deviceState.allowedValue')}>
             {enumValues.map((value, index) => (
-              <div key={index} className="flex gap-2 mb-2">
+              <div key={`enum-${index}`} className="flex gap-2 mb-2">
                 <input
                   type="text"
                   value={value}

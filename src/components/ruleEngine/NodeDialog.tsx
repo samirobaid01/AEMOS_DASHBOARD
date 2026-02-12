@@ -594,7 +594,7 @@ const ExpressionGroup: React.FC<{
         </div>
 
         {group.expressions.map((expr, index) => (
-          <div key={index}>
+          <div key={`expr-${index}`}>
             {index > 0 && (
               <p className="my-2 text-center text-sm text-textSecondary dark:text-textSecondary-dark">
                 {group.type}

@@ -174,7 +174,7 @@ const DeviceStateTest: React.FC = () => {
       <div className="mt-5 border border-border dark:border-border-dark rounded p-3 h-[400px] overflow-y-auto bg-surfaceHover dark:bg-surfaceHover-dark">
         {events.map((event, index) => (
           <div
-            key={index}
+            key={`event-${event.timestamp.getTime()}-${index}`}
             className={`mb-2 p-2 rounded border-l-4 ${
               event.priority === 'high'
                 ? 'bg-dangerBg dark:bg-dangerBg-dark border-danger dark:border-danger-dark'

@@ -112,10 +112,11 @@ Reusable UI, typing, state shape, and rule-engine abstractions.
 
 - **Interfaces:** Prefer `interface` for objects; `type` for unions/aliases. Export from `types/` or feature `types.ts`.
 - **Props:** Name `ComponentNameProps`; in same file for tiny components, in `types.ts` when shared.
-- **Styling:** New code uses Tailwind; migrate existing in dedicated PRs. Use `cn()` to merge `className` with component defaults.
+- **Styling:** New code uses Tailwind; migrate existing in dedicated PRs. Use `cn()` to merge `className` with component defaults. **Form and button styling:** use `Button`, `Input`, `FormField` from `common/` and Tailwind only; do not introduce `.form-input`, `.form-label`, or `.btn*` in CSS or className. See `docs/CONVENTIONS.md` and P2-6.
 - **Components:** Prefer `common/` by default; add new primitives only when pattern appears in 2+ places. **common/** = no Redux, no API (P1-11).
 - **Features:** Do not import from another feature; only from `common/`, `types/`, and own feature (P0-10).
 - **i18n:** New UI strings use i18n from day one. **A11y:** FormField and modals keep labels, focus, Escape, ARIA where needed.
+- **List performance:** Use `React.memo` for list row components; use `key={id}` from backend where possible; avoid inline arrow functions in large list `.map()`; prefer stable callbacks or event-based handlers. See `docs/CONVENTIONS.md` and P2-9.
 
 ---
 

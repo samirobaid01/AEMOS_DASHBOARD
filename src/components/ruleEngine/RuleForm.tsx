@@ -442,7 +442,7 @@ const RuleForm: React.FC<RuleFormProps> = ({
 
               {nodes.map((node, index) => (
                 <div
-                  key={index}
+                  key={node.id}
                   className="mb-4 rounded-lg border border-border dark:border-border-dark bg-surfaceHover dark:bg-surfaceHover-dark p-4"
                 >
                   <div className="flex justify-between items-center mb-4">

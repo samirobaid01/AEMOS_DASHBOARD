@@ -143,7 +143,7 @@ const DynamicKeyValueInput: React.FC<DynamicKeyValueInputProps> = ({
       )}
       <div className="space-y-3">
         {(pairs || []).map((pair, index) => (
-         <div key={index} className="group relative flex flex-row gap-4 p-3 bg-white dark:bg-gray-800 rounded-lg 
+         <div key={`pair-${index}`} className="group relative flex flex-row gap-4 p-3 bg-white dark:bg-gray-800 rounded-lg 
          shadow-sm border border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-400 
          transition-all duration-200">
          {/* Key input - select or text */}

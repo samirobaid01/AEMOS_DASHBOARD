@@ -207,7 +207,7 @@ const SensorForm: React.FC<SensorFormProps> = ({
               )}
               {telemetryRows.map((row, index) => (
                 <div
-                  key={index}
+                  key={`telemetry-row-${index}`}
                   className="flex items-end gap-3 mb-4"
                 >
                   <div className="flex-1 min-w-0">
