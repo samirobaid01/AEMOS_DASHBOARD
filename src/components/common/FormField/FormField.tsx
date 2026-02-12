@@ -1,5 +1,4 @@
 import React from 'react';
-import { useThemeColors } from '../../../hooks/useThemeColors';
 
 export interface FormFieldProps {
   label?: string;
@@ -20,52 +19,22 @@ const FormField: React.FC<FormFieldProps> = ({
   className = '',
   children,
 }) => {
-  const colors = useThemeColors();
-
-  const rootStyle: React.CSSProperties = {
-    marginBottom: '1.5rem',
-  };
-
-  const labelStyle: React.CSSProperties = {
-    display: 'block',
-    fontSize: '0.875rem',
-    fontWeight: 500,
-    color: colors.textSecondary,
-    marginBottom: '0.5rem',
-  };
-
-  const requiredStyle: React.CSSProperties = {
-    color: colors.danger,
-  };
-
-  const errorStyle: React.CSSProperties = {
-    color: colors.dangerText,
-    fontSize: '0.875rem',
-    marginTop: '0.25rem',
-  };
-
-  const hintStyle: React.CSSProperties = {
-    color: colors.textMuted,
-    fontSize: '0.875rem',
-    marginTop: '0.25rem',
-  };
-
   return (
-    <div style={rootStyle} className={className}>
+    <div className={`mb-6 ${className}`}>
       {label != null && label !== '' && (
-        <label htmlFor={id} style={labelStyle}>
+        <label htmlFor={id} className="block text-sm font-medium text-textSecondary dark:text-textSecondary-dark mb-2">
           {label}
-          {required && <span style={requiredStyle}> *</span>}
+          {required && <span className="text-danger dark:text-danger-dark"> *</span>}
         </label>
       )}
       {children}
       {error != null && error !== '' && (
-        <p role="alert" style={errorStyle}>
+        <p role="alert" className="text-sm text-dangerText dark:text-dangerText-dark mt-1">
           {error}
         </p>
       )}
       {hint != null && hint !== '' && (error == null || error === '') && (
-        <p style={hintStyle}>{hint}</p>
+        <p className="text-sm text-textMuted dark:text-textMuted-dark mt-1">{hint}</p>
       )}
     </div>
   );

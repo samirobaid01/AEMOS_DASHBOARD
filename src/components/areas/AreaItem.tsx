@@ -2,7 +2,6 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import type { Area } from '../../types/area';
-import { useThemeColors } from '../../hooks/useThemeColors';
 
 interface AreaItemProps {
   area: Area;
@@ -11,106 +10,46 @@ interface AreaItemProps {
 
 const AreaItem: React.FC<AreaItemProps> = ({ area, windowWidth }) => {
   const { t } = useTranslation();
-  const colors = useThemeColors();
   const isMobile = windowWidth < 768;
 
+  const statusClass =
+    area.status === 'active'
+      ? 'bg-successBg dark:bg-successBg-dark text-successText dark:text-successText-dark'
+      : area.status === 'inactive'
+        ? 'bg-dangerBg dark:bg-dangerBg-dark text-dangerText dark:text-dangerText-dark'
+        : 'bg-border dark:bg-border-dark text-textSecondary dark:text-textSecondary-dark';
+
+  const dotClass =
+    area.status === 'active'
+      ? 'bg-success dark:bg-success-dark'
+      : area.status === 'inactive'
+        ? 'bg-danger dark:bg-danger-dark'
+        : 'bg-textMuted dark:bg-textMuted-dark';
+
   return (
-    <Link 
-      to={`/areas/${area.id}`} 
-      style={{
-        display: 'block',
-        padding: '1rem',
-        borderRadius: '0.5rem',
-        backgroundColor: colors.cardBackground,
-        border: `1px solid ${colors.cardBorder}`,
-        marginBottom: '0.75rem',
-        textDecoration: 'none',
-        transition: 'all 0.2s',
-        boxShadow: colors.cardShadow,
-      }}
-      onMouseOver={(e) => {
-        e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
-        e.currentTarget.style.transform = 'translateY(-2px)';
-      }}
-      onMouseOut={(e) => {
-        e.currentTarget.style.boxShadow = colors.cardShadow;
-        e.currentTarget.style.transform = 'translateY(0)';
-      }}
+    <Link
+      to={`/areas/${area.id}`}
+      className="block p-4 rounded-lg border border-border dark:border-border-dark bg-card dark:bg-card-dark shadow-sm mb-3 no-underline transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
     >
-      <div style={{
-        display: 'flex',
-        flexDirection: isMobile ? 'column' : 'row',
-        justifyContent: 'space-between',
-        alignItems: isMobile ? 'flex-start' : 'center',
-      }}>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <p style={{
-            fontSize: '1rem',
-            fontWeight: 600,
-            color: colors.info,
-            margin: '0 0 0.5rem 0',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-          }}>
+      <div className={`flex justify-between ${isMobile ? 'flex-col items-start gap-3' : 'flex-row items-center'}`}>
+        <div className="flex-1 min-w-0">
+          <p className="text-base font-semibold text-info dark:text-info-dark truncate m-0 mb-2">
             {area.name}
           </p>
-          
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            flexWrap: 'wrap',
-            marginBottom: '0.5rem',
-          }}>
+          <div className="flex items-center flex-wrap gap-2 mb-2">
             {area.organizationId && (
-              <span style={{
-                fontSize: '0.75rem',
-                backgroundColor: colors.infoBackground,
-                color: colors.infoText,
-                padding: '0.125rem 0.5rem',
-                borderRadius: '9999px',
-                marginRight: '0.5rem',
-                display: 'inline-block',
-              }}>
+              <span className="text-xs px-2 py-0.5 rounded-full bg-infoBg dark:bg-infoBg-dark text-infoText dark:text-infoText-dark inline-block">
                 {area.organization?.name || t('organization')}
               </span>
             )}
           </div>
-          
-          <p style={{
-            fontSize: '0.875rem',
-            color: colors.textMuted,
-            margin: 0,
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-          }}>
+          <p className="text-sm text-textMuted dark:text-textMuted-dark m-0 truncate">
             {area.description || t('areas.noDescription')}
           </p>
         </div>
-        
-        <div style={{
-          marginTop: isMobile ? '0.75rem' : 0,
-          marginLeft: isMobile ? 0 : '1rem',
-          flexShrink: 0,
-        }}>
-          <span style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            padding: '0.25rem 0.625rem',
-            borderRadius: '9999px',
-            fontSize: '0.75rem',
-            fontWeight: 500,
-            backgroundColor: area.status === 'active' ? colors.successBackground : area.status === 'inactive' ? colors.dangerBackground : colors.border,
-            color: area.status === 'active' ? colors.successText : area.status === 'inactive' ? colors.dangerText : colors.textSecondary,
-          }}>
-            <span style={{
-              width: '0.5rem',
-              height: '0.5rem',
-              borderRadius: '50%',
-              backgroundColor: area.status === 'active' ? colors.success : area.status === 'inactive' ? colors.danger : colors.textMuted,
-              marginRight: '0.375rem',
-            }}></span>
+        <div className={`flex-shrink-0 ${isMobile ? 'mt-0' : 'ml-4'}`}>
+          <span className={`inline-flex items-center py-1 px-2.5 rounded-full text-xs font-medium ${statusClass}`}>
+            <span className={`w-2 h-2 rounded-full mr-1.5 ${dotClass}`} />
             {t(area.status)}
           </span>
         </div>
@@ -119,4 +58,4 @@ const AreaItem: React.FC<AreaItemProps> = ({ area, windowWidth }) => {
   );
 };
 
-export default AreaItem; 
+export default AreaItem;

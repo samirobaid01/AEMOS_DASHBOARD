@@ -188,7 +188,7 @@ const DynamicKeyValueInput: React.FC<DynamicKeyValueInputProps> = ({
            size="sm"
            onClick={() => handleRemove(index)}
            title="Remove field"
-           style={{ minWidth: '2rem', padding: '0.25rem' }}
+           className="min-w-8 p-1"
          >
            <MinusCircleIcon className="h-6 w-6" />
          </Button>
@@ -199,7 +199,7 @@ const DynamicKeyValueInput: React.FC<DynamicKeyValueInputProps> = ({
         type="button"
         size="sm"
         onClick={() => handleAdd()}
-        style={{ marginTop: '0.5rem' }}
+        className="mt-2"
       >
         <PlusIcon className="h-4 w-4 mr-1.5" />
         {t('common.addField')}

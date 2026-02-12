@@ -1,24 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
-import {
-  TextField,
-  Button,
-  Typography,
-  IconButton,
-} from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import DeleteIcon from '@mui/icons-material/Delete';
-import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
-import EditIcon from '@mui/icons-material/Edit';
 import type { RuleChain } from '../../types/ruleEngine';
 import type { Device, DeviceStateRecord } from '../../types/device';
 import type { Sensor } from '../../types/sensor';
 import NodeDialog from './NodeDialog';
 import ActionDialog from './ActionDialog';
-import { useTheme } from '../../context/ThemeContext';
-import { useThemeColors } from '../../hooks/useThemeColors';
 import { useTranslation } from 'react-i18next';
 import { ruleFormResolver } from '../../utils/validation/ruleFormValidation';
+import Input from '../common/Input/Input';
+import Button from '../common/Button/Button';
+import FormField from '../common/FormField';
 
 interface RuleFormProps {
   initialData?: RuleChain;
@@ -106,8 +97,6 @@ const RuleForm: React.FC<RuleFormProps> = ({
   onFetchSensorDetails,
   onFetchDeviceStates
 }) => {
-  const { darkMode } = useTheme();
-  const colors = useThemeColors();
   const { t } = useTranslation();
   const [nodes, setNodes] = useState<NodeFormData[]>(() => {
     if (!initialData?.nodes) {
@@ -420,178 +409,142 @@ const RuleForm: React.FC<RuleFormProps> = ({
     },
   });
 
-  const formStyle = {
-    backgroundColor: darkMode ? colors.cardBackground : 'white',
-    borderRadius: '0.5rem',
-    boxShadow: darkMode 
-      ? '0 1px 3px 0 rgba(0, 0, 0, 0.2), 0 1px 2px 0 rgba(0, 0, 0, 0.1)' 
-      : '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
-    border: `1px solid ${darkMode ? colors.border : '#e5e7eb'}`,
-    padding: '1.5rem',
-  };
-
-  const formGroupStyle = {
-    marginBottom: '1.5rem',
-  };
-
-  const nodeListStyle = {
-    marginTop: '1.5rem',
-  };
-
-  const nodeItemStyle = {
-    marginBottom: '1rem',
-    backgroundColor: darkMode ? colors.surfaceBackground : '#f9fafb',
-    borderRadius: '0.5rem',
-    border: `1px solid ${darkMode ? colors.border : '#e5e7eb'}`,
-    padding: '1rem',
-  };
-
-  const nodeHeaderStyle = {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: '1rem',
-  };
-
-  const nodeActionsStyle = {
-    display: 'flex',
-    gap: '0.5rem',
-  };
-
-  const nodeConfigStyle = {
-    backgroundColor: darkMode ? colors.background : '#f3f4f6',
-    borderRadius: '0.375rem',
-    padding: '0.75rem',
-    fontFamily: 'monospace',
-    fontSize: '0.875rem',
-    overflowX: 'auto' as const,
-  };
-
-  const arrowStyle = {
-    display: 'flex',
-    justifyContent: 'center',
-    margin: '1rem 0',
-  };
-
   return (
-    <div style={{ padding: '1.5rem' }}>
-      <form 
+    <div className="p-6">
+      <form
         onSubmit={(e) => {
           e.preventDefault();
           handleSubmit(handleMainFormSubmit)(e);
-        }} 
-        style={formStyle}
+        }}
+        className="rounded-lg border border-border dark:border-border-dark bg-card dark:bg-card-dark shadow-sm p-6"
         noValidate
       >
-        <div style={formGroupStyle}>
+        <div className="mb-6">
           <Controller
             name="name"
             control={control}
             render={({ field }) => (
-              <TextField
+              <Input
                 {...field}
-                fullWidth
                 label={t('ruleEngine.ruleChainName')}
-                error={!!errors.name}
-                helperText={errors.name?.message}
-                sx={{ mb: 2 }}
+                error={errors.name?.message}
               />
             )}
           />
         </div>
 
-        <div style={formGroupStyle}>
+        <div className="mb-6">
           <Controller
             name="description"
             control={control}
             render={({ field }) => (
-              <TextField
-                {...field}
-                fullWidth
-                multiline
-                rows={3}
-                label={t('ruleEngine.ruleChainDescription')}
-                error={!!errors.description}
-                helperText={errors.description?.message}
-              />
+              <FormField label={t('ruleEngine.ruleChainDescription')} id="rule-form-description">
+                <textarea
+                  {...field}
+                  id="rule-form-description"
+                  rows={3}
+                  className="block w-full px-3 py-2 rounded border border-border dark:border-border-dark bg-surface dark:bg-surface-dark text-textPrimary dark:text-textPrimary-dark text-sm resize-y"
+                />
+                {errors.description?.message && (
+                  <p className="mt-1 text-sm text-danger dark:text-danger-dark">{errors.description.message}</p>
+                )}
+              </FormField>
             )}
           />
         </div>
 
         {showNodeSection && ruleChainId && (
           <>
-            <div style={nodeListStyle}>
-              <Typography variant="h6" gutterBottom>
+            <div className="mt-6">
+              <h2 className="text-lg font-semibold text-textPrimary dark:text-textPrimary-dark mb-2">
                 Rule Chain Nodes
-              </Typography>
+              </h2>
 
               {nodes.map((node, index) => (
-                <div key={index} style={nodeItemStyle}>
-                  <div style={nodeHeaderStyle}>
-                    <Typography variant="subtitle1">
+                <div
+                  key={index}
+                  className="mb-4 rounded-lg border border-border dark:border-border-dark bg-surfaceHover dark:bg-surfaceHover-dark p-4"
+                >
+                  <div className="flex justify-between items-center mb-4">
+                    <span className="text-base font-medium text-textPrimary dark:text-textPrimary-dark">
                       {node.type.charAt(0).toUpperCase() + node.type.slice(1)} Node {node.name}
-                    </Typography>
-                    <div style={nodeActionsStyle}>
-                      <IconButton
-                        size="small"
+                    </span>
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
                         onClick={() => node.type === 'filter' ? handleNodeDialogOpen(index) : handleActionDialogOpen(index)}
+                        title={t('common.edit')}
                       >
-                        <EditIcon />
-                      </IconButton>
-                      <IconButton
-                        size="small"
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="danger"
+                        size="sm"
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
                           handleNodeDelete(node.id);
                         }}
-                        color="error"
+                        title={t('common.delete')}
                       >
-                        <DeleteIcon />
-                      </IconButton>
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </Button>
                     </div>
                   </div>
 
-                  <div style={nodeConfigStyle}>
-                    <pre style={{ margin: 0 }}>
+                  <div className="rounded bg-background dark:bg-background-dark p-3 font-mono text-sm overflow-x-auto">
+                    <pre className="m-0">
                       {JSON.stringify(node.config, null, 2)}
                     </pre>
                   </div>
 
                   {index < nodes.length - 1 && (
-                    <div style={arrowStyle}>
-                      <ArrowDownwardIcon color="action" />
+                    <div className="flex justify-center my-4 text-textMuted dark:text-textMuted-dark">
+                      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                      </svg>
                     </div>
                   )}
                 </div>
               ))}
 
-              <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+              <div className="flex gap-4 mt-4">
                 <Button
                   type="button"
-                  variant="outlined"
-                  startIcon={<AddIcon />}
+                  variant="outline"
+                  className="flex-1"
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
                     handleNodeDialogOpen(null);
                   }}
-                  fullWidth
                 >
+                  <svg className="w-4 h-4 mr-1.5 inline-block" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
+                  </svg>
                   Add Node
                 </Button>
 
                 <Button
                   type="button"
-                  variant="outlined"
-                  startIcon={<AddIcon />}
+                  variant="outline"
+                  className="flex-1"
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
                     handleActionDialogOpen();
                   }}
-                  fullWidth
                 >
+                  <svg className="w-4 h-4 mr-1.5 inline-block" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
+                  </svg>
                   Add Action
                 </Button>
               </div>
@@ -643,13 +596,12 @@ const RuleForm: React.FC<RuleFormProps> = ({
         )}
 
         {!ruleChainId && (
-          <div style={{ marginTop: '2rem' }}>
+          <div className="mt-8">
             <Button
               type="submit"
-              variant="contained"
-              color="primary"
+              variant="primary"
               disabled={isLoading}
-              fullWidth
+              className="w-full"
             >
               {isLoading ? t('ruleEngine.saving') : t('ruleEngine.createRuleChain')}
             </Button>

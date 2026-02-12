@@ -1,6 +1,4 @@
 import React from 'react';
-import { useTheme } from '../../context/ThemeContext';
-import { useThemeColors } from '../../hooks/useThemeColors';
 import Button from '../common/Button/Button';
 
 interface EmptyStateProps {
@@ -18,33 +16,13 @@ const EmptyState: React.FC<EmptyStateProps> = ({
   onAction,
   icon
 }) => {
-  const { darkMode } = useTheme();
-  const colors = useThemeColors();
-
   return (
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '3rem 1rem',
-      backgroundColor: darkMode ? colors.cardBackground : 'white',
-      borderRadius: '0.5rem',
-      boxShadow: darkMode 
-        ? '0 1px 3px 0 rgba(0, 0, 0, 0.2), 0 1px 2px 0 rgba(0, 0, 0, 0.1)'
-        : '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
-      border: `1px solid ${darkMode ? colors.border : '#e5e7eb'}`,
-    }}>
+    <div className="flex flex-col items-center justify-center py-12 px-4 rounded-lg border border-border dark:border-border-dark bg-card dark:bg-card-dark shadow-sm">
       {icon ? (
         icon
       ) : (
         <svg
-          style={{
-            width: '3rem',
-            height: '3rem',
-            color: darkMode ? colors.textMuted : '#9ca3af',
-            marginBottom: '1rem'
-          }}
+          className="w-12 h-12 text-textMuted dark:text-textMuted-dark mb-4"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -58,32 +36,17 @@ const EmptyState: React.FC<EmptyStateProps> = ({
           />
         </svg>
       )}
-      
-      <h3 style={{
-        marginTop: '0.5rem',
-        fontSize: '1rem',
-        fontWeight: 500,
-        color: darkMode ? colors.textPrimary : '#111827',
-        textAlign: 'center'
-      }}>
+      <h3 className="mt-2 text-base font-medium text-textPrimary dark:text-textPrimary-dark text-center m-0">
         {message}
       </h3>
-      
-      <p style={{
-        marginTop: '0.5rem',
-        fontSize: '0.875rem',
-        color: darkMode ? colors.textMuted : '#6b7280',
-        maxWidth: '20rem',
-        textAlign: 'center'
-      }}>
+      <p className="mt-2 text-sm text-textMuted dark:text-textMuted-dark max-w-[20rem] text-center m-0">
         {description}
       </p>
-      
-      <Button type="button" onClick={onAction} style={{ marginTop: '1.5rem' }}>
+      <Button type="button" onClick={onAction} className="mt-6">
         {actionLabel}
       </Button>
     </div>
   );
 };
 
-export default EmptyState; 
+export default EmptyState;

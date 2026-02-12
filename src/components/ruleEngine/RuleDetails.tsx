@@ -1,12 +1,12 @@
 import React from 'react';
 import type { RuleChain } from '../../types/ruleEngine';
-import { useTheme } from '../../context/ThemeContext';
-import { useThemeColors } from '../../hooks/useThemeColors';
 import { useTranslation } from 'react-i18next';
 import { useRuleEnginePermissions } from '../../hooks/useRuleEnginePermissions';
-import Modal from '../../components/common/Modal/Modal';
+import Modal from '../common/Modal/Modal';
 import Button from '../common/Button/Button';
-import { FormControl, Select, MenuItem } from '@mui/material';
+
+const selectClasses =
+  'w-full mt-2 px-3 py-2 rounded border border-border dark:border-border-dark bg-surface dark:bg-surface-dark text-textPrimary dark:text-textPrimary-dark text-sm outline-none focus:ring-2 focus:ring-primary';
 
 interface RuleDetailsProps {
   rule: RuleChain | null;
@@ -19,9 +19,9 @@ interface RuleDetailsProps {
   windowWidth?: number;
 }
 
-const RuleDetails: React.FC<RuleDetailsProps> = ({ 
-  rule, 
-  isLoading, 
+const RuleDetails: React.FC<RuleDetailsProps> = ({
+  rule,
+  isLoading,
   error,
   onBack,
   onEdit,
@@ -31,8 +31,6 @@ const RuleDetails: React.FC<RuleDetailsProps> = ({
 }) => {
   const [showDeleteModal, setShowDeleteModal] = React.useState(false);
   const { t } = useTranslation();
-  const { darkMode } = useTheme();
-  const colors = useThemeColors();
   const isMobile = windowWidth < 768;
   const { canUpdate, canDelete } = useRuleEnginePermissions();
 
@@ -50,105 +48,21 @@ const RuleDetails: React.FC<RuleDetailsProps> = ({
     });
   };
 
-  const containerStyle = {
-    padding: isMobile ? '1rem' : '1.5rem 2rem',
-    backgroundColor: darkMode ? colors.background : 'transparent',
-  };
-
-  const cardStyle = {
-    backgroundColor: darkMode ? colors.cardBackground : 'white',
-    borderRadius: '0.5rem',
-    boxShadow: darkMode 
-      ? '0 1px 3px 0 rgba(0, 0, 0, 0.2), 0 1px 2px 0 rgba(0, 0, 0, 0.1)'
-      : '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
-    border: `1px solid ${darkMode ? colors.border : '#e5e7eb'}`,
-    padding: isMobile ? '1rem' : '1.5rem',
-  };
-
-  const headerStyle = {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: isMobile ? 'flex-start' : 'center',
-    flexDirection: isMobile ? 'column' as const : 'row' as const,
-    marginBottom: '1.5rem',
-    gap: isMobile ? '1rem' : '0',
-  };
-
-  const titleStyle = {
-    fontSize: '1.5rem',
-    fontWeight: 600,
-    color: darkMode ? colors.textPrimary : '#111827',
-    margin: 0,
-  };
-
-  const buttonGroupStyle = {
-    display: 'flex',
-    gap: '0.5rem',
-    flexWrap: isMobile ? 'wrap' as const : 'nowrap' as const,
-    width: isMobile ? '100%' : 'auto',
-  };
-
-  const dividerStyle = {
-    height: '1px',
-    backgroundColor: darkMode ? colors.border : '#e5e7eb',
-    margin: '1.5rem 0',
-  };
-
-  const sectionStyle = {
-    marginBottom: '1.5rem',
-  };
-
-  const labelStyle = {
-    fontSize: '0.875rem',
-    fontWeight: 500,
-    color: darkMode ? colors.textSecondary : '#6b7280',
-    marginBottom: '0.25rem',
-  };
-
-  const valueStyle = {
-    fontSize: '1rem',
-    color: darkMode ? colors.textPrimary : '#111827',
-    margin: '0',
-  };
-
-  const codeBlockStyle = {
-    backgroundColor: darkMode ? colors.surfaceBackground : '#f3f4f6',
-    borderRadius: '0.375rem',
-    padding: '1rem',
-    fontFamily: 'monospace',
-    fontSize: '0.875rem',
-    overflowX: 'auto' as const,
-    color: darkMode ? colors.textPrimary : '#111827',
-    border: `1px solid ${darkMode ? colors.border : '#e5e7eb'}`,
-  };
-
   if (isLoading) {
     return (
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        minHeight: '400px',
-      }}>
-        <div style={{
-          border: '4px solid #f3f3f3',
-          borderTop: `4px solid ${darkMode ? '#4d7efa' : '#3b82f6'}`,
-          borderRadius: '50%',
-          width: '40px',
-          height: '40px',
-          animation: 'spin 1s linear infinite',
-        }} />
+      <div className="flex justify-center items-center min-h-[400px]">
+        <div
+          className="w-10 h-10 rounded-full border-4 border-gray-200 dark:border-gray-700 border-t-primary dark:border-t-primary-dark animate-spin"
+          aria-hidden
+        />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div style={containerStyle}>
-        <p style={{
-          color: darkMode ? colors.dangerText : '#dc2626',
-          margin: '1rem 0',
-        }}>
+      <div className={`bg-background dark:bg-background-dark ${isMobile ? 'p-4' : 'p-6 px-8'}`}>
+        <p className="text-dangerText dark:text-dangerText-dark my-4 m-0">
           {error}
         </p>
       </div>
@@ -157,11 +71,8 @@ const RuleDetails: React.FC<RuleDetailsProps> = ({
 
   if (!rule) {
     return (
-      <div style={containerStyle}>
-        <p style={{
-          color: darkMode ? colors.textSecondary : '#6b7280',
-          margin: '1rem 0',
-        }}>
+      <div className={`bg-background dark:bg-background-dark ${isMobile ? 'p-4' : 'p-6 px-8'}`}>
+        <p className="text-textSecondary dark:text-textSecondary-dark my-4 m-0">
           {t('rules.notFound')}
         </p>
       </div>
@@ -169,34 +80,26 @@ const RuleDetails: React.FC<RuleDetailsProps> = ({
   }
 
   return (
-    <div style={containerStyle}>
-      <div style={headerStyle}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+    <div className={`bg-background dark:bg-background-dark ${isMobile ? 'p-4' : 'p-6 px-8'}`}>
+      <div className={`flex ${isMobile ? 'flex-col items-stretch' : 'flex-row justify-between items-center'} gap-4 mb-6`}>
+        <div className="flex items-center gap-4">
           {onBack && (
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={onBack}
-              style={{ padding: '0.5rem', minWidth: 'auto' }}
-            >
+            <Button type="button" variant="secondary" onClick={onBack} className="p-2 min-w-0">
               <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
               </svg>
             </Button>
           )}
-          <h1 style={titleStyle}>{rule.name}</h1>
+          <h1 className="text-2xl font-semibold text-textPrimary dark:text-textPrimary-dark m-0">
+            {rule.name}
+          </h1>
         </div>
 
         {(canUpdate || canDelete) && (
-          <div style={buttonGroupStyle}>
+          <div className={`flex gap-2 ${isMobile ? 'flex-wrap w-full' : 'flex-nowrap'}`}>
             {canUpdate && (
               <Button type="button" variant="primary" onClick={() => rule && onEdit(rule.id)}>
-                <svg
-                  style={{ width: '1rem', height: '1rem', marginRight: '0.375rem' }}
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
+                <svg className="w-4 h-4 mr-1.5 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -209,12 +112,7 @@ const RuleDetails: React.FC<RuleDetailsProps> = ({
             )}
             {canDelete && (
               <Button type="button" variant="danger" onClick={handleDeleteClick}>
-                <svg
-                  style={{ width: '1rem', height: '1rem', marginRight: '0.375rem' }}
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
+                <svg className="w-4 h-4 mr-1.5 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -229,95 +127,87 @@ const RuleDetails: React.FC<RuleDetailsProps> = ({
         )}
       </div>
 
-      <div style={cardStyle}>
-        <div style={sectionStyle}>
-          <p style={labelStyle}>{t('common.description')}</p>
-          <p style={valueStyle}>{rule.description}</p>
+      <div className={`rounded-lg border border-border dark:border-border-dark bg-card dark:bg-card-dark shadow-sm overflow-hidden ${isMobile ? 'p-4' : 'p-6'}`}>
+        <div className="mb-6">
+          <p className="text-sm font-medium text-textSecondary dark:text-textSecondary-dark mb-1 m-0">
+            {t('common.description')}
+          </p>
+          <p className="text-base text-textPrimary dark:text-textPrimary-dark m-0">
+            {rule.description}
+          </p>
         </div>
 
-        <div style={dividerStyle} />
+        <div className="h-px bg-border dark:bg-border-dark my-6" />
 
-        <div style={sectionStyle}>
-          <p style={labelStyle}>{t('common.createdAt')}</p>
-          <p style={valueStyle}>{formatDate(rule.createdAt)}</p>
-
-          <p style={{ ...labelStyle, marginTop: '1rem' }}>{t('common.lastUpdated')}</p>
-          <p style={valueStyle}>{formatDate(rule.updatedAt)}</p>
+        <div className="mb-6">
+          <p className="text-sm font-medium text-textSecondary dark:text-textSecondary-dark mb-1 m-0">
+            {t('common.createdAt')}
+          </p>
+          <p className="text-base text-textPrimary dark:text-textPrimary-dark m-0">
+            {formatDate(rule.createdAt)}
+          </p>
+          <p className="text-sm font-medium text-textSecondary dark:text-textSecondary-dark mt-4 mb-1 m-0">
+            {t('common.lastUpdated')}
+          </p>
+          <p className="text-base text-textPrimary dark:text-textPrimary-dark m-0">
+            {formatDate(rule.updatedAt)}
+          </p>
         </div>
 
-        <div style={dividerStyle} />
+        <div className="h-px bg-border dark:bg-border-dark my-6" />
 
         <div>
-          <h2 style={{
-            fontSize: '1.25rem',
-            fontWeight: 600,
-            color: darkMode ? colors.textPrimary : '#111827',
-            margin: '0 0 1rem 0',
-          }}>
+          <h2 className="text-xl font-semibold text-textPrimary dark:text-textPrimary-dark m-0 mb-4">
             {t('ruleEngine.ruleNode.title')}
           </h2>
 
           {rule?.nodes?.length === 0 ? (
-            <p style={{
-              color: darkMode ? colors.textSecondary : '#6b7280',
-              margin: '1rem 0',
-            }}>
+            <p className="text-textSecondary dark:text-textSecondary-dark my-4 m-0">
               {t('rules.noNodes')}
             </p>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              {
-              rule?.nodes?.map((node, index) => {
-                // Create options for the dropdown
+            <div className="flex flex-col gap-4">
+              {rule?.nodes?.map((node, index) => {
                 const nodeOptions = rule.nodes
-                  .filter(n => n.id !== node.id) // Exclude current node
-                  .map(n => ({
+                  .filter((n) => n.id !== node.id)
+                  .map((n) => ({
                     id: n.id,
-                    name: n.name || `${n.type.charAt(0).toUpperCase() + n.type.slice(1)} Node ${n.id}`
+                    name: n.name || `${n.type.charAt(0).toUpperCase() + n.type.slice(1)} Node ${n.id}`,
                   }));
 
                 return (
                   <div
                     key={node.id}
-                    style={{
-                      ...cardStyle,
-                      padding: '1rem',
-                      marginBottom: index < rule.nodes.length - 1 ? '1rem' : 0,
-                    }}
+                    className={`rounded-lg border border-border dark:border-border-dark bg-card dark:bg-card-dark p-4 ${index < rule.nodes.length - 1 ? 'mb-4' : ''}`}
                   >
-                    <h3 style={{
-                      fontSize: '1rem',
-                      fontWeight: 500,
-                      color: darkMode ? colors.textPrimary : '#111827',
-                      margin: '0 0 0.5rem 0',
-                    }}>
+                    <h3 className="text-base font-medium text-textPrimary dark:text-textPrimary-dark m-0 mb-2">
                       {node.name || `${node.type.charAt(0).toUpperCase() + node.type.slice(1)} Node ${node.id}`}
                     </h3>
 
-                    <p style={labelStyle}>{t('rules.configuration')}:</p>
-                    <pre style={codeBlockStyle}>
+                    <p className="text-sm font-medium text-textSecondary dark:text-textSecondary-dark mb-1 m-0">
+                      {t('rules.configuration')}:
+                    </p>
+                    <pre className="bg-surfaceHover dark:bg-surfaceHover-dark rounded border border-border dark:border-border-dark p-4 font-mono text-sm overflow-x-auto text-textPrimary dark:text-textPrimary-dark m-0">
                       {JSON.stringify(node.config, null, 2)}
                     </pre>
 
-                    <FormControl fullWidth sx={{ mt: 2 }}>
-                      <Select
-                        value={node.nextNodeId === null ? '' : node.nextNodeId.toString()}
-                        onChange={(e) => onNextNodeChange(
+                    <select
+                      className={selectClasses}
+                      value={node.nextNodeId === null ? '' : node.nextNodeId.toString()}
+                      onChange={(e) =>
+                        onNextNodeChange(
                           node.id,
                           e.target.value === '' ? null : Number(e.target.value)
-                        )}
-                        displayEmpty
-                      >
-                        <MenuItem value="">
-                          <em>Select next node</em>
-                        </MenuItem>
-                        {nodeOptions.map((option) => (
-                          <MenuItem key={option.id} value={option.id.toString()}>
-                            {option.name}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
+                        )
+                      }
+                    >
+                      <option value="">Select next node</option>
+                      {nodeOptions.map((option) => (
+                        <option key={option.id} value={option.id.toString()}>
+                          {option.name}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 );
               })}
@@ -330,7 +220,7 @@ const RuleDetails: React.FC<RuleDetailsProps> = ({
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
         title={t('ruleEngine.deleteConfirmation')}
-        footer={(
+        footer={
           <>
             <Button type="button" variant="secondary" onClick={() => setShowDeleteModal(false)}>
               {t('common.cancel')}
@@ -348,19 +238,12 @@ const RuleDetails: React.FC<RuleDetailsProps> = ({
               {t('common.delete')}
             </Button>
           </>
-        )}
+        }
       >
-        <p style={{
-          color: darkMode ? colors.textPrimary : '#111827',
-          margin: '0 0 1rem 0',
-        }}>
+        <p className="text-textPrimary dark:text-textPrimary-dark m-0 mb-4">
           {t('ruleEngine.deleteConfirmationMessage', { name: rule?.name })}
         </p>
-        <p style={{
-          color: darkMode ? colors.dangerText : '#dc2626',
-          margin: '0',
-          fontSize: '0.875rem',
-        }}>
+        <p className="text-dangerText dark:text-dangerText-dark m-0 text-sm">
           {t('common.thisActionCannotBeUndone')}
         </p>
       </Modal>
@@ -368,4 +251,4 @@ const RuleDetails: React.FC<RuleDetailsProps> = ({
   );
 };
 
-export default RuleDetails; 
+export default RuleDetails;

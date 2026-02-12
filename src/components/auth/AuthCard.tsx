@@ -7,60 +7,27 @@ interface AuthCardProps {
   children: React.ReactNode;
 }
 
-const AuthCard: React.FC<AuthCardProps> = ({ 
-  title, 
-  subtitle, 
-  icon = '🌾', 
-  children 
+const AuthCard: React.FC<AuthCardProps> = ({
+  title,
+  subtitle,
+  icon = '🌾',
+  children
 }) => {
   return (
-    <div style={{ 
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      minHeight: '100vh',
-      width: '100%',
-      background: 'linear-gradient(to bottom, #f0f9f1, #e0f2fe)',
-      padding: '0 1rem'
-    }}>
-      <div style={{ 
-        maxWidth: '28rem',
-        width: '100%',
-        margin: '0 auto',
-        backgroundColor: 'white',
-        borderRadius: '1rem',
-        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-        padding: '1.5rem',
-        border: '1px solid #dcf1df',
-        transition: 'all 0.3s ease'
-      }}>
-        <div style={{ 
-          textAlign: 'center',
-          marginBottom: '1.5rem'
-        }}>
-          <h1 style={{ 
-            fontSize: 'calc(1.25rem + 0.5vw)',
-            fontWeight: 'bold',
-            color: '#3c9c50',
-            marginBottom: '0.5rem'
-          }}>AEMOS <span style={{ color: '#d9a31b' }}>Agriculture</span></h1>
-          <div style={{ 
-            fontSize: 'calc(2rem + 1vw)',
-            marginBottom: '0.75rem'
-          }}>{icon}</div>
-          <h2 style={{ 
-            fontSize: 'calc(1.1rem + 0.3vw)',
-            fontWeight: 'bold',
-            color: '#674c3c'
-          }}>
+    <div className="flex items-center justify-center min-h-screen w-full bg-gradient-to-b from-leaf-50 to-sky-100 dark:from-gray-900 dark:to-gray-800 px-4">
+      <div className="max-w-md w-full mx-auto bg-card dark:bg-card-dark rounded-2xl shadow-lg p-6 border border-leaf-200 dark:border-border-dark transition-all duration-300">
+        <div className="text-center mb-6">
+          <h1 className="text-xl sm:text-2xl font-bold text-primary dark:text-primary-dark mb-2">
+            AEMOS <span className="text-warning dark:text-warning-dark">Agriculture</span>
+          </h1>
+          <div className="text-3xl sm:text-4xl mb-3">
+            {icon}
+          </div>
+          <h2 className="text-lg sm:text-xl font-bold text-soil-800 dark:text-textPrimary-dark">
             {title}
           </h2>
           {subtitle && (
-            <div style={{ 
-              marginTop: '0.5rem',
-              fontSize: '0.875rem',
-              color: '#7d5c42'
-            }}>
+            <div className="mt-2 text-sm text-soil-700 dark:text-textMuted-dark">
               {subtitle}
             </div>
           )}
@@ -71,4 +38,4 @@ const AuthCard: React.FC<AuthCardProps> = ({
   );
 };
 
-export default AuthCard; 
+export default AuthCard;
