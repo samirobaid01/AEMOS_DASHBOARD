@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { twMerge } from 'tailwind-merge';
+import Button from '../Button/Button';
 
 interface WalkthroughStepProps {
   targetSelector: string;
@@ -271,30 +272,24 @@ const WalkthroughStep: React.FC<WalkthroughStepProps> = ({
             
             <div className="flex space-x-2">
               {!isFirstStep && onPrev && (
-                <button
-                  className="px-3 py-1.5 text-xs font-medium rounded-md bg-transparent text-soil-700 dark:text-soil-300 border border-soil-300 dark:border-soil-700"
-                  onClick={onPrev}
-                >
+                <Button type="button" variant="secondary" onClick={onPrev} className="px-3 py-1.5 text-xs font-medium">
                   Previous
-                </button>
+                </Button>
               )}
-              
-              <button
-                className="px-3 py-1.5 text-xs font-medium rounded-md bg-leaf-600 dark:bg-leaf-700 text-white border-none"
-                onClick={onNext}
-              >
+              <Button type="button" onClick={onNext} className="px-3 py-1.5 text-xs font-medium">
                 {isLastStep ? 'Finish' : 'Next'}
-              </button>
+              </Button>
             </div>
           </div>
-          
-          <button
-            className="absolute top-2 right-2 text-soil-500 hover:text-soil-700 dark:text-soil-400 dark:hover:text-soil-200 bg-transparent border-none cursor-pointer text-base flex items-center justify-center w-6 h-6"
+          <Button
+            type="button"
+            variant="secondary"
             onClick={onSkip}
             aria-label="Skip walkthrough"
+            className="absolute top-2 right-2 text-base flex items-center justify-center w-6 h-6 min-w-0 p-0"
           >
             ×
-          </button>
+          </Button>
         </div>,
         document.body
       )}

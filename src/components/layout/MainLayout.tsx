@@ -6,6 +6,7 @@ import { clearCredentials, selectCurrentUser } from '../../state/slices/auth.sli
 import type { User } from '../../types/auth';
 import { useTheme } from '../../context/ThemeContext';
 import OrganizationSelector from '../common/OrganizationSelector/OrganizationSelector';
+import Button from '../common/Button/Button';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -142,18 +143,16 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             
             {/* Mobile close button - only visible on mobile */}
             {isMobile && (
-              <button
+              <Button
                 type="button"
-                style={{ 
-                  marginLeft: 'auto',
-                  color: darkMode ? '#d1d5db' : 'inherit'
-                }}
+                variant="secondary"
+                style={{ marginLeft: 'auto', padding: '0.5rem', minWidth: 'auto', color: darkMode ? '#d1d5db' : 'inherit' }}
                 onClick={() => setSidebarOpen(false)}
               >
                 <svg style={{ width: '24px', height: '24px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
-              </button>
+              </Button>
             )}
           </div>
 
@@ -227,19 +226,18 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                 }}>
                   {user?.userName || user?.email || 'User'}
                 </p>
-                <button
+                <Button
                   type="button"
-                  style={{ 
-                    marginTop: '4px', 
-                    fontSize: '13px', 
-                    fontWeight: 500, 
+                  variant="secondary"
+                  style={{
+                    marginTop: '4px',
+                    fontSize: '13px',
+                    fontWeight: 500,
                     color: '#16a34a',
                     background: 'none',
                     border: 'none',
                     padding: 0,
-                    display: 'flex',
-                    alignItems: 'center',
-                    cursor: 'pointer'
+                    minWidth: 'auto',
                   }}
                   onClick={handleLogout}
                 >
@@ -247,7 +245,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                   </svg>
                   {t('auth.logout')}
-                </button>
+                </Button>
               </div>
             </div>
           </div>
@@ -276,18 +274,16 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             zIndex: 10,
             color: darkMode ? '#d1d5db' : 'inherit'
           }}>
-            <button
+            <Button
               type="button"
-              style={{
-                padding: '16px',
-                color: darkMode ? '#d1d5db' : '#4b5563'
-              }}
+              variant="secondary"
+              style={{ padding: '16px', minWidth: 'auto', color: darkMode ? '#d1d5db' : '#4b5563' }}
               onClick={() => setSidebarOpen(true)}
             >
               <svg style={{ width: '24px', height: '24px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
-            </button>
+            </Button>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
               <span style={{ fontSize: '20px', marginRight: '8px' }}>🌿</span>
               <h1 style={{ fontSize: '16px', fontWeight: 'bold', color: '#166534' }}>

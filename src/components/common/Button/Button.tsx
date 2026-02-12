@@ -27,6 +27,7 @@ const Button: React.FC<ButtonProps> = ({
   children,
   className = '',
   icon,
+  style: styleProp,
   ...props
 }) => {
   const { darkMode } = useTheme();
@@ -120,7 +121,7 @@ const Button: React.FC<ButtonProps> = ({
     <button
       type="button"
       disabled={disabled || isLoading}
-      style={baseStyle}
+      style={{ ...baseStyle, ...(styleProp ?? {}) }}
       data-tracking-id={trackingId}
       onClick={handleClick}
       {...props}

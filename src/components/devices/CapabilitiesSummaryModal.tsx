@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 import { useThemeColors } from '../../hooks/useThemeColors';
 import type { DeviceCapabilities } from '../../types/device';
+import Button from '../common/Button/Button';
 
 interface CapabilitiesSummaryModalProps {
   isOpen: boolean;
@@ -117,41 +118,14 @@ const CapabilitiesSummaryModal: React.FC<CapabilitiesSummaryModalProps> = ({
             marginTop: '1.5rem',
           }}
         >
-          <button
-            type="button"
-            onClick={onClose}
-            style={{
-              padding: '0.5rem 1rem',
-              borderRadius: '0.375rem',
-              fontSize: '0.875rem',
-              fontWeight: 500,
-              cursor: 'pointer',
-              border: `1px solid ${darkMode ? colors.border : '#d1d5db'}`,
-              backgroundColor: darkMode ? colors.surfaceBackground : 'white',
-              color: darkMode ? colors.textSecondary : '#4b5563',
-            }}
-          >
+          <Button type="button" variant="secondary" onClick={onClose}>
             {t('common.cancel')}
-          </button>
-          <button
-            type="button"
-            onClick={onSave}
-            disabled={isSaving}
-            style={{
-              padding: '0.5rem 1rem',
-              borderRadius: '0.375rem',
-              fontSize: '0.875rem',
-              fontWeight: 500,
-              cursor: isSaving ? 'not-allowed' : 'pointer',
-              border: 'none',
-              backgroundColor: darkMode ? '#4d7efa' : '#3b82f6',
-              color: 'white',
-            }}
-          >
+          </Button>
+          <Button type="button" onClick={onSave} disabled={isSaving}>
             {isSaving
               ? t('devices.capabilities.saving')
               : t('devices.capabilities.saveCapabilities')}
-          </button>
+          </Button>
         </div>
       </div>
     </>

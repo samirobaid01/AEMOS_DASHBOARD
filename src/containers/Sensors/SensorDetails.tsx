@@ -4,6 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import SensorDetailsComponent from '../../components/sensors/SensorDetails';
 import LoadingScreen from '../../components/common/Loading/LoadingScreen';
+import Button from '../../components/common/Button/Button';
 import { fetchAreaById } from '../../state/slices/areas.slice';
 import { deleteSensor, fetchSensorById, selectSelectedSensor, selectSensorsError, selectSensorsLoading } from '../../state/slices/sensors.slice';
 import type { AppDispatch } from '../../state/store';
@@ -100,52 +101,23 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
           flexDirection: isMobile ? 'column' : 'row',
           gap: '0.5rem'
         }}>
-          <button
+          <Button
+            type="button"
+            variant="secondary"
             onClick={onCancel}
-            style={{
-              padding: '0.5rem 1rem',
-              backgroundColor: 'white',
-              color: '#4b5563',
-              border: '1px solid #d1d5db',
-              borderRadius: '0.375rem',
-              fontSize: '0.875rem',
-              fontWeight: 500,
-              cursor: 'pointer',
-              order: isMobile ? 2 : 1
-            }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.backgroundColor = '#f3f4f6';
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.backgroundColor = 'white';
-            }}
+            style={{ order: isMobile ? 2 : 1 }}
           >
             {t('cancel')}
-          </button>
-          <button
+          </Button>
+          <Button
+            type="button"
+            variant="danger"
             onClick={onConfirm}
             disabled={isLoading}
-            style={{
-              padding: '0.5rem 1rem',
-              backgroundColor: '#ef4444',
-              color: 'white',
-              border: 'none',
-              borderRadius: '0.375rem',
-              fontSize: '0.875rem',
-              fontWeight: 500,
-              cursor: isLoading ? 'not-allowed' : 'pointer',
-              opacity: isLoading ? 0.7 : 1,
-              order: isMobile ? 1 : 2
-            }}
-            onMouseOver={(e) => {
-              if (!isLoading) e.currentTarget.style.backgroundColor = '#dc2626';
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.backgroundColor = '#ef4444';
-            }}
+            style={{ order: isMobile ? 1 : 2 }}
           >
             {isLoading ? t('deleting') : t('delete')}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

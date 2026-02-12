@@ -8,6 +8,7 @@ import { deleteRule } from '../../state/slices/ruleEngine.slice';
 import { toastService } from '../../services/toastService';
 import { useTheme } from '../../context/ThemeContext';
 import { useThemeColors } from '../../hooks/useThemeColors';
+import Button from '../common/Button/Button';
 import Modal from '../common/Modal/Modal';
 
 interface RuleItemProps {
@@ -169,54 +170,12 @@ const RuleItem: React.FC<RuleItemProps> = ({ rule, windowWidth }) => {
 
   const deleteModalFooter = (
     <>
-      <button
-        onClick={() => setShowDeleteModal(false)}
-        style={{
-          padding: '0.5rem 1rem',
-          backgroundColor: darkMode ? colors.surfaceBackground : 'white',
-          color: darkMode ? colors.textSecondary : '#4b5563',
-          border: `1px solid ${darkMode ? colors.border : '#d1d5db'}`,
-          borderRadius: '0.375rem',
-          fontSize: '0.875rem',
-          fontWeight: 500,
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          transition: 'all 0.2s',
-        }}
-        onMouseOver={(e) => {
-          e.currentTarget.style.backgroundColor = darkMode ? colors.background : '#f3f4f6';
-        }}
-        onMouseOut={(e) => {
-          e.currentTarget.style.backgroundColor = darkMode ? colors.surfaceBackground : 'white';
-        }}
-      >
+      <Button type="button" variant="secondary" onClick={() => setShowDeleteModal(false)}>
         {t('common.cancel')}
-      </button>
-      <button
-        onClick={handleConfirmDelete}
-        style={{
-          padding: '0.5rem 1rem',
-          backgroundColor: darkMode ? '#ef5350' : '#ef4444',
-          color: 'white',
-          border: 'none',
-          borderRadius: '0.375rem',
-          fontSize: '0.875rem',
-          fontWeight: 500,
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          transition: 'all 0.2s',
-        }}
-        onMouseOver={(e) => {
-          e.currentTarget.style.backgroundColor = darkMode ? '#f44336' : '#dc2626';
-        }}
-        onMouseOut={(e) => {
-          e.currentTarget.style.backgroundColor = darkMode ? '#ef5350' : '#ef4444';
-        }}
-      >
+      </Button>
+      <Button type="button" variant="danger" onClick={handleConfirmDelete}>
         {t('common.delete')}
-      </button>
+      </Button>
     </>
   );
 
@@ -237,7 +196,9 @@ const RuleItem: React.FC<RuleItemProps> = ({ rule, windowWidth }) => {
         }}
       >
         <div style={{ position: "relative" }}>
-          <button
+          <Button
+            type="button"
+            variant="secondary"
             style={menuButtonStyle}
             onClick={(e) => {
               e.stopPropagation();
@@ -256,7 +217,7 @@ const RuleItem: React.FC<RuleItemProps> = ({ rule, windowWidth }) => {
                 fill="currentColor"
               />
             </svg>
-          </button>
+          </Button>
 
           {showMenu && (
             <div

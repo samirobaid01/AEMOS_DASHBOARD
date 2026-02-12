@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import { useThemeColors } from '../../hooks/useThemeColors';
+import Button from '../common/Button/Button';
 
 interface EmptyStateProps {
   message: string;
@@ -78,29 +79,9 @@ const EmptyState: React.FC<EmptyStateProps> = ({
         {description}
       </p>
       
-      <button 
-        onClick={onAction}
-        style={{
-          marginTop: '1.5rem',
-          padding: '0.5rem 1rem',
-          backgroundColor: darkMode ? '#4d7efa' : '#3b82f6',
-          color: 'white',
-          borderRadius: '0.375rem',
-          fontSize: '0.875rem',
-          fontWeight: 500,
-          border: 'none',
-          cursor: 'pointer',
-          transition: 'background-color 0.2s',
-        }}
-        onMouseOver={(e) => {
-          e.currentTarget.style.backgroundColor = darkMode ? '#5d8efa' : '#2563eb';
-        }}
-        onMouseOut={(e) => {
-          e.currentTarget.style.backgroundColor = darkMode ? '#4d7efa' : '#3b82f6';
-        }}
-      >
+      <Button type="button" onClick={onAction} style={{ marginTop: '1.5rem' }}>
         {actionLabel}
-      </button>
+      </Button>
     </div>
   );
 };

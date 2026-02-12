@@ -12,6 +12,9 @@ import type { DeviceCreateRequest } from '../../types/device';
 import type { Organization } from '../../types/organization';
 import type { Area } from '../../types/area';
 import type { FormErrors } from '../../types/ui';
+import FormField from '../common/FormField';
+import FormActions from '../common/FormActions';
+import Button from '../common/Button/Button';
 
 interface DeviceIdentityFormProps {
   formData: DeviceCreateRequest;
@@ -47,16 +50,6 @@ const DeviceIdentityForm: React.FC<DeviceIdentityFormProps> = ({
 
   const bodyStyle = { padding: '1.5rem' };
 
-  const fieldGroupStyle = { marginBottom: '1.5rem' };
-
-  const labelStyle = {
-    display: 'block' as const,
-    fontSize: '0.875rem',
-    fontWeight: 500,
-    color: darkMode ? colors.textSecondary : '#374151',
-    marginBottom: '0.5rem',
-  };
-
   const inputStyle = {
     display: 'block' as const,
     width: '100%',
@@ -88,44 +81,6 @@ const DeviceIdentityForm: React.FC<DeviceIdentityFormProps> = ({
     accentColor: darkMode ? '#4d7efa' : '#3b82f6',
   };
 
-  const buttonGroupStyle = {
-    display: 'flex',
-    justifyContent: 'flex-end' as const,
-    marginTop: '2rem',
-    gap: '0.75rem',
-    flexDirection: isMobile ? ('column-reverse' as const) : ('row' as const),
-  };
-
-  const buttonStyle = (variant: 'primary' | 'secondary') => ({
-    padding: '0.5rem 1rem',
-    backgroundColor:
-      variant === 'primary'
-        ? darkMode
-          ? '#4d7efa'
-          : '#3b82f6'
-        : darkMode
-          ? colors.surfaceBackground
-          : 'white',
-    color: variant === 'primary' ? 'white' : darkMode ? colors.textSecondary : '#4b5563',
-    border: variant === 'primary' ? 'none' : `1px solid ${darkMode ? colors.border : '#d1d5db'}`,
-    borderRadius: '0.375rem',
-    fontSize: '0.875rem',
-    fontWeight: 500,
-    cursor: isLoading ? 'not-allowed' : 'pointer',
-    opacity: isLoading ? 0.7 : 1,
-    flexGrow: isMobile ? 1 : 0,
-    minWidth: isMobile ? '0' : '5rem',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  });
-
-  const errorStyle = {
-    color: darkMode ? colors.dangerText : '#b91c1c',
-    fontSize: '0.875rem',
-    marginTop: '0.25rem',
-  };
-
   return (
     <form onSubmit={onSubmit} style={bodyStyle}>
             {error && (
@@ -144,10 +99,7 @@ const DeviceIdentityForm: React.FC<DeviceIdentityFormProps> = ({
             )}
 
             <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '1rem' }}>
-              <div style={fieldGroupStyle}>
-                <label htmlFor="name" style={labelStyle}>
-                  {t('devices.name')} <span style={{ color: darkMode ? '#ef5350' : '#ef4444' }}>*</span>
-                </label>
+              <FormField label={t('devices.name')} id="name" required error={formErrors.name}>
                 <input
                   type="text"
                   id="name"
@@ -157,13 +109,9 @@ const DeviceIdentityForm: React.FC<DeviceIdentityFormProps> = ({
                   required
                   style={inputStyle}
                 />
-                {formErrors.name && <p style={errorStyle}>{formErrors.name}</p>}
-              </div>
+              </FormField>
 
-              <div style={fieldGroupStyle}>
-                <label htmlFor="deviceType" style={labelStyle}>
-                  {t('devices.deviceType')} <span style={{ color: darkMode ? '#ef5350' : '#ef4444' }}>*</span>
-                </label>
+              <FormField label={t('devices.deviceType')} id="deviceType" required error={formErrors.deviceType}>
                 <select
                   id="deviceType"
                   name="deviceType"
@@ -179,15 +127,11 @@ const DeviceIdentityForm: React.FC<DeviceIdentityFormProps> = ({
                     </option>
                   ))}
                 </select>
-                {formErrors.deviceType && <p style={errorStyle}>{formErrors.deviceType}</p>}
-              </div>
+              </FormField>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '1rem' }}>
-              <div style={fieldGroupStyle}>
-                <label htmlFor="communicationProtocol" style={labelStyle}>
-                  {t('devices.selectProtocol')}
-                </label>
+              <FormField label={t('devices.selectProtocol')} id="communicationProtocol">
                 <select
                   id="communicationProtocol"
                   name="communicationProtocol"
@@ -202,12 +146,9 @@ const DeviceIdentityForm: React.FC<DeviceIdentityFormProps> = ({
                     </option>
                   ))}
                 </select>
-              </div>
+              </FormField>
 
-              <div style={fieldGroupStyle}>
-                <label htmlFor="status" style={labelStyle}>
-                  {t('devices.status')} <span style={{ color: darkMode ? '#ef5350' : '#ef4444' }}>*</span>
-                </label>
+              <FormField label={t('devices.status')} id="status" required>
                 <select id="status" name="status" value={formData.status} onChange={onChange} required style={selectStyle}>
                   {ALLOWED_STATUSES.map((status) => (
                     <option key={status} value={status}>
@@ -215,14 +156,11 @@ const DeviceIdentityForm: React.FC<DeviceIdentityFormProps> = ({
                     </option>
                   ))}
                 </select>
-              </div>
+              </FormField>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '1rem' }}>
-              <div style={fieldGroupStyle}>
-                <label htmlFor="organizationId" style={labelStyle}>
-                  {t('devices.organization')} <span style={{ color: darkMode ? '#ef5350' : '#ef4444' }}>*</span>
-                </label>
+              <FormField label={t('devices.organization')} id="organizationId" required error={formErrors.organizationId}>
                 <select
                   id="organizationId"
                   name="organizationId"
@@ -238,13 +176,9 @@ const DeviceIdentityForm: React.FC<DeviceIdentityFormProps> = ({
                     </option>
                   ))}
                 </select>
-                {formErrors.organizationId && <p style={errorStyle}>{formErrors.organizationId}</p>}
-              </div>
+              </FormField>
 
-              <div style={fieldGroupStyle}>
-                <label htmlFor="areaId" style={labelStyle}>
-                  {t('devices.area')}
-                </label>
+              <FormField label={t('devices.area')} id="areaId" error={formErrors.areaId}>
                 <select
                   id="areaId"
                   name="areaId"
@@ -261,14 +195,10 @@ const DeviceIdentityForm: React.FC<DeviceIdentityFormProps> = ({
                       </option>
                     ))}
                 </select>
-                {formErrors.areaId && <p style={errorStyle}>{formErrors.areaId}</p>}
-              </div>
+              </FormField>
             </div>
 
-            <div style={fieldGroupStyle}>
-              <label htmlFor="controlModes" style={labelStyle}>
-                {t('devices.controlModes')}
-              </label>
+            <FormField label={t('devices.controlModes')} id="controlModes">
               <select
                 id="controlModes"
                 name="controlModes"
@@ -286,9 +216,9 @@ const DeviceIdentityForm: React.FC<DeviceIdentityFormProps> = ({
                   </option>
                 ))}
               </select>
-            </div>
+            </FormField>
 
-            <div style={fieldGroupStyle}>
+            <FormField id="isCritical">
               <div style={checkboxWrapperStyle}>
                 <input
                   type="checkbox"
@@ -305,12 +235,9 @@ const DeviceIdentityForm: React.FC<DeviceIdentityFormProps> = ({
                   {t('devices.isCritical')}
                 </label>
               </div>
-            </div>
+            </FormField>
 
-            <div style={fieldGroupStyle}>
-              <label htmlFor="description" style={labelStyle}>
-                {t('devices.description')}
-              </label>
+            <FormField label={t('devices.description')} id="description">
               <textarea
                 id="description"
                 name="description"
@@ -319,16 +246,16 @@ const DeviceIdentityForm: React.FC<DeviceIdentityFormProps> = ({
                 onChange={onChange}
                 style={{ ...inputStyle, resize: 'vertical' as const, minHeight: '6rem' }}
               />
-            </div>
+            </FormField>
 
-            <div style={buttonGroupStyle}>
-              <button type="button" onClick={onCancel} style={buttonStyle('secondary')}>
+            <FormActions>
+              <Button type="button" variant="secondary" onClick={onCancel}>
                 {t('cancel')}
-              </button>
-              <button type="submit" disabled={isLoading} style={buttonStyle('primary')}>
+              </Button>
+              <Button type="submit" disabled={isLoading}>
                 {isLoading ? t('creating') : submitLabel ?? t('next')}
-              </button>
-            </div>
+              </Button>
+            </FormActions>
     </form>
   );
 };

@@ -11,6 +11,7 @@ import {
 import type { OrganizationUpdateRequest } from '../../types/organization';
 import type { FormErrors } from '../../types/ui';
 import LoadingScreen from '../../components/common/Loading/LoadingScreen';
+import Button from '../../components/common/Button/Button';
 import { OrganizationEdit as OrganizationEditComponent } from '../../components/organizations';
 
 const OrganizationEdit = () => {
@@ -137,12 +138,9 @@ const OrganizationEdit = () => {
             <h3 className="text-sm font-medium text-yellow-800">Organization not found</h3>
           </div>
           <div className="mt-4">
-            <button
-              className="rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-              onClick={() => navigate('/organizations')}
-            >
+            <Button type="button" variant="secondary" onClick={() => navigate('/organizations')}>
               Back to organizations
-            </button>
+            </Button>
           </div>
         </div>
       </div>

@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useTheme } from '../../../context/ThemeContext';
 import { useThemeColors } from '../../../hooks/useThemeColors';
 import type { ModalBaseProps } from '../../../types/ui';
+import Button from '../Button/Button';
 
 export interface ModalProps extends ModalBaseProps {
   title: string;
@@ -113,16 +114,12 @@ const Modal: React.FC<ModalProps> = ({
       >
         <div style={headerStyle}>
           <h2 id="modal-title" style={titleStyle}>{title}</h2>
-          <button
-            style={closeButtonStyle}
+          <Button
+            type="button"
+            variant="secondary"
             onClick={onClose}
             aria-label="Close modal"
-            onMouseOver={(e) => {
-              e.currentTarget.style.backgroundColor = darkMode ? 'rgba(0, 0, 0, 0.1)' : '#f3f4f6';
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.backgroundColor = 'transparent';
-            }}
+            style={closeButtonStyle}
           >
             <svg
               style={{ width: '1.25rem', height: '1.25rem' }}
@@ -137,7 +134,7 @@ const Modal: React.FC<ModalProps> = ({
                 d="M6 18L18 6M6 6l12 12"
               />
             </svg>
-          </button>
+          </Button>
         </div>
         <div style={contentStyle}>
           {children}

@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '../../state/store';
 import { selectCurrentUser, updateUser } from '../../state/slices/auth.slice';
 import usePermissions from '../../hooks/usePermissions';
+import Button from '../common/Button/Button';
 
 // Function to update user in Redux with permissions
 const AdminTools: React.FC = () => {
@@ -88,22 +89,6 @@ const AdminTools: React.FC = () => {
     alert('Quick fix applied! User now has all permissions.');
   };
 
-  const buttonStyle: React.CSSProperties = {
-    backgroundColor: '#16a34a',
-    color: 'white',
-    border: 'none',
-    borderRadius: '0.375rem',
-    padding: '0.5rem 1rem',
-    margin: '0.5rem',
-    cursor: 'pointer',
-    fontWeight: 500,
-  };
-
-  const warningButtonStyle = {
-    ...buttonStyle,
-    backgroundColor: '#ef4444',  // Red color for emergency fix
-  };
-
   return (
     <div style={{
       margin: '1rem',
@@ -115,16 +100,16 @@ const AdminTools: React.FC = () => {
       <h3 style={{ marginTop: 0 }}>Admin Tools</h3>
       <p>Current permissions: {user?.permissions?.join(', ') || 'None'}</p>
       <p>Current roles: {user?.roles?.join(', ') || 'None'}</p>
-      <div>
-        <button style={buttonStyle} onClick={makeSystemAdmin}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.5rem' }}>
+        <Button type="button" onClick={makeSystemAdmin}>
           Make System Admin
-        </button>
-        <button style={buttonStyle} onClick={grantAllPermissions}>
+        </Button>
+        <Button type="button" onClick={grantAllPermissions}>
           Grant All Permissions
-        </button>
-        <button style={warningButtonStyle} onClick={quickFix}>
+        </Button>
+        <Button type="button" variant="danger" onClick={quickFix}>
           Quick Fix (Emergency)
-        </button>
+        </Button>
       </div>
     </div>
   );

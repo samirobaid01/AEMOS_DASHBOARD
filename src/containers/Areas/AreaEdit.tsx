@@ -13,6 +13,7 @@ import { fetchOrganizations, selectOrganizations } from '../../state/slices/orga
 import type { AreaUpdateRequest } from '../../types/area';
 import type { FormErrors } from '../../types/ui';
 import LoadingScreen from '../../components/common/Loading/LoadingScreen';
+import Button from '../../components/common/Button/Button';
 import { AreaEdit as AreaEditComponent } from '../../components/areas';
 
 const AreaEdit = () => {
@@ -128,12 +129,9 @@ const AreaEdit = () => {
             <h3 className="text-sm font-medium text-yellow-800">{t('area_not_found')}</h3>
           </div>
           <div className="mt-4">
-            <button
-              className="rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50"
-              onClick={() => navigate('/areas')}
-            >
+            <Button type="button" variant="secondary" onClick={() => navigate('/areas')}>
               {t('areas.backToAreas')}
-            </button>
+            </Button>
           </div>
         </div>
       </div>

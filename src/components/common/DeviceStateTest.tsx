@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import { useThemeColors } from '../../hooks/useThemeColors';
+import Button from './Button/Button';
 import { useDeviceStateSocket } from '../../hooks/useDeviceStateSocket';
 import type { DeviceStateNotification } from '../../hooks/useDeviceStateSocket';
 import { TOKEN_STORAGE_KEY } from '../../config';
@@ -163,36 +164,12 @@ const DeviceStateTest: React.FC = () => {
       </div>
 
       <div style={{ margin: '20px 0', display: 'flex', gap: '10px' }}>
-        <button
-          onClick={handleConnect}
-          disabled={isConnected}
-          style={{
-            padding: '8px 12px',
-            backgroundColor: '#007bff',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: isConnected ? 'not-allowed' : 'pointer',
-            opacity: isConnected ? 0.65 : 1
-          }}
-        >
+        <Button type="button" onClick={handleConnect} disabled={isConnected}>
           Connect
-        </button>
-        <button
-          onClick={disconnect}
-          disabled={!isConnected}
-          style={{
-            padding: '8px 12px',
-            backgroundColor: '#dc3545',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: !isConnected ? 'not-allowed' : 'pointer',
-            opacity: !isConnected ? 0.65 : 1
-          }}
-        >
+        </Button>
+        <Button type="button" variant="danger" onClick={disconnect} disabled={!isConnected}>
           Disconnect
-        </button>
+        </Button>
       </div>
 
       <div style={{ margin: '20px 0' }}>
@@ -208,21 +185,9 @@ const DeviceStateTest: React.FC = () => {
               border: '1px solid #ced4da'
             }}
           />
-          <button
-            onClick={handleJoinDeviceRoom}
-            disabled={!isConnected}
-            style={{
-              padding: '8px 12px',
-              backgroundColor: '#007bff',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: !isConnected ? 'not-allowed' : 'pointer',
-              opacity: !isConnected ? 0.65 : 1
-            }}
-          >
+          <Button type="button" onClick={handleJoinDeviceRoom} disabled={!isConnected}>
             Join Device Room
-          </button>
+          </Button>
         </div>
         <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
           <input
@@ -236,40 +201,16 @@ const DeviceStateTest: React.FC = () => {
               border: '1px solid #ced4da'
             }}
           />
-          <button
-            onClick={handleJoinDeviceUuidRoom}
-            disabled={!isConnected}
-            style={{
-              padding: '8px 12px',
-              backgroundColor: '#007bff',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: !isConnected ? 'not-allowed' : 'pointer',
-              opacity: !isConnected ? 0.65 : 1
-            }}
-          >
+          <Button type="button" onClick={handleJoinDeviceUuidRoom} disabled={!isConnected}>
             Join Device UUID Room
-          </button>
+          </Button>
         </div>
       </div>
 
       <div style={{ margin: '20px 0' }}>
-        <button
-          onClick={handleTestStateChange}
-          disabled={!isConnected}
-          style={{
-            padding: '8px 12px',
-            backgroundColor: '#28a745',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: !isConnected ? 'not-allowed' : 'pointer',
-            opacity: !isConnected ? 0.65 : 1
-          }}
-        >
+        <Button type="button" onClick={handleTestStateChange} disabled={!isConnected}>
           Test State Change
-        </button>
+        </Button>
       </div>
 
       <h2 style={{ color: darkMode ? colors.textPrimary : '#333' }}>Event Log</h2>

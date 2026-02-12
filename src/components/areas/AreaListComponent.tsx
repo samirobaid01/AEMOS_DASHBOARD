@@ -54,20 +54,6 @@ const AreaListComponent: React.FC<AreaListComponentProps> = ({
     fontFamily: 'system-ui, -apple-system, sans-serif'
   };
 
-  const buttonStyle = {
-    padding: '0.5rem 1rem',
-    backgroundColor: '#3b82f6',
-    color: 'white',
-    border: 'none',
-    borderRadius: '0.375rem',
-    fontSize: '0.875rem',
-    fontWeight: 500,
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    transition: 'all 0.2s',
-  };
-
   const errorStyle = {
     backgroundColor: '#fee2e2',
     padding: '1rem',
@@ -85,18 +71,9 @@ const AreaListComponent: React.FC<AreaListComponentProps> = ({
       <div style={{ padding: isMobile ? '1rem' : '1.5rem 2rem' }}>
         <div style={headerStyle}>
           <h1 style={titleStyle}>{t('areas.title')}</h1>
-          <button
-            onClick={onAddArea}
-            style={buttonStyle}
-            onMouseOver={(e) => {
-              e.currentTarget.style.backgroundColor = '#2563eb';
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.backgroundColor = '#3b82f6';
-            }}
-          >
+          <Button type="button" onClick={onAddArea}>
             {t('add_area')}
-          </button>
+          </Button>
         </div>
         <div style={errorStyle}>
           <svg 
@@ -120,29 +97,20 @@ const AreaListComponent: React.FC<AreaListComponentProps> = ({
     <div style={{ padding: isMobile ? '1rem' : '1.5rem 2rem' }}>
       <div style={headerStyle}>
         <h1 style={titleStyle}>{t('areas.title')}</h1>
-        <button
-          onClick={onAddArea}
-          style={buttonStyle}
-          onMouseOver={(e) => {
-            e.currentTarget.style.backgroundColor = '#2563eb';
-          }}
-          onMouseOut={(e) => {
-            e.currentTarget.style.backgroundColor = '#3b82f6';
-          }}
-        >
-          <svg 
-            style={{ width: '1rem', height: '1rem', marginRight: '0.375rem' }} 
-            fill="currentColor" 
+        <Button type="button" onClick={onAddArea}>
+          <svg
+            style={{ width: '1rem', height: '1rem', marginRight: '0.375rem' }}
+            fill="currentColor"
             viewBox="0 0 20 20"
           >
-            <path 
-              fillRule="evenodd" 
-              d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" 
-              clipRule="evenodd" 
+            <path
+              fillRule="evenodd"
+              d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+              clipRule="evenodd"
             />
           </svg>
           {t('add_area')}
-        </button>
+        </Button>
       </div>
 
       <AreaFilter

@@ -5,6 +5,7 @@ import { fetchOrganizations, selectOrganizations } from '../../../state/slices/o
 import { selectSelectedOrganizationId, setSelectedOrganization } from '../../../state/slices/auth.slice';
 import type { AppDispatch } from '../../../state/store';
 import { useTheme } from '../../../context/ThemeContext';
+import Button from '../Button/Button';
 
 const OrganizationSelector: React.FC = () => {
   const { t } = useTranslation();
@@ -121,8 +122,9 @@ const OrganizationSelector: React.FC = () => {
 
   return (
     <div style={dropdownContainerStyle} data-dropdown="org-selector">
-      <button
+      <Button
         type="button"
+        variant="secondary"
         onClick={() => setIsOpen(!isOpen)}
         style={dropdownButtonStyle}
       >
@@ -130,7 +132,6 @@ const OrganizationSelector: React.FC = () => {
         <span>
           {selectedOrganization ? selectedOrganization.name : t('organizations.select_organization')}
         </span>
-        {/* Only show dropdown arrow if there are multiple organizations */}
         {showDropdownControls && (
           <svg
             style={{ width: '16px', height: '16px', marginLeft: '8px' }}
@@ -147,7 +148,7 @@ const OrganizationSelector: React.FC = () => {
             />
           </svg>
         )}
-      </button>
+      </Button>
 
       {/* Only show dropdown menu if there are multiple organizations */}
       {showDropdownControls && (

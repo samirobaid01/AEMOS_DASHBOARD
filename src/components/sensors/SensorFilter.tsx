@@ -2,6 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 import { useThemeColors } from '../../hooks/useThemeColors';
+import FormField from '../common/FormField';
 
 interface SensorFilterProps {
   searchTerm: string;
@@ -45,13 +46,6 @@ const SensorFilter: React.FC<SensorFilterProps> = ({
     flex: 1,
   };
 
-  const labelStyle = {
-    fontSize: '0.875rem',
-    fontWeight: 500,
-    color: darkMode ? colors.textSecondary : '#4b5563',
-    marginBottom: '0.5rem',
-  };
-
   const inputStyle = {
     padding: '0.5rem 0.75rem',
     fontSize: '0.875rem',
@@ -78,36 +72,34 @@ const SensorFilter: React.FC<SensorFilterProps> = ({
   return (
     <div style={filterContainerStyle}>
       <div style={inputGroupStyle}>
-        <label htmlFor="sensorSearch" style={labelStyle}>
-          {t('common.search')}
-        </label>
-        <input
-          id="sensorSearch"
-          type="text"
-          placeholder={t('common.search')}
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          style={inputStyle}
-        />
+        <FormField label={t('common.search')} id="sensorSearch">
+          <input
+            id="sensorSearch"
+            type="text"
+            placeholder={t('common.search')}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            style={inputStyle}
+          />
+        </FormField>
       </div>
 
       <div style={inputGroupStyle}>
-        <label htmlFor="sensorTypeFilter" style={labelStyle}>
-          {t('sensors.type')}
-        </label>
-        <select
-          id="sensorTypeFilter"
-          value={typeFilter}
-          onChange={(e) => setTypeFilter(e.target.value)}
-          style={selectStyle}
-        >
-          <option value="">{t('common.all')}</option>
-          {sensorTypes.map((type) => (
-            <option key={type} value={type}>
-              {type}
-            </option>
-          ))}
-        </select>
+        <FormField label={t('sensors.type')} id="sensorTypeFilter">
+          <select
+            id="sensorTypeFilter"
+            value={typeFilter}
+            onChange={(e) => setTypeFilter(e.target.value)}
+            style={selectStyle}
+          >
+            <option value="">{t('common.all')}</option>
+            {sensorTypes.map((type) => (
+              <option key={type} value={type}>
+                {type}
+              </option>
+            ))}
+          </select>
+        </FormField>
       </div>
     </div>
   );

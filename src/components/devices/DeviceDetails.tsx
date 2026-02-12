@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '../../state/store';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import LoadingScreen from '../common/Loading/LoadingScreen';
 import type { Device } from '../../types/device';
@@ -75,6 +75,7 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({
   socketError
 }) => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { darkMode } = useTheme();
   const colors = useThemeColors();
   const dispatch = useAppDispatch();
@@ -115,7 +116,7 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({
     display: 'flex',
     gap: '0.5rem',
     flexWrap: isMobile ? 'wrap' as const : 'nowrap' as const,
-    width: isMobile ? '100%' : 'auto'
+    width: isMobile ? '100%' : 'auto',
   };
 
   const buttonStyle = (variant: 'primary' | 'secondary' | 'danger') => ({
@@ -196,7 +197,7 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({
   };
 
   const getStatusBadgeStyle = (status: DeviceStatus) => {
-    const colors = {
+    const statusColors: Record<DeviceStatus, { bg: string; text: string; dot: string }> = {
       active: {
         bg: darkMode ? 'rgba(52, 211, 153, 0.2)' : '#dcfce7',
         text: darkMode ? '#34d399' : '#166534',
@@ -211,8 +212,24 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({
         bg: darkMode ? 'rgba(234, 179, 8, 0.2)' : '#fef3c7',
         text: darkMode ? '#eab308' : '#92400e',
         dot: '#eab308'
+      },
+      maintenance: {
+        bg: darkMode ? 'rgba(249, 115, 22, 0.2)' : '#ffedd5',
+        text: darkMode ? '#fb923c' : '#c2410c',
+        dot: '#ea580c'
+      },
+      faulty: {
+        bg: darkMode ? 'rgba(239, 68, 68, 0.2)' : '#fee2e2',
+        text: darkMode ? '#ef4444' : '#b91c1c',
+        dot: '#ef4444'
+      },
+      retired: {
+        bg: darkMode ? 'rgba(107, 114, 128, 0.2)' : '#f3f4f6',
+        text: darkMode ? '#9ca3af' : '#6b7280',
+        dot: '#6b7280'
       }
     };
+    const colors = statusColors[status];
 
     return {
       display: 'inline-flex',
@@ -221,13 +238,13 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({
       borderRadius: '9999px',
       fontSize: '0.75rem',
       fontWeight: 500,
-      backgroundColor: colors[status].bg,
-      color: colors[status].text,
+      backgroundColor: colors.bg,
+      color: colors.text,
       dot: {
         width: '0.5rem',
         height: '0.5rem',
         borderRadius: '50%',
-        backgroundColor: colors[status].dot,
+        backgroundColor: colors.dot,
         marginRight: '0.375rem'
       }
     };
@@ -303,18 +320,9 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({
           }}>
             {error}
           </div>
-          <button
-            onClick={onNavigateBack}
-            style={buttonStyle('secondary')}
-            onMouseOver={(e) => {
-              e.currentTarget.style.backgroundColor = darkMode ? 'rgba(0, 0, 0, 0.1)' : '#f9fafb';
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.backgroundColor = darkMode ? colors.surfaceBackground : 'white';
-            }}
-          >
+          <Button type="button" variant="secondary" onClick={onNavigateBack}>
             {t('common.back')}
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -333,18 +341,9 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({
           }}>
             {t('devices.deviceNotFound')}
           </div>
-          <button
-            onClick={onNavigateBack}
-            style={buttonStyle('secondary')}
-            onMouseOver={(e) => {
-              e.currentTarget.style.backgroundColor = darkMode ? 'rgba(0, 0, 0, 0.1)' : '#f9fafb';
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.backgroundColor = darkMode ? colors.surfaceBackground : 'white';
-            }}
-          >
+          <Button type="button" variant="secondary" onClick={onNavigateBack}>
             {t('devices.backToDevices')}
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -388,27 +387,26 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({
             )}
           </h2>
           
-          <Link to={`/debug/device-state-test`} style={{ textDecoration: 'none' }}>
-            <button
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                padding: '0.5rem 0.75rem',
-                backgroundColor: darkMode ? colors.infoBackground : '#dbeafe',
-                color: darkMode ? colors.infoText : '#1e40af',
-                border: 'none',
-                borderRadius: '0.375rem',
-                fontSize: '0.75rem',
-                fontWeight: 500,
-                cursor: 'pointer',
-              }}
-            >
-              <svg style={{ width: '0.875rem', height: '0.875rem', marginRight: '0.375rem' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-              {t('devices.detail.socketDebug')}
-            </button>
-          </Link>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => navigate('/debug/device-state-test')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              padding: '0.5rem 0.75rem',
+              fontSize: '0.75rem',
+              backgroundColor: darkMode ? colors.infoBackground : '#dbeafe',
+              color: darkMode ? colors.infoText : '#1e40af',
+              border: 'none',
+            }}
+          >
+            <svg style={{ width: '0.875rem', height: '0.875rem', marginRight: '0.375rem' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            {t('devices.detail.socketDebug')}
+          </Button>
         </div>
 
         {socketError && (
@@ -514,24 +512,14 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({
       <div style={contentContainerStyle}>
         <div style={headerStyle}>
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            <button
+            <Button
+              type="button"
+              variant="secondary"
               onClick={onNavigateBack}
               style={{
-                backgroundColor: 'transparent',
-                border: 'none',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
                 marginRight: '0.75rem',
                 padding: '0.5rem',
-                borderRadius: '0.375rem',
-                cursor: 'pointer'
-              }}
-              onMouseOver={(e) => {
-                e.currentTarget.style.backgroundColor = darkMode ? colors.surfaceBackground : '#f3f4f6';
-              }}
-              onMouseOut={(e) => {
-                e.currentTarget.style.backgroundColor = 'transparent';
+                minWidth: 'auto',
               }}
             >
               <svg
@@ -551,7 +539,7 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({
                   d="M10 19l-7-7m0 0l7-7m-7 7h18"
                 />
               </svg>
-            </button>
+            </Button>
             <h1 style={titleStyle}>{device.name}</h1>
           </div>
 
@@ -581,16 +569,7 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({
               </svg>
               {t('edit')}
             </Link>
-            <button
-              onClick={onOpenDeleteModal}
-              style={buttonStyle('danger')}
-              onMouseOver={(e) => {
-                e.currentTarget.style.backgroundColor = darkMode ? '#f44336' : '#dc2626';
-              }}
-              onMouseOut={(e) => {
-                e.currentTarget.style.backgroundColor = darkMode ? '#ef5350' : '#ef4444';
-              }}
-            >
+            <Button type="button" variant="danger" onClick={onOpenDeleteModal}>
               <svg
                 style={{ width: '1rem', height: '1rem', marginRight: '0.375rem' }}
                 fill="none"
@@ -605,7 +584,7 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({
                 />
               </svg>
               {t('delete')}
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -834,39 +813,12 @@ const DeviceDetails: React.FC<DeviceDetailsProps> = ({
               gap: '0.5rem',
               justifyContent: 'flex-end'
             }}>
-              <button
-                onClick={onCloseDeleteModal}
-                style={buttonStyle('secondary')}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.backgroundColor = darkMode ? 'rgba(0, 0, 0, 0.1)' : '#f9fafb';
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.backgroundColor = darkMode ? colors.surfaceBackground : 'white';
-                }}
-              >
+              <Button type="button" variant="secondary" onClick={onCloseDeleteModal}>
                 {t('cancel')}
-              </button>
-              <button
-                onClick={onDelete}
-                disabled={isDeleting}
-                style={{
-                  ...buttonStyle('danger'),
-                  opacity: isDeleting ? 0.7 : 1,
-                  cursor: isDeleting ? 'not-allowed' : 'pointer'
-                }}
-                onMouseOver={(e) => {
-                  if (!isDeleting) {
-                    e.currentTarget.style.backgroundColor = darkMode ? '#f44336' : '#dc2626';
-                  }
-                }}
-                onMouseOut={(e) => {
-                  if (!isDeleting) {
-                    e.currentTarget.style.backgroundColor = darkMode ? '#ef5350' : '#ef4444';
-                  }
-                }}
-              >
+              </Button>
+              <Button type="button" variant="danger" onClick={onDelete} disabled={isDeleting}>
                 {isDeleting ? t('deleting') : t('delete')}
-              </button>
+              </Button>
             </div>
           </div>
         </div>

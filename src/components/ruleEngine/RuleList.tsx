@@ -4,6 +4,7 @@ import type { RuleChain } from "../../types/ruleEngine";
 import RuleItem from "./RuleItem";
 import RuleFilter from "./RuleFilter";
 import EmptyState from "./EmptyState";
+import Button from "../common/Button/Button";
 import { useTheme } from "../../context/ThemeContext";
 import { useThemeColors } from "../../hooks/useThemeColors";
 
@@ -49,20 +50,6 @@ const RuleList: React.FC<RuleListProps> = ({
     fontFamily: "system-ui, -apple-system, sans-serif",
   };
 
-  const buttonStyle = {
-    padding: "0.5rem 1rem",
-    backgroundColor: darkMode ? "#4d7efa" : "#3b82f6",
-    color: "white",
-    border: "none",
-    borderRadius: "0.375rem",
-    fontSize: "0.875rem",
-    fontWeight: 500,
-    cursor: "pointer",
-    display: "flex",
-    alignItems: "center",
-    transition: "all 0.2s",
-  };
-
   const errorStyle = {
     backgroundColor: darkMode ? colors.dangerBackground : "#fee2e2",
     padding: "1rem",
@@ -85,22 +72,9 @@ const RuleList: React.FC<RuleListProps> = ({
       >
         <div style={headerStyle}>
           <h1 style={titleStyle}>{t("ruleEngine.title")}</h1>
-          <button
-            onClick={onAddRule}
-            style={buttonStyle}
-            onMouseOver={(e) => {
-              e.currentTarget.style.backgroundColor = darkMode
-                ? "#5d8efa"
-                : "#2563eb";
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.backgroundColor = darkMode
-                ? "#4d7efa"
-                : "#3b82f6";
-            }}
-          >
+          <Button type="button" onClick={onAddRule}>
             {t("ruleEngine.add")}
-          </button>
+          </Button>
         </div>
         <div style={errorStyle}>
           <svg
@@ -133,20 +107,7 @@ const RuleList: React.FC<RuleListProps> = ({
     >
       <div style={headerStyle}>
         <h1 style={titleStyle}>{t("ruleEngine.title")}</h1>
-        <button
-          onClick={onAddRule}
-          style={buttonStyle}
-          onMouseOver={(e) => {
-            e.currentTarget.style.backgroundColor = darkMode
-              ? "#5d8efa"
-              : "#2563eb";
-          }}
-          onMouseOut={(e) => {
-            e.currentTarget.style.backgroundColor = darkMode
-              ? "#4d7efa"
-              : "#3b82f6";
-          }}
-        >
+        <Button type="button" onClick={onAddRule}>
           <svg
             style={{ width: "1rem", height: "1rem", marginRight: "0.375rem" }}
             fill="currentColor"
@@ -159,7 +120,7 @@ const RuleList: React.FC<RuleListProps> = ({
             />
           </svg>
           {t("ruleEngine.add")}
-        </button>
+        </Button>
       </div>
 
       <RuleFilter
