@@ -25,16 +25,11 @@ const FormActions: React.FC<FormActionsProps> = ({
   }, [stackOnMobile]);
 
   const stack = stackOnMobile && isNarrow;
-  const containerStyle: React.CSSProperties = {
-    display: 'flex',
-    justifyContent: 'flex-end',
-    marginTop: '2rem',
-    gap: '0.75rem',
-    flexDirection: stack ? 'column-reverse' : 'row',
-  };
 
   return (
-    <div style={containerStyle} className={className}>
+    <div
+      className={`flex justify-end mt-8 gap-3 ${stack ? 'flex-col-reverse' : 'flex-row'} ${className}`}
+    >
       {children}
     </div>
   );

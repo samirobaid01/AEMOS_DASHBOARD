@@ -1,19 +1,13 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  Select,
-  MenuItem,
-  TextField,
-  FormControl,
-  InputLabel,
-  Typography,
-  Box,
-} from '@mui/material';
 import type { Device, DeviceStateRecord } from '../../types/device';
+import Modal from '../common/Modal/Modal';
+import Button from '../common/Button/Button';
+import FormField from '../common/FormField';
+
+const inputClasses =
+  'w-full px-3 py-2 rounded border border-border dark:border-border-dark bg-surface dark:bg-surface-dark text-textPrimary dark:text-textPrimary-dark text-sm outline-none focus:ring-2 focus:ring-primary';
+const selectClasses =
+  'w-full px-3 py-2 rounded border border-border dark:border-border-dark bg-surface dark:bg-surface-dark text-textPrimary dark:text-textPrimary-dark text-sm outline-none focus:ring-2 focus:ring-primary';
 
 interface ActionDialogProps {
   open: boolean;
@@ -118,22 +112,15 @@ const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
   }, [open, mode, initialData, devices, onFetchDeviceStates]);
 
   const handleDeviceChange = async (deviceUuid: string) => {
-    console.log('Device changed to:', deviceUuid);
     setSelectedDevice(deviceUuid);
     setStateName('');
     setStateValue('');
     setAllowedValues([]);
-    
-    // Find the device ID from the UUID
     const selectedDeviceObj = devices.find(d => d.uuid === deviceUuid);
-    console.log('Selected device object:', selectedDeviceObj);
-    
     if (selectedDeviceObj?.id) {
       try {
-        console.log('Fetching device states for device ID:', selectedDeviceObj.id);
         setIsLoadingDeviceStates(true);
         await onFetchDeviceStates(selectedDeviceObj.id);
-        console.log('Device states fetched successfully');
       } catch (error) {
         console.error('Error fetching device states:', error);
       } finally {
@@ -144,9 +131,7 @@ const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
 
   const handleStateNameChange = (newStateName: string) => {
     setStateName(newStateName);
-    setStateValue(''); // Reset state value when state name changes
-    
-    // Use filtered device states instead of all device states
+    setStateValue('');
     const selectedState = filteredDeviceStates?.find(state => state.stateName === newStateName);
     if (selectedState) {
       setAllowedValues(Array.isArray(selectedState.allowedValues) ? selectedState.allowedValues : []);
@@ -235,138 +220,131 @@ const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
     setAllowedValues(next);
   }, [mode, stateName, filteredDeviceStates]);
 
+  if (!open) return null;
+
+  const footer = (
+    <>
+      <Button type="button" variant="secondary" onClick={onClose}>
+        Cancel
+      </Button>
+      <Button
+        type="button"
+        variant="primary"
+        onClick={handleSave}
+        disabled={!jsonOutput || !nodeName.trim()}
+      >
+        Save
+      </Button>
+    </>
+  );
+
   return (
-    <Dialog
-      open={open}
+    <Modal
+      isOpen={open}
       onClose={onClose}
-      maxWidth="md"
-      fullWidth
+      title={mode === 'edit' ? 'Edit Action' : 'Add Action'}
+      footer={footer}
     >
-      <DialogTitle>
-        {mode === 'edit' ? 'Edit Action' : 'Add Action'}
-      </DialogTitle>
-      <DialogContent>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
-          <TextField
-            fullWidth
-            label="Node Name"
+      <div className="flex flex-col gap-4 max-h-[70vh] overflow-y-auto">
+        <FormField label="Node Name" id="action-node-name" required>
+          <input
+            id="action-node-name"
+            type="text"
             value={nodeName}
             onChange={(e) => setNodeName(e.target.value)}
-            required
-            error={!nodeName.trim()}
-            helperText={!nodeName.trim() ? "Node name is required" : ""}
+            className={inputClasses}
           />
+          {!nodeName.trim() && (
+            <p className="mt-1 text-sm text-danger dark:text-danger-dark">Node name is required</p>
+          )}
+        </FormField>
 
-          <FormControl fullWidth>
-            <InputLabel>Action Type</InputLabel>
-            <Select
-              value={actionType}
-              onChange={(e) => setActionType(e.target.value)}
-              label="Action Type"
-            >
-              <MenuItem value="Device">Device</MenuItem>
-              <MenuItem value="Notification">Notification</MenuItem>
-              <MenuItem value="Email">Email</MenuItem>
-            </Select>
-          </FormControl>
+        <FormField label="Action Type" id="action-type">
+          <select
+            id="action-type"
+            value={actionType}
+            onChange={(e) => setActionType(e.target.value)}
+            className={selectClasses}
+          >
+            <option value="Device">Device</option>
+            <option value="Notification">Notification</option>
+            <option value="Email">Email</option>
+          </select>
+        </FormField>
 
-          {actionType === 'Device' && (
-            <>
-              <FormControl fullWidth>
-                <InputLabel>Device</InputLabel>
-                <Select
-                  value={selectedDevice}
-                  onChange={(e) => handleDeviceChange(e.target.value)}
-                  label="Device"
+        {actionType === 'Device' && (
+          <>
+            <FormField label="Device" id="action-device">
+              <select
+                id="action-device"
+                value={selectedDevice}
+                onChange={(e) => handleDeviceChange(e.target.value)}
+                className={selectClasses}
+              >
+                <option value="">Select device</option>
+                {(devices || []).map((device) => (
+                  <option key={device.uuid} value={device.uuid}>
+                    {device.name}
+                  </option>
+                ))}
+              </select>
+            </FormField>
+
+            {selectedDevice && (
+              <FormField label="Device State" id="action-device-state">
+                <select
+                  id="action-device-state"
+                  value={deviceStateSelectValue}
+                  onChange={(e) => handleStateNameChange(e.target.value)}
+                  disabled={isLoadingDeviceStates}
+                  className={selectClasses}
                 >
-                  {(devices || []).map((device) => (
-                    <MenuItem key={device.uuid} value={device.uuid}>
-                      {device.name}
-                    </MenuItem>
+                  {isLoadingDeviceStates ? (
+                    <option>Loading device states...</option>
+                  ) : filteredDeviceStates.length === 0 ? (
+                    <option>No device states available</option>
+                  ) : (
+                    filteredDeviceStates.map((state) => (
+                      <option key={state.id} value={state.stateName}>
+                        {state.stateName}
+                      </option>
+                    ))
+                  )}
+                </select>
+              </FormField>
+            )}
+
+            {stateName && (
+              <FormField label="State Value" id="action-state-value">
+                <select
+                  id="action-state-value"
+                  value={stateValueSelectValue}
+                  onChange={(e) => setStateValue(e.target.value)}
+                  className={selectClasses}
+                >
+                  {(allowedValues || []).map((value) => (
+                    <option key={value} value={value}>
+                      {value}
+                    </option>
                   ))}
-                </Select>
-              </FormControl>
+                </select>
+              </FormField>
+            )}
+          </>
+        )}
 
-              {selectedDevice && (
-                <FormControl fullWidth>
-                  <InputLabel>Device State</InputLabel>
-                  <Select
-                    value={deviceStateSelectValue}
-                    onChange={(e) => handleStateNameChange(e.target.value)}
-                    label="Device State"
-                    disabled={isLoadingDeviceStates}
-                  >
-                    {isLoadingDeviceStates ? (
-                      <MenuItem disabled>
-                        Loading device states...
-                      </MenuItem>
-                    ) : filteredDeviceStates.length === 0 ? (
-                      <MenuItem disabled>
-                        No device states available
-                      </MenuItem>
-                    ) : (
-                      filteredDeviceStates.map((state) => (
-                        <MenuItem key={state.id} value={state.stateName}>
-                          {state.stateName}
-                        </MenuItem>
-                      ))
-                    )}
-                  </Select>
-                </FormControl>
-              )}
-
-              {stateName && (
-                <FormControl fullWidth>
-                  <InputLabel>State Value</InputLabel>
-                  <Select
-                    value={stateValueSelectValue}
-                    onChange={(e) => setStateValue(e.target.value)}
-                    label="State Value"
-                  >
-                    {(allowedValues || []).map((value) => (
-                      <MenuItem key={value} value={value}>
-                        {value}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              )}
-            </>
-          )}
-
-          {jsonOutput && (
-            <Box
-              sx={{
-                mt: 2,
-                p: 2,
-                bgcolor: 'background.paper',
-                borderRadius: 1,
-                border: '1px solid',
-                borderColor: 'divider',
-              }}
-            >
-              <Typography variant="subtitle2" gutterBottom>
-                Action Configuration:
-              </Typography>
-              <pre style={{ margin: 0, whiteSpace: 'pre-wrap' }}>
-                {jsonOutput}
-              </pre>
-            </Box>
-          )}
-        </Box>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button
-          onClick={handleSave}
-          variant="contained"
-          color="primary"
-          disabled={!jsonOutput || !nodeName.trim()}
-        >
-          Save
-        </Button>
-      </DialogActions>
-    </Dialog>
+        {jsonOutput && (
+          <div className="mt-2 p-4 rounded border border-border dark:border-border-dark bg-card dark:bg-card-dark">
+            <p className="text-sm font-medium text-textSecondary dark:text-textSecondary-dark mb-2 m-0">
+              Action Configuration:
+            </p>
+            <pre className="m-0 whitespace-pre-wrap text-sm text-textPrimary dark:text-textPrimary-dark">
+              {jsonOutput}
+            </pre>
+          </div>
+        )}
+      </div>
+    </Modal>
   );
 }, (prevProps, nextProps) => {
   return (
@@ -380,4 +358,4 @@ const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
   );
 });
 
-export default ActionDialog; 
+export default ActionDialog;

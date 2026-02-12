@@ -1,7 +1,5 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useTheme } from '../../context/ThemeContext';
-import { useThemeColors } from '../../hooks/useThemeColors';
 import RuleForm from './RuleForm';
 import type { RuleChain, RuleChainUpdatePayload } from '../../types/ruleEngine';
 import type { Sensor } from '../../types/sensor';
@@ -45,50 +43,23 @@ const RuleEdit: React.FC<RuleEditProps> = ({
   onFetchDeviceStates
 }) => {
   const { t } = useTranslation();
-  const { darkMode } = useTheme();
-  const colors = useThemeColors();
   const isMobile = windowWidth < 768;
-
-  const containerStyle = {
-    maxWidth: '800px',
-    margin: '0 auto',
-    padding: isMobile ? '1rem' : '1.5rem',
-  };
-
-  const titleStyle = {
-    fontSize: '1.5rem',
-    fontWeight: 600,
-    color: darkMode ? colors.textPrimary : '#111827',
-    marginBottom: '1.5rem',
-  };
 
   if (isLoading) {
     return (
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        minHeight: '400px',
-      }}>
-        <div style={{
-          border: '4px solid #f3f3f3',
-          borderTop: `4px solid ${darkMode ? '#4d7efa' : '#3b82f6'}`,
-          borderRadius: '50%',
-          width: '40px',
-          height: '40px',
-          animation: 'spin 1s linear infinite',
-        }} />
+      <div className="flex justify-center items-center min-h-[400px]">
+        <div
+          className="w-10 h-10 rounded-full border-4 border-gray-200 dark:border-gray-700 border-t-primary dark:border-t-primary-dark animate-spin"
+          aria-hidden
+        />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div style={containerStyle}>
-        <p style={{
-          color: darkMode ? colors.dangerText : '#dc2626',
-          margin: '1rem 0',
-        }}>
+      <div className={`max-w-[800px] mx-auto ${isMobile ? 'p-4' : 'p-6'}`}>
+        <p className="text-dangerText dark:text-dangerText-dark my-4 m-0">
           {error}
         </p>
       </div>
@@ -97,11 +68,8 @@ const RuleEdit: React.FC<RuleEditProps> = ({
 
   if (!rule) {
     return (
-      <div style={containerStyle}>
-        <p style={{
-          color: darkMode ? colors.textSecondary : '#6b7280',
-          margin: '1rem 0',
-        }}>
+      <div className={`max-w-[800px] mx-auto ${isMobile ? 'p-4' : 'p-6'}`}>
+        <p className="text-textSecondary dark:text-textSecondary-dark my-4 m-0">
           {t('rules.notFound')}
         </p>
       </div>
@@ -109,8 +77,8 @@ const RuleEdit: React.FC<RuleEditProps> = ({
   }
 
   return (
-    <div style={containerStyle}>
-      <h1 style={titleStyle}>
+    <div className={`max-w-[800px] mx-auto ${isMobile ? 'p-4' : 'p-6'}`}>
+      <h1 className="text-2xl font-semibold text-textPrimary dark:text-textPrimary-dark mb-6 m-0">
         {t('rules.edit')}: {rule.name}
       </h1>
       <RuleForm
@@ -134,4 +102,4 @@ const RuleEdit: React.FC<RuleEditProps> = ({
   );
 };
 
-export default RuleEdit; 
+export default RuleEdit;

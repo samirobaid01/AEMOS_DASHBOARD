@@ -1,7 +1,5 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useTheme } from '../../context/ThemeContext';
-import { useThemeColors } from '../../hooks/useThemeColors';
 import FormField from '../common/FormField';
 
 interface SensorFilterProps {
@@ -22,56 +20,20 @@ const SensorFilter: React.FC<SensorFilterProps> = ({
   windowWidth
 }) => {
   const { t } = useTranslation();
-  const { darkMode } = useTheme();
-  const colors = useThemeColors();
   const isMobile = windowWidth < 768;
 
-  const filterContainerStyle = {
-    display: 'flex',
-    flexDirection: isMobile ? 'column' as const : 'row' as const,
-    gap: '1rem',
-    marginBottom: '1.5rem',
-    padding: '1rem',
-    backgroundColor: darkMode ? colors.surfaceBackground : 'white',
-    borderRadius: '0.5rem',
-    boxShadow: darkMode 
-      ? '0 1px 3px 0 rgba(0, 0, 0, 0.2), 0 1px 2px 0 rgba(0, 0, 0, 0.1)'
-      : '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
-    border: `1px solid ${darkMode ? colors.border : '#e5e7eb'}`,
-  };
-
-  const inputGroupStyle = {
-    display: 'flex',
-    flexDirection: 'column' as const,
-    flex: 1,
-  };
-
-  const inputStyle = {
-    padding: '0.5rem 0.75rem',
-    fontSize: '0.875rem',
-    lineHeight: '1.25rem',
-    color: darkMode ? colors.textPrimary : '#111827',
-    backgroundColor: darkMode ? colors.background : 'white',
-    borderRadius: '0.375rem',
-    border: `1px solid ${darkMode ? colors.border : '#d1d5db'}`,
-    boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-    width: '100%',
-    outline: 'none',
-  };
-
-  const selectStyle = {
-    ...inputStyle,
-    appearance: 'none' as const,
-    backgroundImage: 'url("data:image/svg+xml,%3csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 20 20\'%3e%3cpath stroke=\'%236b7280\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1.5\' d=\'M6 8l4 4 4-4\'/%3e%3c/svg%3e")',
-    backgroundPosition: 'right 0.5rem center',
-    backgroundRepeat: 'no-repeat',
-    backgroundSize: '1.5em 1.5em',
-    paddingRight: '2.5rem',
-  };
+  const inputClasses =
+    'w-full px-3 py-2 text-sm text-textPrimary dark:text-textPrimary-dark bg-background dark:bg-background-dark rounded border border-border dark:border-border-dark shadow-sm outline-none focus:ring-2 focus:ring-primary';
+  const selectClasses =
+    'w-full px-3 py-2 pr-10 text-sm text-textPrimary dark:text-textPrimary-dark bg-background dark:bg-background-dark rounded border border-border dark:border-border-dark shadow-sm outline-none focus:ring-2 focus:ring-primary appearance-none bg-no-repeat bg-[length:1.5em_1.5em] bg-[right_0.5rem_center] bg-[url("data:image/svg+xml,%3csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 20 20\'%3e%3cpath stroke=\'%236b7280\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1.5\' d=\'M6 8l4 4 4-4\'/%3e%3c/svg%3e")]';
 
   return (
-    <div style={filterContainerStyle}>
-      <div style={inputGroupStyle}>
+    <div
+      className={`flex gap-4 mb-6 p-4 rounded-lg border border-border dark:border-border-dark bg-surface dark:bg-surface-dark shadow-sm ${
+        isMobile ? 'flex-col' : 'flex-row'
+      }`}
+    >
+      <div className="flex flex-col flex-1">
         <FormField label={t('common.search')} id="sensorSearch">
           <input
             id="sensorSearch"
@@ -79,18 +41,17 @@ const SensorFilter: React.FC<SensorFilterProps> = ({
             placeholder={t('common.search')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            style={inputStyle}
+            className={inputClasses}
           />
         </FormField>
       </div>
-
-      <div style={inputGroupStyle}>
+      <div className="flex flex-col flex-1">
         <FormField label={t('sensors.type')} id="sensorTypeFilter">
           <select
             id="sensorTypeFilter"
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value)}
-            style={selectStyle}
+            className={selectClasses}
           >
             <option value="">{t('common.all')}</option>
             {sensorTypes.map((type) => (
@@ -105,4 +66,4 @@ const SensorFilter: React.FC<SensorFilterProps> = ({
   );
 };
 
-export default SensorFilter; 
+export default SensorFilter;

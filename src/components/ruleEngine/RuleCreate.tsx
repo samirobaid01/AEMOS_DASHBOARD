@@ -1,13 +1,10 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useTheme } from '../../context/ThemeContext';
-import { useThemeColors } from '../../hooks/useThemeColors';
 import RuleForm from './RuleForm';
 import type { RuleChainCreatePayload, RuleChainUpdatePayload } from '../../types/ruleEngine';
-import { Button, Box } from '@mui/material';
+import Button from '../common/Button/Button';
 import type { Sensor } from '../../types/sensor';
-import type { Device } from '../../types/device';
-import type { DeviceStateRecord } from '../../types/device';
+import type { Device, DeviceStateRecord } from '../../types/device';
 
 interface RuleCreateProps {
   onSubmit: (data: RuleChainCreatePayload | RuleChainUpdatePayload) => Promise<void>;
@@ -27,10 +24,10 @@ interface RuleCreateProps {
   onFetchDeviceStates: (deviceId: number) => Promise<void>;
 }
 
-const RuleCreate: React.FC<RuleCreateProps> = ({ 
-  onSubmit, 
+const RuleCreate: React.FC<RuleCreateProps> = ({
+  onSubmit,
   onFinish,
-  isLoading, 
+  isLoading,
   ruleChainId,
   showNodeSection,
   onNodeDelete,
@@ -45,26 +42,15 @@ const RuleCreate: React.FC<RuleCreateProps> = ({
   onFetchDeviceStates
 }) => {
   const { t } = useTranslation();
-  const { darkMode } = useTheme();
-  const colors = useThemeColors();
 
   return (
-    <div style={{
-      maxWidth: '800px',
-      margin: '0 auto',
-      padding: '1.5rem'
-    }}>
-      <h1 style={{
-        fontSize: '1.5rem',
-        fontWeight: 600,
-        marginBottom: '1.5rem',
-        color: darkMode ? colors.textPrimary : '#111827'
-      }}>
+    <div className="max-w-[800px] mx-auto p-6">
+      <h1 className="text-2xl font-semibold text-textPrimary dark:text-textPrimary-dark mb-6 m-0">
         {showNodeSection ? t('ruleEngine.addNodes') : t('ruleEngine.createRuleChain')}
       </h1>
-      <RuleForm 
-        onSubmit={onSubmit} 
-        isLoading={isLoading} 
+      <RuleForm
+        onSubmit={onSubmit}
+        isLoading={isLoading}
         ruleChainId={ruleChainId || undefined}
         showNodeSection={showNodeSection}
         onNodeDelete={onNodeDelete}
@@ -79,19 +65,14 @@ const RuleCreate: React.FC<RuleCreateProps> = ({
         onFetchDeviceStates={onFetchDeviceStates}
       />
       {showNodeSection && (
-        <Box mt={2}>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={onFinish}
-            fullWidth
-          >
+        <div className="mt-4">
+          <Button type="button" variant="primary" onClick={onFinish} className="w-full">
             {t('ruleEngine.finish')}
           </Button>
-        </Box>
+        </div>
       )}
     </div>
   );
 };
 
-export default RuleCreate; 
+export default RuleCreate;

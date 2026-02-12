@@ -1,9 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useTheme } from '../../context/ThemeContext';
-import { useThemeColors } from '../../hooks/useThemeColors';
 import Button from './Button/Button';
 import { useDeviceStateSocket } from '../../hooks/useDeviceStateSocket';
-import type { DeviceStateNotification } from '../../hooks/useDeviceStateSocket';
 import { TOKEN_STORAGE_KEY } from '../../config';
 
 interface LogEvent {
@@ -14,30 +11,19 @@ interface LogEvent {
 }
 
 const DeviceStateTest: React.FC = () => {
-  const { darkMode } = useTheme();
-  const colors = useThemeColors();
   const [deviceId, setDeviceId] = useState('');
   const [deviceUuid, setDeviceUuid] = useState('');
   const [events, setEvents] = useState<LogEvent[]>([]);
   const eventsEndRef = useRef<HTMLDivElement>(null);
 
-  // Get auth token from localStorage
   const authToken = localStorage.getItem(TOKEN_STORAGE_KEY) || '';
 
   const logEvent = (event: string, data: any, priority: 'high' | 'normal' = 'normal') => {
-    setEvents(prev => [{
-      event,
-      data,
-      priority,
-      timestamp: new Date()
-    }, ...prev]);
+    setEvents(prev => [{ event, data, priority, timestamp: new Date() }, ...prev]);
   };
 
-  // Scroll to bottom of events
   useEffect(() => {
-    if (eventsEndRef.current) {
-      eventsEndRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
+    if (eventsEndRef.current) eventsEndRef.current.scrollIntoView({ behavior: 'smooth' });
   }, [events]);
 
   const {
@@ -47,24 +33,16 @@ const DeviceStateTest: React.FC = () => {
     disconnect,
     joinRoom,
     joinDeviceUuidRoom,
-    lastError
   } = useDeviceStateSocket({
     serverUrl: 'http://localhost:3000',
     authToken,
     deviceUuid,
-    onNotification: (notification) => {
-      logEvent('device-state-change', notification, notification.priority);
-    },
+    onNotification: (notification) => logEvent('device-state-change', notification, notification.priority),
     onConnectionChange: (connected) => {
-      if (connected) {
-        logEvent('connect', { socketId });
-      } else {
-        logEvent('disconnect', {});
-      }
+      if (connected) logEvent('connect', { socketId });
+      else logEvent('disconnect', {});
     },
-    onError: (error) => {
-      logEvent('connect_error', { error: error.message }, 'high');
-    }
+    onError: (error) => logEvent('connect_error', { error: error.message }, 'high')
   });
 
   const handleConnect = () => {
@@ -98,7 +76,6 @@ const DeviceStateTest: React.FC = () => {
       logEvent('error', { message: 'Please enter a Device ID first' }, 'high');
       return;
     }
-
     try {
       const testData = {
         deviceId: parseInt(deviceId),
@@ -114,20 +91,12 @@ const DeviceStateTest: React.FC = () => {
           newValue: 'new-value'
         }
       };
-
       const response = await fetch('/api/v1/device-state-instances', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authToken}`
-        },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
         body: JSON.stringify(testData)
       });
-
-      if (!response.ok) {
-        throw new Error(`API request failed with status ${response.status}`);
-      }
-
+      if (!response.ok) throw new Error(`API request failed with status ${response.status}`);
       const result = await response.json();
       logEvent('test-state-change', result);
     } catch (error) {
@@ -135,35 +104,29 @@ const DeviceStateTest: React.FC = () => {
     }
   };
 
+  const inputClasses = "px-3 py-2 rounded border border-border dark:border-border-dark bg-surface dark:bg-surface-dark text-textPrimary dark:text-textPrimary-dark text-sm outline-none focus:ring-2 focus:ring-primary";
+
   return (
-    <div className="container" style={{ maxWidth: '800px', margin: '0 auto', padding: '20px' }}>
-      <h1 style={{ color: darkMode ? colors.textPrimary : '#333' }}>
+    <div className="max-w-[800px] mx-auto p-5">
+      <h1 className="text-2xl font-semibold text-textPrimary dark:text-textPrimary-dark mb-4">
         AEMOS Device State Socket Client
       </h1>
 
-      <div style={{
-        backgroundColor: '#fff3cd',
-        borderLeft: '4px solid #856404',
-        color: '#856404',
-        padding: '10px',
-        marginBottom: '20px',
-        borderRadius: '4px',
-        fontWeight: 'bold'
-      }}>
-        <p>⚠️ This is a development tool accessible from localhost only. Not for production use.</p>
+      <div className="bg-warningBg dark:bg-warningBg-dark border-l-4 border-warning dark:border-warning-dark text-warningText dark:text-warningText-dark py-2.5 px-3 rounded mb-5 font-semibold text-sm">
+        <p className="m-0">⚠️ This is a development tool accessible from localhost only. Not for production use.</p>
       </div>
 
-      <div style={{
-        padding: '10px',
-        margin: '10px 0',
-        borderRadius: '4px',
-        backgroundColor: isConnected ? '#d4edda' : '#f8d7da',
-        color: isConnected ? '#155724' : '#721c24'
-      }}>
+      <div
+        className={`py-2.5 px-3 rounded text-sm font-medium ${
+          isConnected
+            ? 'bg-successBg dark:bg-successBg-dark text-successText dark:text-successText-dark'
+            : 'bg-dangerBg dark:bg-dangerBg-dark text-dangerText dark:text-dangerText-dark'
+        }`}
+      >
         {isConnected ? `Connected (Socket ID: ${socketId})` : 'Disconnected'}
       </div>
 
-      <div style={{ margin: '20px 0', display: 'flex', gap: '10px' }}>
+      <div className="flex gap-2 my-5">
         <Button type="button" onClick={handleConnect} disabled={isConnected}>
           Connect
         </Button>
@@ -172,34 +135,26 @@ const DeviceStateTest: React.FC = () => {
         </Button>
       </div>
 
-      <div style={{ margin: '20px 0' }}>
-        <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
+      <div className="my-5 space-y-2">
+        <div className="flex gap-2">
           <input
             type="text"
             value={deviceId}
             onChange={(e) => setDeviceId(e.target.value)}
             placeholder="Device ID"
-            style={{
-              padding: '8px 12px',
-              borderRadius: '4px',
-              border: '1px solid #ced4da'
-            }}
+            className={inputClasses}
           />
           <Button type="button" onClick={handleJoinDeviceRoom} disabled={!isConnected}>
             Join Device Room
           </Button>
         </div>
-        <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
+        <div className="flex gap-2">
           <input
             type="text"
             value={deviceUuid}
             onChange={(e) => setDeviceUuid(e.target.value)}
             placeholder="Device UUID"
-            style={{
-              padding: '8px 12px',
-              borderRadius: '4px',
-              border: '1px solid #ced4da'
-            }}
+            className={inputClasses}
           />
           <Button type="button" onClick={handleJoinDeviceUuidRoom} disabled={!isConnected}>
             Join Device UUID Room
@@ -207,34 +162,29 @@ const DeviceStateTest: React.FC = () => {
         </div>
       </div>
 
-      <div style={{ margin: '20px 0' }}>
+      <div className="my-5">
         <Button type="button" onClick={handleTestStateChange} disabled={!isConnected}>
           Test State Change
         </Button>
       </div>
 
-      <h2 style={{ color: darkMode ? colors.textPrimary : '#333' }}>Event Log</h2>
-      <div style={{
-        marginTop: '20px',
-        border: '1px solid #ddd',
-        padding: '10px',
-        height: '400px',
-        overflowY: 'auto',
-        backgroundColor: '#f9f9f9'
-      }}>
+      <h2 className="text-xl font-semibold text-textPrimary dark:text-textPrimary-dark mb-2">
+        Event Log
+      </h2>
+      <div className="mt-5 border border-border dark:border-border-dark rounded p-3 h-[400px] overflow-y-auto bg-surfaceHover dark:bg-surfaceHover-dark">
         {events.map((event, index) => (
           <div
             key={index}
-            style={{
-              marginBottom: '10px',
-              padding: '8px',
-              borderRadius: '4px',
-              backgroundColor: event.priority === 'high' ? '#f8d7da' : '#d1ecf1',
-              borderLeft: `4px solid ${event.priority === 'high' ? '#721c24' : '#0c5460'}`
-            }}
+            className={`mb-2 p-2 rounded border-l-4 ${
+              event.priority === 'high'
+                ? 'bg-dangerBg dark:bg-dangerBg-dark border-danger dark:border-danger-dark'
+                : 'bg-infoBg dark:bg-infoBg-dark border-info dark:border-info-dark'
+            }`}
           >
-            <strong>{event.timestamp.toLocaleTimeString()} - {event.event}</strong>
-            <pre style={{ margin: '4px 0 0', whiteSpace: 'pre-wrap' }}>
+            <strong className="text-sm text-textPrimary dark:text-textPrimary-dark">
+              {event.timestamp.toLocaleTimeString()} - {event.event}
+            </strong>
+            <pre className="m-1 mt-1 text-xs whitespace-pre-wrap text-textPrimary dark:text-textPrimary-dark">
               {JSON.stringify(event.data, null, 2)}
             </pre>
           </div>
@@ -245,4 +195,4 @@ const DeviceStateTest: React.FC = () => {
   );
 };
 
-export default DeviceStateTest; 
+export default DeviceStateTest;

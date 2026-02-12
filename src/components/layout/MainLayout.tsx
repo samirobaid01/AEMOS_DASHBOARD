@@ -3,8 +3,6 @@ import { useAppDispatch, useAppSelector } from '../../state/store';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { clearCredentials, selectCurrentUser } from '../../state/slices/auth.slice';
-import type { User } from '../../types/auth';
-import { useTheme } from '../../context/ThemeContext';
 import OrganizationSelector from '../common/OrganizationSelector/OrganizationSelector';
 import Button from '../common/Button/Button';
 
@@ -21,19 +19,13 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const user = useAppSelector(selectCurrentUser);
   const isMobile = windowWidth < 768;
-  const { darkMode } = useTheme();
 
-  // Handle window resize
   useEffect(() => {
-    const handleResize = () => {
-      setWindowWidth(window.innerWidth);
-    };
-
+    const handleResize = () => setWindowWidth(window.innerWidth);
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Close sidebar when route changes on mobile
   useEffect(() => {
     setSidebarOpen(false);
   }, [location.pathname]);
@@ -57,136 +49,53 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     { name: t('navigation.settings'), path: '/settings', icon: '⚙️' },
   ];
 
-  const isActive = (path: string) => {
-    return location.pathname.startsWith(path);
-  };
-
-  // Theme-aware styles
-  const sidebarStyle = {
-    position: 'fixed' as const,
-    top: 0,
-    left: 0,
-    bottom: 0,
-    width: '260px',
-    backgroundColor: darkMode ? '#111827' : 'white',
-    boxShadow: darkMode 
-      ? '0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px 0 rgba(0, 0, 0, 0.2)'
-      : '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
-    zIndex: 40,
-    transform: (isMobile && !sidebarOpen) ? 'translateX(-100%)' : 'translateX(0)',
-    transition: 'transform 300ms ease-in-out',
-    borderRight: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
-  };
-
-  const overlayStyle = {
-    position: 'fixed' as const,
-    top: 0,
-    right: 0,
-    bottom: 0,
-    left: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    zIndex: 30,
-    display: (isMobile && sidebarOpen) ? 'block' : 'none',
-  };
-
-  const getNavItemStyle = (isActiveItem: boolean) => ({
-    display: 'flex',
-    alignItems: 'center',
-    padding: '12px 16px',
-    borderRadius: '8px',
-    marginBottom: '8px',
-    fontWeight: 500,
-    color: isActiveItem 
-      ? 'white' 
-      : darkMode ? '#d1d5db' : '#4b5563',
-    backgroundColor: isActiveItem 
-      ? '#16a34a' 
-      : 'transparent',
-    transition: 'all 200ms',
-    textDecoration: 'none'
-  });
+  const isActive = (path: string) => location.pathname.startsWith(path);
 
   return (
-    <div style={{ 
-      minHeight: '100vh', 
-      backgroundColor: darkMode ? '#111827' : '#f0f9f0',
-      color: darkMode ? '#f9fafb' : 'inherit'
-    }}>
-      {/* Mobile sidebar overlay */}
-      <div 
-        style={overlayStyle}
+    <div className="min-h-screen bg-background dark:bg-background-dark text-textPrimary dark:text-textPrimary-dark">
+      <div
+        className={`fixed inset-0 bg-black/50 z-30 ${isMobile && sidebarOpen ? 'block' : 'hidden'}`}
         onClick={() => setSidebarOpen(false)}
+        aria-hidden
       />
 
-      {/* Sidebar (mobile & desktop) */}
-      <div style={sidebarStyle}>
-        <div style={{ 
-          display: 'flex', 
-          flexDirection: 'column' as const, 
-          height: '100%' 
-        }}>
-          {/* Logo section */}
-          <div style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            padding: '16px', 
-            borderBottom: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}` 
-          }}>
-            <span style={{ fontSize: '24px', marginRight: '12px' }}>🌿</span>
-            <h1 style={{ 
-              fontSize: '18px', 
-              fontWeight: 'bold', 
-              color: '#166534' 
-            }}>
-              AEMOS <span style={{ color: darkMode ? '#f59e0b' : '#b45309' }}>Agriculture</span>
+      <aside
+        className={`fixed top-0 left-0 bottom-0 w-[260px] bg-card dark:bg-card-dark shadow-md z-40 border-r border-border dark:border-border-dark transition-transform duration-300 ease-in-out ${
+          isMobile && !sidebarOpen ? '-translate-x-full' : 'translate-x-0'
+        }`}
+      >
+        <div className="flex flex-col h-full">
+          <div className="flex items-center p-4 border-b border-border dark:border-border-dark">
+            <span className="text-2xl mr-3">🌿</span>
+            <h1 className="text-lg font-bold text-leaf-800 dark:text-leaf-200">
+              AEMOS <span className="text-warning dark:text-warning-dark">Agriculture</span>
             </h1>
-            
-            {/* Mobile close button - only visible on mobile */}
             {isMobile && (
               <Button
                 type="button"
                 variant="secondary"
-                style={{ marginLeft: 'auto', padding: '0.5rem', minWidth: 'auto', color: darkMode ? '#d1d5db' : 'inherit' }}
+                className="ml-auto p-2 min-w-0 text-textSecondary dark:text-textSecondary-dark"
                 onClick={() => setSidebarOpen(false)}
               >
-                <svg style={{ width: '24px', height: '24px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </Button>
             )}
           </div>
 
-          {/* Navigation links */}
-          <nav style={{ 
-            flex: '1 1 auto', 
-            overflowY: 'auto' as const, 
-            padding: '20px 16px' 
-          }}>
+          <nav className="flex-1 overflow-y-auto py-5 px-4">
             {navigation.map((item) => (
               <Link
                 key={item.name}
                 to={item.path}
-                style={getNavItemStyle(isActive(item.path))}
-                onMouseOver={(e) => {
-                  if (!isActive(item.path)) {
-                    e.currentTarget.style.backgroundColor = darkMode ? '#374151' : '#f0f9f0';
-                  }
-                }}
-                onMouseOut={(e) => {
-                  if (!isActive(item.path)) {
-                    e.currentTarget.style.backgroundColor = 'transparent';
-                  }
-                }}
+                className={`flex items-center py-3 px-4 rounded-lg mb-2 font-medium no-underline transition-colors ${
+                  isActive(item.path)
+                    ? 'bg-primary dark:bg-primary-dark text-white'
+                    : 'text-textSecondary dark:text-textSecondary-dark hover:bg-surfaceHover dark:hover:bg-surfaceHover-dark'
+                }`}
               >
-                <span style={{ 
-                  marginRight: '12px', 
-                  fontSize: '20px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  width: '28px',
-                  height: '28px'
-                }}>
+                <span className="mr-3 text-xl w-7 h-7 flex items-center justify-center">
                   {item.icon}
                 </span>
                 {item.name}
@@ -194,54 +103,22 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             ))}
           </nav>
 
-          {/* User section */}
-          <div style={{ 
-            borderTop: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`, 
-            padding: '16px' 
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <div style={{
-                width: '40px',
-                height: '40px',
-                borderRadius: '50%',
-                backgroundColor: '#16a34a',
-                color: 'white',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontWeight: 'bold',
-                fontSize: '18px'
-              }}>
+          <div className="border-t border-border dark:border-border-dark p-4">
+            <div className="flex items-center">
+              <div className="w-10 h-10 rounded-full bg-primary dark:bg-primary-dark text-white flex items-center justify-center font-bold text-lg shrink-0">
                 {getInitial(user?.userName)}
               </div>
-              <div style={{ marginLeft: '12px' }}>
-                <p style={{ 
-                  fontSize: '14px', 
-                  fontWeight: 500, 
-                  color: darkMode ? '#d1d5db' : '#4b5563',
-                  maxWidth: '160px',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap' as const
-                }}>
+              <div className="ml-3 min-w-0">
+                <p className="text-sm font-medium text-textSecondary dark:text-textSecondary-dark truncate max-w-[160px]">
                   {user?.userName || user?.email || 'User'}
                 </p>
                 <Button
                   type="button"
                   variant="secondary"
-                  style={{
-                    marginTop: '4px',
-                    fontSize: '13px',
-                    fontWeight: 500,
-                    color: '#16a34a',
-                    background: 'none',
-                    border: 'none',
-                    padding: 0,
-                    minWidth: 'auto',
-                  }}
+                  className="mt-1 text-sm font-medium text-primary dark:text-primary-dark bg-transparent border-0 p-0 min-w-0 hover:bg-transparent"
                   onClick={handleLogout}
                 >
-                  <svg style={{ marginRight: '4px', width: '14px', height: '14px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="mr-1 w-3.5 h-3.5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                   </svg>
                   {t('auth.logout')}
@@ -250,73 +127,44 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             </div>
           </div>
         </div>
-      </div>
+      </aside>
 
-      {/* Main content area */}
-      <div style={{
-        paddingLeft: isMobile ? 0 : '260px',
-        minHeight: '100vh',
-        transition: 'padding-left 300ms ease-in-out',
-        backgroundColor: darkMode ? '#111827' : '#f0f9f0',
-      }}>
-        {/* Mobile top bar - only visible on mobile */}
+      <div
+        className={`min-h-screen transition-[padding] duration-300 ${
+          isMobile ? 'pl-0' : 'pl-[260px]'
+        } bg-background dark:bg-background-dark`}
+      >
         {isMobile && (
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            height: '64px',
-            backgroundColor: darkMode ? '#1f2937' : 'white',
-            boxShadow: darkMode 
-              ? '0 1px 3px 0 rgba(0, 0, 0, 0.3)'
-              : '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
-            position: 'sticky' as const,
-            top: 0,
-            zIndex: 10,
-            color: darkMode ? '#d1d5db' : 'inherit'
-          }}>
+          <header className="flex items-center h-16 bg-card dark:bg-card-dark shadow sticky top-0 z-10 text-textPrimary dark:text-textPrimary-dark">
             <Button
               type="button"
               variant="secondary"
-              style={{ padding: '16px', minWidth: 'auto', color: darkMode ? '#d1d5db' : '#4b5563' }}
+              className="p-4 min-w-0 text-textSecondary dark:text-textSecondary-dark"
               onClick={() => setSidebarOpen(true)}
             >
-              <svg style={{ width: '24px', height: '24px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </Button>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
-              <span style={{ fontSize: '20px', marginRight: '8px' }}>🌿</span>
-              <h1 style={{ fontSize: '16px', fontWeight: 'bold', color: '#166534' }}>
-                AEMOS <span style={{ color: darkMode ? '#f59e0b' : '#b45309' }}>Agriculture</span>
+            <div className="flex items-center justify-center flex-1">
+              <span className="text-xl mr-2">🌿</span>
+              <h1 className="text-base font-bold text-leaf-800 dark:text-leaf-200">
+                AEMOS <span className="text-warning dark:text-warning-dark">Agriculture</span>
               </h1>
             </div>
-            
-            {/* Organization Selector for Mobile */}
-            <div style={{ padding: '0 16px' }}>
+            <div className="px-4">
               <OrganizationSelector />
             </div>
-          </div>
+          </header>
         )}
 
-        {/* Desktop header with organization selector - only visible on desktop */}
         {!isMobile && (
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'flex-end',
-            height: '64px',
-            padding: '0 32px',
-            backgroundColor: 'transparent',
-            position: 'sticky' as const,
-            top: 0,
-            zIndex: 10,
-          }}>
+          <div className="flex items-center justify-end h-16 pr-8 sticky top-0 z-10 bg-transparent">
             <OrganizationSelector />
           </div>
         )}
 
-        {/* Main content */}
-        <main style={{ padding: isMobile ? '24px' : '32px' }}>
+        <main className="p-6 md:p-8">
           {children}
         </main>
       </div>
@@ -324,4 +172,4 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   );
 };
 
-export default MainLayout; 
+export default MainLayout;

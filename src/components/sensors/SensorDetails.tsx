@@ -1,8 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { useTheme } from '../../context/ThemeContext';
-import { useThemeColors } from '../../hooks/useThemeColors';
 import { useTelemetrySocket } from '../../hooks/useTelemetrySocket';
 import type { Sensor } from '../../types/sensor';
 import Button from '../common/Button/Button';
@@ -19,8 +17,8 @@ interface SensorDetailsProps {
 
 const SensorDetails: React.FC<SensorDetailsProps> = ({
   sensor,
-  isLoading,
-  error,
+  isLoading: _isLoading,
+  error: _error,
   onEdit,
   onDelete,
   onBack,
@@ -28,38 +26,12 @@ const SensorDetails: React.FC<SensorDetailsProps> = ({
 }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { darkMode } = useTheme();
-  const colors = useThemeColors();
   const isMobile = windowWidth < 768;
   const { telemetryValues, connected } = useTelemetrySocket(sensor?.TelemetryData);
 
   if (!sensor) {
     return null;
   }
-
-  const headerStyle = {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: isMobile ? "flex-start" : "center",
-    flexDirection: isMobile ? ("column" as const) : ("row" as const),
-    marginBottom: "1.5rem",
-    gap: isMobile ? "1rem" : "0",
-  };
-
-  const titleStyle = {
-    fontSize: "1.5rem",
-    fontWeight: 600,
-    color: darkMode ? colors.textPrimary : "#111827",
-    margin: 0,
-    fontFamily: "system-ui, -apple-system, sans-serif",
-  };
-
-  const buttonGroupStyle = {
-    display: "flex",
-    gap: "0.5rem",
-    flexWrap: isMobile ? ("wrap" as const) : ("nowrap" as const),
-    width: isMobile ? "100%" : "auto",
-  };
 
   // Helper function to format telemetry values based on their type
   const formatTelemetryValue = (value: any, datatype: string) => {
@@ -96,403 +68,109 @@ const SensorDetails: React.FC<SensorDetailsProps> = ({
   };
 
   return (
-    <div
-      style={{
-        padding: isMobile ? "1rem" : "1.5rem 2rem",
-        backgroundColor: darkMode ? colors.background : "transparent",
-      }}
-    >
-      <div style={headerStyle}>
-        <div style={{ display: "flex", alignItems: "center" }}>
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={onBack}
-            style={{
-              marginRight: "0.75rem",
-              padding: "0.5rem",
-              minWidth: "auto",
-            }}
-          >
-            <svg
-              style={{
-                width: "1.25rem",
-                height: "1.25rem",
-                color: darkMode ? colors.textSecondary : "#4b5563",
-              }}
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M10 19l-7-7m0 0l7-7m-7 7h18"
-              />
+    <div className={`p-4 sm:py-6 sm:px-8 bg-background dark:bg-background-dark ${isMobile ? 'p-4' : ''}`}>
+      <div className={`flex justify-between items-start sm:items-center flex-col sm:flex-row gap-4 mb-6`}>
+        <div className="flex items-center">
+          <Button type="button" variant="secondary" onClick={onBack} className="mr-3 p-2 min-w-0">
+            <svg className="w-5 h-5 text-textSecondary dark:text-textSecondary-dark" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
           </Button>
-          <h1 style={titleStyle}>{sensor.name}</h1>
+          <h1 className="text-2xl font-semibold text-textPrimary dark:text-textPrimary-dark m-0">{sensor.name}</h1>
         </div>
-
-        <div style={buttonGroupStyle}>
+        <div className={`flex gap-2 ${isMobile ? 'flex-wrap w-full' : 'flex-nowrap'}`}>
           <Button type="button" variant="primary" onClick={onEdit}>
-            <svg
-              style={{ width: "1rem", height: "1rem", marginRight: "0.375rem" }}
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-              />
+            <svg className="w-4 h-4 mr-1.5 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
             </svg>
             {t("edit")}
           </Button>
           <Button type="button" variant="danger" onClick={onDelete}>
-            <svg
-              style={{ width: "1rem", height: "1rem", marginRight: "0.375rem" }}
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-              />
+            <svg className="w-4 h-4 mr-1.5 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
             </svg>
             {t("delete")}
           </Button>
         </div>
       </div>
 
-      <div
-        style={{
-          backgroundColor: darkMode ? colors.cardBackground : "white",
-          borderRadius: "0.5rem",
-          boxShadow: darkMode
-            ? "0 1px 3px 0 rgba(0, 0, 0, 0.2), 0 1px 2px 0 rgba(0, 0, 0, 0.1)"
-            : "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
-          border: `1px solid ${darkMode ? colors.border : "#e5e7eb"}`,
-          overflow: "hidden",
-        }}
-      >
-        <div style={{ padding: "1.5rem" }}>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
-              gap: "1.5rem",
-            }}
-          >
+      <div className="rounded-lg border border-border dark:border-border-dark bg-card dark:bg-card-dark shadow-sm dark:shadow-md overflow-hidden">
+        <div className="p-6">
+          <div className={`grid gap-6 ${isMobile ? 'grid-cols-1' : 'grid-cols-2'}`}>
             <div>
-              <h2
-                style={{
-                  fontSize: "1.125rem",
-                  fontWeight: 600,
-                  color: darkMode ? colors.textPrimary : "#111827",
-                  margin: "0 0 1rem 0",
-                }}
-              >
+              <h2 className="text-lg font-semibold text-textPrimary dark:text-textPrimary-dark mb-4 m-0">
                 {t("sensors.sensorInformation")}
               </h2>
-
-              <div style={{ marginBottom: "1rem" }}>
-                <p
-                  style={{
-                    fontSize: "0.875rem",
-                    fontWeight: 500,
-                    color: darkMode ? colors.textSecondary : "#6b7280",
-                    margin: "0 0 0.25rem 0",
-                  }}
-                >
-                  {t("sensors.name")}
-                </p>
-                <p
-                  style={{
-                    fontSize: "1rem",
-                    color: darkMode ? colors.textPrimary : "#111827",
-                    margin: 0,
-                  }}
-                >
-                  {sensor.name}
-                </p>
+              <div className="mb-4">
+                <p className="text-sm font-medium text-textSecondary dark:text-textSecondary-dark mb-1 m-0">{t("sensors.name")}</p>
+                <p className="text-base text-textPrimary dark:text-textPrimary-dark m-0">{sensor.name}</p>
               </div>
-
-              <div style={{ marginBottom: "1rem" }}>
-                <p
-                  style={{
-                    fontSize: "0.875rem",
-                    fontWeight: 500,
-                    color: darkMode ? colors.textSecondary : "#6b7280",
-                    margin: "0 0 0.25rem 0",
-                  }}
-                >
-                  {t("sensors.type")}
-                </p>
-                <p
-                  style={{
-                    fontSize: "1rem",
-                    color: darkMode ? colors.textPrimary : "#111827",
-                    margin: 0,
-                  }}
-                >
-                  <span
-                    style={{
-                      display: "inline-block",
-                      fontSize: "0.75rem",
-                      backgroundColor: darkMode
-                        ? colors.infoBackground
-                        : "#dbeafe",
-                      color: darkMode ? colors.infoText : "#1e40af",
-                      padding: "0.125rem 0.5rem",
-                      borderRadius: "9999px",
-                    }}
-                  >
+              <div className="mb-4">
+                <p className="text-sm font-medium text-textSecondary dark:text-textSecondary-dark mb-1 m-0">{t("sensors.type")}</p>
+                <p className="text-base m-0">
+                  <span className="inline-block text-xs px-2 py-0.5 rounded-full bg-infoBg dark:bg-infoBg-dark text-infoText dark:text-infoText-dark">
                     {sensor.type}
                   </span>
                 </p>
               </div>
-
-              <div style={{ marginBottom: "1rem" }}>
-                <p
-                  style={{
-                    fontSize: "0.875rem",
-                    fontWeight: 500,
-                    color: darkMode ? colors.textSecondary : "#6b7280",
-                    margin: "0 0 0.25rem 0",
-                  }}
-                >
-                  {t("status")}
-                </p>
-                <p style={{ fontSize: "1rem", margin: 0 }}>
+              <div className="mb-4">
+                <p className="text-sm font-medium text-textSecondary dark:text-textSecondary-dark mb-1 m-0">{t("status")}</p>
+                <p className="text-base m-0">
                   <span
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      padding: "0.25rem 0.625rem",
-                      borderRadius: "9999px",
-                      fontSize: "0.75rem",
-                      fontWeight: 500,
-                      backgroundColor: sensor.status
-                        ? darkMode
-                          ? colors.successBackground
-                          : "#dcfce7"
-                        : darkMode
-                        ? colors.dangerBackground
-                        : "#fee2e2",
-                      color: sensor.status
-                        ? darkMode
-                          ? colors.successText
-                          : "#166534"
-                        : darkMode
-                        ? colors.dangerText
-                        : "#b91c1c",
-                    }}
+                    className={`inline-flex items-center py-1 px-2.5 rounded-full text-xs font-medium ${
+                      sensor.status
+                        ? 'bg-successBg dark:bg-successBg-dark text-successText dark:text-successText-dark'
+                        : 'bg-dangerBg dark:bg-dangerBg-dark text-dangerText dark:text-dangerText-dark'
+                    }`}
                   >
-                    <span
-                      style={{
-                        width: "0.5rem",
-                        height: "0.5rem",
-                        borderRadius: "50%",
-                        backgroundColor: sensor.status ? "#16a34a" : "#ef4444",
-                        marginRight: "0.375rem",
-                      }}
-                    ></span>
+                    <span className={`w-2 h-2 rounded-full mr-1.5 ${sensor.status ? 'bg-success dark:bg-success-dark' : 'bg-danger dark:bg-danger-dark'}`} />
                     {sensor.status ? t("active") : t("inactive")}
                   </span>
                 </p>
               </div>
-
-              <div style={{ marginBottom: "1rem" }}>
-                <p
-                  style={{
-                    fontSize: "0.875rem",
-                    fontWeight: 500,
-                    color: darkMode ? colors.textSecondary : "#6b7280",
-                    margin: "0 0 0.25rem 0",
-                  }}
-                >
-                  {t("sensors.area")}
-                </p>
-                <p
-                  style={{
-                    fontSize: "1rem",
-                    color: darkMode ? colors.textPrimary : "#111827",
-                    margin: 0,
-                  }}
-                >
-                  <span
-                    style={{
-                      display: "inline-block",
-                      fontSize: "0.75rem",
-                      backgroundColor: darkMode
-                        ? colors.successBackground
-                        : "#dcfce7",
-                      color: darkMode ? colors.successText : "#166534",
-                      padding: "0.125rem 0.5rem",
-                      borderRadius: "9999px",
-                    }}
-                  >
+              <div className="mb-4">
+                <p className="text-sm font-medium text-textSecondary dark:text-textSecondary-dark mb-1 m-0">{t("sensors.area")}</p>
+                <p className="text-base m-0">
+                  <span className="inline-block text-xs px-2 py-0.5 rounded-full bg-successBg dark:bg-successBg-dark text-successText dark:text-successText-dark">
                     {sensor.area?.name ?? (sensor.areaId != null ? String(sensor.areaId) : "-")}
                   </span>
                 </p>
               </div>
             </div>
-
             <div>
-              <h2
-                style={{
-                  fontSize: "1.125rem",
-                  fontWeight: 600,
-                  color: darkMode ? colors.textPrimary : "#111827",
-                  margin: "0 0 1rem 0",
-                }}
-              >
+              <h2 className="text-lg font-semibold text-textPrimary dark:text-textPrimary-dark mb-4 m-0">
                 {t("sensors.additionalDetails")}
               </h2>
-
-              <div style={{ marginBottom: "1rem" }}>
-                <p
-                  style={{
-                    fontSize: "0.875rem",
-                    fontWeight: 500,
-                    color: darkMode ? colors.textSecondary : "#6b7280",
-                    margin: "0 0 0.25rem 0",
-                  }}
-                >
-                  {t("description")}
-                </p>
-                <p
-                  style={{
-                    fontSize: "1rem",
-                    color: darkMode ? colors.textPrimary : "#111827",
-                    margin: 0,
-                    lineHeight: 1.5,
-                  }}
-                >
-                  {sensor.description || t("sensors.noDescription")}
-                </p>
+              <div className="mb-4">
+                <p className="text-sm font-medium text-textSecondary dark:text-textSecondary-dark mb-1 m-0">{t("description")}</p>
+                <p className="text-base text-textPrimary dark:text-textPrimary-dark m-0 leading-relaxed">{sensor.description || t("sensors.noDescription")}</p>
               </div>
-
               <div>
-                <p
-                  style={{
-                    fontSize: "0.875rem",
-                    fontWeight: 500,
-                    color: darkMode ? colors.textSecondary : "#6b7280",
-                    margin: "0 0 0.25rem 0",
-                  }}
-                >
-                  {t("sensors.createdAt")}
-                </p>
-                <p
-                  style={{
-                    fontSize: "1rem",
-                    color: darkMode ? colors.textPrimary : "#111827",
-                    margin: 0,
-                  }}
-                >
-                  {sensor.createdAt
-                    ? new Date(sensor.createdAt).toLocaleDateString()
-                    : "-"}
+                <p className="text-sm font-medium text-textSecondary dark:text-textSecondary-dark mb-1 m-0">{t("sensors.createdAt")}</p>
+                <p className="text-base text-textPrimary dark:text-textPrimary-dark m-0">
+                  {sensor.createdAt ? new Date(sensor.createdAt).toLocaleDateString() : "-"}
                 </p>
               </div>
             </div>
           </div>
 
           {sensor.metadata && Object.keys(sensor.metadata).length > 0 && (
-            <div style={{ marginTop: "2rem" }}>
-              <h2
-                style={{
-                  fontSize: "1.125rem",
-                  fontWeight: 600,
-                  color: darkMode ? colors.textPrimary : "#111827",
-                  margin: "0 0 1rem 0",
-                }}
-              >
-                {t("metadata")}
-              </h2>
-              <div
-                style={{
-                  border: `1px solid ${darkMode ? colors.border : "#e5e7eb"}`,
-                  borderRadius: "0.375rem",
-                  overflow: "hidden",
-                }}
-              >
-                <table
-                  style={{
-                    width: "100%",
-                    borderCollapse: "collapse",
-                    fontSize: "0.875rem",
-                  }}
-                >
+            <div className="mt-8">
+              <h2 className="text-lg font-semibold text-textPrimary dark:text-textPrimary-dark mb-4 m-0">{t("metadata")}</h2>
+              <div className="border border-border dark:border-border-dark rounded overflow-hidden">
+                <table className="w-full border-collapse text-sm">
                   <thead>
-                    <tr
-                      style={{
-                        backgroundColor: darkMode
-                          ? colors.surfaceBackground
-                          : "#f9fafb",
-                        borderBottom: `1px solid ${
-                          darkMode ? colors.border : "#e5e7eb"
-                        }`,
-                      }}
-                    >
-                      <th
-                        style={{
-                          padding: "0.75rem 1rem",
-                          textAlign: "left",
-                          fontWeight: 500,
-                          color: darkMode ? colors.textSecondary : "#6b7280",
-                        }}
-                      >
-                        {t("property")}
-                      </th>
-                      <th
-                        style={{
-                          padding: "0.75rem 1rem",
-                          textAlign: "left",
-                          fontWeight: 500,
-                          color: darkMode ? colors.textSecondary : "#6b7280",
-                        }}
-                      >
-                        {t("value")}
-                      </th>
+                    <tr className="bg-surfaceHover dark:bg-surfaceHover-dark border-b border-border dark:border-border-dark">
+                      <th className="py-3 px-4 text-left font-medium text-textSecondary dark:text-textSecondary-dark">{t("property")}</th>
+                      <th className="py-3 px-4 text-left font-medium text-textSecondary dark:text-textSecondary-dark">{t("value")}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {Object.entries(sensor.metadata).map(([key, value]) => (
-                      <tr
-                        key={key}
-                        style={{
-                          borderBottom: `1px solid ${
-                            darkMode ? colors.border : "#e5e7eb"
-                          }`,
-                        }}
-                      >
-                        <td
-                          style={{
-                            padding: "0.75rem 1rem",
-                            fontWeight: 500,
-                            color: darkMode ? colors.textPrimary : "#111827",
-                          }}
-                        >
-                          {key}
-                        </td>
-                        <td
-                          style={{
-                            padding: "0.75rem 1rem",
-                            color: darkMode ? colors.textSecondary : "#4b5563",
-                          }}
-                        >
-                          {typeof value === "object"
-                            ? JSON.stringify(value)
-                            : String(value)}
+                      <tr key={key} className="border-b border-border dark:border-border-dark last:border-0">
+                        <td className="py-3 px-4 font-medium text-textPrimary dark:text-textPrimary-dark">{key}</td>
+                        <td className="py-3 px-4 text-textSecondary dark:text-textSecondary-dark">
+                          {typeof value === "object" ? JSON.stringify(value) : String(value)}
                         </td>
                       </tr>
                     ))}
@@ -503,168 +181,60 @@ const SensorDetails: React.FC<SensorDetailsProps> = ({
           )}
 
           {sensor.TelemetryData && sensor.TelemetryData.length > 0 && (
-            <div style={{ marginTop: '2rem' }}>
-              <div style={{ 
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: '1rem'
-              }}>
-                <h2 style={{ 
-                  fontSize: '1.125rem', 
-                  fontWeight: 600, 
-                  color: darkMode ? colors.textPrimary : '#111827', 
-                  margin: 0
-                }}>
+            <div className="mt-8">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-semibold text-textPrimary dark:text-textPrimary-dark m-0">
                   {t('sensors.telemetryData')}
                   {connected && (
-                    <span style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      marginLeft: '0.75rem',
-                      fontSize: '0.75rem',
-                      fontWeight: 500,
-                      color: darkMode ? colors.successText : '#166534',
-                    }}>
-                      <span style={{
-                        width: '0.5rem',
-                        height: '0.5rem',
-                        borderRadius: '50%',
-                        backgroundColor: '#16a34a',
-                        marginRight: '0.375rem',
-                        animation: 'pulse 2s infinite',
-                      }}></span>
+                    <span className="inline-flex items-center ml-3 text-xs font-medium text-successText dark:text-successText-dark">
+                      <span className="w-2 h-2 rounded-full bg-success dark:bg-success-dark mr-1.5 animate-pulse" />
                       {t('live')}
                     </span>
                   )}
                 </h2>
-                
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => navigate('/debug/socket-tester')}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    padding: '0.5rem 0.75rem',
-                    fontSize: '0.75rem',
-                    backgroundColor: darkMode ? colors.infoBackground : '#dbeafe',
-                    color: darkMode ? colors.infoText : '#1e40af',
-                    border: 'none',
-                  }}
-                >
-                  <svg style={{ width: '0.875rem', height: '0.875rem', marginRight: '0.375rem' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <Button type="button" variant="outline" size="sm" onClick={() => navigate('/debug/socket-tester')} className="flex items-center py-2 px-3 text-xs bg-infoBg dark:bg-infoBg-dark text-infoText dark:text-infoText-dark border-0">
+                  <svg className="w-3.5 h-3.5 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
                   {t('debug_socket')}
                 </Button>
               </div>
-              
-              <div style={{ 
-                display: 'grid', 
-                gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', 
-                gap: '1rem'
-              }}>
+              <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-2'}`}>
                 {sensor.TelemetryData.map((variable) => {
                   const telemetryData = telemetryValues[variable.id];
                   const isNew = telemetryData?.isNew;
-                  
+                  const typeBgClass = getVariableTypeBgClass(variable.datatype);
+                  const typeTextClass = getVariableTypeTextClass(variable.datatype);
                   return (
-                    <div 
+                    <div
                       key={variable.id}
-                      style={{ 
-                        backgroundColor: darkMode ? colors.cardBackground : 'white',
-                        borderRadius: '0.5rem',
-                        boxShadow: isNew 
-                          ? `0 0 0 2px ${darkMode ? '#4d7efa' : '#3b82f6'}, ${darkMode 
-                            ? '0 1px 3px 0 rgba(0, 0, 0, 0.2), 0 1px 2px 0 rgba(0, 0, 0, 0.1)' 
-                            : '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'}`
-                          : darkMode 
-                            ? '0 1px 3px 0 rgba(0, 0, 0, 0.2), 0 1px 2px 0 rgba(0, 0, 0, 0.1)' 
-                            : '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
-                        border: `1px solid ${darkMode ? colors.border : '#e5e7eb'}`,
-                        padding: '1.25rem',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '0.75rem',
-                        transition: 'all 0.3s ease',
-                        transform: isNew ? 'scale(1.02)' : 'scale(1)',
-                      }}
+                      className={`rounded-lg border border-border dark:border-border-dark bg-card dark:bg-card-dark shadow-sm dark:shadow-md p-5 flex flex-col gap-3 transition-all duration-300 ${isNew ? 'ring-2 ring-info dark:ring-info-dark scale-[1.02]' : ''}`}
                     >
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{
-                          fontSize: '1rem',
-                          fontWeight: 600,
-                          color: darkMode ? colors.textPrimary : '#111827',
-                        }}>
+                      <div className="flex justify-between items-center">
+                        <span className="text-base font-semibold text-textPrimary dark:text-textPrimary-dark">
                           {variable.variableName.replace(/_/g, ' ')}
                         </span>
-                        <span style={{
-                          display: 'inline-block',
-                          fontSize: '0.75rem',
-                          backgroundColor: getVariableTypeColor(variable.datatype, darkMode, colors),
-                          color: getVariableTypeTextColor(variable.datatype, darkMode, colors),
-                          padding: '0.125rem 0.5rem',
-                          borderRadius: '9999px',
-                        }}>
+                        <span className={`inline-block text-xs px-2 py-0.5 rounded-full ${typeBgClass} ${typeTextClass}`}>
                           {variable.datatype}
                         </span>
                       </div>
-                      
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        <div style={{ position: 'relative', height: '2.5rem', width: '2.5rem', flexShrink: 0 }}>
-                          {getTelemetryIconForType(variable.variableName, darkMode, colors)}
+                      <div className="flex items-center gap-4">
+                        <div className="relative h-10 w-10 flex-shrink-0">
+                          {getTelemetryIconForType(variable.variableName)}
                           {isNew && (
-                            <div style={{
-                              position: 'absolute',
-                              top: '-5px',
-                              right: '-5px',
-                              width: '10px',
-                              height: '10px',
-                              borderRadius: '50%',
-                              backgroundColor: '#16a34a',
-                              boxShadow: '0 0 0 2px white',
-                              animation: 'pulse 2s infinite'
-                            }}></div>
+                            <div className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-success dark:bg-success-dark ring-2 ring-white animate-pulse" />
                           )}
                         </div>
-                        
-                        <div style={{ flex: 1 }}>
-                          <div style={{ 
-                            fontSize: '1.5rem', 
-                            fontWeight: 600, 
-                            color: isNew 
-                              ? darkMode ? '#4d7efa' : '#3b82f6' 
-                              : darkMode ? colors.textPrimary : '#111827',
-                            transition: 'color 0.3s ease',
-                            display: 'flex',
-                            alignItems: 'baseline',
-                            gap: '0.25rem'
-                          }}>
-                            {telemetryData 
-                              ? formatTelemetryValue(telemetryData.value, variable.datatype) 
-                              : <span style={{ color: darkMode ? colors.textSecondary : '#6b7280', fontSize: '1rem', fontStyle: 'italic' }}>
-                                  {t('sensors.waitingForData')}
-                                </span>
-                            }
-                            {telemetryData && (
-                              <span style={{ fontSize: '0.875rem', color: darkMode ? colors.textSecondary : '#6b7280', fontWeight: 500 }}>
-                                {getTelemetryUnit(variable.variableName)}
-                              </span>
-                            )}
+                        <div className="flex-1">
+                          <div className={`text-2xl font-semibold flex items-baseline gap-1 transition-colors ${isNew ? 'text-info dark:text-info-dark' : 'text-textPrimary dark:text-textPrimary-dark'}`}>
+                            {telemetryData
+                              ? formatTelemetryValue(telemetryData.value, variable.datatype)
+                              : <span className="text-base italic text-textSecondary dark:text-textSecondary-dark">{t('sensors.waitingForData')}</span>}
+                            {telemetryData && <span className="text-sm font-medium text-textSecondary dark:text-textSecondary-dark">{getTelemetryUnit(variable.variableName)}</span>}
                           </div>
-                          
                           {telemetryData?.timestamp && (
-                            <div style={{ 
-                              fontSize: '0.75rem', 
-                              color: darkMode ? colors.textSecondary : '#6b7280',
-                              marginTop: '0.25rem',
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '0.25rem'
-                            }}>
-                              <svg style={{ width: '0.875rem', height: '0.875rem' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <div className="text-xs text-textSecondary dark:text-textSecondary-dark mt-1 flex items-center gap-1">
+                              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                               </svg>
                               {t('last_update')}: {new Date(telemetryData.timestamp).toLocaleTimeString()}
@@ -676,22 +246,6 @@ const SensorDetails: React.FC<SensorDetailsProps> = ({
                   );
                 })}
               </div>
-              
-              <style>
-                {`
-                  @keyframes pulse {
-                    0% {
-                      box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.4);
-                    }
-                    70% {
-                      box-shadow: 0 0 0 6px rgba(22, 163, 74, 0);
-                    }
-                    100% {
-                      box-shadow: 0 0 0 0 rgba(22, 163, 74, 0);
-                    }
-                  }
-                `}
-              </style>
             </div>
           )}
         </div>
@@ -700,75 +254,66 @@ const SensorDetails: React.FC<SensorDetailsProps> = ({
   );
 };
 
-// Helper functions for telemetry visualization
-const getVariableTypeColor = (type: string, darkMode: boolean, colors: any) => {
+const getVariableTypeBgClass = (type: string) => {
   switch (type.toLowerCase()) {
-    case 'float':
-      return darkMode ? colors.infoBackground : '#dbeafe';
-    case 'integer':
-      return darkMode ? colors.warningBackground : '#fef3c7';
-    case 'boolean':
-      return darkMode ? colors.successBackground : '#dcfce7';
-    case 'string':
-      return darkMode ? colors.primaryBackground : '#e0e7ff';
-    default:
-      return darkMode ? colors.surfaceBackground : '#f3f4f6';
+    case 'float': return 'bg-infoBg dark:bg-infoBg-dark';
+    case 'integer': return 'bg-warningBg dark:bg-warningBg-dark';
+    case 'boolean': return 'bg-successBg dark:bg-successBg-dark';
+    case 'string': return 'bg-infoBg dark:bg-infoBg-dark';
+    default: return 'bg-surfaceHover dark:bg-surfaceHover-dark';
   }
 };
 
-const getVariableTypeTextColor = (type: string, darkMode: boolean, colors: any) => {
+const getVariableTypeTextClass = (type: string) => {
   switch (type.toLowerCase()) {
-    case 'float':
-      return darkMode ? colors.infoText : '#1e40af';
-    case 'integer':
-      return darkMode ? colors.warningText : '#92400e';
-    case 'boolean':
-      return darkMode ? colors.successText : '#166534';
-    case 'string':
-      return darkMode ? colors.primaryText : '#3730a3';
-    default:
-      return darkMode ? colors.textSecondary : '#6b7280';
+    case 'float': return 'text-infoText dark:text-infoText-dark';
+    case 'integer': return 'text-warningText dark:text-warningText-dark';
+    case 'boolean': return 'text-successText dark:text-successText-dark';
+    case 'string': return 'text-infoText dark:text-infoText-dark';
+    default: return 'text-textSecondary dark:text-textSecondary-dark';
   }
 };
 
-const getTelemetryIconForType = (variableName: string, darkMode: boolean, colors: any) => {
-  const iconColor = darkMode ? colors.textSecondary : '#6b7280';
-  const variableNameLower = variableName.toLowerCase();
-  
-  if (variableNameLower.includes('moisture') || variableNameLower.includes('humidity')) {
+const iconClass = 'w-10 h-10 text-textSecondary dark:text-textSecondary-dark';
+
+const getTelemetryIconForType = (variableName: string) => {
+  const v = variableName.toLowerCase();
+  if (v.includes('moisture') || v.includes('humidity')) {
     return (
-      <svg style={{ width: '2.5rem', height: '2.5rem', color: iconColor }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <svg className={iconClass} fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19.5 12c0-4.3-3.497-8.5-7.5-8.5S4.5 7.7 4.5 12c0 6 7.5 10 7.5 10s7.5-4 7.5-10z" />
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10 14a4 4 0 108 0 4 4 0 00-8 0" />
       </svg>
     );
-  } else if (variableNameLower.includes('temperature')) {
+  }
+  if (v.includes('temperature')) {
     return (
-      <svg style={{ width: '2.5rem', height: '2.5rem', color: iconColor }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <svg className={iconClass} fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 3v11m0 0a3 3 0 106 0M9 14a3 3 0 116 0" />
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 3v8.5M12 18.5V21" />
       </svg>
     );
-  } else if (variableNameLower.includes('battery')) {
+  }
+  if (v.includes('battery')) {
     return (
-      <svg style={{ width: '2.5rem', height: '2.5rem', color: iconColor }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <svg className={iconClass} fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 6H7a2 2 0 00-2 2v8a2 2 0 002 2h10a2 2 0 002-2V8a2 2 0 00-2-2zm-2 0V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v2" />
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 10v4" />
       </svg>
     );
-  } else if (variableNameLower.includes('signal') || variableNameLower.includes('strength')) {
+  }
+  if (v.includes('signal') || v.includes('strength')) {
     return (
-      <svg style={{ width: '2.5rem', height: '2.5rem', color: iconColor }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <svg className={iconClass} fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.143 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" />
       </svg>
     );
-  } else {
-    return (
-      <svg style={{ width: '2.5rem', height: '2.5rem', color: iconColor }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-      </svg>
-    );
   }
+  return (
+    <svg className={iconClass} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+    </svg>
+  );
 };
 
 export default SensorDetails;

@@ -6,37 +6,20 @@ import { selectSensors, fetchSensors } from '../../state/slices/sensors.slice';
 import { selectDevices, fetchDevices } from '../../state/slices/devices.slice';
 import { useTranslation } from 'react-i18next';
 import LoadingScreen from '../../components/common/Loading/LoadingScreen';
-import { useTheme } from '../../context/ThemeContext';
-import { useThemeColors } from '../../hooks/useThemeColors';
-
-// Import our reusable components
 import StatCard from '../../components/dashboard/StatCard';
 import EntityList from '../../components/dashboard/EntityList';
 import DashboardHeader from '../../components/dashboard/DashboardHeader';
 import DashboardWalkthrough from '../../components/dashboard/DashboardWalkthrough';
-import AdminTools from '../../components/dashboard/AdminTools';
 
 const Dashboard = () => {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const [loading, setLoading] = useState(true);
-  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-  const { darkMode } = useTheme();
-  const colors = useThemeColors();
 
   const organizations = useAppSelector(selectOrganizations);
   const areas = useAppSelector(selectAreas);
   const sensors = useAppSelector(selectSensors);
   const devices = useAppSelector(selectDevices);
-
-  useEffect(() => {
-    const handleResize = () => {
-      setWindowWidth(window.innerWidth);
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -53,7 +36,6 @@ const Dashboard = () => {
         setLoading(false);
       }
     };
-
     fetchData();
   }, [dispatch]);
 
@@ -61,93 +43,18 @@ const Dashboard = () => {
     return <LoadingScreen />;
   }
 
-  // Custom styles based on theme
-  const getStatCardStyles = () => {
-    return {
-      backgroundColor: darkMode ? colors.cardBackground : 'white',
-      borderColor: darkMode ? colors.cardBorder : '#e5e7eb',
-      boxShadow: darkMode 
-        ? '0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1)'
-        : '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-      color: darkMode ? colors.textPrimary : '#111827',
-      textColor: darkMode ? colors.textSecondary : '#6B7280',
-    };
-  };
-
   const stats = [
-    { 
-      name: t('common.organizations'), 
-      count: organizations.length, 
-      path: '/organizations', 
-      icon: '🚜', 
-      color: 'bg-leaf-600', 
-      textColor: 'text-leaf-800', 
-      bgColor: 'bg-leaf-50', 
-      borderColor: 'border-leaf-200' 
-    },
-    { 
-      name: t('common.areas'), 
-      count: areas.length, 
-      path: '/areas', 
-      icon: '🌾', 
-      color: 'bg-soil-600', 
-      textColor: 'text-soil-800', 
-      bgColor: 'bg-soil-50', 
-      borderColor: 'border-soil-200' 
-    },
-    { 
-      name: t('common.sensors'), 
-      count: sensors.length, 
-      path: '/sensors', 
-      icon: '🌡️', 
-      color: 'bg-wheat-600', 
-      textColor: 'text-wheat-800', 
-      bgColor: 'bg-wheat-50', 
-      borderColor: 'border-wheat-200' 
-    },
-    { 
-      name: t('common.devices'), 
-      count: devices.length, 
-      path: '/devices', 
-      icon: '📡', 
-      color: 'bg-sky-600', 
-      textColor: 'text-sky-800', 
-      bgColor: 'bg-sky-50', 
-      borderColor: 'border-sky-200' 
-    }
+    { name: t('common.organizations'), count: organizations.length, path: '/organizations', icon: '🚜', color: 'bg-leaf-600', textColor: 'text-leaf-800', bgColor: 'bg-leaf-50', borderColor: 'border-leaf-200' },
+    { name: t('common.areas'), count: areas.length, path: '/areas', icon: '🌾', color: 'bg-soil-600', textColor: 'text-soil-800', bgColor: 'bg-soil-50', borderColor: 'border-soil-200' },
+    { name: t('common.sensors'), count: sensors.length, path: '/sensors', icon: '🌡️', color: 'bg-wheat-600', textColor: 'text-wheat-800', bgColor: 'bg-wheat-50', borderColor: 'border-wheat-200' },
+    { name: t('common.devices'), count: devices.length, path: '/devices', icon: '📡', color: 'bg-sky-600', textColor: 'text-sky-800', bgColor: 'bg-sky-50', borderColor: 'border-sky-200' }
   ];
 
-  // Calculate grid columns based on window width
-  const getStatGridTemplateColumns = () => {
-    if (windowWidth >= 1024) return 'repeat(4, 1fr)';
-    if (windowWidth >= 768) return 'repeat(2, 1fr)';
-    return '1fr';
-  };
-
-  const getEntityGridTemplateColumns = () => {
-    if (windowWidth >= 1024) return 'repeat(2, 1fr)';
-    return '1fr';
-  };
-
   return (
-    <div style={{ 
-      padding: '2rem',
-      backgroundColor: darkMode ? colors.background : '#f0f9f0',
-      minHeight: 'calc(100vh - 60px)',
-      maxWidth: '1400px',
-      margin: '0 auto',
-      color: darkMode ? colors.textPrimary : 'inherit'
-    }}>
+    <div className="p-8 bg-background dark:bg-background-dark min-h-[calc(100vh-60px)] max-w-[1400px] mx-auto text-textPrimary dark:text-textPrimary-dark">
       <DashboardHeader title={t('dashboard.title')} />
-      
-      {/* <AdminTools /> */}
-      
-      <div style={{ 
-        display: 'grid',
-        gridTemplateColumns: getStatGridTemplateColumns(),
-        gap: '1.5rem', 
-        marginBottom: '2.5rem' 
-      }}>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-10">
         {stats.map((stat) => (
           <StatCard
             key={stat.name}
@@ -163,12 +70,7 @@ const Dashboard = () => {
         ))}
       </div>
 
-      <div style={{ 
-        display: 'grid',
-        gridTemplateColumns: getEntityGridTemplateColumns(),
-        gap: '2rem', 
-        marginBottom: '1.5rem'
-      }}>
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-6">
         <EntityList
           title={t('dashboard.recent_organizations')}
           titleIcon="🚜"
@@ -188,7 +90,6 @@ const Dashboard = () => {
           createNewText={t('common.create_new')}
           noDetailsText={t('common.no_details')}
         />
-
         <EntityList
           title={t('dashboard.recent_devices')}
           titleIcon="📡"
@@ -215,4 +116,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard; 
+export default Dashboard;

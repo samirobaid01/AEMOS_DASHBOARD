@@ -4,7 +4,6 @@ import type { OrganizationUpdateRequest } from '../../types/organization';
 import type { FormErrors } from '../../types/ui';
 import Input from '../../components/common/Input/Input';
 import Button from '../../components/common/Button/Button';
-import { useThemeColors } from '../../hooks/useThemeColors';
 
 interface OrganizationEditProps {
   formData: OrganizationUpdateRequest;
@@ -30,132 +29,26 @@ const OrganizationEdit: React.FC<OrganizationEditProps> = ({
   onCancel
 }) => {
   const { t } = useTranslation();
-  const colors = useThemeColors();
-  
-  // Styled objects for consistent styling
-  const styles = {
-    container: {
-      padding: '1.5rem',
-      maxWidth: '1200px',
-      margin: '0 auto',
-    },
-    innerContainer: {
-      maxWidth: '48rem',
-      margin: '0 auto',
-    },
-    header: {
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: '1.5rem',
-      flexWrap: 'wrap' as const,
-      gap: '1rem',
-    },
-    title: {
-      fontSize: '1.5rem',
-      fontWeight: 600,
-      color: colors.textPrimary,
-      margin: 0,
-    },
-    card: {
-      backgroundColor: colors.cardBackground,
-      borderRadius: '0.5rem',
-      boxShadow: colors.cardShadow,
-      border: `1px solid ${colors.cardBorder}`,
-      overflow: 'hidden',
-    },
-    form: {
-      padding: '1.5rem',
-    },
-    formGrid: {
-      display: 'grid',
-      gridTemplateColumns: '1fr',
-      gap: '1.5rem',
-      marginBottom: '1.5rem',
-    },
-    formRow: {
-      marginBottom: '1.5rem',
-    },
-    fullWidth: {
-      gridColumn: '1 / -1',
-    },
-    labelText: {
-      display: 'block',
-      fontSize: '0.875rem',
-      fontWeight: 500,
-      color: colors.textSecondary,
-      marginBottom: '0.5rem',
-    },
-    textarea: {
-      width: '100%',
-      minHeight: '6rem',
-      padding: '0.5rem 0.75rem',
-      borderRadius: '0.375rem',
-      border: `1px solid ${colors.border}`,
-      backgroundColor: colors.surfaceBackground,
-      color: colors.textPrimary,
-      fontSize: '0.875rem',
-      resize: 'vertical' as const,
-    },
-    checkboxContainer: {
-      display: 'flex',
-      alignItems: 'center',
-      marginTop: '1.5rem',
-    },
-    checkbox: {
-      marginRight: '0.5rem',
-      width: '1rem',
-      height: '1rem',
-      accentColor: colors.buttonPrimary,
-    },
-    checkboxLabel: {
-      fontSize: '0.875rem',
-      color: colors.textPrimary,
-    },
-    errorContainer: {
-      backgroundColor: colors.dangerBackground,
-      color: colors.dangerText,
-      padding: '1rem',
-      borderRadius: '0.375rem',
-      marginBottom: '1.5rem',
-      fontSize: '0.875rem',
-    },
-    buttonsContainer: {
-      display: 'flex',
-      justifyContent: 'flex-end',
-      gap: '0.75rem',
-      marginTop: '1.5rem',
-    },
-    column: {
-      display: 'flex',
-      flexDirection: 'column' as const,
-    },
-    highlight: {
-      color: colors.info,
-      fontWeight: 600 as const
-    }
-  };
-  
+
+  const selectClasses =
+    'w-full px-3 py-2 rounded border border-border dark:border-border-dark bg-surface dark:bg-surface-dark text-textPrimary dark:text-textPrimary-dark text-sm outline-none focus:ring-2 focus:ring-primary';
+
   return (
-    <div style={styles.container}>
-      <div style={styles.innerContainer}>
-        <div style={styles.header}>
-          <h1 style={styles.title}>
-            {t('edit_organization')} {organizationName && <span style={styles.highlight}>{organizationName}</span>}
+    <div className="p-6 max-w-[1200px] mx-auto">
+      <div className="max-w-3xl mx-auto">
+        <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
+          <h1 className="text-2xl font-semibold text-textPrimary dark:text-textPrimary-dark m-0">
+            {t('edit_organization')} {organizationName && <span className="text-info dark:text-info-dark font-semibold">{organizationName}</span>}
           </h1>
-          <Button
-            variant="outline"
-            onClick={onCancel}
-          >
+          <Button variant="outline" onClick={onCancel}>
             {t('cancel')}
           </Button>
         </div>
-        
-        <div style={styles.card}>
-          <form onSubmit={onSubmit} style={styles.form}>
-            <div style={styles.formGrid}>
+        <div className="rounded-lg border border-border dark:border-border-dark bg-card dark:bg-card-dark shadow-sm overflow-hidden">
+          <form onSubmit={onSubmit} className="p-6">
+            <div className="grid grid-cols-1 gap-6 mb-6">
               {/* Name */}
-              <div style={styles.fullWidth}>
+              <div className="col-span-full">
                 <Input
                   id="name"
                   name="name"
@@ -169,7 +62,7 @@ const OrganizationEdit: React.FC<OrganizationEditProps> = ({
               </div>
               
               {/* Two column section */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', gridColumn: '1 / -1' }}>
+              <div className="grid grid-cols-2 gap-4 col-span-full">
                 {/* Email */}
                 <div>
                   <Input
@@ -197,37 +90,32 @@ const OrganizationEdit: React.FC<OrganizationEditProps> = ({
               </div>
               
               {/* Description */}
-              <div style={styles.fullWidth}>
-                <div style={styles.column}>
-                  <label htmlFor="detail" style={styles.labelText}>
-                    {t('description')}
-                  </label>
-                  <textarea
-                    id="detail"
-                    name="detail"
-                    rows={3}
-                    value={formData.detail || ''}
-                    onChange={onChange}
-                    style={styles.textarea}
-                  />
-                </div>
+              <div className="col-span-full">
+                <label htmlFor="detail" className="block text-sm font-medium text-textSecondary dark:text-textSecondary-dark mb-2">
+                  {t('description')}
+                </label>
+                <textarea
+                  id="detail"
+                  name="detail"
+                  rows={3}
+                  value={formData.detail || ''}
+                  onChange={onChange}
+                  className="w-full min-h-24 px-3 py-2 rounded border border-border dark:border-border-dark bg-surface dark:bg-surface-dark text-textPrimary dark:text-textPrimary-dark text-sm resize-y"
+                />
               </div>
-              
               {/* Address */}
-              <div style={styles.fullWidth}>
-                <div style={styles.column}>
-                  <label htmlFor="address" style={styles.labelText}>
-                    {t('address')}
-                  </label>
-                  <textarea
-                    id="address"
-                    name="address"
-                    rows={2}
-                    value={formData.address || ''}
-                    onChange={onChange}
-                    style={styles.textarea}
-                  />
-                </div>
+              <div className="col-span-full">
+                <label htmlFor="address" className="block text-sm font-medium text-textSecondary dark:text-textSecondary-dark mb-2">
+                  {t('address')}
+                </label>
+                <textarea
+                  id="address"
+                  name="address"
+                  rows={2}
+                  value={formData.address || ''}
+                  onChange={onChange}
+                  className="w-full min-h-24 px-3 py-2 rounded border border-border dark:border-border-dark bg-surface dark:bg-surface-dark text-textPrimary dark:text-textPrimary-dark text-sm resize-y"
+                />
               </div>
               
               {/* Zip Code */}
@@ -243,25 +131,11 @@ const OrganizationEdit: React.FC<OrganizationEditProps> = ({
               </div>
               
               {/* Status */}
-              <div style={styles.fullWidth}>
-                <label htmlFor="status" style={styles.labelText}>
+              <div className="col-span-full">
+                <label htmlFor="status" className="block text-sm font-medium text-textSecondary dark:text-textSecondary-dark mb-2">
                   {t('status')}
                 </label>
-                <select
-                  id="status"
-                  name="status"
-                  value={formData.status ?? 'active'}
-                  onChange={onChange}
-                  style={{
-                    width: '100%',
-                    padding: '0.5rem 0.75rem',
-                    borderRadius: '0.375rem',
-                    border: `1px solid ${colors.border}`,
-                    backgroundColor: colors.surfaceBackground,
-                    color: colors.textPrimary,
-                    fontSize: '0.875rem',
-                  }}
-                >
+                <select id="status" name="status" value={formData.status ?? 'active'} onChange={onChange} className={selectClasses}>
                   <option value="active">{t('active')}</option>
                   <option value="inactive">{t('inactive')}</option>
                   <option value="pending">{t('pending')}</option>
@@ -269,34 +143,27 @@ const OrganizationEdit: React.FC<OrganizationEditProps> = ({
                   <option value="archived">{t('archived')}</option>
                 </select>
               </div>
-
               {/* Is Parent */}
-              <div style={styles.checkboxContainer}>
+              <div className="flex items-center mt-6">
                 <input
                   id="isParent"
                   name="isParent"
                   type="checkbox"
                   checked={formData.isParent}
                   onChange={onChange}
-                  style={styles.checkbox}
+                  className="mr-2 w-4 h-4 accent-primary"
                 />
-                <label htmlFor="isParent" style={styles.checkboxLabel}>
+                <label htmlFor="isParent" className="text-sm text-textPrimary dark:text-textPrimary-dark">
                   {t('is_parent_organization')}
                 </label>
               </div>
             </div>
-            
             {error && (
-              <div style={styles.errorContainer}>
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <div>
-                    <h3 style={{ fontSize: '0.875rem', fontWeight: 500, color: colors.dangerText }}>{error}</h3>
-                  </div>
-                </div>
+              <div className="bg-dangerBg dark:bg-dangerBg-dark text-dangerText dark:text-dangerText-dark p-4 rounded-md mb-6 text-sm">
+                <h3 className="text-sm font-medium">{error}</h3>
               </div>
             )}
-            
-            <div style={styles.buttonsContainer}>
+            <div className="flex justify-end gap-3 mt-6">
               <Button
                 type="button"
                 variant="outline"

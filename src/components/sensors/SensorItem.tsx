@@ -1,8 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useTheme } from '../../context/ThemeContext';
-import { useThemeColors } from '../../hooks/useThemeColors';
 import type { Sensor } from '../../types/sensor';
 
 interface SensorItemProps {
@@ -12,146 +10,45 @@ interface SensorItemProps {
 
 const SensorItem: React.FC<SensorItemProps> = ({ sensor, windowWidth }) => {
   const { t } = useTranslation();
-  const { darkMode } = useTheme();
-  const colors = useThemeColors();
   const isMobile = windowWidth < 768;
 
-  // Function to determine the status color
-  const getStatusColor = (status: boolean) => {
-    if (status) {
-      return darkMode ? colors.successBackground : '#dcfce7';
-    } else {
-      return darkMode ? colors.dangerBackground : '#fee2e2';
-    }
-  };
-
-  // Function to determine the status text color
-  const getStatusTextColor = (status: boolean) => {
-    if (status) {
-      return darkMode ? colors.successText : '#166534';
-    } else {
-      return darkMode ? colors.dangerText : '#991b1b';
-    }
-  };
-
-  const sensorCardStyle = {
-    display: 'flex',
-    flexDirection: isMobile ? 'column' as const : 'row' as const,
-    alignItems: isMobile ? 'flex-start' : 'center',
-    padding: '1rem',
-    backgroundColor: darkMode ? colors.cardBackground : 'white',
-    borderRadius: '0.5rem',
-    boxShadow: darkMode 
-      ? '0 1px 3px 0 rgba(0, 0, 0, 0.2), 0 1px 2px 0 rgba(0, 0, 0, 0.1)' 
-      : '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
-    border: `1px solid ${darkMode ? colors.border : '#e5e7eb'}`,
-    marginBottom: '1rem',
-    transition: 'all 0.15s ease-in-out',
-  };
-
   return (
-    <Link 
+    <Link
       to={`/sensors/${sensor.id}`}
-      style={{
-        textDecoration: 'none',
-        color: 'inherit',
-        display: 'block'
-      }}
+      className="no-underline text-inherit block"
     >
-      <div 
-        style={sensorCardStyle}
-        onMouseOver={e => {
-          e.currentTarget.style.transform = 'translateY(-2px)';
-          e.currentTarget.style.boxShadow = darkMode 
-            ? '0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1)' 
-            : '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)';
-        }}
-        onMouseOut={e => {
-          e.currentTarget.style.transform = 'translateY(0)';
-          e.currentTarget.style.boxShadow = darkMode 
-            ? '0 1px 3px 0 rgba(0, 0, 0, 0.2), 0 1px 2px 0 rgba(0, 0, 0, 0.1)' 
-            : '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)';
-        }}
-      >
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <h3 style={{
-            fontSize: '1rem',
-            fontWeight: 600,
-            color: darkMode ? colors.textPrimary : '#111827',
-            margin: '0 0 0.5rem 0',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-          }}>
+      <div className="flex flex-col sm:flex-row sm:items-center items-start p-4 rounded-lg border border-border dark:border-border-dark bg-card dark:bg-card-dark shadow-sm dark:shadow-md mb-4 transition-all duration-150 hover:-translate-y-0.5 hover:shadow-md dark:hover:shadow-lg">
+        <div className="flex-1 min-w-0">
+          <h3 className="text-base font-semibold text-textPrimary dark:text-textPrimary-dark m-0 mb-2 truncate">
             {sensor.name}
           </h3>
-          
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            flexWrap: 'wrap',
-            marginBottom: '0.5rem',
-          }}>
-            <span style={{
-              fontSize: '0.75rem',
-              backgroundColor: darkMode ? colors.infoBackground : '#dbeafe',
-              color: darkMode ? colors.infoText : '#1e40af',
-              padding: '0.125rem 0.5rem',
-              borderRadius: '9999px',
-              marginRight: '0.5rem',
-              display: 'inline-block',
-            }}>
+          <div className="flex items-center flex-wrap gap-2 mb-2">
+            <span className="text-xs px-2 py-0.5 rounded-full bg-infoBg dark:bg-infoBg-dark text-infoText dark:text-infoText-dark inline-block">
               {sensor.type}
             </span>
-            
             {sensor.area && (
-              <span style={{
-                fontSize: '0.75rem',
-                backgroundColor: darkMode ? colors.successBackground : '#dcfce7',
-                color: darkMode ? colors.successText : '#166534',
-                padding: '0.125rem 0.5rem',
-                borderRadius: '9999px',
-                display: 'inline-block',
-              }}>
+              <span className="text-xs px-2 py-0.5 rounded-full bg-successBg dark:bg-successBg-dark text-successText dark:text-successText-dark inline-block">
                 {sensor.area.name}
               </span>
             )}
           </div>
-          
-          <p style={{
-            fontSize: '0.875rem',
-            color: darkMode ? colors.textMuted : '#6b7280',
-            margin: 0,
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-          }}>
+          <p className="text-sm text-textMuted dark:text-textMuted-dark m-0 truncate">
             {sensor.description || t('sensors.noDescription')}
           </p>
         </div>
-        
-        <div style={{
-          marginTop: isMobile ? '0.75rem' : 0,
-          marginLeft: isMobile ? 0 : '1rem',
-          flexShrink: 0,
-        }}>
-          <span style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            padding: '0.25rem 0.625rem',
-            borderRadius: '9999px',
-            fontSize: '0.75rem',
-            fontWeight: 500,
-            backgroundColor: getStatusColor(sensor.status),
-            color: getStatusTextColor(sensor.status),
-          }}>
-            <span style={{
-              width: '0.5rem',
-              height: '0.5rem',
-              borderRadius: '50%',
-              backgroundColor: sensor.status ? '#16a34a' : '#ef4444',
-              marginRight: '0.375rem',
-            }}></span>
+        <div className={`flex-shrink-0 ${isMobile ? 'mt-3 ml-0' : 'mt-0 ml-4'}`}>
+          <span
+            className={`inline-flex items-center py-1 px-2.5 rounded-full text-xs font-medium ${
+              sensor.status
+                ? 'bg-successBg dark:bg-successBg-dark text-successText dark:text-successText-dark'
+                : 'bg-dangerBg dark:bg-dangerBg-dark text-dangerText dark:text-dangerText-dark'
+            }`}
+          >
+            <span
+              className={`w-2 h-2 rounded-full mr-1.5 ${
+                sensor.status ? 'bg-success dark:bg-success-dark' : 'bg-danger dark:bg-danger-dark'
+              }`}
+            />
             {sensor.status ? t('active') : t('inactive')}
           </span>
         </div>
@@ -160,4 +57,4 @@ const SensorItem: React.FC<SensorItemProps> = ({ sensor, windowWidth }) => {
   );
 };
 
-export default SensorItem; 
+export default SensorItem;

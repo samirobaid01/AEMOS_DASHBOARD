@@ -1,28 +1,17 @@
 import React, { useState, useEffect, useRef } from "react";
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  TextField,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Box,
-  Typography,
-  IconButton,
-  Stack,
-} from "@mui/material";
-import { useTranslation } from "react-i18next";
-import AddIcon from '@mui/icons-material/Add';
-import DeleteIcon from '@mui/icons-material/Delete';
 import type { Device } from "../../types/device";
 import type { Sensor } from "../../types/sensor";
 import * as deviceStatesService from '../../services/deviceStates.service';
 import { useAppSelector } from '../../state/store';
 import { selectSelectedOrganizationId } from '../../state/slices/auth.slice';
+import Modal from '../common/Modal/Modal';
+import Button from '../common/Button/Button';
+import FormField from '../common/FormField';
+
+const inputClasses =
+  'block w-full min-w-0 px-3 py-2 rounded border border-border dark:border-border-dark bg-surface dark:bg-surface-dark text-textPrimary dark:text-textPrimary-dark text-sm outline-none focus:ring-2 focus:ring-primary';
+const selectClasses =
+  'block w-full min-w-0 px-3 py-2 rounded border border-border dark:border-border-dark bg-surface dark:bg-surface-dark text-textPrimary dark:text-textPrimary-dark text-sm outline-none focus:ring-2 focus:ring-primary';
 
 interface ConditionData {
   sourceType: 'sensor' | 'device';
@@ -47,11 +36,6 @@ interface ParsedExpression {
   duration?: string | number;
   type?: string;
   expressions?: ParsedExpression[];
-}
-
-interface ConfigObject {
-  type: string;
-  expressions: ParsedExpression[];
 }
 
 interface NodeDialogProps {
@@ -142,7 +126,6 @@ const ValueInput: React.FC<{
   onDurationChange?: (duration: string | number) => void;
 }> = ({ operator, value, duration, onChange, onDurationChange }) => {
   const operatorConfig = getOperatorConfig(operator);
-  const { t } = useTranslation();
 
   const handleSingleValueChange = (newValue: string) => {
     // Try to convert to number if it looks like a number
@@ -188,81 +171,93 @@ const ValueInput: React.FC<{
     case 'none':
       return null; // No input needed for operators like isNull, isNumber, etc.
 
-    case 'range':
+    case 'range': {
       const rangeValue = Array.isArray(value) ? value : [0, 0];
       return (
-        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', minWidth: 200 }}>
-          <TextField
-            label="Min"
-            type="number"
-            value={rangeValue[0] || ''}
-            onChange={(e) => handleRangeValueChange(0, e.target.value)}
-            size="small"
-            sx={{ flex: 1 }}
-          />
-          <Typography variant="body2">to</Typography>
-          <TextField
-            label="Max"
-            type="number"
-            value={rangeValue[1] || ''}
-            onChange={(e) => handleRangeValueChange(1, e.target.value)}
-            size="small"
-            sx={{ flex: 1 }}
-          />
-        </Box>
+        <div className="flex gap-2 items-center min-w-[200px]">
+          <FormField label="Min" id="value-min">
+            <input
+              type="number"
+              className={inputClasses}
+              value={rangeValue[0] ?? ''}
+              onChange={(e) => handleRangeValueChange(0, e.target.value)}
+            />
+          </FormField>
+          <span className="text-sm text-textSecondary dark:text-textSecondary-dark">to</span>
+          <FormField label="Max" id="value-max">
+            <input
+              type="number"
+              className={inputClasses}
+              value={rangeValue[1] ?? ''}
+              onChange={(e) => handleRangeValueChange(1, e.target.value)}
+            />
+          </FormField>
+        </div>
       );
+    }
 
-    case 'array':
+    case 'array': {
       const displayValue = Array.isArray(value) ? value.join(', ') : String(value || '');
       return (
-        <TextField
-          label="Values (comma-separated)"
-          value={displayValue}
-          onChange={(e) => handleArrayValueChange(e.target.value)}
-          sx={{ minWidth: 200 }}
-          placeholder="value1, value2, value3"
-          helperText="Enter values separated by commas"
-        />
+        <FormField label="Values (comma-separated)" id="value-array">
+          <input
+            type="text"
+            className={inputClasses}
+            value={displayValue}
+            onChange={(e) => handleArrayValueChange(e.target.value)}
+            placeholder="value1, value2, value3"
+          />
+          <p className="mt-1 text-xs text-textMuted dark:text-textMuted-dark">Enter values separated by commas</p>
+        </FormField>
       );
+    }
 
     case 'singleDuration':
       return (
-        <TextField
-          label="30s | 1m | 1h | 1d"
-          value={Array.isArray(value) ? value.join(', ') : String(value || '')}
-          onChange={(e) => handleSingleValueChange(e.target.value)}
-          sx={{ minWidth: 120 }}
-          placeholder={operatorConfig.category === 'string' ? 'Enter text' : 'Enter value'}
-        />
+        <FormField label="30s | 1m | 1h | 1d" id="value-duration">
+          <input
+            type="text"
+            className={inputClasses}
+            value={Array.isArray(value) ? value.join(', ') : String(value || '')}
+            onChange={(e) => handleSingleValueChange(e.target.value)}
+            placeholder={operatorConfig.category === 'string' ? 'Enter text' : 'Enter value'}
+          />
+        </FormField>
       );
     case 'compareValueDuration':
       return (
-        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', minWidth: 200 }}>
-          <TextField
-            label="Duration (30s | 1m | 1h | 1d)"
-            value={duration || ''}
-            onChange={(e) => onDurationChange?.(e.target.value)}
-            sx={{ minWidth: 120 }}
-            placeholder="Enter duration"
-          />
-          <TextField
-            label="Value"
-            value={Array.isArray(value) ? value.join(', ') : String(value || '')}
-            onChange={(e) => handleSingleValueChange(e.target.value)}
-            sx={{ minWidth: 120 }}
-            placeholder="Enter value"
-          />
-        </Box>
+        <div className="flex gap-2 items-center min-w-[200px]">
+          <FormField label="Duration (30s | 1m | 1h | 1d)" id="duration-compare">
+            <input
+              type="text"
+              className={inputClasses}
+              value={duration ?? ''}
+              onChange={(e) => onDurationChange?.(e.target.value)}
+              placeholder="Enter duration"
+            />
+          </FormField>
+          <FormField label="Value" id="value-compare">
+            <input
+              type="text"
+              className={inputClasses}
+              value={Array.isArray(value) ? value.join(', ') : String(value || '')}
+              onChange={(e) => handleSingleValueChange(e.target.value)}
+              placeholder="Enter value"
+            />
+          </FormField>
+        </div>
       );
     default:
       return (
-        <TextField
-          label="Value"
-          value={Array.isArray(value) ? value.join(', ') : String(value || '')}
-          onChange={(e) => handleSingleValueChange(e.target.value)}
-          sx={{ minWidth: 120 }}
-          placeholder={operatorConfig.category === 'string' ? 'Enter text' : 'Enter value'}
-        />
+        <FormField label="Value" id="value-single">
+          <input
+            type="text"
+            className={inputClasses}
+            value={Array.isArray(value) ? value.join(', ') : String(value || '')}
+            onChange={(e) => handleSingleValueChange(e.target.value)}
+            placeholder={operatorConfig.category === 'string' ? 'Enter text' : 'Enter value'}
+          />
+        </FormField>
       );
   }
 };
@@ -301,7 +296,6 @@ const ConditionBuilder: React.FC<{
   sensorDetails: { [uuid: string]: Sensor };
   onFetchSensorDetails: (sensorId: number) => Promise<void>;
 }> = ({ condition, onChange, onDelete, sensors, devices, sensorDetails, onFetchSensorDetails }) => {
-  const { t } = useTranslation();
   const [isLoadingSensorDetails, setIsLoadingSensorDetails] = useState(false);
   const [isLoadingDeviceStates, setIsLoadingDeviceStates] = useState(false);
   const [deviceStates, setDeviceStates] = useState<any[]>([]);
@@ -413,144 +407,104 @@ const ConditionBuilder: React.FC<{
     }
   }, [availableKeys, currentKey]);
 
+  const sourceOptions = (condition.sourceType === 'sensor' ? sensors : devices) || [];
+
   return (
-    <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center', width: '100%' }}>
-      <FormControl sx={{ minWidth: 120 }}>
-        <InputLabel>Source Type</InputLabel>
-        <Select
+    <div className="flex flex-wrap gap-4 items-center w-full">
+      <FormField label="Source Type" id={`source-type-${condition.UUID}`}>
+        <select
+          className={selectClasses}
           value={condition.sourceType}
           onChange={(e) => handleSourceTypeChange(e.target.value as 'sensor' | 'device')}
-          label="Source Type"
         >
-          <MenuItem value="sensor">Sensor</MenuItem>
-          <MenuItem value="device">Device</MenuItem>
-        </Select>
-      </FormControl>
+          <option value="sensor">Sensor</option>
+          <option value="device">Device</option>
+        </select>
+      </FormField>
 
-      <FormControl sx={{ minWidth: 120 }}>
-        <InputLabel>{condition.sourceType === 'sensor' ? 'Sensor' : 'Device'}</InputLabel>
-        <Select
+      <FormField label={condition.sourceType === 'sensor' ? 'Sensor' : 'Device'} id={`uuid-${condition.UUID}`}>
+        <select
+          className={selectClasses}
           value={condition.UUID}
           onChange={(e) => handleUUIDChange(e.target.value)}
-          label={condition.sourceType === 'sensor' ? 'Sensor' : 'Device'}
         >
-          {((condition.sourceType === 'sensor' ? sensors : devices) || []).map((item) => (
-            <MenuItem key={item.uuid} value={item.uuid}>
+          {sourceOptions.map((item) => (
+            <option key={item.uuid} value={item.uuid}>
               {item.name}
-            </MenuItem>
+            </option>
           ))}
-        </Select>
-      </FormControl>
+        </select>
+      </FormField>
 
-      <FormControl sx={{ minWidth: 120 }}>
-        <InputLabel>Key</InputLabel>
-        <Select
+      <FormField label="Key" id={`key-${condition.UUID}`}>
+        <select
+          className={selectClasses}
           value={condition.key}
           onChange={(e) => onChange({ ...condition, key: e.target.value })}
-          label="Key"
           disabled={isLoadingSensorDetails || isLoadingDeviceStates || availableKeys.length === 0}
         >
           {availableKeys.length === 0 ? (
-            <MenuItem disabled value="">
+            <option value="">
               {isLoadingSensorDetails || isLoadingDeviceStates ? 'Loading...' : 'No options available'}
-            </MenuItem>
+            </option>
           ) : (
             availableKeys.map((key) => (
-              <MenuItem key={key.value} value={key.value}>
+              <option key={key.value} value={key.value}>
                 {key.label}
-              </MenuItem>
+              </option>
             ))
           )}
-        </Select>
-      </FormControl>
+        </select>
+      </FormField>
 
-      <FormControl sx={{ minWidth: 120 }}>
-        <InputLabel>Operator</InputLabel>
-        <Select
+      <FormField label="Operator" id={`operator-${condition.UUID}`}>
+        <select
+          className={selectClasses}
           value={condition.operator}
           onChange={(e) => onChange({ ...condition, operator: e.target.value })}
-          label="Operator"
         >
-          {/* Basic Comparisons */}
-          <MenuItem disabled sx={{ fontWeight: 'bold', color: 'primary.main' }}>
-            Basic Comparisons
-          </MenuItem>
-          {OPERATORS.filter(op => op.category === 'comparison').map((op) => (
-            <MenuItem key={op.value} value={op.value} sx={{ pl: 3 }}>
-              {op.label}
-            </MenuItem>
-          ))}
-          
-          {/* Null/Empty Checks */}
-          <MenuItem disabled sx={{ fontWeight: 'bold', color: 'primary.main', mt: 1 }}>
-            Null/Empty Checks
-          </MenuItem>
-          {OPERATORS.filter(op => op.category === 'null').map((op) => (
-            <MenuItem key={op.value} value={op.value} sx={{ pl: 3 }}>
-              {op.label}
-            </MenuItem>
-          ))}
-          
-          {/* Type Checks */}
-          <MenuItem disabled sx={{ fontWeight: 'bold', color: 'primary.main', mt: 1 }}>
-            Type Checks
-          </MenuItem>
-          {OPERATORS.filter(op => op.category === 'type').map((op) => (
-            <MenuItem key={op.value} value={op.value} sx={{ pl: 3 }}>
-              {op.label}
-            </MenuItem>
-          ))}
-          
-          {/* Numeric Operations */}
-          <MenuItem disabled sx={{ fontWeight: 'bold', color: 'primary.main', mt: 1 }}>
-            Numeric Operations
-          </MenuItem>
-          {OPERATORS.filter(op => op.category === 'numeric').map((op) => (
-            <MenuItem key={op.value} value={op.value} sx={{ pl: 3 }}>
-              {op.label}
-            </MenuItem>
-          ))}
-          
-          {/* String Operations */}
-          <MenuItem disabled sx={{ fontWeight: 'bold', color: 'primary.main', mt: 1 }}>
-            String Operations
-          </MenuItem>
-          {OPERATORS.filter(op => op.category === 'string').map((op) => (
-            <MenuItem key={op.value} value={op.value} sx={{ pl: 3 }}>
-              {op.label}
-            </MenuItem>
-          ))}
-          
-          {/* Array Operations */}
-          <MenuItem disabled sx={{ fontWeight: 'bold', color: 'primary.main', mt: 1 }}>
-            Array Operations
-          </MenuItem>
-          {OPERATORS.filter(op => op.category === 'array').map((op) => (
-            <MenuItem key={op.value} value={op.value} sx={{ pl: 3 }}>
-              {op.label}
-            </MenuItem>
-          ))}
-          
-          {/* Time Operations */}
-          <MenuItem disabled sx={{ fontWeight: 'bold', color: 'primary.main', mt: 1 }}>
-            Time Operations
-          </MenuItem>
-          {OPERATORS.filter(op => op.category === 'time').map((op) => (
-            <MenuItem key={op.value} value={op.value} sx={{ pl: 3 }}>
-              {op.label}
-            </MenuItem>
-          ))}
-          {/* Time Operations with value to compare with */}
-          <MenuItem disabled sx={{ fontWeight: 'bold', color: 'primary.main', mt: 1 }}>
-            Time Operations with value to compare with
-          </MenuItem>
-          {OPERATORS.filter(op => op.category === 'timeValue').map((op) => (
-            <MenuItem key={op.value} value={op.value} sx={{ pl: 3 }}>
-              {op.label}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+          <optgroup label="Basic Comparisons">
+            {OPERATORS.filter(op => op.category === 'comparison').map((op) => (
+              <option key={op.value} value={op.value}>{op.label}</option>
+            ))}
+          </optgroup>
+          <optgroup label="Null/Empty Checks">
+            {OPERATORS.filter(op => op.category === 'null').map((op) => (
+              <option key={op.value} value={op.value}>{op.label}</option>
+            ))}
+          </optgroup>
+          <optgroup label="Type Checks">
+            {OPERATORS.filter(op => op.category === 'type').map((op) => (
+              <option key={op.value} value={op.value}>{op.label}</option>
+            ))}
+          </optgroup>
+          <optgroup label="Numeric Operations">
+            {OPERATORS.filter(op => op.category === 'numeric').map((op) => (
+              <option key={op.value} value={op.value}>{op.label}</option>
+            ))}
+          </optgroup>
+          <optgroup label="String Operations">
+            {OPERATORS.filter(op => op.category === 'string').map((op) => (
+              <option key={op.value} value={op.value}>{op.label}</option>
+            ))}
+          </optgroup>
+          <optgroup label="Array Operations">
+            {OPERATORS.filter(op => op.category === 'array').map((op) => (
+              <option key={op.value} value={op.value}>{op.label}</option>
+            ))}
+          </optgroup>
+          <optgroup label="Time Operations">
+            {OPERATORS.filter(op => op.category === 'time').map((op) => (
+              <option key={op.value} value={op.value}>{op.label}</option>
+            ))}
+          </optgroup>
+          <optgroup label="Time Operations with value to compare with">
+            {OPERATORS.filter(op => op.category === 'timeValue').map((op) => (
+              <option key={op.value} value={op.value}>{op.label}</option>
+            ))}
+          </optgroup>
+        </select>
+      </FormField>
 
       <ValueInput
         operator={condition.operator}
@@ -561,11 +515,13 @@ const ConditionBuilder: React.FC<{
       />
 
       {onDelete && (
-        <IconButton onClick={onDelete} color="error" sx={{ ml: 'auto' }}>
-          <DeleteIcon />
-        </IconButton>
+        <Button type="button" variant="danger" size="sm" onClick={onDelete} className="ml-auto">
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+          </svg>
+        </Button>
       )}
-    </Box>
+    </div>
   );
 };
 
@@ -618,41 +574,34 @@ const ExpressionGroup: React.FC<{
   };
 
   return (
-    <Box sx={{ 
-      border: '1px solid',
-      borderColor: 'divider',
-      borderRadius: 1,
-      p: 2,
-      mb: 2,
-      bgcolor: 'background.paper'
-    }}>
-      <Stack spacing={2}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <FormControl sx={{ minWidth: 120 }}>
-            <InputLabel>Group Type</InputLabel>
-            <Select
+    <div className="rounded border border-border dark:border-border-dark p-4 mb-4 bg-card dark:bg-card-dark">
+      <div className="space-y-4">
+        <div className="flex items-center gap-4">
+          <FormField label="Group Type" id={`group-type-${group.type}-${group.expressions.length}`}>
+            <select
+              className={selectClasses}
               value={group.type}
               onChange={(e) => handleTypeChange(e.target.value as 'AND' | 'OR')}
-              label="Group Type"
             >
-              <MenuItem value="AND">AND</MenuItem>
-              <MenuItem value="OR">OR</MenuItem>
-            </Select>
-          </FormControl>
-          
+              <option value="AND">AND</option>
+              <option value="OR">OR</option>
+            </select>
+          </FormField>
           {onDelete && (
-            <IconButton onClick={onDelete} color="error" sx={{ ml: 'auto' }}>
-              <DeleteIcon />
-            </IconButton>
+            <Button type="button" variant="danger" size="sm" onClick={onDelete} className="ml-auto">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </Button>
           )}
-        </Box>
+        </div>
 
         {group.expressions.map((expr, index) => (
-          <Box key={index}>
+          <div key={index}>
             {index > 0 && (
-              <Typography variant="body2" color="textSecondary" sx={{ my: 1, textAlign: 'center' }}>
+              <p className="my-2 text-center text-sm text-textSecondary dark:text-textSecondary-dark">
                 {group.type}
-              </Typography>
+              </p>
             )}
             {'sourceType' in expr ? (
               <ConditionBuilder
@@ -675,29 +624,25 @@ const ExpressionGroup: React.FC<{
                 onFetchSensorDetails={onFetchSensorDetails}
               />
             )}
-          </Box>
+          </div>
         ))}
 
-        <Stack direction="row" spacing={1}>
-          <Button
-            startIcon={<AddIcon />}
-            onClick={addCondition}
-            variant="outlined"
-            size="small"
-          >
+        <div className="flex gap-2">
+          <Button type="button" variant="outline" size="sm" onClick={addCondition}>
+            <svg className="w-4 h-4 mr-1 inline-block" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
+            </svg>
             Add Condition
           </Button>
-          <Button
-            startIcon={<AddIcon />}
-            onClick={addGroup}
-            variant="outlined"
-            size="small"
-          >
+          <Button type="button" variant="outline" size="sm" onClick={addGroup}>
+            <svg className="w-4 h-4 mr-1 inline-block" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
+            </svg>
             Add Group
           </Button>
-        </Stack>
-      </Stack>
-    </Box>
+        </div>
+      </div>
+    </div>
   );
 };
 
@@ -714,7 +659,6 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
   sensorDetails,
   onFetchSensorDetails,
 }) => {
-  const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(true);
   const [nodeName, setNodeName] = useState(initialExpression?.name || '');
   const [rootGroup, setRootGroup] = useState<GroupData>(() => ({
@@ -893,75 +837,79 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
     onClose();
   };
 
+  if (!open) return null;
+
+  const footer = (
+    <>
+      <Button type="button" variant="secondary" onClick={onClose}>
+        Cancel
+      </Button>
+      <Button
+        type="button"
+        variant="primary"
+        onClick={handleSave}
+        disabled={!nodeName.trim()}
+      >
+        {mode === 'edit' ? 'Update' : 'Save'}
+      </Button>
+    </>
+  );
+
   if (isLoading) {
     return (
-      <Dialog open={open} maxWidth="md" fullWidth>
-        <DialogContent>
-          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '200px' }}>
-            <Typography>Loading...</Typography>
-          </Box>
-        </DialogContent>
-      </Dialog>
+      <Modal
+        isOpen={open}
+        onClose={onClose}
+        title={mode === 'edit' ? 'Edit Node' : 'Create Node'}
+        footer={null}
+      >
+        <div className="flex justify-center items-center min-h-[200px] text-textMuted dark:text-textMuted-dark">
+          Loading...
+        </div>
+      </Modal>
     );
   }
 
   return (
-    <Dialog
-      open={open}
+    <Modal
+      isOpen={open}
       onClose={onClose}
-      maxWidth="md"
-      fullWidth
+      title={mode === 'edit' ? 'Edit Node' : 'Create Node'}
+      footer={footer}
     >
-      <DialogTitle>
-        {mode === 'edit' ? 'Edit Node' : 'Create Node'}
-      </DialogTitle>
-      
-      <DialogContent>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, py: 2 }}>
-          <TextField
-            fullWidth
-            label="Node Name"
+      <div className="flex flex-col gap-4 py-2 max-h-[70vh] overflow-y-auto">
+        <FormField label="Node Name" id="node-dialog-name" required>
+          <input
+            id="node-dialog-name"
+            type="text"
             value={nodeName}
             onChange={(e) => setNodeName(e.target.value)}
-            required
-            error={!nodeName.trim()}
-            helperText={!nodeName.trim() ? "Node name is required" : ""}
+            className={inputClasses}
           />
+          {!nodeName.trim() && (
+            <p className="mt-1 text-sm text-danger dark:text-danger-dark">Node name is required</p>
+          )}
+        </FormField>
 
-          <ExpressionGroup
-            group={rootGroup}
-            onChange={setRootGroup}
-            sensors={sensors}
-            devices={devices}
-            sensorDetails={sensorDetails}
-            onFetchSensorDetails={onFetchSensorDetails}
-          />
+        <ExpressionGroup
+          group={rootGroup}
+          onChange={setRootGroup}
+          sensors={sensors}
+          devices={devices}
+          sensorDetails={sensorDetails}
+          onFetchSensorDetails={onFetchSensorDetails}
+        />
 
-          <Box sx={{ mt: 2, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
-            <Typography variant="subtitle2" gutterBottom>
-              Preview:
-            </Typography>
-            <pre style={{ margin: 0, overflow: 'auto' }}>
-              {JSON.stringify(optimizeStructure(rootGroup), null, 2)}
-            </pre>
-          </Box>
-        </Box>
-      </DialogContent>
-
-      <DialogActions>
-        <Button onClick={onClose} color="inherit">
-          Cancel
-        </Button>
-        <Button
-          onClick={handleSave}
-          variant="contained"
-          color="primary"
-          disabled={!nodeName.trim()}
-        >
-          {mode === 'edit' ? 'Update' : 'Save'}
-        </Button>
-      </DialogActions>
-    </Dialog>
+        <div className="mt-2 p-4 rounded border border-border dark:border-border-dark bg-surfaceHover dark:bg-surfaceHover-dark">
+          <p className="text-sm font-medium text-textSecondary dark:text-textSecondary-dark mb-2 m-0">
+            Preview:
+          </p>
+          <pre className="m-0 overflow-auto text-sm text-textPrimary dark:text-textPrimary-dark">
+            {JSON.stringify(optimizeStructure(rootGroup), null, 2)}
+          </pre>
+        </div>
+      </div>
+    </Modal>
   );
 };
 
