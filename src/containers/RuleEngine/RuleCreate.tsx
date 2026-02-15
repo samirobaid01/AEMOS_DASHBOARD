@@ -18,7 +18,9 @@ import {
   selectSensorDetails
 } from '../../state/slices/ruleEngine.slice';
 import { useRuleEnginePermissions } from '../../hooks/useRuleEnginePermissions';
-import type { RuleChainCreatePayload, RuleChainUpdatePayload } from '../../types/ruleEngine';
+import type { RuleChainCreatePayload } from '../../types/ruleEngine';
+import type { RuleFormSubmitData } from '../../components/ruleEngine/types';
+import type { NodeCreatePayload, NodeUpdatePayload } from '../../types/ruleEngine';
 import { selectSelectedOrganizationId } from '../../state/slices/auth.slice';
 import { RuleCreate as RuleCreateComponent } from '../../components/ruleEngine';
 import { toastService } from '../../services/toastService';
@@ -57,26 +59,21 @@ const RuleCreate: React.FC = () => {
     loadData();
   }, [dispatch, t]);
 
-  const handleSubmit = async (data: RuleChainCreatePayload | RuleChainUpdatePayload) => {
+  const handleSubmit = async (data: RuleFormSubmitData) => {
     try {
-      // Ensure we have required fields for creation
       if (!data.name || !data.description) {
         toastService.error('Name and description are required');
         return;
       }
-
-      // Create the payload ensuring all required fields are present
-      const createData = {
-        name: data.name,
-        description: data.description
-      } as RuleChainCreatePayload;
-
-      if(selectedOrganizationId){
-        (createData as any).organizationId = selectedOrganizationId;
-      }else{
+      if (!selectedOrganizationId) {
         toastService.error('Please select an organization');
         return;
       }
+      const createData: RuleChainCreatePayload = {
+        name: data.name,
+        description: data.description,
+        organizationId: data.organizationId ?? selectedOrganizationId,
+      };
       const result = await dispatch(createRule(createData)).unwrap();
       setCreatedRuleId(result.id);
       toastService.success('Rule chain created successfully');
@@ -101,15 +98,15 @@ const RuleCreate: React.FC = () => {
     }
   };
 
-  const handleNodeCreate = async (data: any) => {
+  const handleNodeCreate = async (data: NodeCreatePayload) => {
     try {
       if (!createdRuleId) return;
       
       await dispatch(createRuleNode({
         ruleChainId: createdRuleId,
-        type: data.type,
-        name: data.name,
-        config: data.config,
+        type: data.type ?? 'filter',
+        name: data.name ?? '',
+        config: typeof data.config === 'string' ? data.config : JSON.stringify(data.config ?? {}),
         nextNodeId: null
       })).unwrap();
       
@@ -120,13 +117,13 @@ const RuleCreate: React.FC = () => {
     }
   };
 
-  const handleNodeUpdate = async (nodeId: number, data: any) => {
+  const handleNodeUpdate = async (nodeId: number, data: NodeUpdatePayload) => {
     try {
       await dispatch(updateRuleNode({ 
         nodeId, 
         payload: {
-          name: data.name,
-          config: data.config
+          name: data.name ?? '',
+          config: typeof data.config === 'string' ? data.config : JSON.stringify(data.config ?? {})
         }
       })).unwrap();
       

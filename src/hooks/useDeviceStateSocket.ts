@@ -23,12 +23,6 @@ export interface DeviceStateNotification {
   };
 }
 
-interface SocketError extends Error {
-  description?: string;
-  type?: string;
-  context?: any;
-}
-
 interface UseDeviceStateSocketOptions {
   serverUrl: string;
   authToken: string;

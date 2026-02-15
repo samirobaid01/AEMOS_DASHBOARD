@@ -1,7 +1,6 @@
 import apiClient from './api/apiClient';
 import type { ApiDataWrapper, ApiDeleteResponse } from '../types/api';
 import type { Organization, OrganizationCreateRequest, OrganizationUpdateRequest, OrganizationFilterParams } from '../types/organization';
-import { store } from '../state/store';
 
 /**
  * Get all organizations with optional filters

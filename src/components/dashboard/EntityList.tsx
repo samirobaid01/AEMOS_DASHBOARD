@@ -5,7 +5,7 @@ export interface Entity {
   id: string | number;
   name: string;
   status?: string | boolean;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface EntityListProps {
@@ -92,7 +92,7 @@ const EntityList: React.FC<EntityListProps> = ({
                     </p>
                     {detailField && (
                       <p className="text-xs text-textMuted dark:text-textMuted-dark mt-1 m-0 overflow-hidden text-ellipsis whitespace-nowrap">
-                        {entity[detailField] || noDetailsText}
+                        {entity[detailField] != null ? String(entity[detailField]) : noDetailsText}
                       </p>
                     )}
                   </div>

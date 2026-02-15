@@ -1,13 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import type { Organization } from '../../types/organization';
 import Button from '../common/Button/Button';
-
-interface OrganizationItemProps {
-  organization: Organization;
-  windowWidth: number;
-}
+import type { OrganizationItemProps } from './types';
 
 const EditIcon = () => (
   <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -22,7 +17,7 @@ const ViewIcon = () => (
   </svg>
 );
 
-const OrganizationItem: React.FC<OrganizationItemProps> = ({ organization, windowWidth }) => {
+const OrganizationItem: React.FC<OrganizationItemProps> = React.memo(({ organization, windowWidth }) => {
   const { t } = useTranslation();
   const isMobile = windowWidth < 768;
 
@@ -111,6 +106,6 @@ const OrganizationItem: React.FC<OrganizationItemProps> = ({ organization, windo
       </div>
     </div>
   );
-};
+});
 
 export default OrganizationItem;

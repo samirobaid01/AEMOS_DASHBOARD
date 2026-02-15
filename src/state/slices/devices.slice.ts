@@ -6,15 +6,25 @@ import { getErrorMessage } from '../../utils/getErrorMessage';
 import type { RootState } from '../store';
 import * as devicesService from '../../services/devices.service';
 
-// Initial state
+function toNormalized(devices: Device[]): { byId: Record<string, Device>; allIds: string[] } {
+  const byId: Record<string, Device> = {};
+  const allIds: string[] = [];
+  for (const d of devices) {
+    const id = String(d.id);
+    byId[id] = d;
+    allIds.push(id);
+  }
+  return { byId, allIds };
+}
+
 const initialState: DeviceState = {
-  devices: [],
+  byId: {},
+  allIds: [],
   selectedDevice: null,
   loading: false,
   error: null,
 };
 
-// Async thunks
 export const fetchDevices = createAsyncThunk<
   Awaited<ReturnType<typeof devicesService.getDevices>>,
   DeviceFilterParams | undefined,
@@ -106,7 +116,6 @@ export const deleteDevice = createAsyncThunk<
   }
 );
 
-// Slice
 const devicesSlice = createSlice({
   name: 'devices',
   initialState,
@@ -119,35 +128,36 @@ const devicesSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    // Fetch Devices
     builder.addCase(fetchDevices.pending, (state) => {
       state.loading = true;
       state.error = null;
     });
     builder.addCase(fetchDevices.fulfilled, (state, action: PayloadAction<Device[]>) => {
       state.loading = false;
-      state.devices = action.payload;
+      const { byId, allIds } = toNormalized(action.payload);
+      state.byId = byId;
+      state.allIds = allIds;
     });
     builder.addCase(fetchDevices.rejected, (state, action) => {
       state.loading = false;
       state.error = action.payload?.message ?? null;
     });
 
-    // Fetch Devices By Organization ID
     builder.addCase(fetchDevicesByOrganizationId.pending, (state) => {
       state.loading = true;
       state.error = null;
     });
     builder.addCase(fetchDevicesByOrganizationId.fulfilled, (state, action: PayloadAction<Device[]>) => {
       state.loading = false;
-      state.devices = action.payload;
+      const { byId, allIds } = toNormalized(action.payload);
+      state.byId = byId;
+      state.allIds = allIds;
     });
     builder.addCase(fetchDevicesByOrganizationId.rejected, (state, action) => {
       state.loading = false;
       state.error = action.payload?.message ?? null;
     });
 
-    // Fetch Device By ID
     builder.addCase(fetchDeviceById.pending, (state) => {
       state.loading = true;
       state.error = null;
@@ -155,37 +165,40 @@ const devicesSlice = createSlice({
     builder.addCase(fetchDeviceById.fulfilled, (state, action: PayloadAction<Device>) => {
       state.loading = false;
       state.selectedDevice = action.payload;
+      const id = String(action.payload.id);
+      state.byId[id] = action.payload;
+      if (!state.allIds.includes(id)) {
+        state.allIds.push(id);
+      }
     });
     builder.addCase(fetchDeviceById.rejected, (state, action) => {
       state.loading = false;
       state.error = action.payload?.message ?? null;
     });
 
-    // Create Device
     builder.addCase(createDevice.pending, (state) => {
       state.loading = true;
       state.error = null;
     });
     builder.addCase(createDevice.fulfilled, (state, action: PayloadAction<Device>) => {
       state.loading = false;
-      state.devices.push(action.payload);
+      const id = String(action.payload.id);
+      state.byId[id] = action.payload;
+      state.allIds.push(id);
     });
     builder.addCase(createDevice.rejected, (state, action) => {
       state.loading = false;
       state.error = action.payload?.message ?? null;
     });
 
-    // Update Device
     builder.addCase(updateDevice.pending, (state) => {
       state.loading = true;
       state.error = null;
     });
     builder.addCase(updateDevice.fulfilled, (state, action: PayloadAction<Device>) => {
       state.loading = false;
-      const index = state.devices.findIndex((device) => device.id === action.payload.id);
-      if (index !== -1) {
-        state.devices[index] = action.payload;
-      }
+      const id = String(action.payload.id);
+      state.byId[id] = action.payload;
       if (state.selectedDevice?.id === action.payload.id) {
         state.selectedDevice = action.payload;
       }
@@ -195,14 +208,15 @@ const devicesSlice = createSlice({
       state.error = action.payload?.message ?? null;
     });
 
-    // Delete Device
     builder.addCase(deleteDevice.pending, (state) => {
       state.loading = true;
       state.error = null;
     });
     builder.addCase(deleteDevice.fulfilled, (state, action: PayloadAction<number>) => {
       state.loading = false;
-      state.devices = state.devices.filter((device) => device.id !== action.payload);
+      const id = String(action.payload);
+      delete state.byId[id];
+      state.allIds = state.allIds.filter((x) => x !== id);
       if (state.selectedDevice?.id === action.payload) {
         state.selectedDevice = null;
       }
@@ -216,10 +230,12 @@ const devicesSlice = createSlice({
 
 export const { clearSelectedDevice, setSelectedDevice } = devicesSlice.actions;
 
-// Selectors
-export const selectDevices = (state: RootState) => state.devices.devices;
+export const selectDevices = (state: RootState): Device[] =>
+  state.devices.allIds
+    .map((id) => state.devices.byId[id])
+    .filter((d): d is Device => d != null);
 export const selectSelectedDevice = (state: RootState) => state.devices.selectedDevice;
 export const selectDevicesLoading = (state: RootState) => state.devices.loading;
 export const selectDevicesError = (state: RootState) => state.devices.error;
 
-export default devicesSlice.reducer; 
+export default devicesSlice.reducer;

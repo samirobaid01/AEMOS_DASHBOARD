@@ -7,6 +7,7 @@ import { createDeviceState, selectDeviceStatesLoading, selectDeviceStatesError }
 import { fetchOrganizations, selectOrganizations } from '../../state/slices/organizations.slice';
 import { fetchAreas, selectAreas } from '../../state/slices/areas.slice';
 import type { DeviceCreateRequest, DeviceCapabilities } from '../../types/device';
+import type { ApiRejectPayload } from '../../types/api';
 import type { FormErrors } from '../../types/ui';
 import DeviceCreate from '../../components/devices/DeviceCreate';
 import type { DeviceStatePayload } from '../../components/devices/DeviceStatesModal';
@@ -185,7 +186,8 @@ const DeviceCreateContainer = () => {
         navigate('/devices');
       }
     } else if (updateDevice.rejected.match(resultAction)) {
-      setCapabilitiesError((resultAction.payload as string) || 'Failed to save capabilities');
+      const payload = resultAction.payload as ApiRejectPayload | undefined;
+      setCapabilitiesError(payload?.message ?? 'Failed to save capabilities');
     }
   };
 

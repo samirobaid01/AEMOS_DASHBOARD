@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useAppDispatch } from '../../state/store';
 import i18n from '../../i18n/i18n';
 import { useTheme } from '../../context/ThemeContext';
 import { useWalkthrough } from '../../context/WalkthroughContext';
@@ -9,7 +8,6 @@ import Button from '../../components/common/Button/Button';
 
 const Settings = () => {
   const { t } = useTranslation();
-  const dispatch = useAppDispatch();
   const { darkMode, toggleDarkMode } = useTheme();
   const { isWalkthroughEnabled, toggleWalkthroughEnabled, resetCompletedWalkthroughs } = useWalkthrough();
   const [language, setLanguage] = useState(i18n.language || 'en');

@@ -5,9 +5,11 @@ import { selectAreas, fetchAreas } from '../../state/slices/areas.slice';
 import { selectSensors, fetchSensors } from '../../state/slices/sensors.slice';
 import { selectDevices, fetchDevices } from '../../state/slices/devices.slice';
 import { useTranslation } from 'react-i18next';
+import Card from '../../components/common/Card/Card';
 import LoadingScreen from '../../components/common/Loading/LoadingScreen';
+import Page from '../../components/common/Page/Page';
 import StatCard from '../../components/dashboard/StatCard';
-import EntityList from '../../components/dashboard/EntityList';
+import EntityList, { type Entity } from '../../components/dashboard/EntityList';
 import DashboardHeader from '../../components/dashboard/DashboardHeader';
 import DashboardWalkthrough from '../../components/dashboard/DashboardWalkthrough';
 
@@ -51,7 +53,7 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="p-8 bg-background dark:bg-background-dark min-h-[calc(100vh-60px)] max-w-[1400px] mx-auto text-textPrimary dark:text-textPrimary-dark">
+    <Page className="bg-background dark:bg-background-dark min-h-[calc(100vh-60px)] text-textPrimary dark:text-textPrimary-dark">
       <DashboardHeader title={t('dashboard.title')} />
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-10">
@@ -71,48 +73,52 @@ const Dashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-6">
-        <EntityList
-          title={t('dashboard.recent_organizations')}
-          titleIcon="🚜"
-          entities={organizations}
-          entityIcon="🚜"
-          emptyMessage={t('dashboard.no_organizations')}
-          basePath="/organizations"
-          createPath="/organizations/create"
-          detailField="detail"
-          headerColor="bg-leaf-600"
-          hoverColor="bg-leaf-50"
-          dividerColor="divide-leaf-100"
-          buttonColor="text-leaf-600"
-          buttonHoverColor="text-leaf-700"
-          addNewText={t('common.add_new')}
-          viewAllText={t('common.view_all')}
-          createNewText={t('common.create_new')}
-          noDetailsText={t('common.no_details')}
-        />
-        <EntityList
-          title={t('dashboard.recent_devices')}
-          titleIcon="📡"
-          entities={devices}
-          entityIcon="📡"
-          emptyMessage={t('dashboard.no_devices')}
-          basePath="/devices"
-          createPath="/devices/create"
-          detailField="serialNumber"
-          headerColor="bg-sky-600"
-          hoverColor="bg-sky-50"
-          dividerColor="divide-sky-100"
-          buttonColor="text-sky-600"
-          buttonHoverColor="text-sky-700"
-          addNewText={t('common.add_new')}
-          viewAllText={t('common.view_all')}
-          createNewText={t('common.create_new')}
-          noDetailsText={t('common.no_details')}
-        />
+        <Card contentClassName="p-0">
+          <EntityList
+            title={t('dashboard.recent_organizations')}
+            titleIcon="🚜"
+            entities={organizations as unknown as Entity[]}
+            entityIcon="🚜"
+            emptyMessage={t('dashboard.no_organizations')}
+            basePath="/organizations"
+            createPath="/organizations/create"
+            detailField="detail"
+            headerColor="bg-leaf-600"
+            hoverColor="bg-leaf-50"
+            dividerColor="divide-leaf-100"
+            buttonColor="text-leaf-600"
+            buttonHoverColor="text-leaf-700"
+            addNewText={t('common.add_new')}
+            viewAllText={t('common.view_all')}
+            createNewText={t('common.create_new')}
+            noDetailsText={t('common.no_details')}
+          />
+        </Card>
+        <Card contentClassName="p-0">
+          <EntityList
+            title={t('dashboard.recent_devices')}
+            titleIcon="📡"
+            entities={devices as unknown as Entity[]}
+            entityIcon="📡"
+            emptyMessage={t('dashboard.no_devices')}
+            basePath="/devices"
+            createPath="/devices/create"
+            detailField="serialNumber"
+            headerColor="bg-sky-600"
+            hoverColor="bg-sky-50"
+            dividerColor="divide-sky-100"
+            buttonColor="text-sky-600"
+            buttonHoverColor="text-sky-700"
+            addNewText={t('common.add_new')}
+            viewAllText={t('common.view_all')}
+            createNewText={t('common.create_new')}
+            noDetailsText={t('common.no_details')}
+          />
+        </Card>
       </div>
 
       <DashboardWalkthrough />
-    </div>
+    </Page>
   );
 };
 

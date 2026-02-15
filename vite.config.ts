@@ -18,7 +18,7 @@ const optimizeComponentsPlugin = () => {
       };
     },
     // Generate optimized chunks in build
-    config(config: UserConfig) {
+    config(_config: UserConfig) {
       return {
         build: {
           rollupOptions: {

@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
-import type { RuleChain } from '../../types/ruleEngine';
-import type { Device, DeviceStateRecord } from '../../types/device';
-import type { Sensor } from '../../types/sensor';
 import NodeDialog from './NodeDialog';
 import ActionDialog from './ActionDialog';
 import { useTranslation } from 'react-i18next';
@@ -10,24 +7,8 @@ import { ruleFormResolver } from '../../utils/validation/ruleFormValidation';
 import Input from '../common/Input/Input';
 import Button from '../common/Button/Button';
 import FormField from '../common/FormField';
-
-interface RuleFormProps {
-  initialData?: RuleChain;
-  ruleChainId?: number;
-  onSubmit: (data: any) => Promise<void>;
-  onNodeDelete: (nodeId: number) => Promise<void>;
-  onNodeCreate: (data: any) => Promise<void>;
-  onNodeUpdate: (nodeId: number, data: any) => Promise<void>;
-  isLoading?: boolean;
-  showNodeSection?: boolean;
-  sensors: Sensor[];
-  devices: Device[];
-  deviceStates: DeviceStateRecord[];
-  lastFetchedDeviceId?: number | null;
-  sensorDetails: { [uuid: string]: Sensor };
-  onFetchSensorDetails: (sensorId: number) => Promise<void>;
-  onFetchDeviceStates: (deviceId: number) => Promise<void>;
-}
+import type { RuleFormProps, RuleFormSubmitData } from './types';
+import type { NodeCreatePayload, NodeUpdatePayload } from '../../types/ruleEngine';
 
 interface FilterConfig {
   sourceType: string;
@@ -169,7 +150,7 @@ const RuleForm: React.FC<RuleFormProps> = ({
     console.log('Getting initial expression for node:', node);
 
     if (node.type === 'filter') {
-      let nodeConfig: any;
+      let nodeConfig: unknown;
       
       // If config is a string, try to parse it
       if (typeof node.config === 'string') {
@@ -195,17 +176,16 @@ const RuleForm: React.FC<RuleFormProps> = ({
         };
       }
 
-      // Otherwise, create a new config object
-      console.log('Creating new config object from node:', node);
+      const cfg = nodeConfig as Record<string, unknown> | undefined;
       const newConfig: ExpressionConfig = {
         type: 'AND',
         expressions: [{
-          sourceType: nodeConfig?.sourceType || 'sensor',
-          UUID: nodeConfig?.UUID || '',
-          key: nodeConfig?.key || '',
-          operator: nodeConfig?.operator || '==',
-          value: nodeConfig?.value || '',
-          duration: nodeConfig?.duration || ''
+          sourceType: (cfg?.sourceType as string) || 'sensor',
+          UUID: (cfg?.UUID as string) || '',
+          key: (cfg?.key as string) || '',
+          operator: (cfg?.operator as string) || '==',
+          value: (cfg?.value as string | number) ?? '',
+          duration: (cfg?.duration as string) || ''
         }]
       };
 
@@ -219,36 +199,35 @@ const RuleForm: React.FC<RuleFormProps> = ({
     return undefined;
   };
 
-  const handleNodeSave = async (data: any) => {
+  const handleNodeSave = async (data: NodeCreatePayload & { expressions?: unknown[] }) => {
     console.log('Saving node data:', data);
     
-    // If it's a new node being created
     if (data.ruleChainId) {
       await onNodeCreate(data);
       return;
     }
 
-    // For existing nodes or other cases
-    if (!data?.expressions?.length) {
+    const exprs = Array.isArray(data.expressions) ? data.expressions : [];
+    if (!exprs.length) {
       console.log('No expressions to save');
       return;
     }
 
-    // Check if it's just an empty AND group
-    if (data.expressions.length === 1 && 
-        'type' in data.expressions[0] && 
-        data.expressions[0].type === 'AND' && 
-        !data.expressions[0].expressions?.length) {
+    if (exprs.length === 1 && 
+        typeof exprs[0] === 'object' && exprs[0] !== null &&
+        'type' in (exprs[0] as Record<string, unknown>) && 
+        (exprs[0] as Record<string, unknown>).type === 'AND' && 
+        !((exprs[0] as Record<string, unknown>).expressions as unknown[])?.length) {
       console.log('Empty AND group, not saving');
       return;
     }
 
-    const expression = data.expressions[0];
+    const expression = exprs[0] as Record<string, unknown>;
     let nodeData: NodeFormData;
 
-    if ('expressions' in expression && expression.expressions[0] && 'sourceType' in expression.expressions[0]) {
-      // It's a ConditionData wrapped in an AND group
-      const conditionData = expression.expressions[0];
+    const exprList = Array.isArray(expression?.expressions) ? (expression.expressions as unknown[]) : [];
+    if (exprList[0] && typeof exprList[0] === 'object' && 'sourceType' in (exprList[0] as Record<string, unknown>)) {
+      const conditionData = exprList[0] as FilterConfig;
       nodeData = {
         id: data.id,
         name: data.name,
@@ -337,7 +316,7 @@ const RuleForm: React.FC<RuleFormProps> = ({
     return undefined;
   };
 
-  const handleActionSave = async (actionData: any) => {
+  const handleActionSave = async (actionData: NodeUpdatePayload & { name?: string }) => {
     console.log('Saving action data:', actionData);
     
     try {
@@ -353,10 +332,11 @@ const RuleForm: React.FC<RuleFormProps> = ({
           // Update local state after successful API call
           setNodes(prev => {
             const newNodes = [...prev];
+            const config = typeof actionData.config === 'string' ? actionData.config : JSON.stringify(actionData.config);
             newNodes[currentNodeIndex] = {
               ...existingNode,
               name: actionData.name || '',
-              config: JSON.parse(actionData.config)
+              config: typeof config === 'string' ? JSON.parse(config) : config
             };
             return newNodes;
           });
@@ -365,13 +345,13 @@ const RuleForm: React.FC<RuleFormProps> = ({
         // Add mode - create new node via API
         console.log("creating new node via API");
         if (onNodeCreate) {
-          await onNodeCreate(actionData);
+          await onNodeCreate({ ...actionData, type: 'action', config: actionData.config ?? {} });
           
-          // Add to local state after successful API call
+          const configStr = typeof actionData.config === 'string' ? actionData.config : JSON.stringify(actionData.config ?? {});
           const newNode: NodeFormData = {
             type: 'action',
             name: actionData.name || '',
-            config: JSON.parse(actionData.config)
+            config: JSON.parse(configStr)
           };
           setNodes(prev => [...prev, newNode]);
         }
@@ -384,7 +364,7 @@ const RuleForm: React.FC<RuleFormProps> = ({
     }
   };
 
-  const handleMainFormSubmit = async (data: any) => {
+  const handleMainFormSubmit = async (data: RuleFormSubmitData) => {
     const formattedNodes = nodes.map((node, index) => ({
       type: node.type,
       config: JSON.stringify(node.config),
@@ -410,7 +390,7 @@ const RuleForm: React.FC<RuleFormProps> = ({
   });
 
   return (
-    <div className="p-6">
+    <div>
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -462,7 +442,7 @@ const RuleForm: React.FC<RuleFormProps> = ({
 
               {nodes.map((node, index) => (
                 <div
-                  key={index}
+                  key={node.id}
                   className="mb-4 rounded-lg border border-border dark:border-border-dark bg-surfaceHover dark:bg-surfaceHover-dark p-4"
                 >
                   <div className="flex justify-between items-center mb-4">

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import type { Device } from "../../types/device";
+import type { Device, DeviceStateRecord } from "../../types/device";
 import type { Sensor } from "../../types/sensor";
 import * as deviceStatesService from '../../services/deviceStates.service';
 import { useAppSelector } from '../../state/store';
@@ -7,6 +7,7 @@ import { selectSelectedOrganizationId } from '../../state/slices/auth.slice';
 import Modal from '../common/Modal/Modal';
 import Button from '../common/Button/Button';
 import FormField from '../common/FormField';
+import type { NodeDialogProps } from './types';
 
 const inputClasses =
   'block w-full min-w-0 px-3 py-2 rounded border border-border dark:border-border-dark bg-surface dark:bg-surface-dark text-textPrimary dark:text-textPrimary-dark text-sm outline-none focus:ring-2 focus:ring-primary';
@@ -36,31 +37,6 @@ interface ParsedExpression {
   duration?: string | number;
   type?: string;
   expressions?: ParsedExpression[];
-}
-
-interface NodeDialogProps {
-  open: boolean;
-  onClose: () => void;
-  onSave?: (data: any) => void;
-  onUpdate?: (nodeId: number, data: any) => void;
-  ruleChainId?: number;
-  mode: 'add' | 'edit';
-  initialExpression?: {
-    id?: number;
-    name?: string;
-    type: 'filter' | 'action';
-    sourceType?: string;
-    UUID?: string;
-    key?: string;
-    operator?: string;
-    value?: string | number;
-    duration?: string | number;
-    config?: string;
-  };
-  sensors: Sensor[];
-  devices: Device[];
-  sensorDetails: { [uuid: string]: Sensor };
-  onFetchSensorDetails: (sensorId: number) => Promise<void>;
 }
 
 const OPERATORS = [
@@ -262,8 +238,7 @@ const ValueInput: React.FC<{
   }
 };
 
-// Function to optimize the structure by removing unnecessary single-expression groups
-const optimizeStructure = (data: GroupData | ConditionData, isRoot: boolean = true): any => {
+const optimizeStructure = (data: GroupData | ConditionData, isRoot: boolean = true): GroupData | ConditionData | null => {
   // If it's a condition, return it as-is
   if ('sourceType' in data) {
     return data;
@@ -277,10 +252,10 @@ const optimizeStructure = (data: GroupData | ConditionData, isRoot: boolean = tr
   
   // For nested groups OR multiple expressions, keep the group but optimize nested expressions
   if (data.expressions.length >= 1) {
-    return {
-      type: data.type,
-      expressions: data.expressions.map(expr => optimizeStructure(expr, false))
-    };
+    const expressions = data.expressions
+      .map(expr => optimizeStructure(expr, false))
+      .filter((x): x is ConditionData | GroupData => x != null);
+    return { type: data.type, expressions };
   }
   
   // If no expressions, return null (this shouldn't happen in normal usage)
@@ -298,7 +273,7 @@ const ConditionBuilder: React.FC<{
 }> = ({ condition, onChange, onDelete, sensors, devices, sensorDetails, onFetchSensorDetails }) => {
   const [isLoadingSensorDetails, setIsLoadingSensorDetails] = useState(false);
   const [isLoadingDeviceStates, setIsLoadingDeviceStates] = useState(false);
-  const [deviceStates, setDeviceStates] = useState<any[]>([]);
+  const [deviceStates, setDeviceStates] = useState<DeviceStateRecord[]>([]);
   const lastFetchTime = useRef<number>(0);
   const organizationId = useAppSelector(selectSelectedOrganizationId);
 
@@ -371,6 +346,20 @@ const ConditionBuilder: React.FC<{
     });
   };
 
+  const sourceOptions = (condition.sourceType === 'sensor' ? sensors : devices) || [];
+
+  useEffect(() => {
+    const single = sourceOptions[0];
+    const singleUuid = single?.uuid;
+    if (sourceOptions.length === 1 && singleUuid && condition.UUID !== singleUuid) {
+      onChange({
+        ...condition,
+        UUID: singleUuid,
+        key: ''
+      });
+    }
+  }, [sourceOptions.length, sourceOptions[0]?.uuid, condition.UUID, condition.sourceType, condition, onChange]);
+
   const getAvailableKeys = () => {
     if (condition.sourceType === 'sensor') {
       if (isLoadingSensorDetails || !sensorDetails[condition.UUID]) {
@@ -407,8 +396,6 @@ const ConditionBuilder: React.FC<{
     }
   }, [availableKeys, currentKey]);
 
-  const sourceOptions = (condition.sourceType === 'sensor' ? sensors : devices) || [];
-
   return (
     <div className="flex flex-wrap gap-4 items-center w-full">
       <FormField label="Source Type" id={`source-type-${condition.UUID}`}>
@@ -428,6 +415,11 @@ const ConditionBuilder: React.FC<{
           value={condition.UUID}
           onChange={(e) => handleUUIDChange(e.target.value)}
         >
+          <option value="">
+            {sourceOptions.length === 0
+              ? (condition.sourceType === 'sensor' ? 'No sensors available' : 'No devices available')
+              : (condition.sourceType === 'sensor' ? 'Select sensor...' : 'Select device...')}
+          </option>
           {sourceOptions.map((item) => (
             <option key={item.uuid} value={item.uuid}>
               {item.name}
@@ -441,18 +433,23 @@ const ConditionBuilder: React.FC<{
           className={selectClasses}
           value={condition.key}
           onChange={(e) => onChange({ ...condition, key: e.target.value })}
-          disabled={isLoadingSensorDetails || isLoadingDeviceStates || availableKeys.length === 0}
+          disabled={!condition.UUID || isLoadingSensorDetails || isLoadingDeviceStates || availableKeys.length === 0}
         >
           {availableKeys.length === 0 ? (
             <option value="">
-              {isLoadingSensorDetails || isLoadingDeviceStates ? 'Loading...' : 'No options available'}
+              {!condition.UUID
+                ? (condition.sourceType === 'sensor' ? 'Select a sensor first' : 'Select a device first')
+                : (isLoadingSensorDetails || isLoadingDeviceStates ? 'Loading...' : 'No keys available')}
             </option>
           ) : (
-            availableKeys.map((key) => (
-              <option key={key.value} value={key.value}>
-                {key.label}
-              </option>
-            ))
+            <>
+              <option value="">Select key...</option>
+              {availableKeys.map((key) => (
+                <option key={key.value} value={key.value}>
+                  {key.label}
+                </option>
+              ))}
+            </>
           )}
         </select>
       </FormField>
@@ -597,7 +594,7 @@ const ExpressionGroup: React.FC<{
         </div>
 
         {group.expressions.map((expr, index) => (
-          <div key={index}>
+          <div key={`expr-${index}`}>
             {index > 0 && (
               <p className="my-2 text-center text-sm text-textSecondary dark:text-textSecondary-dark">
                 {group.type}
@@ -862,6 +859,7 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
         onClose={onClose}
         title={mode === 'edit' ? 'Edit Node' : 'Create Node'}
         footer={null}
+        size="xl"
       >
         <div className="flex justify-center items-center min-h-[200px] text-textMuted dark:text-textMuted-dark">
           Loading...
@@ -876,8 +874,9 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
       onClose={onClose}
       title={mode === 'edit' ? 'Edit Node' : 'Create Node'}
       footer={footer}
+      size="xl"
     >
-      <div className="flex flex-col gap-4 py-2 max-h-[70vh] overflow-y-auto">
+      <div className="flex flex-col gap-4 py-2 min-h-[280px] max-h-[70vh] overflow-y-auto pr-1">
         <FormField label="Node Name" id="node-dialog-name" required>
           <input
             id="node-dialog-name"

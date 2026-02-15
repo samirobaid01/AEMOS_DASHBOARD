@@ -1,9 +1,6 @@
 import React from 'react';
 import { useTheme } from '../../context/ThemeContext';
-
-interface ErrorDisplayProps {
-  errorMessage: string;
-}
+import type { ErrorDisplayProps } from './types';
 
 const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ errorMessage }) => {
   const { darkMode } = useTheme();

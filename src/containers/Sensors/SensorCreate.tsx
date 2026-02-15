@@ -7,7 +7,9 @@ import LoadingScreen from '../../components/common/Loading/LoadingScreen';
 import { fetchAreas, selectAreas } from '../../state/slices/areas.slice';
 import { createSensor, createTelemetry, selectSensorsLoading, selectSensorsError } from '../../state/slices/sensors.slice';
 import { toastService } from '../../services/toastService';
+import type { ApiRejectPayload } from '../../types/api';
 import { ALLOWED_SENSOR_STATUSES } from '../../types/sensor';
+import type { SensorStatus } from '../../constants/sensor';
 import type { SensorCreateRequest, SensorUpdateRequest, TelemetryDatatype } from '../../types/sensor';
 
 const SensorCreate = () => {
@@ -57,7 +59,7 @@ const SensorCreate = () => {
 
     const statusValue = data.status as string | undefined;
     const status =
-      typeof statusValue === 'string' && ALLOWED_SENSOR_STATUSES.includes(statusValue as any)
+      typeof statusValue === 'string' && ALLOWED_SENSOR_STATUSES.includes(statusValue as SensorStatus)
         ? statusValue
         : 'pending';
 
@@ -82,7 +84,8 @@ const SensorCreate = () => {
               createTelemetry({ sensorId: sensor.id, variableName: item.variableName, datatype: item.datatype })
             );
             if (createTelemetry.rejected.match(telemetryResult)) {
-              toastService.error((telemetryResult.payload as string) || 'Failed to create telemetry');
+              const payload = (telemetryResult.payload as ApiRejectPayload | undefined);
+              toastService.error(payload?.message ?? 'Failed to create telemetry');
             }
           }
         }

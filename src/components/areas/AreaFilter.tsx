@@ -1,14 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-
-interface AreaFilterProps {
-  searchTerm: string;
-  setSearchTerm: (value: string) => void;
-  organizationFilter: string;
-  setOrganizationFilter: (value: string) => void;
-  organizations: string[];
-  windowWidth: number;
-}
+import type { AreaFilterProps } from './types';
 
 const inputClasses =
   'block w-full pl-10 pr-3 py-2 rounded border border-border dark:border-border-dark text-sm bg-surface dark:bg-surface-dark text-textPrimary dark:text-textPrimary-dark outline-none focus:ring-2 focus:ring-primary';

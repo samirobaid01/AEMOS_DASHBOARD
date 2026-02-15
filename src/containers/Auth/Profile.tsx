@@ -27,7 +27,7 @@ const Profile = () => {
     notifyByEmail: false,
     notifyBySMS: false,
   });
-  const [avatar, setAvatar] = useState<File | null>(null);
+  const [, setAvatar] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);

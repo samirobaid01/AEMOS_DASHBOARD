@@ -82,7 +82,7 @@ export const socketTest = () => {
     });
   };
   
-  const emitEvent = (eventName: string, data: any) => {
+  const emitEvent = (eventName: string, data: unknown) => {
     if (!socket || !socket.connected) {
       console.error('Socket not connected, call connect() first');
       return;

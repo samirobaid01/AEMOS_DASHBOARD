@@ -1,18 +1,13 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useTheme } from '../../context/ThemeContext';
-import { useThemeColors } from '../../hooks/useThemeColors';
 import type { DeviceType } from '../../constants/device';
 import FormField from '../common/FormField';
+import type { DeviceFilterProps } from './types';
 
-interface DeviceFilterProps {
-  searchTerm: string;
-  setSearchTerm: (term: string) => void;
-  typeFilter: DeviceType | '';
-  setTypeFilter: (filter: DeviceType | '') => void;
-  deviceTypes: DeviceType[];
-  isMobile: boolean;
-}
+const inputClasses =
+  'block w-full px-3 py-2 rounded border border-border dark:border-border-dark bg-surface dark:bg-surface-dark text-textPrimary dark:text-textPrimary-dark text-sm outline-none focus:ring-2 focus:ring-primary';
+const selectClasses =
+  'block w-full px-3 py-2 pr-10 rounded border border-border dark:border-border-dark bg-surface dark:bg-surface-dark text-textPrimary dark:text-textPrimary-dark text-sm outline-none focus:ring-2 focus:ring-primary appearance-none bg-no-repeat bg-[length:1.5rem_1.5rem] bg-[right_0.5rem_center] bg-[url("data:image/svg+xml,%3csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 20 20\'%3e%3cpath stroke=\'%236b7280\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1.5\' d=\'M6 8l4 4 4-4\'/%3e%3c/svg%3e")]';
 
 const DeviceFilter: React.FC<DeviceFilterProps> = ({
   searchTerm,
@@ -23,52 +18,12 @@ const DeviceFilter: React.FC<DeviceFilterProps> = ({
   isMobile
 }) => {
   const { t } = useTranslation();
-  const { darkMode } = useTheme();
-  const colors = useThemeColors();
-
-  const containerStyle = {
-    display: 'flex',
-    flexDirection: isMobile ? 'column' as const : 'row' as const,
-    gap: '1rem',
-    marginBottom: '1.5rem',
-    padding: '1rem',
-    backgroundColor: darkMode ? colors.cardBackground : 'white',
-    borderRadius: '0.5rem',
-    boxShadow: darkMode 
-      ? '0 1px 3px 0 rgba(0, 0, 0, 0.2), 0 1px 2px 0 rgba(0, 0, 0, 0.1)' 
-      : '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
-    border: `1px solid ${darkMode ? colors.border : '#e5e7eb'}`
-  };
-
-  const fieldWrapperStyle = {
-    flex: 1,
-  };
-
-  const inputStyle = {
-    display: 'block',
-    width: '100%',
-    padding: '0.5rem 0.75rem',
-    borderRadius: '0.375rem',
-    border: `1px solid ${darkMode ? colors.border : '#d1d5db'}`,
-    fontSize: '0.875rem',
-    lineHeight: 1.5,
-    backgroundColor: darkMode ? colors.background : 'white',
-    color: darkMode ? colors.textPrimary : '#111827',
-    outline: 'none'
-  };
-
-  const selectStyle = {
-    ...inputStyle,
-    backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
-    backgroundPosition: 'right 0.5rem center',
-    backgroundRepeat: 'no-repeat',
-    backgroundSize: '1.5rem 1.5rem',
-    paddingRight: '2.5rem'
-  };
 
   return (
-    <div style={containerStyle}>
-      <div style={fieldWrapperStyle}>
+    <div
+      className={`flex gap-4 mb-6 p-4 rounded-lg border border-border dark:border-border-dark bg-card dark:bg-card-dark shadow-sm ${isMobile ? 'flex-col' : 'flex-row'}`}
+    >
+      <div className="flex-1">
         <FormField label={t('common.search')} id="deviceSearch">
           <input
             id="deviceSearch"
@@ -76,34 +31,18 @@ const DeviceFilter: React.FC<DeviceFilterProps> = ({
             placeholder={t('devices.searchDevice')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            style={inputStyle}
-            onFocus={(e) => {
-              e.target.style.boxShadow = `0 0 0 3px ${darkMode ? 'rgba(77, 126, 250, 0.3)' : 'rgba(59, 130, 246, 0.2)'}`;
-              e.target.style.borderColor = darkMode ? '#4d7efa' : '#3b82f6';
-            }}
-            onBlur={(e) => {
-              e.target.style.boxShadow = 'none';
-              e.target.style.borderColor = darkMode ? colors.border : '#d1d5db';
-            }}
+            className={inputClasses}
           />
         </FormField>
       </div>
 
-      <div style={fieldWrapperStyle}>
+      <div className="flex-1">
         <FormField label={t('devices.type')} id="deviceTypeFilter">
           <select
             id="deviceTypeFilter"
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value as DeviceType | '')}
-            style={selectStyle}
-            onFocus={(e) => {
-              e.target.style.boxShadow = `0 0 0 3px ${darkMode ? 'rgba(77, 126, 250, 0.3)' : 'rgba(59, 130, 246, 0.2)'}`;
-              e.target.style.borderColor = darkMode ? '#4d7efa' : '#3b82f6';
-            }}
-            onBlur={(e) => {
-              e.target.style.boxShadow = 'none';
-              e.target.style.borderColor = darkMode ? colors.border : '#d1d5db';
-            }}
+            className={selectClasses}
           >
             <option value="">{t('common.all')}</option>
             {deviceTypes.map((type) => (
@@ -118,5 +57,4 @@ const DeviceFilter: React.FC<DeviceFilterProps> = ({
   );
 };
 
-export default DeviceFilter; 
-
+export default DeviceFilter;

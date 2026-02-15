@@ -3,7 +3,6 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../state/store";
 import {
   fetchDeviceDetails,
-  updateDeviceState,
   selectDeviceDetails,
   selectDeviceDetailsLoading,
   selectDeviceDetailsError,
@@ -18,6 +17,8 @@ import {
   selectSelectedArea,
 } from "../../state/slices/areas.slice";
 import { deleteDevice } from "../../state/slices/devices.slice";
+import type { Device } from "../../types/device";
+import type { DeviceState } from "../../state/slices/deviceDetails.slice";
 import DeviceDetailsComponent from "../../components/devices/DeviceDetails";
 import type { DeviceStateNotification } from "../../hooks/useDeviceStateSocket";
 import { useDeviceStateSocket } from "../../hooks/useDeviceStateSocket";
@@ -29,11 +30,6 @@ interface SelectedState {
   value: string;
   defaultValue: string;
   allowedValues: string[];
-}
-
-interface DeviceState {
-  stateName: string;
-  // ... other properties of DeviceState if any
 }
 
 const DeviceDetails = () => {
@@ -56,8 +52,6 @@ const DeviceDetails = () => {
   );
   const [isStateUpdating, setIsStateUpdating] = useState(false);
 
-  const previousDeviceUuid = useRef("");
-  const previousAuthToken = useRef("");
   const isComponentMounted = useRef(true);
 
   // Set mounted flag
@@ -171,13 +165,19 @@ const DeviceDetails = () => {
     }
   }, [dispatch, device?.areaId]);
 
-  const handleStateButtonClick = (state: any) => {
+  const handleStateButtonClick = (state: DeviceState) => {
+    let allowedValues: string[] = [];
+    try {
+      allowedValues = state.allowedValues ? JSON.parse(state.allowedValues) : [];
+    } catch {
+      allowedValues = [];
+    }
     setSelectedState({
       id: state.id,
       name: state.stateName,
-      value: state.instances[0]?.value || state.defaultValue,
+      value: state.instances[0]?.value ?? state.defaultValue,
       defaultValue: state.defaultValue,
-      allowedValues: JSON.parse(state.allowedValues),
+      allowedValues,
     });
   };
 
@@ -236,7 +236,7 @@ const DeviceDetails = () => {
 
   return (
     <DeviceDetailsComponent
-      device={device}
+      device={device as Device | null}
       organization={organization}
       area={area}
       isLoading={isLoading}

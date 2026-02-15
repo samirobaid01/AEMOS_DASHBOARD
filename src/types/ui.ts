@@ -3,4 +3,6 @@ export type {
   SelectOption,
   ModalBaseProps,
   FormPropsBase,
+  AsyncStatus,
+  AsyncState,
 } from './ui.d';

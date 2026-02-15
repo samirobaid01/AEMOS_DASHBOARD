@@ -1,26 +1,12 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import type { OrganizationUpdateRequest } from '../../types/organization';
-import type { FormErrors } from '../../types/ui';
 import Input from '../../components/common/Input/Input';
 import Button from '../../components/common/Button/Button';
-
-interface OrganizationEditProps {
-  formData: OrganizationUpdateRequest;
-  formErrors: FormErrors;
-  isLoading: boolean;
-  isSubmitting: boolean;
-  error: string | null;
-  organizationName?: string;
-  onSubmit: (e: React.FormEvent) => void;
-  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
-  onCancel: () => void;
-}
+import type { OrganizationEditProps } from './types';
 
 const OrganizationEdit: React.FC<OrganizationEditProps> = ({
   formData,
   formErrors,
-  isLoading,
   isSubmitting,
   error,
   organizationName,

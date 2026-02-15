@@ -1,21 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import type { AreaUpdateRequest } from '../../types/area';
-import type { FormErrors } from '../../types/ui';
 import Input from '../common/Input/Input';
 import Button from '../common/Button/Button';
-
-interface AreaEditProps {
-  formData: AreaUpdateRequest;
-  formErrors: FormErrors;
-  isLoading: boolean;
-  isSubmitting: boolean;
-  error: string | null;
-  areaName?: string;
-  onSubmit: (e: React.FormEvent) => void;
-  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
-  onCancel: () => void;
-}
+import type { AreaEditProps } from './types';
 
 const selectClasses =
   'w-full px-3 py-2 rounded border border-border dark:border-border-dark bg-surface dark:bg-surface-dark text-textPrimary dark:text-textPrimary-dark text-sm outline-none focus:ring-2 focus:ring-primary';

@@ -1,35 +1,9 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import type { Area, AreaCreateRequest, AreaUpdateRequest } from '../../types/area';
 import FormField from '../common/FormField';
 import FormActions from '../common/FormActions';
 import Button from '../common/Button/Button';
-
-interface Organization {
-  id: number;
-  name: string;
-}
-
-interface ExtendedAreaCreateRequest extends AreaCreateRequest {
-  parentAreaId?: number;
-}
-
-interface ExtendedAreaUpdateRequest extends AreaUpdateRequest {
-  parentAreaId?: number;
-}
-
-interface AreaFormProps {
-  area?: Area | null;
-  organizations: Organization[];
-  parentAreas?: Area[];
-  isLoading: boolean;
-  error: string | null;
-  onSubmit: (data: ExtendedAreaCreateRequest | ExtendedAreaUpdateRequest) => void;
-  onCancel: () => void;
-  isSubmitting: boolean;
-  windowWidth: number;
-  isEditMode?: boolean;
-}
+import type { AreaFormProps, ExtendedAreaCreateRequest, ExtendedAreaUpdateRequest } from './types';
 
 const inputClasses =
   'block w-full px-3 py-2 rounded border border-border dark:border-border-dark text-sm bg-surface dark:bg-surface-dark text-textPrimary dark:text-textPrimary-dark outline-none focus:ring-2 focus:ring-primary';

@@ -1,4 +1,4 @@
-import EmptyState from './EmptyState';
+import EmptyState from '../common/EmptyState';
 import SensorDetails from './SensorDetails';
 import SensorFilter from './SensorFilter';
 import SensorForm from './SensorForm';

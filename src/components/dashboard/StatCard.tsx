@@ -19,9 +19,6 @@ const StatCard: React.FC<StatCardProps> = ({
   path,
   icon,
   color,
-  textColor,
-  bgColor,
-  borderColor,
 }) => {
   const navigate = useNavigate();
   const { hasPermission } = usePermissions();

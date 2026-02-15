@@ -7,7 +7,6 @@ import LoadingScreen from '../../components/common/Loading/LoadingScreen';
 import Button from '../../components/common/Button/Button';
 import { fetchAreaById } from '../../state/slices/areas.slice';
 import { deleteSensor, fetchSensorById, selectSelectedSensor, selectSensorsError, selectSensorsLoading } from '../../state/slices/sensors.slice';
-import type { AppDispatch } from '../../state/store';
 
 // Import modal component or use your own
 interface ConfirmModalProps {

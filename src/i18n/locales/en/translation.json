@@ -400,6 +400,7 @@
     "deleteConfirmationMessage": "Are you sure you want to delete {{name}}?",
     "deleteSuccess": "Rule chain deleted successfully",
     "deleteError": "Failed to delete rule chain",
+    "nextNode": "Next node",
     "ruleNode":{
       "title":"Rule Nodes",
       "editNode":"Edit Node",

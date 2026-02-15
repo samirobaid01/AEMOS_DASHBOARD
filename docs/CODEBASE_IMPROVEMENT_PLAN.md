@@ -75,6 +75,8 @@ Reusable UI, typing, state shape, and rule-engine abstractions.
 
 **P1 exit criteria:** FormField/FormActions in use; Page/Card + shared EmptyState; feature props in types; one feature on Tailwind; modals consistent; component/smart rule documented; AsyncState in use; normalized state and memoized selectors in at least one feature; cn() in use; rule engine has RuleNodeDefinition + ConfigField.
 
+**Docs:** P1-4–P1-6: `docs/P1-4-P1-5-P1-6-PAGE-CARD-EMPTYSTATE.md`. P1-12–P1-15: `docs/P1-12-P1-13-P1-14-P1-15-ASYNC-STATE-SELECTORS-CN.md`.
+
 ---
 
 ## P2 – Nice-to-have (polish and scale)
@@ -110,10 +112,11 @@ Reusable UI, typing, state shape, and rule-engine abstractions.
 
 - **Interfaces:** Prefer `interface` for objects; `type` for unions/aliases. Export from `types/` or feature `types.ts`.
 - **Props:** Name `ComponentNameProps`; in same file for tiny components, in `types.ts` when shared.
-- **Styling:** New code uses Tailwind; migrate existing in dedicated PRs. Use `cn()` to merge `className` with component defaults.
+- **Styling:** New code uses Tailwind; migrate existing in dedicated PRs. Use `cn()` to merge `className` with component defaults. **Form and button styling:** use `Button`, `Input`, `FormField` from `common/` and Tailwind only; do not introduce `.form-input`, `.form-label`, or `.btn*` in CSS or className. See `docs/CONVENTIONS.md` and P2-6.
 - **Components:** Prefer `common/` by default; add new primitives only when pattern appears in 2+ places. **common/** = no Redux, no API (P1-11).
 - **Features:** Do not import from another feature; only from `common/`, `types/`, and own feature (P0-10).
 - **i18n:** New UI strings use i18n from day one. **A11y:** FormField and modals keep labels, focus, Escape, ARIA where needed.
+- **List performance:** Use `React.memo` for list row components; use `key={id}` from backend where possible; avoid inline arrow functions in large list `.map()`; prefer stable callbacks or event-based handlers. See `docs/CONVENTIONS.md` and P2-9.
 
 ---
 
@@ -145,8 +148,36 @@ You can merge PR-2 and PR-3 if preferred (e.g. one “foundation” PR after PR-
 5. P1-4 → P1-5 → P1-6 (Page, Card, EmptyState)
 6. P1-12 → P1-13 → P1-14 → P1-15 (AsyncState, normalization, selectors, cn())
 7. P1-9 (Tailwind one feature)
-8. P1-R1 → P1-R2 (rule engine)
-9. P1-7 → P1-8 → P1-10 → P1-11 (props, modals, component rule)
+8. P1-R1 → P1-R2 (rule engine) TO DO
+9. P1-7 → P1-8 → P1-10 → P1-11 (props, modals, component rule) — P1-7, P1-8, P1-9, P1-10 done.
 10. P2-* in any order
 
 Update this doc as tasks are completed or scope changes.
+
+
+❌ Still remaining (by plan item)
+P0
+P0-1: Finish consolidation: ensure every domain uses *.d.ts as single source and *.ts only re-exports; no duplicate/conflicting exports (needs a full pass).
+P0-5: Type services: type response.data (and full response) with ApiResponse<T> (or equivalent) in services; currently they use raw response.data without a shared contract.
+P1
+P1-3: Migrate one form to FormField + common Input/Button end-to-end (plan: e.g. DeviceIdentityForm or AreaForm); confirm if already done in one place.
+P1-11: Document the controlled/smart rule: common/ = stateless, no API/Redux; feature components = UI + callbacks; containers = Redux, routing, data fetching. No dedicated doc found; only mentioned in the plan.
+P1-12 (usage): Use AsyncState<T> in at least one slice (e.g. devices: AsyncState<Device[]>); type exists but slices still use ad-hoc loading/error/data.
+P1-13 (expand): Normalize state for sensors and rule nodes (byId/allIds); only devices is normalized so far.
+P1-14 (expand): Memoized selectors for organizations, areas, sensors, ruleEngine; only devices (and auth) have a selectors module with createSelector.
+P2
+P2-1: Add src/types/index.ts barrel re-exporting public types (no barrel found).
+P2-2: Audit and document common components (Button, Input, Modal, Select, Loading, Toggle, etc.).
+P2-3: Deprecate or fix unused/duplicate common components.
+P2-4: Tailwind: migrate remaining features (sensors, organizations, areas, ruleEngine) from inline styles to Tailwind.
+P2-5: Remove redundant CSS from index.css after Tailwind migration.
+P2-6: Consolidate form/button classes (e.g. into Tailwind or shared components).
+P2-7, P2-8: Optional List/ListRow and shared ListProps/FormWrapperProps if patterns justify it.
+P2-9: Broader performance guardrails: use React.memo for list row components, key={id} from backend, avoid inline handlers in large lists (only ActionDialog uses React.memo so far).
+P2-10: Feature-level READMEs (state shape, entry points, main components) per feature; only types/README.md exists, no READMEs under feature folders.
+Summary table
+Area	Done in code	Remaining
+P0	P0-6, P0-7, P0-8, P0-9, P0-10; P0-1–P0-4 largely in place	P0-1 (full consolidation pass), P0-5 (services typed with ApiResponse)
+P1	P1-1, P1-2, P1-4–P1-10, P1-12 (type), P1-13 (devices), P1-14 (devices/auth), P1-15, P1-R1, P1-R2	P1-3 (confirm one form migrated), P1-11 (doc), P1-12 (use in slices), P1-13/14 (sensors + ruleEngine)
+P2	—	P2-1 through P2-10 (barrel, audit, Tailwind rest, CSS cleanup, performance, feature READMEs)
+So: most of P0 and P1 is already implemented; what’s clearly still open is P0-1/P0-5, P1-11 doc, using AsyncState in slices, extending normalization and selectors to sensors/ruleEngine, and the full P2 list.

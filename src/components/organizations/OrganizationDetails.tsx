@@ -1,26 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import type { Organization } from '../../types/organization';
-import type { Area } from '../../types/area';
-import type { Device } from '../../types/device';
 import Button from '../../components/common/Button/Button';
-import type { Sensor } from '../../types/sensor';
-
-interface OrganizationDetailsProps {
-  organization: Organization | null;
-  areas: Area[];
-  devices: Device[];
-  sensors: Sensor[];
-  isLoading: boolean;
-  error: string | null;
-  deleteModalOpen: boolean;
-  isDeleting: boolean;
-  onBack: () => void;
-  onDelete: () => void;
-  onOpenDeleteModal: () => void;
-  onCloseDeleteModal: () => void;
-}
+import type { OrganizationDetailsProps } from './types';
 
 const OrganizationDetails: React.FC<OrganizationDetailsProps> = ({
   organization,

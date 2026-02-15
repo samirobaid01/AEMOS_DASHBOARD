@@ -1,20 +1,10 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import type { RuleChain } from "../../types/ruleEngine";
 import RuleItem from "./RuleItem";
 import RuleFilter from "./RuleFilter";
-import EmptyState from "./EmptyState";
+import EmptyState from '../common/EmptyState';
 import Button from "../common/Button/Button";
-
-interface RuleListProps {
-  rules: RuleChain[];
-  isLoading: boolean;
-  error: string | null;
-  searchTerm: string;
-  onSearchChange: (term: string) => void;
-  onAddRule: () => void;
-  windowWidth?: number;
-}
+import type { RuleListProps } from './types';
 
 const RuleList: React.FC<RuleListProps> = ({
   rules = [],
@@ -79,13 +69,13 @@ const RuleList: React.FC<RuleListProps> = ({
 
       {safeRules.length === 0 ? (
         <EmptyState
-          message={t("ruleEngine.noRules")}
+          title={t("ruleEngine.noRules")}
           description={t("ruleEngine.noRuleFound")}
           actionLabel={t("ruleEngine.add")}
           onAction={onAddRule}
         />
       ) : (
-        <div>
+        <div className="flex flex-col gap-4">
           {safeRules.map((rule) => (
             <RuleItem key={rule.id} rule={rule} windowWidth={windowWidth} />
           ))}

@@ -1,28 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import RuleForm from './RuleForm';
-import type { RuleChainCreatePayload, RuleChainUpdatePayload } from '../../types/ruleEngine';
 import Button from '../common/Button/Button';
-import type { Sensor } from '../../types/sensor';
-import type { Device, DeviceStateRecord } from '../../types/device';
-
-interface RuleCreateProps {
-  onSubmit: (data: RuleChainCreatePayload | RuleChainUpdatePayload) => Promise<void>;
-  onFinish: () => void;
-  isLoading?: boolean;
-  ruleChainId: number | null;
-  showNodeSection: boolean;
-  onNodeDelete: (nodeId: number) => Promise<void>;
-  onNodeCreate: (data: any) => Promise<void>;
-  onNodeUpdate: (nodeId: number, data: any) => Promise<void>;
-  sensors: Sensor[];
-  devices: Device[];
-  deviceStates: DeviceStateRecord[];
-  lastFetchedDeviceId: number | null;
-  sensorDetails: { [uuid: string]: Sensor };
-  onFetchSensorDetails: (sensorId: number) => Promise<void>;
-  onFetchDeviceStates: (deviceId: number) => Promise<void>;
-}
+import type { RuleCreateProps } from './types';
 
 const RuleCreate: React.FC<RuleCreateProps> = ({
   onSubmit,

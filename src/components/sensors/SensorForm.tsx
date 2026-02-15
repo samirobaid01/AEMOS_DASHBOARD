@@ -1,41 +1,13 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ALLOWED_SENSOR_STATUSES } from '../../types/sensor';
-import type { Sensor, SensorCreateRequest, SensorUpdateRequest, TelemetryDatatype } from '../../types/sensor';
+import type { SensorCreateRequest, SensorUpdateRequest, TelemetryDatatype } from '../../types/sensor';
 import FormField from '../common/FormField';
 import FormActions from '../common/FormActions';
 import Button from '../common/Button/Button';
+import type { SensorFormProps, TelemetryRowPayload, TelemetryRowFormState } from './types';
 
-export interface TelemetryRowPayload {
-  id?: number;
-  variableName: string;
-  datatype: TelemetryDatatype;
-}
-
-interface Area {
-  id: number;
-  name: string;
-  organizationId: number;
-}
-
-export interface TelemetryRowFormState {
-  id?: number;
-  variableName: string;
-  datatype: TelemetryDatatype | '';
-}
-
-interface SensorFormProps {
-  sensor?: Sensor | null;
-  areas: Area[];
-  isLoading: boolean;
-  error: string | null;
-  telemetryError?: string | null;
-  onSubmit: (data: SensorCreateRequest | SensorUpdateRequest, telemetryRows?: TelemetryRowFormState[]) => void;
-  onCancel: () => void;
-  isSubmitting: boolean;
-  windowWidth: number;
-  isEditMode?: boolean;
-}
+export type { TelemetryRowPayload, TelemetryRowFormState };
 
 const TELEMETRY_DATATYPES: TelemetryDatatype[] = ['float', 'int', 'string', 'boolean'];
 
@@ -235,7 +207,7 @@ const SensorForm: React.FC<SensorFormProps> = ({
               )}
               {telemetryRows.map((row, index) => (
                 <div
-                  key={index}
+                  key={`telemetry-row-${index}`}
                   className="flex items-end gap-3 mb-4"
                 >
                   <div className="flex-1 min-w-0">

@@ -46,8 +46,9 @@ const ForgotPassword = () => {
       await authService.forgotPassword(email);
       setSuccess(t('password_reset_email_sent'));
       setEmail('');
-    } catch (error: any) {
-      setError(error.response?.data?.message || t('something_went_wrong'));
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string } } };
+      setError(err.response?.data?.message || t('something_went_wrong'));
     } finally {
       setIsSubmitting(false);
     }

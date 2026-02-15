@@ -1,17 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import type { Device } from '../../types/device';
 import type { DeviceStatus } from '../../constants/device';
 import { useTheme } from '../../context/ThemeContext';
 import { useThemeColors } from '../../hooks/useThemeColors';
+import type { DeviceItemProps } from './types';
 
-interface DeviceItemProps {
-  device: Device;
-  isMobile: boolean;
-}
-
-const DeviceItem: React.FC<DeviceItemProps> = ({ device, isMobile }) => {
+const DeviceItem: React.FC<DeviceItemProps> = React.memo(({ device, isMobile }) => {
   const { t } = useTranslation();
   const { darkMode } = useTheme();
   const colors = useThemeColors();
@@ -206,6 +201,6 @@ const DeviceItem: React.FC<DeviceItemProps> = ({ device, isMobile }) => {
       </div>
     </Link>
   );
-};
+});
 
 export default DeviceItem; 

@@ -4,15 +4,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { useThemeColors } from '../../hooks/useThemeColors';
 import type { DeviceState } from '../../state/slices/deviceStates.slice';
 import Button from '../common/Button/Button';
-
-interface DeviceStateManagerProps {
-  states: DeviceState[];
-  onAddState: (state: Omit<DeviceState, 'id' | 'createdAt' | 'updatedAt'>) => void;
-  onUpdateState: (stateId: number, state: Partial<Omit<DeviceState, 'id' | 'createdAt' | 'updatedAt'>>) => void;
-  onDeactivateState: (stateId: number) => void;
-  isLoading: boolean;
-  error: string | null;
-}
+import type { DeviceStateManagerProps } from './types';
 
 const DeviceStateManager: React.FC<DeviceStateManagerProps> = ({
   states = [],
@@ -94,16 +86,6 @@ const DeviceStateManager: React.FC<DeviceStateManagerProps> = ({
     border: `1px solid ${darkMode ? colors.border : '#d1d5db'}`,
     backgroundColor: darkMode ? colors.background : 'white',
     color: darkMode ? colors.textPrimary : '#111827'
-  };
-
-  const buttonStyle = {
-    padding: '0.5rem 1rem',
-    borderRadius: '0.375rem',
-    border: 'none',
-    backgroundColor: darkMode ? '#4d7efa' : '#3b82f6',
-    color: 'white',
-    cursor: isLoading ? 'not-allowed' : 'pointer',
-    opacity: isLoading ? 0.7 : 1
   };
 
   const stateListStyle = {

@@ -1,3 +1,22 @@
+import type { SelectOption } from './ui';
+
+export type ConfigField =
+  | { type: 'number'; key: string; label?: string; min?: number; max?: number }
+  | { type: 'select'; key: string; label?: string; options: SelectOption[] }
+  | { type: 'sensorKey'; key: string; label?: string }
+  | { type: 'deviceKey'; key: string; label?: string }
+  | { type: 'text'; key: string; label?: string; placeholder?: string }
+  | { type: 'duration'; key: string; label?: string }
+  | { type: 'operator'; key: string; label?: string; options: SelectOption[] }
+  | { type: 'boolean'; key: string; label?: string };
+
+export interface RuleNodeDefinition {
+  type: 'filter' | 'action';
+  label: string;
+  icon?: string;
+  configSchema: ConfigField[];
+}
+
 export interface RuleNode {
   id: number;
   ruleChainId: number;
@@ -35,4 +54,31 @@ export interface RuleEngineState {
   filters: {
     search: string;
   };
+}
+
+export interface DeviceCommandConfig {
+  deviceUuid: string;
+  stateName: string;
+  value: string;
+  initiatedBy: 'device';
+}
+
+export interface ActionNodeConfig {
+  type: 'DEVICE_COMMAND';
+  command: DeviceCommandConfig;
+}
+
+export interface NodeCreatePayload {
+  ruleChainId?: number;
+  id?: number;
+  name?: string;
+  type?: 'filter' | 'action';
+  config?: string | Record<string, unknown>;
+  nextNodeId?: number | null;
+}
+
+export interface NodeUpdatePayload {
+  name?: string;
+  type?: 'filter' | 'action';
+  config?: string | Record<string, unknown>;
 } 

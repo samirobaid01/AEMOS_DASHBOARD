@@ -1,40 +1,11 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import type { DeviceCreateRequest } from '../../types/device';
-import type { Organization } from '../../types/organization';
-import type { Area } from '../../types/area';
-import type { FormErrors } from '../../types/ui';
 import { useTheme } from '../../context/ThemeContext';
 import { useThemeColors } from '../../hooks/useThemeColors';
 import DeviceIdentityForm from './DeviceIdentityForm';
-import DeviceStatesModal, { type DeviceStatePayload } from './DeviceStatesModal';
+import DeviceStatesModal from './DeviceStatesModal';
 import CapabilitiesSummaryModal from './CapabilitiesSummaryModal';
-import type { DeviceCapabilities } from '../../types/device';
-
-interface DeviceCreateProps {
-  currentStep: 1 | 2 | 3;
-  formData: DeviceCreateRequest;
-  formErrors: FormErrors;
-  isLoading: boolean;
-  error: string | null;
-  organizations: Organization[];
-  areas: Area[];
-  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
-  onControlModesChange: (modes: string[]) => void;
-  onSubmit: (e: React.FormEvent) => void;
-  onCancel: () => void;
-  createdDeviceId: number | null;
-  statesError: string | null;
-  statesLoading: boolean;
-  onStatesNext: (payload: DeviceStatePayload) => void;
-  onStatesFinish: (payload: DeviceStatePayload) => void;
-  onStatesCancel: () => void;
-  capabilities: DeviceCapabilities;
-  capabilitiesSaving: boolean;
-  capabilitiesError: string | null;
-  onSaveCapabilities: () => void;
-  onCapabilitiesClose: () => void;
-}
+import type { DeviceCreateProps } from './types';
 
 const DeviceCreate: React.FC<DeviceCreateProps> = ({
   currentStep,

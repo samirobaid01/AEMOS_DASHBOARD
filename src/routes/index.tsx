@@ -1,7 +1,7 @@
 import DeviceStateTest from '../components/common/DeviceStateTest';
 import { RuleList, RuleCreate, RuleEdit, RuleDetails } from '../containers/RuleEngine';
 
-const routes = [
+export const routes = [
   {
     path: '/debug/device-state-test',
     element: <DeviceStateTest />

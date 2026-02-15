@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../state/store';
-import { useTranslation } from 'react-i18next';
 import {
   fetchAreaById,
   selectSelectedArea,
@@ -9,22 +8,19 @@ import {
   selectAreasError,
   deleteArea
 } from '../../state/slices/areas.slice';
-import { fetchSensorsByAreaId, selectSensors } from '../../state/slices/sensors.slice';
-import { fetchOrganizationById, selectSelectedOrganization } from '../../state/slices/organizations.slice';
+import { fetchSensorsByAreaId } from '../../state/slices/sensors.slice';
+import { fetchOrganizationById } from '../../state/slices/organizations.slice';
 import LoadingScreen from '../../components/common/Loading/LoadingScreen';
 import AreaDetails from '../../components/areas/AreaDetails';
 
 const AreaDetailsContainer = () => {
-  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const area = useAppSelector(selectSelectedArea);
-  const sensors = useAppSelector(selectSensors);
   const isLoading = useAppSelector(selectAreasLoading);
   const error = useAppSelector(selectAreasError);
-  const organization = useAppSelector(selectSelectedOrganization);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [, setIsDeleting] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
   // Handle window resize

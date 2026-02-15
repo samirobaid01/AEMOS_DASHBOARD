@@ -20,13 +20,15 @@ import {
   selectLastFetchedDeviceId,
   selectSensorDetails,
 } from '../../state/slices/ruleEngine.slice';
-import { selectAuthToken, selectSelectedOrganizationId } from '../../state/slices/auth.slice';
 import { useRuleEnginePermissions } from '../../hooks/useRuleEnginePermissions';
 import RuleForm from '../../components/ruleEngine/RuleForm';
 import NodeDialog from '../../components/ruleEngine/NodeDialog';
 import ActionDialog from '../../components/ruleEngine/ActionDialog';
 import { toastService } from '../../services/toastService';
 import { useTranslation } from 'react-i18next';
+import type { RuleChainUpdatePayload } from '../../types/ruleEngine';
+import type { RuleFormSubmitData } from '../../components/ruleEngine/types';
+import type { NodeCreatePayload, NodeUpdatePayload } from '../../types/ruleEngine';
 
 const RuleEdit: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -85,11 +87,16 @@ const RuleEdit: React.FC = () => {
     });
   }, [devices, loading, error]);
 
-  const handleSubmit = async (data: any) => {
-    if (!id) return;
+  const handleSubmit = async (data: RuleFormSubmitData) => {
+    if (!id || !selectedRule) return;
 
     try {
-      await dispatch(updateRule({ id: parseInt(id), payload: data })).unwrap();
+      const payload: RuleChainUpdatePayload = {
+        organizationId: selectedRule.organizationId,
+        ...(data.name !== undefined && { name: data.name }),
+        ...(data.description !== undefined && { description: data.description }),
+      };
+      await dispatch(updateRule({ id: parseInt(id), payload })).unwrap();
       toastService.success(t('ruleEngine.updateSuccess'));
     } catch (error) {
       toastService.error(t('ruleEngine.updateError'));
@@ -107,16 +114,16 @@ const RuleEdit: React.FC = () => {
     }
   };
 
-  const handleNodeCreate = async (data: any) => {
+  const handleNodeCreate = async (data: NodeCreatePayload) => {
     console.log("called handleNodeCreate from container");
     try {
       if (!id) return;
       
       await dispatch(createRuleNode({
         ruleChainId: parseInt(id),
-        type: data.type,
-        name: data.name,
-        config: data.config,
+        type: data.type ?? 'filter',
+        name: data.name ?? '',
+        config: typeof data.config === 'string' ? data.config : JSON.stringify(data.config ?? {}),
         nextNodeId: null
       })).unwrap();
       
@@ -127,7 +134,7 @@ const RuleEdit: React.FC = () => {
     }
   };
 
-  const handleNodeUpdate = async (nodeId: number, data: any) => {
+  const handleNodeUpdate = async (nodeId: number, data: NodeUpdatePayload) => {
     try {
       const currentNode = selectedRule?.nodes.find(n => n.id === nodeId);
       if (!currentNode) return;
@@ -141,9 +148,9 @@ const RuleEdit: React.FC = () => {
       await dispatch(updateRuleNode({ 
         nodeId, 
         payload: {
-          name: data.name,
-          config: data.config,
-          ...(nextNodeId !== undefined ? { nextNodeId } : {})  // Only include nextNodeId if it exists
+          name: data.name ?? '',
+          config: typeof data.config === 'string' ? data.config : JSON.stringify(data.config ?? {}),
+          ...(nextNodeId !== undefined ? { nextNodeId } : {})
         }
       })).unwrap();
       
