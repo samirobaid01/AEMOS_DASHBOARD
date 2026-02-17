@@ -53,9 +53,12 @@ const AreaDetails: React.FC<AreaDetailsProps> = ({
     <div className="p-4 sm:py-6 sm:px-8 bg-background dark:bg-background-dark">
       <div className="max-w-[65rem] mx-auto">
         <div className="flex justify-between items-center mb-6">
-          <Button variant="outline" onClick={onBack}>
-            {t('common.back')}
-          </Button>
+            <Button type="button" variant="secondary" onClick={onBack} className="flex items-center gap-2">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              {t('common.back')}
+            </Button>
           <div className="flex gap-3">
             <Button variant="outline" onClick={onEdit}>
               {t('common.edit')}

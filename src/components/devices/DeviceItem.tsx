@@ -2,205 +2,120 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import type { DeviceStatus } from '../../constants/device';
-import { useTheme } from '../../context/ThemeContext';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import Card from '../common/Card/Card';
+import { cn } from '../../utils/cn';
 import type { DeviceItemProps } from './types';
 
-const DeviceItem: React.FC<DeviceItemProps> = React.memo(({ device, isMobile }) => {
+const DeviceItem: React.FC<DeviceItemProps> = React.memo(({ device, isMobile, className }) => {
   const { t } = useTranslation();
-  const { darkMode } = useTheme();
-  const colors = useThemeColors();
 
-  const getStatusColor = (status: DeviceStatus) => {
+  const getStatusClasses = (status: DeviceStatus) => {
     switch (status) {
       case 'active':
         return {
-          bg: darkMode ? 'rgba(52, 211, 153, 0.2)' : '#dcfce7',
-          text: darkMode ? '#34d399' : '#166534',
-          dot: '#16a34a'
+          bg: 'bg-green-100 dark:bg-green-900/20',
+          text: 'text-green-700 dark:text-green-400',
+          dot: 'bg-green-600'
         };
       case 'inactive':
         return {
-          bg: darkMode ? 'rgba(239, 68, 68, 0.2)' : '#fee2e2',
-          text: darkMode ? '#ef4444' : '#b91c1c',
-          dot: '#ef4444'
+          bg: 'bg-red-100 dark:bg-red-900/20',
+          text: 'text-red-700 dark:text-red-400',
+          dot: 'bg-red-500'
         };
       default:
         return {
-          bg: darkMode ? 'rgba(234, 179, 8, 0.2)' : '#fef3c7',
-          text: darkMode ? '#eab308' : '#92400e',
-          dot: '#eab308'
+          bg: 'bg-yellow-100 dark:bg-yellow-900/20',
+          text: 'text-yellow-700 dark:text-yellow-400',
+          dot: 'bg-yellow-500'
         };
     }
   };
 
-  const getDeviceTypeColor = (type: string) => {
+  const getDeviceTypeClasses = (type: string) => {
     switch (type) {
       case 'actuator':
-        return darkMode ? colors.infoBackground : '#dbeafe';
+        return 'bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400';
       case 'sensor':
-        return darkMode ? colors.successBackground : '#dcfce7';
+        return 'bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400';
       case 'gateway':
-        return darkMode ? colors.warningBackground : '#fef3c7';
+        return 'bg-yellow-100 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400';
       case 'controller':
-        return darkMode ? colors.infoBackground : '#e0e7ff';
+        return 'bg-indigo-100 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400';
       default:
-        return darkMode ? colors.surfaceBackground : '#f3f4f6';
+        return 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400';
     }
   };
 
-  const getDeviceTypeTextColor = (type: string) => {
-    switch (type) {
-      case 'actuator':
-        return darkMode ? colors.infoText : '#1e40af';
-      case 'sensor':
-        return darkMode ? colors.successText : '#166534';
-      case 'gateway':
-        return darkMode ? colors.warningText : '#92400e';
-      case 'controller':
-        return darkMode ? colors.infoText : '#3730a3';
-      default:
-        return darkMode ? colors.textSecondary : '#4b5563';
-    }
-  };
-
-  const deviceCardStyle = {
-    display: 'flex',
-    flexDirection: isMobile ? 'column' as const : 'row' as const,
-    alignItems: isMobile ? 'flex-start' : 'center',
-    padding: '1rem',
-    backgroundColor: darkMode ? colors.cardBackground : 'white',
-    borderRadius: '0.5rem',
-    boxShadow: darkMode 
-      ? '0 1px 3px 0 rgba(0, 0, 0, 0.2), 0 1px 2px 0 rgba(0, 0, 0, 0.1)' 
-      : '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
-    border: `1px solid ${darkMode ? colors.border : '#e5e7eb'}`,
-    marginBottom: '1rem',
-    transition: 'all 0.15s ease-in-out'
-  };
-
-  const statusColors = getStatusColor(device.status);
+  const statusClasses = getStatusClasses(device.status);
 
   return (
     <Link 
       to={`/devices/${device.id}`}
-      style={{
-        textDecoration: 'none',
-        color: 'inherit',
-        display: 'block'
-      }}
+      className="block no-underline text-inherit"
     >
-      <div 
-        style={deviceCardStyle}
-        onMouseOver={e => {
-          e.currentTarget.style.transform = 'translateY(-2px)';
-          e.currentTarget.style.boxShadow = darkMode 
-            ? '0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1)' 
-            : '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)';
-        }}
-        onMouseOut={e => {
-          e.currentTarget.style.transform = 'translateY(0)';
-          e.currentTarget.style.boxShadow = darkMode 
-            ? '0 1px 3px 0 rgba(0, 0, 0, 0.2), 0 1px 2px 0 rgba(0, 0, 0, 0.1)' 
-            : '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)';
-        }}
+      <Card 
+        className={cn(
+          'hover:-translate-y-0.5 hover:shadow-lg transition-all duration-150 mb-4',
+          className
+        )}
+        contentClassName="p-4"
       >
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <h3 style={{
-            fontSize: '1rem',
-            fontWeight: 600,
-            color: darkMode ? colors.textPrimary : '#111827',
-            margin: '0 0 0.5rem 0',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap'
-          }}>
-            {device.name}
-          </h3>
+        <div className={cn(
+          'flex',
+          isMobile ? 'flex-col items-start' : 'flex-row items-center'
+        )}>
+          <div className="flex-1 min-w-0">
+            <h3 className="text-base font-semibold text-textPrimary dark:text-textPrimary-dark mb-2 truncate m-0">
+              {device.name}
+            </h3>
 
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            flexWrap: 'wrap',
-            gap: '0.5rem',
-            marginBottom: '0.5rem'
-          }}>
-            <span style={{
-              fontSize: '0.75rem',
-              backgroundColor: getDeviceTypeColor(device.deviceType),
-              color: getDeviceTypeTextColor(device.deviceType),
-              padding: '0.125rem 0.5rem',
-              borderRadius: '9999px',
-              display: 'inline-block'
-            }}>
-              {device.deviceType}
-            </span>
-
-            <span style={{
-              fontSize: '0.75rem',
-              backgroundColor: darkMode ? colors.infoBackground : '#dbeafe',
-              color: darkMode ? colors.infoText : '#1e40af',
-              padding: '0.125rem 0.5rem',
-              borderRadius: '9999px',
-              display: 'inline-block'
-            }}>
-              {device.controlType}
-            </span>
-
-            {device.communicationProtocol && (
-              <span style={{
-                fontSize: '0.75rem',
-                backgroundColor: darkMode ? colors.surfaceBackground : '#f3f4f6',
-                color: darkMode ? colors.textSecondary : '#4b5563',
-                padding: '0.125rem 0.5rem',
-                borderRadius: '9999px',
-                display: 'inline-block'
-              }}>
-                {device.communicationProtocol}
+            <div className="flex items-center flex-wrap gap-2 mb-2">
+              <span className={cn(
+                'text-xs px-2 py-0.5 rounded-full inline-block',
+                getDeviceTypeClasses(device.deviceType)
+              )}>
+                {device.deviceType}
               </span>
-            )}
+
+              <span className="text-xs px-2 py-0.5 rounded-full inline-block bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400">
+                {device.controlType}
+              </span>
+
+              {device.communicationProtocol && (
+                <span className="text-xs px-2 py-0.5 rounded-full inline-block bg-surface dark:bg-surface-dark text-textSecondary dark:text-textSecondary-dark">
+                  {device.communicationProtocol}
+                </span>
+              )}
+            </div>
+
+            <p className="text-sm text-textMuted dark:text-textMuted-dark m-0 truncate">
+              {device.description || t('devices.noDescription')}
+            </p>
           </div>
 
-          <p style={{
-            fontSize: '0.875rem',
-            color: darkMode ? colors.textMuted : '#6b7280',
-            margin: 0,
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap'
-          }}>
-            {device.description || t('devices.noDescription')}
-          </p>
+          <div className={cn(
+            'flex-shrink-0',
+            isMobile ? 'mt-3' : 'ml-4'
+          )}>
+            <span className={cn(
+              'inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium',
+              statusClasses.bg,
+              statusClasses.text
+            )}>
+              <span className={cn(
+                'w-2 h-2 rounded-full mr-1.5',
+                statusClasses.dot
+              )}></span>
+              {t(`devices.statuses.${device.status}`)}
+            </span>
+          </div>
         </div>
-
-        <div style={{
-          marginTop: isMobile ? '0.75rem' : 0,
-          marginLeft: isMobile ? 0 : '1rem',
-          flexShrink: 0
-        }}>
-          <span style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            padding: '0.25rem 0.625rem',
-            borderRadius: '9999px',
-            fontSize: '0.75rem',
-            fontWeight: 500,
-            backgroundColor: statusColors.bg,
-            color: statusColors.text
-          }}>
-            <span style={{
-              width: '0.5rem',
-              height: '0.5rem',
-              borderRadius: '50%',
-              backgroundColor: statusColors.dot,
-              marginRight: '0.375rem'
-            }}></span>
-            {t(`devices.statuses.${device.status}`)}
-          </span>
-        </div>
-      </div>
+      </Card>
     </Link>
   );
 });
+
+DeviceItem.displayName = 'DeviceItem';
 
 export default DeviceItem; 

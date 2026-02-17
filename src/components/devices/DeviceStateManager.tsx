@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useTheme } from '../../context/ThemeContext';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { cn } from '../../utils/cn';
+import Card from '../common/Card/Card';
+import Modal from '../common/Modal/Modal';
 import type { DeviceState } from '../../state/slices/deviceStates.slice';
 import Button from '../common/Button/Button';
 import type { DeviceStateManagerProps } from './types';
@@ -15,8 +16,6 @@ const DeviceStateManager: React.FC<DeviceStateManagerProps> = ({
   error
 }) => {
   const { t } = useTranslation();
-  const { darkMode } = useTheme();
-  const colors = useThemeColors();
   const isMobile = window.innerWidth < 768;
 
   const [newState, setNewState] = useState<Omit<DeviceState, 'id' | 'createdAt' | 'updatedAt'>>({
@@ -48,101 +47,55 @@ const DeviceStateManager: React.FC<DeviceStateManagerProps> = ({
     }
   };
 
-  const containerStyle = {
-    marginTop: '2rem',
-    padding: '1.5rem',
-    backgroundColor: darkMode ? colors.cardBackground : 'white',
-    borderRadius: '0.5rem',
-    border: `1px solid ${darkMode ? colors.border : '#e5e7eb'}`
-  };
-
-  const headerStyle = {
-    marginBottom: '1.5rem'
-  };
-
-  const titleStyle = {
-    fontSize: '1.25rem',
-    fontWeight: 600,
-    color: darkMode ? colors.textPrimary : '#111827',
-    marginBottom: '0.5rem'
-  };
-
-  const descriptionStyle = {
-    fontSize: '0.875rem',
-    color: darkMode ? colors.textSecondary : '#6b7280'
-  };
-
-  const formStyle = {
-    display: 'grid',
-    gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(200px, 1fr))',
-    gap: '1rem',
-    marginBottom: '1.5rem'
-  };
-
-  const inputStyle = {
-    width: '100%',
-    padding: '0.5rem',
-    borderRadius: '0.375rem',
-    border: `1px solid ${darkMode ? colors.border : '#d1d5db'}`,
-    backgroundColor: darkMode ? colors.background : 'white',
-    color: darkMode ? colors.textPrimary : '#111827'
-  };
-
-  const stateListStyle = {
-    display: 'grid',
-    gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(300px, 1fr))',
-    gap: '1rem'
-  };
-
-  const stateCardStyle = {
-    padding: '1rem',
-    backgroundColor: darkMode ? colors.surfaceBackground : '#f9fafb',
-    borderRadius: '0.375rem',
-    border: `1px solid ${darkMode ? colors.border : '#e5e7eb'}`
-  };
+  const inputClassName = "w-full px-3 py-2 rounded-md border border-border dark:border-border-dark bg-background dark:bg-background-dark text-textPrimary dark:text-textPrimary-dark text-sm focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-primary-dark";
 
   if (isLoading) {
     return (
-      <div style={containerStyle}>
-        <div style={headerStyle}>
-          <h3 style={titleStyle}>{t('devices.deviceState.title')}</h3>
-          <p style={descriptionStyle}>{t('devices.deviceState.loading')}</p>
+      <Card className="mt-8">
+        <div>
+          <h3 className="text-xl font-semibold text-textPrimary dark:text-textPrimary-dark mb-2">
+            {t('devices.deviceState.title')}
+          </h3>
+          <p className="text-sm text-textSecondary dark:text-textSecondary-dark">
+            {t('devices.deviceState.loading')}
+          </p>
         </div>
-      </div>
+      </Card>
     );
   }
 
   return (
-    <div style={containerStyle}>
-      <div style={headerStyle}>
-        <h3 style={titleStyle}>{t('devices.deviceState.title')}</h3>
-        <p style={descriptionStyle}>{t('devices.deviceState.description')}</p>
+    <Card className="mt-8">
+      <div className="mb-6">
+        <h3 className="text-xl font-semibold text-textPrimary dark:text-textPrimary-dark mb-2">
+          {t('devices.deviceState.title')}
+        </h3>
+        <p className="text-sm text-textSecondary dark:text-textSecondary-dark">
+          {t('devices.deviceState.description')}
+        </p>
       </div>
 
       {error && (
-        <div style={{
-          padding: '0.75rem',
-          marginBottom: '1rem',
-          backgroundColor: darkMode ? colors.dangerBackground : '#fee2e2',
-          color: darkMode ? colors.dangerText : '#b91c1c',
-          borderRadius: '0.375rem'
-        }}>
+        <div className="bg-dangerBg dark:bg-dangerBg-dark text-dangerText dark:text-dangerText-dark p-3 rounded-md mb-4">
           {error}
         </div>
       )}
 
-      <div style={formStyle}>
+      <div className={cn(
+        'grid gap-4 mb-6',
+        isMobile ? 'grid-cols-1' : 'grid-cols-[repeat(auto-fit,minmax(200px,1fr))]'
+      )}>
         <input
           type="text"
           placeholder={t('devices.deviceState.stateName')}
           value={newState.stateName}
           onChange={(e) => setNewState({ ...newState, stateName: e.target.value })}
-          style={inputStyle}
+          className={inputClassName}
         />
         <select
           value={newState.dataType}
           onChange={(e) => setNewState({ ...newState, dataType: e.target.value })}
-          style={inputStyle}
+          className={inputClassName}
         >
           <option value="string">String</option>
           <option value="number">Number</option>
@@ -153,14 +106,14 @@ const DeviceStateManager: React.FC<DeviceStateManagerProps> = ({
           placeholder={t('devices.deviceState.defaultValue')}
           value={newState.defaultValue}
           onChange={(e) => setNewState({ ...newState, defaultValue: e.target.value })}
-          style={inputStyle}
+          className={inputClassName}
         />
         <input
           type="text"
           placeholder={t('devices.deviceState.allowedValues')}
           value={newState.allowedValues.join(',')}
           onChange={(e) => setNewState({ ...newState, allowedValues: e.target.value.split(',').map(v => v.trim()) })}
-          style={inputStyle}
+          className={inputClassName}
         />
         <Button
           variant="primary"
@@ -171,31 +124,29 @@ const DeviceStateManager: React.FC<DeviceStateManagerProps> = ({
         </Button>
       </div>
 
-      <div style={stateListStyle}>
+      <div className={cn(
+        'grid gap-4',
+        isMobile ? 'grid-cols-1' : 'grid-cols-[repeat(auto-fill,minmax(300px,1fr))]'
+      )}>
         {Array.isArray(states) && states.map((state) => (
-          <div key={state.id} style={stateCardStyle}>
-            <div style={{ marginBottom: '0.75rem' }}>
-              <strong style={{ color: darkMode ? colors.textPrimary : '#111827' }}>
+          <div key={state.id} className="p-4 bg-surface dark:bg-surface-dark rounded-md border border-border dark:border-border-dark">
+            <div className="mb-3">
+              <strong className="text-textPrimary dark:text-textPrimary-dark">
                 {state.stateName}
               </strong>
-              <span style={{ 
-                marginLeft: '0.5rem',
-                fontSize: '0.75rem',
-                color: state.status === 'active' ? '#10b981' : '#ef4444'
-              }}>
+              <span className={cn(
+                'ml-2 text-xs',
+                state.status === 'active' ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400'
+              )}>
                 ({state.status === 'active' ? t('devices.deviceState.active') : state.status === 'inactive' ? t('devices.deviceState.inactive') : t('devices.deviceState.suspended')})
               </span>
             </div>
-            <div style={{ 
-              fontSize: '0.875rem',
-              color: darkMode ? colors.textSecondary : '#6b7280',
-              marginBottom: '0.5rem'
-            }}>
+            <div className="text-sm text-textSecondary dark:text-textSecondary-dark mb-2 space-y-1">
               <div>Type: {state.dataType}</div>
               <div>Default: {state.defaultValue}</div>
               <div>Allowed: {(Array.isArray(state.allowedValues) ? state.allowedValues : []).join(', ')}</div>
             </div>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <div className="flex gap-2">
               <Button
                 variant="secondary"
                 size="sm"
@@ -227,109 +178,86 @@ const DeviceStateManager: React.FC<DeviceStateManagerProps> = ({
       </div>
 
       {editingState && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '1rem',
-          zIndex: 50
-        }}>
-          <div style={{
-            backgroundColor: darkMode ? colors.cardBackground : 'white',
-            padding: '1.5rem',
-            borderRadius: '0.5rem',
-            width: '100%',
-            maxWidth: '500px'
-          }}>
-            <h3 style={{
-              fontSize: '1.25rem',
-              fontWeight: 600,
-              color: darkMode ? colors.textPrimary : '#111827',
-              marginBottom: '1rem'
-            }}>
-              {t('devices.deviceState.editState')}
-            </h3>
-            <div style={{ display: 'grid', gap: '1rem', marginBottom: '1.5rem' }}>
-              <input
-                type="text"
-                placeholder={t('devices.deviceState.stateName')}
-                value={editingState.state.stateName}
-                onChange={(e) => setEditingState({
-                  ...editingState,
-                  state: { ...editingState.state, stateName: e.target.value }
-                })}
-                style={inputStyle}
-              />
-              <select
-                value={editingState.state.dataType}
-                onChange={(e) => setEditingState({
-                  ...editingState,
-                  state: { ...editingState.state, dataType: e.target.value }
-                })}
-                style={inputStyle}
-              >
-                <option value="string">String</option>
-                <option value="number">Number</option>
-                <option value="boolean">Boolean</option>
-              </select>
-              <input
-                type="text"
-                placeholder={t('devices.deviceState.defaultValue')}
-                value={editingState.state.defaultValue}
-                onChange={(e) => setEditingState({
-                  ...editingState,
-                  state: { ...editingState.state, defaultValue: e.target.value }
-                })}
-                style={inputStyle}
-              />
-              <input
-                type="text"
-                placeholder={t('devices.deviceState.allowedValues')}
-                value={editingState.state.allowedValues?.join(',')}
-                onChange={(e) => setEditingState({
-                  ...editingState,
-                  state: { ...editingState.state, allowedValues: e.target.value.split(',').map(v => v.trim()) }
-                })}
-                style={inputStyle}
-              />
-              <select
-                value={editingState.state.status}
-                onChange={(e) => setEditingState({
-                  ...editingState,
-                  state: { ...editingState.state, status: e.target.value as 'active' | 'inactive' | 'suspended' }
-                })}
-              >
-                <option value="active">{t('devices.deviceState.active')}</option>
-                <option value="inactive">{t('devices.deviceState.inactive')}</option>
-                <option value="suspended">{t('devices.deviceState.suspended')}</option>
-              </select>
-            </div>
-            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
-              <Button
-                variant="secondary"
-                onClick={() => setEditingState(null)}
-                disabled={isLoading}
-              >
-                {t('cancel')}
-              </Button>
-              <Button
-                variant="primary"
-                onClick={handleUpdateState}
-                disabled={isLoading}
-              >
-                {t('save')}
-              </Button>
-            </div>
+        <Modal
+          isOpen={true}
+          onClose={() => setEditingState(null)}
+          title={t('devices.deviceState.editState')}
+        >
+          <div className="grid gap-4 mb-6">
+            <input
+              type="text"
+              placeholder={t('devices.deviceState.stateName')}
+              value={editingState.state.stateName}
+              onChange={(e) => setEditingState({
+                ...editingState,
+                state: { ...editingState.state, stateName: e.target.value }
+              })}
+              className={inputClassName}
+            />
+            <select
+              value={editingState.state.dataType}
+              onChange={(e) => setEditingState({
+                ...editingState,
+                state: { ...editingState.state, dataType: e.target.value }
+              })}
+              className={inputClassName}
+            >
+              <option value="string">String</option>
+              <option value="number">Number</option>
+              <option value="boolean">Boolean</option>
+            </select>
+            <input
+              type="text"
+              placeholder={t('devices.deviceState.defaultValue')}
+              value={editingState.state.defaultValue}
+              onChange={(e) => setEditingState({
+                ...editingState,
+                state: { ...editingState.state, defaultValue: e.target.value }
+              })}
+              className={inputClassName}
+            />
+            <input
+              type="text"
+              placeholder={t('devices.deviceState.allowedValues')}
+              value={editingState.state.allowedValues?.join(',')}
+              onChange={(e) => setEditingState({
+                ...editingState,
+                state: { ...editingState.state, allowedValues: e.target.value.split(',').map(v => v.trim()) }
+              })}
+              className={inputClassName}
+            />
+            <select
+              value={editingState.state.status}
+              onChange={(e) => setEditingState({
+                ...editingState,
+                state: { ...editingState.state, status: e.target.value as 'active' | 'inactive' | 'suspended' }
+              })}
+              className={inputClassName}
+            >
+              <option value="active">{t('devices.deviceState.active')}</option>
+              <option value="inactive">{t('devices.deviceState.inactive')}</option>
+              <option value="suspended">{t('devices.deviceState.suspended')}</option>
+            </select>
           </div>
-        </div>
+          <div className="flex gap-3 justify-end">
+            <Button
+              variant="secondary"
+              onClick={() => setEditingState(null)}
+              disabled={isLoading}
+            >
+              {t('cancel')}
+            </Button>
+            <Button
+              variant="primary"
+              onClick={handleUpdateState}
+              disabled={isLoading}
+            >
+              {t('save')}
+            </Button>
+          </div>
+        </Modal>
       )}
-    </div>
+    </Card>
   );
 };
 
