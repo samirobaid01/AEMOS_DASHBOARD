@@ -44,6 +44,7 @@
   },
   "navigation": {
     "dashboard": "Panel de control",
+    "telemetry": "Telemetría en Vivo",
     "organizations": "Organizaciones",
     "areas": "Áreas",
     "sensors": "Sensores",
@@ -320,5 +321,35 @@
     "sms_notifications_desc": "Recibir alertas SMS para eventos críticos",
     "app_notifications": "Notificaciones en la Aplicación",
     "app_notifications_desc": "Recibir notificaciones y alertas en la aplicación"
+  },
+  "telemetry": {
+    "pageTitle": "Panel de Telemetría en Vivo",
+    "pageDescription": "Monitorear datos de telemetría de sensores y dispositivos en tiempo real",
+    "filterTitle": "Agregar Sensores y Dispositivos",
+    "filterDescription": "Seleccione organización, área y entidades para monitorear su telemetría en tiempo real",
+    "selectOrganization": "Seleccionar Organización",
+    "selectArea": "Seleccionar Área",
+    "selectSensor": "Seleccionar Sensor",
+    "selectDevice": "Seleccionar Dispositivo",
+    "addToDashboard": "Agregar al Panel",
+    "monitoredEntities": "Entidades Monitoreadas",
+    "entityCount": "{{count}} entidades",
+    "type": "Tipo",
+    "name": "Nombre",
+    "values": "Valores",
+    "status": "Estado",
+    "connected": "Conectado",
+    "disconnected": "Desconectado",
+    "lastUpdate": "Última actualización",
+    "removeEntity": "Eliminar del panel",
+    "sensor": "Sensor",
+    "device": "Dispositivo",
+    "sensorSelected": "Sensor seleccionado",
+    "deviceSelected": "Dispositivo seleccionado",
+    "selectEntityPrompt": "Seleccione un sensor o dispositivo para monitorear",
+    "noEntitiesMonitored": "Sin Entidades Monitoreadas",
+    "noEntitiesDescription": "Use los filtros arriba para seleccionar sensores o dispositivos y agregarlos para comenzar a monitorear datos de telemetría en tiempo real.",
+    "telemetryVariables": "Variables de Telemetría",
+    "deviceStates": "Estados del Dispositivo"
   }
 } 

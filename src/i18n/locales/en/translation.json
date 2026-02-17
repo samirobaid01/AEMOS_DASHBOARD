@@ -48,6 +48,7 @@
   },
   "navigation": {
     "dashboard": "Dashboard",
+    "telemetry": "Live Telemetry",
     "organizations": "Organizations",
     "areas": "Areas",
     "sensors": "Sensors",
@@ -411,5 +412,35 @@
       "nodeType":"Node Type",
       "nodeNotFound":"Node not found"
     }
+  },
+  "telemetry": {
+    "pageTitle": "Live Telemetry Dashboard",
+    "pageDescription": "Monitor real-time sensor and device telemetry data",
+    "filterTitle": "Add Sensors & Devices",
+    "filterDescription": "Select organization, area, and entities to monitor their real-time telemetry",
+    "selectOrganization": "Select Organization",
+    "selectArea": "Select Area",
+    "selectSensor": "Select Sensor",
+    "selectDevice": "Select Device",
+    "addToDashboard": "Add to Dashboard",
+    "monitoredEntities": "Monitored Entities",
+    "entityCount": "{{count}} entities",
+    "type": "Type",
+    "name": "Name",
+    "values": "Values",
+    "status": "Status",
+    "connected": "Connected",
+    "disconnected": "Disconnected",
+    "lastUpdate": "Last update",
+    "removeEntity": "Remove from dashboard",
+    "sensor": "Sensor",
+    "device": "Device",
+    "sensorSelected": "Sensor selected",
+    "deviceSelected": "Device selected",
+    "selectEntityPrompt": "Select a sensor or device to monitor",
+    "noEntitiesMonitored": "No Entities Monitored",
+    "noEntitiesDescription": "Use the filters above to select sensors or devices and add them to start monitoring real-time telemetry data.",
+    "telemetryVariables": "Telemetry Variables",
+    "deviceStates": "Device States"
   }
 } 
