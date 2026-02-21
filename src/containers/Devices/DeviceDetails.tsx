@@ -227,11 +227,7 @@ const DeviceDetails = () => {
   };
 
   const handleNavigateBack = () => {
-    if (organizationId) {
-      navigate(`/organizations/${organizationId}/devices`);
-    } else {
-      navigate("/devices");
-    }
+    navigate("/devices");
   };
 
   return (

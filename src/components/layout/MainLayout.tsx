@@ -41,6 +41,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
   const navigation = [
     { name: t('navigation.dashboard'), path: '/dashboard', icon: '🌱' },
+    { name: t('navigation.telemetry'), path: '/telemetry', icon: '📊' },
     { name: t('navigation.organizations'), path: '/organizations', icon: '🚜' },
     { name: t('navigation.areas'), path: '/areas', icon: '🌾' },
     { name: t('navigation.sensors'), path: '/sensors', icon: '🌡️' },

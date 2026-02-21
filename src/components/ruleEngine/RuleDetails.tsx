@@ -73,10 +73,11 @@ const RuleDetails: React.FC<RuleDetailsProps> = ({
       <div className={`flex ${isMobile ? 'flex-col items-stretch' : 'flex-row justify-between items-center'} gap-4 mb-6`}>
         <div className="flex items-center gap-4">
           {onBack && (
-            <Button type="button" variant="secondary" onClick={onBack} className="p-2 min-w-0">
-              <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <Button type="button" variant="secondary" onClick={onBack} className="flex items-center gap-2">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
               </svg>
+              {t('common.back')}
             </Button>
           )}
           <h1 className="text-2xl font-semibold text-textPrimary dark:text-textPrimary-dark m-0">
