@@ -10,6 +10,10 @@ export const IS_TEST = ENV === 'test';
 // Feature flags
 export const ENABLE_MIXPANEL = true;
 export const MIXPANEL_TOKEN = import.meta.env.VITE_MIXPANEL_TOKEN || '';
+export const ENABLE_TELEMETRY_PERSISTENCE =
+  import.meta.env.VITE_ENABLE_TELEMETRY_PERSISTENCE !== undefined
+    ? import.meta.env.VITE_ENABLE_TELEMETRY_PERSISTENCE === 'true'
+    : true;
 
 // i18n configuration
 export const DEFAULT_LANGUAGE = 'en';

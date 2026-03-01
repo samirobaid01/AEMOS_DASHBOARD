@@ -1,4 +1,7 @@
-import type { TelemetryVariable } from '../../types/sensor';
+import type { TelemetryVariable, Sensor } from '../../types/sensor';
+import type { Device } from '../../types/device';
+import type { Organization } from '../../types/organization';
+import type { Area } from '../../types/area';
 import type { DeviceState } from '../../state/slices/deviceDetails.slice';
 
 export type EntityType = 'sensor' | 'device';
@@ -36,14 +39,15 @@ export interface TelemetryFiltersProps {
   selectedAreaId: number | null;
   selectedSensorId: number | null;
   selectedDeviceId: number | null;
-  organizations: Array<{ id: number; name: string }>;
-  areas: Array<{ id: number; name: string; organizationId: number }>;
-  sensors: Array<{ id: number; name: string; areaId?: number; description?: string; TelemetryData?: Array<{ id: number; variableName: string; datatype: string }> }>;
-  devices: Array<{ id: number; name: string; uuid: string; areaId?: number; description?: string; states?: Array<{ id: number; stateName: string; dataType: string }> }>;
+  organizations: Pick<Organization, 'id' | 'name'>[];
+  areas: Pick<Area, 'id' | 'name' | 'organizationId'>[];
+  sensors: Pick<Sensor, 'id' | 'name' | 'areaId' | 'description' | 'TelemetryData' | 'status'>[];
+  devices: Pick<Device, 'id' | 'name' | 'uuid' | 'areaId' | 'description' | 'states'>[];
   onOrgChange: (orgId: number | null) => void;
   onAreaChange: (areaId: number | null) => void;
   onSensorChange: (sensorId: number | null) => void;
   onDeviceChange: (deviceId: number | null) => void;
+  onClearFilters: () => void;
   onAddEntity: () => void;
   canAdd: boolean;
   isLoading?: boolean;
@@ -66,10 +70,10 @@ export interface TelemetryRowProps {
 export interface TelemetryDashboardProps {
   monitoredEntities: MonitoredEntity[];
   telemetryData: TelemetryData;
-  organizations: Array<{ id: number; name: string }>;
-  areas: Array<{ id: number; name: string; organizationId: number }>;
-  sensors: Array<{ id: number; name: string; areaId?: number; description?: string; TelemetryData?: TelemetryVariable[] }>;
-  devices: Array<{ id: number; name: string; uuid: string; areaId?: number; description?: string; states?: Array<{ id: number; stateName: string; dataType: string }> }>;
+  organizations: Pick<Organization, 'id' | 'name'>[];
+  areas: Pick<Area, 'id' | 'name' | 'organizationId'>[];
+  sensors: Pick<Sensor, 'id' | 'name' | 'areaId' | 'description' | 'TelemetryData' | 'status'>[];
+  devices: Pick<Device, 'id' | 'name' | 'uuid' | 'areaId' | 'description' | 'states'>[];
   selectedOrgId: number | null;
   selectedAreaId: number | null;
   selectedSensorId: number | null;
@@ -78,6 +82,7 @@ export interface TelemetryDashboardProps {
   onAreaChange: (areaId: number | null) => void;
   onSensorChange: (sensorId: number | null) => void;
   onDeviceChange: (deviceId: number | null) => void;
+  onClearFilters: () => void;
   onAddEntity: () => void;
   onRemoveEntity: (entityId: string) => void;
   windowWidth: number;

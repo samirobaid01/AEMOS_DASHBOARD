@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAppDispatch, useAppSelector } from '../../state/store';
 import { fetchOrganizations, selectOrganizations } from '../../state/slices/organizations.slice';
 import { fetchAreas, selectAreas } from '../../state/slices/areas.slice';
@@ -10,6 +10,8 @@ import { selectSelectedOrganizationId } from '../../state/slices/auth.slice';
 import TelemetryDashboardComponent from '../../components/telemetry/TelemetryDashboard';
 import LoadingScreen from '../../components/common/Loading/LoadingScreen';
 import { useMultiTelemetry } from '../../hooks/useMultiTelemetry';
+import { ENABLE_TELEMETRY_PERSISTENCE } from '../../config';
+import { loadTelemetryEntities, saveTelemetryEntities } from '../../utils/telemetryStorage';
 import type { MonitoredEntity } from '../../components/telemetry/types';
 
 const TelemetryDashboard = () => {
@@ -38,11 +40,23 @@ const TelemetryDashboard = () => {
     serverUrl: import.meta.env.VITE_SOCKET_URL || 'http://localhost:3000'
   });
 
+  const hasRestoredFromStorage = useRef(false);
+
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth);
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  useEffect(() => {
+    if (!ENABLE_TELEMETRY_PERSISTENCE || isInitialLoading || hasRestoredFromStorage.current) return;
+    hasRestoredFromStorage.current = true;
+    const loaded = loadTelemetryEntities();
+    if (loaded.length > 0) {
+      setMonitoredEntities(loaded);
+      loaded.forEach((entity) => addEntity(entity));
+    }
+  }, [isInitialLoading, addEntity]);
 
   useEffect(() => {
     const fetchInitialData = async () => {
@@ -149,8 +163,10 @@ const TelemetryDashboard = () => {
         };
 
         addEntity(entity);
-        setMonitoredEntities(prev => [...prev, entity]);
-        
+        const newList = [...monitoredEntities, entity];
+        setMonitoredEntities(newList);
+        if (ENABLE_TELEMETRY_PERSISTENCE) saveTelemetryEntities(newList);
+
         setSelectedSensorId(null);
       } catch (error) {
         console.error('Error adding sensor:', error);
@@ -218,8 +234,10 @@ const TelemetryDashboard = () => {
         console.log('Created device entity:', entity);
 
         addEntity(entity);
-        setMonitoredEntities(prev => [...prev, entity]);
-        
+        const newList = [...monitoredEntities, entity];
+        setMonitoredEntities(newList);
+        if (ENABLE_TELEMETRY_PERSISTENCE) saveTelemetryEntities(newList);
+
         setSelectedDeviceId(null);
       } catch (error) {
         console.error('Error adding device:', error);
@@ -234,13 +252,27 @@ const TelemetryDashboard = () => {
     devices,
     areas,
     organizations,
-    addEntity
+    addEntity,
+    monitoredEntities
   ]);
 
   const handleRemoveEntity = useCallback((entityId: string) => {
     removeEntity(entityId);
-    setMonitoredEntities(prev => prev.filter(e => e.id !== entityId));
+    setMonitoredEntities((prev) => {
+      const next = prev.filter((e) => e.id !== entityId);
+      if (ENABLE_TELEMETRY_PERSISTENCE) saveTelemetryEntities(next);
+      return next;
+    });
   }, [removeEntity]);
+
+  const handleClearFilters = useCallback(() => {
+    setSelectedOrgId(null);
+    setSelectedAreaId(null);
+    setSelectedSensorId(null);
+    setSelectedDeviceId(null);
+    setSelectedSensorDetails(null);
+    setSelectedDeviceDetails(null);
+  }, []);
 
   if (isInitialLoading) {
     return <LoadingScreen />;
@@ -272,6 +304,7 @@ const TelemetryDashboard = () => {
       onAreaChange={setSelectedAreaId}
       onSensorChange={setSelectedSensorId}
       onDeviceChange={setSelectedDeviceId}
+      onClearFilters={handleClearFilters}
       onAddEntity={handleAddEntity}
       onRemoveEntity={handleRemoveEntity}
       windowWidth={windowWidth}

@@ -20,6 +20,7 @@ const TelemetryDashboard: React.FC<TelemetryDashboardProps> = ({
   onAreaChange,
   onSensorChange,
   onDeviceChange,
+  onClearFilters,
   onAddEntity,
   onRemoveEntity,
   windowWidth,
@@ -53,6 +54,7 @@ const TelemetryDashboard: React.FC<TelemetryDashboardProps> = ({
           onAreaChange={onAreaChange}
           onSensorChange={onSensorChange}
           onDeviceChange={onDeviceChange}
+          onClearFilters={onClearFilters}
           onAddEntity={onAddEntity}
           canAdd={canAddEntity}
           isLoading={isLoading}

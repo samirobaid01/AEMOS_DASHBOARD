@@ -21,6 +21,7 @@ const TelemetryFilters: React.FC<TelemetryFiltersProps> = ({
   onAreaChange,
   onSensorChange,
   onDeviceChange,
+  onClearFilters,
   onAddEntity,
   canAdd,
   isLoading = false
@@ -57,7 +58,7 @@ const TelemetryFilters: React.FC<TelemetryFiltersProps> = ({
 
   const filteredSensors = selectedAreaId
     ? sensors.filter(sensor => sensor.areaId === selectedAreaId)
-    : sensors;
+    : sensors.filter(sensor => sensor.status === 'active');
 
   const filteredDevices = selectedAreaId
     ? devices.filter(device => device.areaId === selectedAreaId)
@@ -268,17 +269,33 @@ const TelemetryFilters: React.FC<TelemetryFiltersProps> = ({
               <span className="text-sm">{t('telemetry.selectEntityPrompt')}</span>
             </div>
           )}
-          <Button
-            type="button"
-            variant="primary"
-            onClick={onAddEntity}
-            disabled={!canAdd || isLoading}
-          >
-            <svg className="w-4 h-4 mr-1.5 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            {t('telemetry.addToDashboard')}
-          </Button>
+          <div className="flex gap-2 flex-shrink-0">
+            {(selectedOrgId || selectedAreaId || selectedSensorId || selectedDeviceId) && (
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={onClearFilters}
+                disabled={isLoading}
+                title={t('telemetry.clearSelection')}
+              >
+                <svg className="w-4 h-4 mr-1.5 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                {t('telemetry.clearSelection')}
+              </Button>
+            )}
+            <Button
+              type="button"
+              variant="primary"
+              onClick={onAddEntity}
+              disabled={!canAdd || isLoading}
+            >
+              <svg className="w-4 h-4 mr-1.5 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              {t('telemetry.addToDashboard')}
+            </Button>
+          </div>
         </div>
       </div>
     </Card>

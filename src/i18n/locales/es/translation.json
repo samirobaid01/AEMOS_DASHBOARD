@@ -347,6 +347,7 @@
     "sensorSelected": "Sensor seleccionado",
     "deviceSelected": "Dispositivo seleccionado",
     "selectEntityPrompt": "Seleccione un sensor o dispositivo para monitorear",
+    "clearSelection": "Limpiar Selección",
     "noEntitiesMonitored": "Sin Entidades Monitoreadas",
     "noEntitiesDescription": "Use los filtros arriba para seleccionar sensores o dispositivos y agregarlos para comenzar a monitorear datos de telemetría en tiempo real.",
     "telemetryVariables": "Variables de Telemetría",
