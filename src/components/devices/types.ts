@@ -59,6 +59,7 @@ export interface DeviceListProps {
 export interface DeviceItemProps {
   device: Device;
   isMobile: boolean;
+  className?: string;
 }
 
 export interface DeviceFilterProps {
@@ -122,6 +123,7 @@ export interface DeviceIdentityFormProps {
   onSubmit: (e: React.FormEvent) => void;
   onCancel: () => void;
   submitLabel?: string;
+  className?: string;
 }
 
 export interface DeviceStateManagerProps {

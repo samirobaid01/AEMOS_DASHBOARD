@@ -73,7 +73,7 @@ const SensorList: React.FC<SensorListProps> = ({
       ) : (
         <div>
           {sensors.map(sensor => (
-            <SensorItem key={sensor.id} sensor={sensor} windowWidth={windowWidth} />
+            sensor.status === 'active' ? <SensorItem key={sensor.id} sensor={sensor} windowWidth={windowWidth} /> : null
           ))}
         </div>
       )}

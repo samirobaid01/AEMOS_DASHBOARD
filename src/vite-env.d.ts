@@ -5,7 +5,10 @@
  */
 interface ImportMetaEnv {
   readonly VITE_APP_API_URL: string;
-  // Add other env variables here
+  readonly VITE_API_URL?: string;
+  readonly VITE_MIXPANEL_TOKEN?: string;
+  readonly VITE_ENABLE_TELEMETRY_PERSISTENCE?: string;
+  readonly VITE_SOCKET_URL?: string;
 }
 
 interface ImportMeta {

@@ -35,8 +35,11 @@ const OrganizationDetails: React.FC<OrganizationDetailsProps> = ({
             <h3 className="font-medium">{error}</h3>
           </div>
           <div className="mt-4">
-            <Button variant="outline" onClick={onBack}>
-              {t('organizations.backToOrganizations')}
+            <Button type="button" variant="secondary" onClick={onBack} className="flex items-center gap-2">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              {t('common.back')}
             </Button>
           </div>
         </div>
@@ -52,8 +55,11 @@ const OrganizationDetails: React.FC<OrganizationDetailsProps> = ({
             <h3 className="font-medium">{t('organizations.organization_not_found')}</h3>
           </div>
           <div className="mt-4">
-            <Button variant="outline" onClick={onBack}>
-              {t('organizations.backToOrganizations')}
+            <Button type="button" variant="secondary" onClick={onBack} className="flex items-center gap-2">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              {t('common.back')}
             </Button>
           </div>
         </div>
@@ -67,7 +73,10 @@ const OrganizationDetails: React.FC<OrganizationDetailsProps> = ({
         <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
           <h1 className="text-2xl font-semibold text-textPrimary dark:text-textPrimary-dark">{organization.name}</h1>
           <div className="flex gap-3">
-            <Button variant="outline" onClick={onBack}>
+            <Button type="button" variant="secondary" onClick={onBack} className="flex items-center gap-2">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
               {t('common.back')}
             </Button>
             <Link to={`/organizations/${organization.id}/edit`}>

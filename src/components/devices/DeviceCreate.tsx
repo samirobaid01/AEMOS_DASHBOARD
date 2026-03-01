@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useTheme } from '../../context/ThemeContext';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { cn } from '../../utils/cn';
+import Card from '../common/Card/Card';
 import DeviceIdentityForm from './DeviceIdentityForm';
 import DeviceStatesModal from './DeviceStatesModal';
 import CapabilitiesSummaryModal from './CapabilitiesSummaryModal';
@@ -32,73 +32,38 @@ const DeviceCreate: React.FC<DeviceCreateProps> = ({
   onCapabilitiesClose,
 }) => {
   const { t } = useTranslation();
-  const { darkMode } = useTheme();
-  const colors = useThemeColors();
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
-  const formStyle = {
-    backgroundColor: darkMode ? colors.cardBackground : 'white',
-    borderRadius: '0.5rem',
-    boxShadow: darkMode
-      ? '0 1px 3px 0 rgba(0, 0, 0, 0.2), 0 1px 2px 0 rgba(0, 0, 0, 0.1)'
-      : '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
-    border: `1px solid ${darkMode ? colors.border : '#e5e7eb'}`,
-    overflow: 'hidden',
-  };
-
-  const headerStyle = {
-    backgroundColor: darkMode ? colors.surfaceBackground : '#f9fafb',
-    padding: '1.5rem',
-    borderBottom: `1px solid ${darkMode ? colors.border : '#e5e7eb'}`,
-  };
-
-  const headerTitleStyle = {
-    fontSize: '1.25rem',
-    fontWeight: 600,
-    color: darkMode ? colors.textPrimary : '#111827',
-    margin: 0,
-  };
-
-  const headerDescriptionStyle = {
-    fontSize: '0.875rem',
-    color: darkMode ? colors.textSecondary : '#6b7280',
-    marginTop: '0.5rem',
-  };
-
-  const bodyStyle = {
-    padding: '1.5rem',
-  };
-
   return (
-    <div
-      style={{
-        padding: isMobile ? '1rem' : '1.5rem 2rem',
-        backgroundColor: darkMode ? colors.background : 'transparent',
-      }}
-    >
-      <div style={{ maxWidth: '48rem', margin: '0 auto' }}>
+    <div className={cn(
+      'bg-background dark:bg-background-dark',
+      isMobile ? 'p-4' : 'p-6 lg:p-8'
+    )}>
+      <div className="max-w-3xl mx-auto">
         {currentStep === 1 && (
-          <div style={formStyle}>
-            <div style={headerStyle}>
-              <h2 style={headerTitleStyle}>{t('devices.newDevice.new')}</h2>
-              <p style={headerDescriptionStyle}>{t('devices.newDevice.newDeviceDescription')}</p>
+          <Card contentClassName="p-0">
+            <div className="bg-surface dark:bg-surface-dark p-6 border-b border-border dark:border-border-dark">
+              <h2 className="text-xl font-semibold text-textPrimary dark:text-textPrimary-dark m-0">
+                {t('devices.newDevice.new')}
+              </h2>
+              <p className="text-sm text-textSecondary dark:text-textSecondary-dark mt-2 m-0">
+                {t('devices.newDevice.newDeviceDescription')}
+              </p>
             </div>
-            <div style={bodyStyle}>
-              <DeviceIdentityForm
-                formData={formData}
-                formErrors={formErrors}
-                isLoading={isLoading}
-                error={error}
-                organizations={organizations}
-                areas={areas}
-                onChange={onChange}
-                onControlModesChange={onControlModesChange}
-                onSubmit={onSubmit}
-                onCancel={onCancel}
-                submitLabel={t('common.next')}
-              />
-            </div>
-          </div>
+            <DeviceIdentityForm
+              formData={formData}
+              formErrors={formErrors}
+              isLoading={isLoading}
+              error={error}
+              organizations={organizations}
+              areas={areas}
+              onChange={onChange}
+              onControlModesChange={onControlModesChange}
+              onSubmit={onSubmit}
+              onCancel={onCancel}
+              submitLabel={t('common.next')}
+            />
+          </Card>
         )}
 
         {currentStep === 2 && createdDeviceId !== null && (

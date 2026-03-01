@@ -1,17 +1,15 @@
 import React from 'react';
-import { useTheme } from '../../context/ThemeContext';
+import { cn } from '../../utils/cn';
 import type { ErrorDisplayProps } from './types';
 
 const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ errorMessage }) => {
-  const { darkMode } = useTheme();
-
   return (
-    <div className={`
-      flex items-center p-4 mb-6 rounded-lg text-sm font-medium
-      ${darkMode 
-        ? 'bg-red-900/50 text-red-300 border border-red-800' 
-        : 'bg-red-50 text-red-700 border border-red-100'}
-    `}>
+    <div className={cn(
+      'flex items-center p-4 mb-6 rounded-lg text-sm font-medium',
+      'bg-red-50 dark:bg-red-900/50',
+      'text-red-700 dark:text-red-300',
+      'border border-red-100 dark:border-red-800'
+    )}>
       <svg 
         className="w-5 h-5 mr-2 flex-shrink-0" 
         fill="currentColor" 

@@ -5,8 +5,7 @@ import DeviceFilter from './DeviceFilter';
 import EmptyState from '../common/EmptyState';
 import Button from '../common/Button/Button';
 import ErrorDisplay from './ErrorDisplay';
-import { useTheme } from '../../context/ThemeContext';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { cn } from '../../utils/cn';
 import type { DeviceListProps } from './types';
 
 const DeviceList: React.FC<DeviceListProps> = ({
@@ -23,8 +22,6 @@ const DeviceList: React.FC<DeviceListProps> = ({
   windowWidth
 }) => {
   const { t } = useTranslation();
-  const { darkMode } = useTheme();
-  const colors = useThemeColors();
   const isMobile = windowWidth < 768;
 
   if (error) {
@@ -51,34 +48,25 @@ const DeviceList: React.FC<DeviceListProps> = ({
   }
 
   return (
-    <div style={{
-      padding: isMobile ? '1rem' : '1.5rem 2rem',
-      backgroundColor: darkMode ? colors.background : 'transparent'
-    }}>
-      <div style={{
-        display: 'flex',
-        flexDirection: isMobile ? 'column' as const : 'row' as const,
-        justifyContent: 'space-between',
-        alignItems: isMobile ? 'flex-start' : 'center',
-        marginBottom: '1.5rem',
-        gap: isMobile ? '1rem' : '0'
-      }}>
-        <h1 style={{
-          fontSize: '1.5rem',
-          fontWeight: 600,
-          color: darkMode ? colors.textPrimary : '#111827',
-          margin: 0
-        }}>
+    <div className={cn(
+      'bg-background dark:bg-background-dark',
+      isMobile ? 'p-4' : 'p-6 lg:p-8'
+    )}>
+      <div className={cn(
+        'flex justify-between mb-6',
+        isMobile ? 'flex-col items-start gap-4' : 'flex-row items-center'
+      )}>
+        <h1 className="text-2xl font-semibold text-textPrimary dark:text-textPrimary-dark m-0">
           {t('devices.title')}
         </h1>
         <Button
           type="button"
           onClick={onAddDevice}
           fullWidth={isMobile}
-          style={isMobile ? { width: '100%' } : undefined}
+          className={isMobile ? 'w-full' : ''}
         >
           <svg
-            style={{ width: '1rem', height: '1rem', marginRight: '0.375rem' }}
+            className="w-4 h-4 mr-1.5"
             fill="currentColor"
             viewBox="0 0 20 20"
           >
@@ -112,7 +100,7 @@ const DeviceList: React.FC<DeviceListProps> = ({
           onAction={onAddDevice}
         />
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '1rem' }}>
+        <div className="flex flex-col gap-4">
           {filteredDevices.map(device => (
             <DeviceItem 
               key={device.id} 

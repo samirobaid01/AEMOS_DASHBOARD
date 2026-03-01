@@ -61,10 +61,11 @@ const SensorDetails: React.FC<SensorDetailsProps> = ({
     <div className={`p-4 sm:py-6 sm:px-8 bg-background dark:bg-background-dark ${isMobile ? 'p-4' : ''}`}>
       <div className={`flex justify-between items-start sm:items-center flex-col sm:flex-row gap-4 mb-6`}>
         <div className="flex items-center">
-          <Button type="button" variant="secondary" onClick={onBack} className="mr-3 p-2 min-w-0">
-            <svg className="w-5 h-5 text-textSecondary dark:text-textSecondary-dark" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <Button type="button" variant="secondary" onClick={onBack} className="flex items-center gap-2">
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
+            {t('common.back')}
           </Button>
           <h1 className="text-2xl font-semibold text-textPrimary dark:text-textPrimary-dark m-0">{sensor.name}</h1>
         </div>

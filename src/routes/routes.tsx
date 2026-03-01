@@ -17,6 +17,7 @@ const ForgotPassword = lazy(() => import('../containers/Auth/ForgotPassword'));
 
 // Dashboard
 const Dashboard = lazy(() => import('../containers/Dashboard/Dashboard'));
+const TelemetryDashboard = lazy(() => import('../containers/Telemetry/TelemetryDashboard'));
 
 // Organizations
 const OrganizationList = lazy(() => import('../containers/Organizations/OrganizationList'));
@@ -289,6 +290,16 @@ const AppRoutes = () => {
                 <RuleEdit />
               </PrivateRoute>
             </Suspense>
+          }
+        />
+        
+        {/* Telemetry */}
+        <Route
+          path="/telemetry"
+          element={
+            <PrivateRoute>
+              <TelemetryDashboard />
+            </PrivateRoute>
           }
         />
         

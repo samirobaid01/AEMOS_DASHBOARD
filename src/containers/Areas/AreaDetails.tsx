@@ -49,18 +49,17 @@ const AreaDetailsContainer = () => {
 
   const handleDelete = async () => {
     if (!id) return;
-    
+
     setIsDeleting(true);
     try {
       const resultAction = await dispatch(deleteArea(parseInt(id, 10)));
       if (deleteArea.fulfilled.match(resultAction)) {
         if (area?.organizationId) {
-          navigate(`/organizations/${area.organizationId}`);
-        } else {
-          navigate('/areas');
+          navigate(`/areas`);
         }
       }
-    } catch (error) {
+    }
+    catch (error) {
       console.error('Error deleting area:', error);
     } finally {
       setIsDeleting(false);
