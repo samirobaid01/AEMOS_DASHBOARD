@@ -9,13 +9,6 @@ import {
   deleteRuleNode,
   fetchSensors,
   fetchDevices,
-  fetchDeviceStates,
-  fetchSensorDetails,
-  selectSensors,
-  selectDevices,
-  selectDeviceStates,
-  selectLastFetchedDeviceId,
-  selectSensorDetails
 } from '../../state/slices/ruleEngine.slice';
 import { useRuleEnginePermissions } from '../../hooks/useRuleEnginePermissions';
 import type { RuleChainCreatePayload } from '../../types/ruleEngine';
@@ -35,14 +28,7 @@ const RuleCreate: React.FC = () => {
   const selectedOrganizationId = useAppSelector(selectSelectedOrganizationId);
   const [createdRuleId, setCreatedRuleId] = useState<number | null>(null);
 
-  // Select sensors and devices from state
-  const sensors = useAppSelector(selectSensors);
-  const devices = useAppSelector(selectDevices);
-  const deviceStates = useAppSelector(selectDeviceStates);
-  const lastFetchedDeviceId = useAppSelector(selectLastFetchedDeviceId);
-  const sensorDetails = useAppSelector(selectSensorDetails);
-
-  // Fetch sensors and devices when component mounts
+  // Fetch sensors and devices when component mounts — populated into Redux for NodeDialog/ActionDialog
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -134,26 +120,6 @@ const RuleCreate: React.FC = () => {
     }
   };
 
-  const handleFetchSensorDetails = async (sensorId: number) => {
-    try {
-      console.log("called fetch sensor detail from RuleCreate container");
-      await dispatch(fetchSensorDetails(sensorId)).unwrap();
-      console.log("now sensor details is", sensorDetails);
-    } catch (error) {
-      console.error('Error fetching sensor details:', error);
-      toastService.error(t('ruleEngine.fetchSensorDetailsError'));
-    }
-  };
-
-  const handleFetchDeviceStates = async (deviceId: number) => {
-    try {
-      await dispatch(fetchDeviceStates(deviceId)).unwrap();
-    } catch (error) {
-      console.error('Error fetching device states:', error);
-      toastService.error(t('ruleEngine.fetchDeviceStatesError'));
-    }
-  };
-
   if (!canCreate) {
     return <Navigate to="/rule-engine" replace />;
   }
@@ -168,13 +134,6 @@ const RuleCreate: React.FC = () => {
       onNodeDelete={handleNodeDelete}
       onNodeCreate={handleNodeCreate}
       onNodeUpdate={handleNodeUpdate}
-      sensors={sensors}
-      devices={devices}
-      deviceStates={deviceStates}
-      lastFetchedDeviceId={lastFetchedDeviceId}
-      sensorDetails={sensorDetails}
-      onFetchSensorDetails={handleFetchSensorDetails}
-      onFetchDeviceStates={handleFetchDeviceStates}
     />
   );
 };

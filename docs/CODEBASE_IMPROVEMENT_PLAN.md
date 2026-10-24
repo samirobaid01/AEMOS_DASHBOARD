@@ -72,10 +72,26 @@ Reusable UI, typing, state shape, and rule-engine abstractions.
 |----|------|---------|
 | P1-R1 | `RuleNodeDefinition` abstraction | Define `RuleNodeDefinition`: `type`, `label`, `icon?`, `configSchema: ConfigField[]`. UI renders nodes dynamically; validation is schema-driven; adding new node types does not touch UI logic. |
 | P1-R2 | `ConfigField` typing | Define `ConfigField` as discriminated union (e.g. `{ type: 'number'; key: string; min?: number; max?: number }` \| `{ type: 'select'; key: string; options: SelectOption[] }` \| `{ type: 'sensorKey'; key: string }`). Ties to FormField and gives end-to-end typing for rule config. |
+| ~~P1-R3~~ | ~~Delete `ExpressionBuilder` dead code~~ | **Done** — file deleted. |
+| ~~P1-R4~~ | ~~Remove dead dialog instances in RuleEdit~~ | **Done** — JSX blocks removed. |
+| ~~P1-R5~~ | ~~Reconcile duplicate `RuleEngineState` type~~ | **Done** — shared type extended; local re-declaration removed. |
+| ~~P1-R6~~ | ~~Centralize node config serialization~~ | **Done** — `src/utils/ruleNodeConfig.ts` created; all inline JSON ops replaced. |
+| ~~P1-R7~~ | ~~Remove `console.log` debug statements~~ | **Done** — all debug logs removed across 4 files. |
+| ~~P1-R8~~ | ~~Break sensor/device prop-drilling~~ | **Done** — NodeDialog + ActionDialog use `useSelector`/`useAppDispatch` directly; 7 props removed from 5 interfaces. |
 
-**P1 exit criteria:** FormField/FormActions in use; Page/Card + shared EmptyState; feature props in types; one feature on Tailwind; modals consistent; component/smart rule documented; AsyncState in use; normalized state and memoized selectors in at least one feature; cn() in use; rule engine has RuleNodeDefinition + ConfigField.
+**Rule-engine–specific (P2)**
 
-**Docs:** P1-4–P1-6: `docs/P1-4-P1-5-P1-6-PAGE-CARD-EMPTYSTATE.md`. P1-12–P1-15: `docs/P1-12-P1-13-P1-14-P1-15-ASYNC-STATE-SELECTORS-CN.md`.
+| ID | Task | Details |
+|----|------|---------|
+| ~~P2-R1~~ | ~~Rule creation step indicator~~ | **Done** — `RuleCreationStepper` added to `RuleCreate`. |
+| ~~P2-R2~~ | ~~`NodeSummary` — readable condition display~~ | **Done** — `NodeSummary.tsx` created; `<pre>JSON</pre>` blocks replaced in RuleForm + RuleDetails. |
+| ~~P2-R3~~ | ~~Next-node wiring on Edit page~~ | **Done** — `nextNodeId` select added to each node row in RuleForm; wired through container. |
+| ~~P2-R4~~ | ~~Disable unimplemented action types~~ | **Done** — Notification + Email options marked `disabled` with "(coming soon)". |
+| ~~P2-R5~~ | ~~Fix silent UUID auto-reset in ConditionBuilder~~ | **Done** — auto-override `useEffect` replaced with inline `uuidMissing` warning. |
+
+**P1 exit criteria:** FormField/FormActions in use; Page/Card + shared EmptyState; feature props in types; one feature on Tailwind; modals consistent; component/smart rule documented; AsyncState in use; normalized state and memoized selectors in at least one feature; cn() in use; rule engine has RuleNodeDefinition + ConfigField; rule engine code health items (P1-R3–P1-R8) done.
+
+**Docs:** P1-4–P1-6: `docs/P1-4-P1-5-P1-6-PAGE-CARD-EMPTYSTATE.md`. P1-12–P1-15: `docs/P1-12-P1-13-P1-14-P1-15-ASYNC-STATE-SELECTORS-CN.md`. P1-R3–P2-R5: `docs/P1-R3-TO-P2-R5-RULE-ENGINE-HEALTH-UX.md`.
 
 ---
 
@@ -132,6 +148,10 @@ Reusable UI, typing, state shape, and rule-engine abstractions.
 | **PR-6** | State & selectors | P1-12 → P1-13 → P1-14 (AsyncState, normalize one slice, memoized selectors) + P1-15 (cn()) |
 | **PR-7** | Tailwind one feature | P1-9 (e.g. devices) |
 | **PR-8** | Rule engine abstractions | P1-R1 → P1-R2 (RuleNodeDefinition, ConfigField) |
+| **PR-RE1** | Rule engine code health — zero-risk | P1-R3, P1-R4, P1-R5, P1-R7 (dead code, duplicate type, debug logs) |
+| **PR-RE2** | Rule engine code health — refactor | P1-R6 (config serialization utility), P1-R8 (prop-drilling removal) |
+| **PR-RE3** | Rule engine UX — additive display | P2-R1 (step indicator), P2-R2 (NodeSummary), P2-R4 (disable dead action types) |
+| **PR-RE4** | Rule engine UX — edit-flow changes | P2-R3 (next-node on edit page), P2-R5 (UUID auto-reset fix) |
 | **PR-9** | Props, modals, component rule | P1-7 → P1-8 → P1-10 → P1-11 |
 | **PR-10+** | P2 | P2-1 through P2-10 as needed |
 
@@ -148,7 +168,9 @@ You can merge PR-2 and PR-3 if preferred (e.g. one “foundation” PR after PR-
 5. P1-4 → P1-5 → P1-6 (Page, Card, EmptyState)
 6. P1-12 → P1-13 → P1-14 → P1-15 (AsyncState, normalization, selectors, cn())
 7. P1-9 (Tailwind one feature)
-8. P1-R1 → P1-R2 (rule engine) TO DO
+8. P1-R1 → P1-R2 (rule engine abstractions) — Done
+9. P1-R3 → P1-R8 (rule engine code health) — **Done** — see docs/P1-R3-TO-P2-R5-RULE-ENGINE-HEALTH-UX.md
+9b. P2-R1 → P2-R5 (rule engine UX) — **Done** — see docs/P1-R3-TO-P2-R5-RULE-ENGINE-HEALTH-UX.md
 9. P1-7 → P1-8 → P1-10 → P1-11 (props, modals, component rule) — P1-7, P1-8, P1-9, P1-10 done.
 10. P2-* in any order
 
@@ -178,6 +200,6 @@ P2-10: Feature-level READMEs (state shape, entry points, main components) per fe
 Summary table
 Area	Done in code	Remaining
 P0	P0-6, P0-7, P0-8, P0-9, P0-10; P0-1–P0-4 largely in place	P0-1 (full consolidation pass), P0-5 (services typed with ApiResponse)
-P1	P1-1, P1-2, P1-4–P1-10, P1-12 (type), P1-13 (devices), P1-14 (devices/auth), P1-15, P1-R1, P1-R2	P1-3 (confirm one form migrated), P1-11 (doc), P1-12 (use in slices), P1-13/14 (sensors + ruleEngine)
-P2	—	P2-1 through P2-10 (barrel, audit, Tailwind rest, CSS cleanup, performance, feature READMEs)
+P1	P1-1, P1-2, P1-4–P1-10, P1-12 (type), P1-13 (devices), P1-14 (devices/auth), P1-15, P1-R1, P1-R2, P1-R3–P1-R8	P1-3 (confirm one form migrated), P1-11 (doc), P1-12 (use in slices), P1-13/14 (sensors + ruleEngine)
+P2	P2-R1–P2-R5 (rule engine UX)	P2-1 through P2-10 (barrel, audit, Tailwind rest, CSS cleanup, performance, feature READMEs)
 So: most of P0 and P1 is already implemented; what’s clearly still open is P0-1/P0-5, P1-11 doc, using AsyncState in slices, extending normalization and selectors to sensors/ruleEngine, and the full P2 list.

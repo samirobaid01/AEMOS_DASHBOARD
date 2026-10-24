@@ -2,12 +2,19 @@ import React, { useState, useEffect, useRef } from "react";
 import type { Device, DeviceStateRecord } from "../../types/device";
 import type { Sensor } from "../../types/sensor";
 import * as deviceStatesService from '../../services/deviceStates.service';
-import { useAppSelector } from '../../state/store';
+import { useAppSelector, useAppDispatch } from '../../state/store';
 import { selectSelectedOrganizationId } from '../../state/slices/auth.slice';
+import {
+  selectSensors,
+  selectDevices,
+  selectSensorDetails,
+  fetchSensorDetails as fetchSensorDetailsThunk,
+} from '../../state/slices/ruleEngine.slice';
 import Modal from '../common/Modal/Modal';
 import Button from '../common/Button/Button';
 import FormField from '../common/FormField';
 import type { NodeDialogProps } from './types';
+import { parseNodeConfig, serializeNodeConfig } from '../../utils/ruleNodeConfig';
 
 const inputClasses =
   'block w-full min-w-0 px-3 py-2 rounded border border-border dark:border-border-dark bg-surface dark:bg-surface-dark text-textPrimary dark:text-textPrimary-dark text-sm outline-none focus:ring-2 focus:ring-primary';
@@ -348,17 +355,10 @@ const ConditionBuilder: React.FC<{
 
   const sourceOptions = (condition.sourceType === 'sensor' ? sensors : devices) || [];
 
-  useEffect(() => {
-    const single = sourceOptions[0];
-    const singleUuid = single?.uuid;
-    if (sourceOptions.length === 1 && singleUuid && condition.UUID !== singleUuid) {
-      onChange({
-        ...condition,
-        UUID: singleUuid,
-        key: ''
-      });
-    }
-  }, [sourceOptions.length, sourceOptions[0]?.uuid, condition.UUID, condition.sourceType, condition, onChange]);
+  const uuidMissing =
+    !!condition.UUID &&
+    sourceOptions.length > 0 &&
+    !sourceOptions.some((item) => item.uuid === condition.UUID);
 
   const getAvailableKeys = () => {
     if (condition.sourceType === 'sensor') {
@@ -426,6 +426,11 @@ const ConditionBuilder: React.FC<{
             </option>
           ))}
         </select>
+        {uuidMissing && (
+          <p className="mt-1 text-xs text-warning dark:text-warning-dark">
+            Saved {condition.sourceType} (UUID: {condition.UUID}) is no longer available. Please re-select.
+          </p>
+        )}
       </FormField>
 
       <FormField label="Key" id={`key-${condition.UUID}`}>
@@ -651,11 +656,19 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
   ruleChainId,
   mode = 'add',
   initialExpression,
-  sensors,
-  devices,
-  sensorDetails,
-  onFetchSensorDetails,
 }) => {
+  const dispatch = useAppDispatch();
+  const sensors = useAppSelector(selectSensors);
+  const devices = useAppSelector(selectDevices);
+  const sensorDetails = useAppSelector(selectSensorDetails);
+
+  const onFetchSensorDetails = async (sensorId: number) => {
+    try {
+      await dispatch(fetchSensorDetailsThunk(sensorId)).unwrap();
+    } catch {
+      // error stored in Redux state
+    }
+  };
   const [isLoading, setIsLoading] = useState(true);
   const [nodeName, setNodeName] = useState(initialExpression?.name || '');
   const [rootGroup, setRootGroup] = useState<GroupData>(() => ({
@@ -683,17 +696,12 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
         
         let parsedConfig: ParsedExpression | null = null;
 
-        // Try to parse config if it's a string
-        if (typeof initialExpression.config === 'string') {
+        if (initialExpression.config) {
           try {
-            parsedConfig = JSON.parse(initialExpression.config);
+            parsedConfig = parseNodeConfig<ParsedExpression>(initialExpression.config);
           } catch (e) {
             console.error('Failed to parse config string:', e);
           }
-        }
-        // If config is an object, try to use it directly
-        else if (initialExpression.config && typeof initialExpression.config === 'object') {
-          parsedConfig = initialExpression.config as ParsedExpression;
         }
 
         // If we have a valid config, process it
@@ -819,15 +827,15 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
     if (mode === 'edit' && initialExpression?.id && onUpdate) {
       onUpdate(initialExpression.id, {
         name: nodeName.trim(),
-        config: JSON.stringify(optimizedConfig),
-        type: "filter"  // Preserve the node type
+        config: serializeNodeConfig(optimizedConfig),
+        type: "filter",
       });
     } else if (onSave) {
       onSave({
         ruleChainId,
         type: "filter",
         name: nodeName.trim(),
-        config: JSON.stringify(optimizedConfig),
+        config: serializeNodeConfig(optimizedConfig),
         nextNodeId: null,
       });
     }

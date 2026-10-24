@@ -2,6 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import RuleForm from './RuleForm';
 import Button from '../common/Button/Button';
+import RuleCreationStepper from './RuleCreationStepper';
 import type { RuleCreateProps } from './types';
 
 const RuleCreate: React.FC<RuleCreateProps> = ({
@@ -13,21 +14,17 @@ const RuleCreate: React.FC<RuleCreateProps> = ({
   onNodeDelete,
   onNodeCreate,
   onNodeUpdate,
-  sensors,
-  devices,
-  deviceStates,
-  lastFetchedDeviceId,
-  sensorDetails,
-  onFetchSensorDetails,
-  onFetchDeviceStates
 }) => {
   const { t } = useTranslation();
 
+  const steps = [
+    { label: t('ruleEngine.createRuleChain') },
+    { label: t('ruleEngine.addNodes') },
+  ];
+
   return (
     <div className="max-w-[800px] mx-auto p-6">
-      <h1 className="text-2xl font-semibold text-textPrimary dark:text-textPrimary-dark mb-6 m-0">
-        {showNodeSection ? t('ruleEngine.addNodes') : t('ruleEngine.createRuleChain')}
-      </h1>
+      <RuleCreationStepper steps={steps} currentStep={showNodeSection ? 1 : 0} />
       <RuleForm
         onSubmit={onSubmit}
         isLoading={isLoading}
@@ -36,13 +33,6 @@ const RuleCreate: React.FC<RuleCreateProps> = ({
         onNodeDelete={onNodeDelete}
         onNodeCreate={onNodeCreate}
         onNodeUpdate={onNodeUpdate}
-        sensors={sensors}
-        devices={devices}
-        deviceStates={deviceStates}
-        lastFetchedDeviceId={lastFetchedDeviceId}
-        sensorDetails={sensorDetails}
-        onFetchSensorDetails={onFetchSensorDetails}
-        onFetchDeviceStates={onFetchDeviceStates}
       />
       {showNodeSection && (
         <div className="mt-4">

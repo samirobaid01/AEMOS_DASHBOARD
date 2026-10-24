@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import NodeDialog from './NodeDialog';
 import ActionDialog from './ActionDialog';
+import NodeSummary from './NodeSummary';
 import { useTranslation } from 'react-i18next';
 import { ruleFormResolver } from '../../utils/validation/ruleFormValidation';
 import Input from '../common/Input/Input';
@@ -9,6 +10,7 @@ import Button from '../common/Button/Button';
 import FormField from '../common/FormField';
 import type { RuleFormProps, RuleFormSubmitData } from './types';
 import type { NodeCreatePayload, NodeUpdatePayload } from '../../types/ruleEngine';
+import { parseNodeConfig, serializeNodeConfig } from '../../utils/ruleNodeConfig';
 
 interface FilterConfig {
   sourceType: string;
@@ -53,6 +55,7 @@ interface NodeFormData {
   name?: string;
   type: 'filter' | 'action';
   config: NodeConfig;
+  nextNodeId?: number | null;
 }
 
 interface ActionNodeData {
@@ -68,15 +71,9 @@ const RuleForm: React.FC<RuleFormProps> = ({
   onNodeDelete,
   onNodeCreate,
   onNodeUpdate,
+  onNextNodeChange,
   isLoading = false,
   showNodeSection = true,
-  sensors,
-  devices,
-  deviceStates,
-  lastFetchedDeviceId = null,
-  sensorDetails,
-  onFetchSensorDetails,
-  onFetchDeviceStates
 }) => {
   const { t } = useTranslation();
   const [nodes, setNodes] = useState<NodeFormData[]>(() => {
@@ -87,7 +84,8 @@ const RuleForm: React.FC<RuleFormProps> = ({
       id: node.id,
       type: node.type as 'filter' | 'action',
       name: node.name,
-      config: JSON.stringify(node.config),
+      config: serializeNodeConfig(node.config),
+      nextNodeId: node.nextNodeId,
     }));
   });
 
@@ -98,7 +96,7 @@ const RuleForm: React.FC<RuleFormProps> = ({
         id: node.id,
         type: node.type as 'filter' | 'action',
         name: node.name,
-        config: JSON.stringify(node.config),
+        config: serializeNodeConfig(node.config),
         nextNodeId: node.nextNodeId
       })));
     }
@@ -109,34 +107,25 @@ const RuleForm: React.FC<RuleFormProps> = ({
   const [isActionDialogOpen, setIsActionDialogOpen] = useState(false);
 
   const handleNodeDialogOpen = (index: number | null) => {
-    console.log('Opening node dialog with index:', index);
     setCurrentNodeIndex(index);
     setIsNodeDialogOpen(true);
   };
 
   const handleActionDialogOpen = (index?: number) => {
-    console.log('Opening action dialog with index:', index);
     if (index !== undefined) {
-      // Edit mode
-      console.log('Edit mode - setting current node index:', index);
-      console.log('Current node data:', nodes[index]);
       setCurrentNodeIndex(index);
     } else {
-      // Add mode - reset current node index
-      console.log('Add mode - resetting current node index');
       setCurrentNodeIndex(null);
     }
     setIsActionDialogOpen(true);
   };
 
   const handleNodeDialogClose = () => {
-    console.log('Closing node dialog');
     setIsNodeDialogOpen(false);
     setCurrentNodeIndex(null);
   };
 
   const handleActionDialogClose = () => {
-    console.log('Closing action dialog');
     setIsActionDialogOpen(false);
     setCurrentNodeIndex(null);
   };
@@ -147,32 +136,21 @@ const RuleForm: React.FC<RuleFormProps> = ({
     const node = nodes[index];
     if (!node) return undefined;
 
-    console.log('Getting initial expression for node:', node);
-
     if (node.type === 'filter') {
       let nodeConfig: unknown;
-      
-      // If config is a string, try to parse it
-      if (typeof node.config === 'string') {
-        try {
-          nodeConfig = JSON.parse(node.config);
-        } catch (e) {
-          console.error('Failed to parse node config:', e);
-        }
-      } else {
-        nodeConfig = node.config;
+
+      try {
+        nodeConfig = parseNodeConfig(node.config);
+      } catch (e) {
+        console.error('Failed to parse node config:', e);
       }
 
-      console.log('Node config:', nodeConfig);
-
-      // If the config is already in the correct format, use it directly
       if (nodeConfig && typeof nodeConfig === 'object' && 'type' in nodeConfig && 'expressions' in nodeConfig) {
-        console.log('Using existing config object:', nodeConfig);
         return {
           id: node.id,
           type: 'filter' as const,
           name: node.name || '',
-          config: JSON.stringify(nodeConfig)
+          config: serializeNodeConfig(nodeConfig)
         };
       }
 
@@ -200,8 +178,6 @@ const RuleForm: React.FC<RuleFormProps> = ({
   };
 
   const handleNodeSave = async (data: NodeCreatePayload & { expressions?: unknown[] }) => {
-    console.log('Saving node data:', data);
-    
     if (data.ruleChainId) {
       await onNodeCreate(data);
       return;
@@ -209,16 +185,14 @@ const RuleForm: React.FC<RuleFormProps> = ({
 
     const exprs = Array.isArray(data.expressions) ? data.expressions : [];
     if (!exprs.length) {
-      console.log('No expressions to save');
       return;
     }
 
-    if (exprs.length === 1 && 
+    if (exprs.length === 1 &&
         typeof exprs[0] === 'object' && exprs[0] !== null &&
-        'type' in (exprs[0] as Record<string, unknown>) && 
-        (exprs[0] as Record<string, unknown>).type === 'AND' && 
+        'type' in (exprs[0] as Record<string, unknown>) &&
+        (exprs[0] as Record<string, unknown>).type === 'AND' &&
         !((exprs[0] as Record<string, unknown>).expressions as unknown[])?.length) {
-      console.log('Empty AND group, not saving');
       return;
     }
 
@@ -258,7 +232,6 @@ const RuleForm: React.FC<RuleFormProps> = ({
       };
     }
     
-    console.log('Processed node data:', nodeData);
     if (currentNodeIndex === null) {
       setNodes(prev => [...prev, nodeData]);
     } else {
@@ -271,11 +244,7 @@ const RuleForm: React.FC<RuleFormProps> = ({
   };
 
   const handleNodeDelete = async (nodeId: number | undefined) => {
-    console.log('Attempting to delete node:', nodeId);
-    if (!nodeId) {
-      console.error('Cannot delete node: no node ID provided');
-      return;
-    }
+    if (!nodeId) return;
 
     try {
       await onNodeDelete(nodeId);
@@ -289,20 +258,15 @@ const RuleForm: React.FC<RuleFormProps> = ({
     
     let config: ActionConfig | undefined;
     
-    // Parse config if it's a string
-    if (typeof node.config === 'string') {
-      try {
-        const parsed = JSON.parse(node.config);
-        if (parsed.type === 'DEVICE_COMMAND' && parsed.command) {
-          config = parsed as ActionConfig;
-        }
-      } catch (e) {
-        console.error('Failed to parse action node config:', e);
+    try {
+      const parsed = parseNodeConfig<ActionConfig>(node.config);
+      if (parsed && parsed.type === 'DEVICE_COMMAND' && parsed.command) {
+        config = parsed;
       }
-    }
-    // Use config directly if it's an object
-    else if (typeof node.config === 'object' && 'type' in node.config && node.config.type === 'DEVICE_COMMAND') {
-      config = node.config as ActionConfig;
+    } catch {
+      if (typeof node.config === 'object' && node.config !== null && 'type' in node.config && (node.config as ActionConfig).type === 'DEVICE_COMMAND') {
+        config = node.config as ActionConfig;
+      }
     }
     
     if (config) {
@@ -317,8 +281,6 @@ const RuleForm: React.FC<RuleFormProps> = ({
   };
 
   const handleActionSave = async (actionData: NodeUpdatePayload & { name?: string }) => {
-    console.log('Saving action data:', actionData);
-    
     try {
       if (currentNodeIndex !== null) {
         // Edit mode - update existing node via API
@@ -332,26 +294,22 @@ const RuleForm: React.FC<RuleFormProps> = ({
           // Update local state after successful API call
           setNodes(prev => {
             const newNodes = [...prev];
-            const config = typeof actionData.config === 'string' ? actionData.config : JSON.stringify(actionData.config);
             newNodes[currentNodeIndex] = {
               ...existingNode,
               name: actionData.name || '',
-              config: typeof config === 'string' ? JSON.parse(config) : config
+              config: parseNodeConfig(serializeNodeConfig(actionData.config))
             };
             return newNodes;
           });
         }
       } else {
-        // Add mode - create new node via API
-        console.log("creating new node via API");
         if (onNodeCreate) {
           await onNodeCreate({ ...actionData, type: 'action', config: actionData.config ?? {} });
           
-          const configStr = typeof actionData.config === 'string' ? actionData.config : JSON.stringify(actionData.config ?? {});
           const newNode: NodeFormData = {
             type: 'action',
             name: actionData.name || '',
-            config: JSON.parse(configStr)
+            config: parseNodeConfig(serializeNodeConfig(actionData.config ?? {}))
           };
           setNodes(prev => [...prev, newNode]);
         }
@@ -479,11 +437,35 @@ const RuleForm: React.FC<RuleFormProps> = ({
                     </div>
                   </div>
 
-                  <div className="rounded bg-background dark:bg-background-dark p-3 font-mono text-sm overflow-x-auto">
-                    <pre className="m-0">
-                      {JSON.stringify(node.config, null, 2)}
-                    </pre>
-                  </div>
+                  <NodeSummary config={node.config} />
+
+                  {onNextNodeChange && (
+                    <div className="mt-3">
+                      <label className="block text-xs font-medium text-textSecondary dark:text-textSecondary-dark mb-1">
+                        {t('ruleEngine.nextNode')}
+                      </label>
+                      <select
+                        className="w-full px-3 py-2 rounded border border-border dark:border-border-dark bg-surface dark:bg-surface-dark text-textPrimary dark:text-textPrimary-dark text-sm outline-none focus:ring-2 focus:ring-primary"
+                        value={node.nextNodeId == null ? '' : String(node.nextNodeId)}
+                        onChange={async (e) => {
+                          const next = e.target.value === '' ? null : Number(e.target.value);
+                          setNodes(prev => prev.map((n, i) => i === index ? { ...n, nextNodeId: next } : n));
+                          if (node.id != null) {
+                            await onNextNodeChange(node.id, next);
+                          }
+                        }}
+                      >
+                        <option value="">— None —</option>
+                        {nodes
+                          .filter((_, i) => i !== index)
+                          .map((n) => (
+                            <option key={n.id} value={String(n.id)}>
+                              {n.name || `${n.type} node ${n.id}`}
+                            </option>
+                          ))}
+                      </select>
+                    </div>
+                  )}
 
                   {index < nodes.length - 1 && (
                     <div className="flex justify-center my-4 text-textMuted dark:text-textMuted-dark">
@@ -540,12 +522,9 @@ const RuleForm: React.FC<RuleFormProps> = ({
                 }}
                 onUpdate={async (nodeId, data) => {
                   await onNodeUpdate(nodeId, data);
-                  const configValue = typeof data.config === 'string'
-                    ? JSON.parse(data.config)
-                    : data.config;
                   setNodes(prev => prev.map(node =>
                     node.id === nodeId
-                      ? { ...node, name: data.name, config: configValue }
+                      ? { ...node, name: data.name, config: parseNodeConfig(serializeNodeConfig(data.config)) }
                       : node
                   ));
                   handleNodeDialogClose();
@@ -553,10 +532,6 @@ const RuleForm: React.FC<RuleFormProps> = ({
                 ruleChainId={ruleChainId}
                 mode={currentNodeIndex === null ? 'add' : 'edit'}
                 initialExpression={getInitialExpression(currentNodeIndex)}
-                sensors={sensors}
-                devices={devices}
-                sensorDetails={sensorDetails}
-                onFetchSensorDetails={onFetchSensorDetails}
               />
             )}
 
@@ -567,10 +542,6 @@ const RuleForm: React.FC<RuleFormProps> = ({
               ruleChainId={ruleChainId || 0}
               mode={currentNodeIndex !== null ? 'edit' : 'add'}
               initialData={currentNodeIndex !== null && nodes[currentNodeIndex] ? getActionNodeData(nodes[currentNodeIndex]) : undefined}
-              devices={devices}
-              deviceStates={deviceStates}
-              lastFetchedDeviceId={lastFetchedDeviceId ?? null}
-              onFetchDeviceStates={onFetchDeviceStates}
             />
           </>
         )}

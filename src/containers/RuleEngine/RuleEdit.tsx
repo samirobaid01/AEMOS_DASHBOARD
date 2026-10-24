@@ -12,18 +12,9 @@ import {
   updateRuleNode,
   fetchSensors,
   fetchDevices,
-  fetchDeviceStates,
-  fetchSensorDetails,
-  selectSensors,
-  selectDevices,
-  selectDeviceStates,
-  selectLastFetchedDeviceId,
-  selectSensorDetails,
 } from '../../state/slices/ruleEngine.slice';
 import { useRuleEnginePermissions } from '../../hooks/useRuleEnginePermissions';
 import RuleForm from '../../components/ruleEngine/RuleForm';
-import NodeDialog from '../../components/ruleEngine/NodeDialog';
-import ActionDialog from '../../components/ruleEngine/ActionDialog';
 import { toastService } from '../../services/toastService';
 import { useTranslation } from 'react-i18next';
 import type { RuleChainUpdatePayload } from '../../types/ruleEngine';
@@ -39,11 +30,6 @@ const RuleEdit: React.FC = () => {
   const selectedRule = useAppSelector(selectSelectedRule);
   const loading = useAppSelector(selectRuleEngineLoading);
   const error = useAppSelector(selectRuleEngineError);
-  const sensors = useAppSelector(selectSensors);
-  const devices = useAppSelector(selectDevices);
-  const deviceStates = useAppSelector(selectDeviceStates);
-  const lastFetchedDeviceId = useAppSelector(selectLastFetchedDeviceId);
-  const sensorDetails = useAppSelector(selectSensorDetails);
 
   useEffect(() => {
     if (id) {
@@ -54,12 +40,10 @@ const RuleEdit: React.FC = () => {
   useEffect(() => {
     const loadData = async () => {
       try {
-        console.log('Starting to fetch sensors and devices...');
-        const [sensorsResult, devicesResult] = await Promise.all([
+        await Promise.all([
           dispatch(fetchSensors()).unwrap(),
           dispatch(fetchDevices()).unwrap()
         ]);
-        console.log('Fetch completed:', { sensorsResult, devicesResult });
       } catch (error) {
         console.error('Error loading sensors or devices:', error);
         toastService.error(t('common.errorLoadingData'));
@@ -68,24 +52,6 @@ const RuleEdit: React.FC = () => {
 
     loadData();
   }, [dispatch]);
-
-  useEffect(() => {
-    console.log('Sensors state updated:', { 
-      sensorCount: sensors?.length,
-      sensors,
-      loading,
-      error 
-    });
-  }, [sensors, loading, error]);
-
-  useEffect(() => {
-    console.log('Devices state updated:', { 
-      deviceCount: devices?.length,
-      devices,
-      loading,
-      error 
-    });
-  }, [devices, loading, error]);
 
   const handleSubmit = async (data: RuleFormSubmitData) => {
     if (!id || !selectedRule) return;
@@ -115,7 +81,6 @@ const RuleEdit: React.FC = () => {
   };
 
   const handleNodeCreate = async (data: NodeCreatePayload) => {
-    console.log("called handleNodeCreate from container");
     try {
       if (!id) return;
       
@@ -166,22 +131,25 @@ const RuleEdit: React.FC = () => {
     }
   };
 
-  const handleFetchDeviceStates = async (deviceId: number) => {
+  const handleNextNodeChange = async (nodeId: number, nextNodeId: number | null) => {
     try {
-      await dispatch(fetchDeviceStates(deviceId)).unwrap();
+      const currentNode = selectedRule?.nodes.find(n => n.id === nodeId);
+      if (!currentNode) return;
+      await dispatch(updateRuleNode({
+        nodeId,
+        payload: {
+          name: currentNode.name ?? '',
+          config: typeof currentNode.config === 'string' ? currentNode.config : JSON.stringify(currentNode.config ?? {}),
+          nextNodeId,
+        }
+      })).unwrap();
+      if (id) {
+        await dispatch(fetchRuleDetails(parseInt(id))).unwrap();
+      }
+      toastService.success(t('ruleEngine.nodeUpdateSuccess'));
     } catch (error) {
-      console.error('Error fetching device states:', error);
-      toastService.error(t('ruleEngine.fetchDeviceStatesError'));
-    }
-  };
-
-  const handleFetchSensorDetails = async (sensorId: number) => {
-    try {
-      console.log("called fetch sensor detail from container");
-      await dispatch(fetchSensorDetails(sensorId)).unwrap();
-    } catch (error) {
-      console.error('Error fetching sensor details:', error);
-      toastService.error(t('ruleEngine.fetchSensorDetailsError'));
+      console.error('Error updating next node:', error);
+      toastService.error(t('ruleEngine.nodeUpdateError'));
     }
   };
 
@@ -200,35 +168,7 @@ const RuleEdit: React.FC = () => {
         onNodeDelete={handleNodeDelete}
         onNodeCreate={handleNodeCreate}
         onNodeUpdate={handleNodeUpdate}
-        sensors={sensors}
-        devices={devices}
-        deviceStates={deviceStates}
-        lastFetchedDeviceId={lastFetchedDeviceId}
-        sensorDetails={sensorDetails}
-        onFetchSensorDetails={handleFetchSensorDetails}
-        onFetchDeviceStates={handleFetchDeviceStates}
-      />
-      <NodeDialog
-        open={false} // Control this with state if needed
-        onClose={() => {}} // Add close handler if needed
-        onSave={handleNodeCreate}
-        onUpdate={handleNodeUpdate}
-        sensors={sensors}
-        devices={devices}
-        onFetchSensorDetails={handleFetchSensorDetails}
-        sensorDetails={sensorDetails}
-        mode="add"
-      />
-      <ActionDialog
-        open={false}
-        onClose={() => {}}
-        onSave={handleNodeCreate}
-        devices={devices}
-        deviceStates={deviceStates}
-        lastFetchedDeviceId={lastFetchedDeviceId}
-        onFetchDeviceStates={handleFetchDeviceStates}
-        mode="add"
-        ruleChainId={id ? parseInt(id) : 0}
+        onNextNodeChange={handleNextNodeChange}
       />
     </>
   );

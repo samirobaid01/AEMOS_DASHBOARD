@@ -1,6 +1,4 @@
 import type { RuleChain } from '../../types/ruleEngine';
-import type { Device, DeviceStateRecord } from '../../types/device';
-import type { Sensor } from '../../types/sensor';
 import type { NodeCreatePayload, NodeUpdatePayload } from '../../types/ruleEngine';
 
 export interface RuleFormSubmitData {
@@ -31,10 +29,6 @@ export interface NodeDialogProps {
   ruleChainId?: number;
   mode: 'add' | 'edit';
   initialExpression?: NodeDialogInitialExpression;
-  sensors: Sensor[];
-  devices: Device[];
-  sensorDetails: { [uuid: string]: Sensor };
-  onFetchSensorDetails: (sensorId: number) => Promise<void>;
 }
 
 export interface ActionDialogInitialData {
@@ -58,10 +52,6 @@ export interface ActionDialogProps {
   ruleChainId: number;
   mode?: 'add' | 'edit';
   initialData?: ActionDialogInitialData;
-  devices: Device[];
-  deviceStates: DeviceStateRecord[];
-  lastFetchedDeviceId: number | null;
-  onFetchDeviceStates: (deviceId: number) => Promise<void>;
 }
 
 export interface RuleFormProps {
@@ -71,15 +61,9 @@ export interface RuleFormProps {
   onNodeDelete: (nodeId: number) => Promise<void>;
   onNodeCreate: (data: NodeCreatePayload) => Promise<void>;
   onNodeUpdate: (nodeId: number, data: NodeUpdatePayload) => Promise<void>;
+  onNextNodeChange?: (nodeId: number, nextNodeId: number | null) => Promise<void>;
   isLoading?: boolean;
   showNodeSection?: boolean;
-  sensors: Sensor[];
-  devices: Device[];
-  deviceStates: DeviceStateRecord[];
-  lastFetchedDeviceId?: number | null;
-  sensorDetails: { [uuid: string]: Sensor };
-  onFetchSensorDetails: (sensorId: number) => Promise<void>;
-  onFetchDeviceStates: (deviceId: number) => Promise<void>;
 }
 
 export interface RuleDetailsProps {
@@ -123,13 +107,6 @@ export interface RuleCreateProps {
   onNodeDelete: (nodeId: number) => Promise<void>;
   onNodeCreate: (data: NodeCreatePayload) => Promise<void>;
   onNodeUpdate: (nodeId: number, data: NodeUpdatePayload) => Promise<void>;
-  sensors: Sensor[];
-  devices: Device[];
-  deviceStates: DeviceStateRecord[];
-  lastFetchedDeviceId: number | null;
-  sensorDetails: { [uuid: string]: Sensor };
-  onFetchSensorDetails: (sensorId: number) => Promise<void>;
-  onFetchDeviceStates: (deviceId: number) => Promise<void>;
 }
 
 export interface RuleEditProps {
@@ -142,11 +119,5 @@ export interface RuleEditProps {
   onNodeDelete: (nodeId: number) => Promise<void>;
   onNodeCreate: (data: NodeCreatePayload) => Promise<void>;
   onNodeUpdate: (nodeId: number, data: NodeUpdatePayload) => Promise<void>;
-  sensors: Sensor[];
-  devices: Device[];
-  deviceStates: DeviceStateRecord[];
-  lastFetchedDeviceId: number | null;
-  sensorDetails: { [uuid: string]: Sensor };
-  onFetchSensorDetails: (sensorId: number) => Promise<void>;
-  onFetchDeviceStates: (deviceId: number) => Promise<void>;
+  onNextNodeChange?: (nodeId: number, nextNodeId: number | null) => Promise<void>;
 }
