@@ -4,6 +4,13 @@ import Modal from '../common/Modal/Modal';
 import Button from '../common/Button/Button';
 import FormField from '../common/FormField';
 import type { ActionDialogProps } from './types';
+import { useAppSelector, useAppDispatch } from '../../state/store';
+import {
+  selectDevices,
+  selectDeviceStates,
+  selectLastFetchedDeviceId,
+  fetchDeviceStates as fetchDeviceStatesThunk,
+} from '../../state/slices/ruleEngine.slice';
 
 const inputClasses =
   'w-full px-3 py-2 rounded border border-border dark:border-border-dark bg-surface dark:bg-surface-dark text-textPrimary dark:text-textPrimary-dark text-sm outline-none focus:ring-2 focus:ring-primary';
@@ -17,11 +24,19 @@ const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
   ruleChainId,
   mode = 'add',
   initialData,
-  devices = [],
-  deviceStates = [],
-  lastFetchedDeviceId = null,
-  onFetchDeviceStates,
 }) => {
+  const dispatch = useAppDispatch();
+  const devices = useAppSelector(selectDevices);
+  const deviceStates = useAppSelector(selectDeviceStates);
+  const lastFetchedDeviceId = useAppSelector(selectLastFetchedDeviceId);
+
+  const onFetchDeviceStates = async (deviceId: number) => {
+    try {
+      await dispatch(fetchDeviceStatesThunk(deviceId)).unwrap();
+    } catch {
+      // error stored in Redux state
+    }
+  };
   const [actionType, setActionType] = useState<string>('Device');
   const [selectedDevice, setSelectedDevice] = useState<string>('');
   const [stateName, setStateName] = useState<string>('');
@@ -262,8 +277,8 @@ const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
             className={selectClasses}
           >
             <option value="Device">Device</option>
-            <option value="Notification">Notification</option>
-            <option value="Email">Email</option>
+            <option value="Notification" disabled>Notification (coming soon)</option>
+            <option value="Email" disabled>Email (coming soon)</option>
           </select>
         </FormField>
 
@@ -357,9 +372,6 @@ const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
     prevProps.open === nextProps.open &&
     prevProps.mode === nextProps.mode &&
     prevProps.ruleChainId === nextProps.ruleChainId &&
-    prevProps.lastFetchedDeviceId === nextProps.lastFetchedDeviceId &&
-    prevProps.devices.length === nextProps.devices.length &&
-    prevProps.deviceStates.length === nextProps.deviceStates.length &&
     JSON.stringify(prevProps.initialData) === JSON.stringify(nextProps.initialData)
   );
 });

@@ -13,13 +13,7 @@ const RuleEdit: React.FC<RuleEditProps> = ({
   onNodeDelete,
   onNodeCreate,
   onNodeUpdate,
-  sensors,
-  devices,
-  deviceStates,
-  lastFetchedDeviceId,
-  sensorDetails,
-  onFetchSensorDetails,
-  onFetchDeviceStates
+  onNextNodeChange,
 }) => {
   const { t } = useTranslation();
   const isMobile = windowWidth < 768;
@@ -69,13 +63,7 @@ const RuleEdit: React.FC<RuleEditProps> = ({
         onNodeDelete={onNodeDelete}
         onNodeCreate={onNodeCreate}
         onNodeUpdate={onNodeUpdate}
-        sensors={sensors}
-        devices={devices}
-        deviceStates={deviceStates}
-        lastFetchedDeviceId={lastFetchedDeviceId}
-        sensorDetails={sensorDetails}
-        onFetchSensorDetails={onFetchSensorDetails}
-        onFetchDeviceStates={onFetchDeviceStates}
+        onNextNodeChange={onNextNodeChange}
       />
     </div>
   );

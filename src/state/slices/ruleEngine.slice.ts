@@ -3,25 +3,10 @@ import type { PayloadAction } from '@reduxjs/toolkit';
 import type { ApiRejectPayload } from '../../types/api';
 import { getErrorMessage } from '../../utils/getErrorMessage';
 import type { RootState } from '../store';
-import type { RuleChain, RuleChainCreatePayload, RuleChainUpdatePayload } from '../../types/ruleEngine';
+import type { RuleChain, RuleChainCreatePayload, RuleChainUpdatePayload, RuleEngineState } from '../../types/ruleEngine';
 import type { Sensor } from '../../types/sensor';
 import type { Device, DeviceStateRecord } from '../../types/device';
 import RuleEngineService from '../../services/ruleEngineService';
-
-interface RuleEngineState {
-  rules: RuleChain[];
-  selectedRule: RuleChain | null;
-  loading: boolean;
-  error: string | null;
-  filters: {
-    search: string;
-  };
-  sensors: Sensor[];
-  devices: Device[];
-  deviceStates: DeviceStateRecord[];
-  lastFetchedDeviceId: number | null;
-  sensorDetails: { [uuid: string]: Sensor };
-}
 
 // Initial state
 const initialState: RuleEngineState = {
@@ -360,38 +345,32 @@ const ruleEngineSlice = createSlice({
 
     // Fetch Sensors
     builder.addCase(fetchSensors.pending, (state) => {
-      console.log('fetchSensors: pending');
       state.loading = true;
       state.error = null;
     });
     builder.addCase(fetchSensors.fulfilled, (state, action) => {
-      console.log('fetchSensors: fulfilled', action.payload);
       state.loading = false;
       state.sensors = action.payload;
     });
     builder.addCase(fetchSensors.rejected, (state, action) => {
-      console.log('fetchSensors: rejected', action.payload);
       state.loading = false;
       state.error = action.payload?.message ?? null;
-      state.sensors = []; // Initialize to empty array on error
+      state.sensors = [];
     });
 
     // Fetch Devices
     builder.addCase(fetchDevices.pending, (state) => {
-      console.log('fetchDevices: pending');
       state.loading = true;
       state.error = null;
     });
     builder.addCase(fetchDevices.fulfilled, (state, action) => {
-      console.log('fetchDevices: fulfilled', action.payload);
       state.loading = false;
       state.devices = action.payload;
     });
     builder.addCase(fetchDevices.rejected, (state, action) => {
-      console.log('fetchDevices: rejected', action.payload);
       state.loading = false;
       state.error = action.payload?.message ?? null;
-      state.devices = []; // Initialize to empty array on error
+      state.devices = [];
     });
 
     // Fetch Device States (do not set global loading; dialog has its own loading state)

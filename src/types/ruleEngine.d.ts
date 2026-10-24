@@ -1,4 +1,6 @@
 import type { SelectOption } from './ui';
+import type { Sensor } from './sensor';
+import type { Device, DeviceStateRecord } from './device';
 
 export type ConfigField =
   | { type: 'number'; key: string; label?: string; min?: number; max?: number }
@@ -54,6 +56,11 @@ export interface RuleEngineState {
   filters: {
     search: string;
   };
+  sensors: Sensor[];
+  devices: Device[];
+  deviceStates: DeviceStateRecord[];
+  lastFetchedDeviceId: number | null;
+  sensorDetails: { [uuid: string]: Sensor };
 }
 
 export interface DeviceCommandConfig {
@@ -81,4 +88,5 @@ export interface NodeUpdatePayload {
   name?: string;
   type?: 'filter' | 'action';
   config?: string | Record<string, unknown>;
+  nextNodeId?: number | null;
 } 
