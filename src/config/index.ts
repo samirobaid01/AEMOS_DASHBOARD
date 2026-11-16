@@ -15,6 +15,12 @@ export const ENABLE_TELEMETRY_PERSISTENCE =
     ? import.meta.env.VITE_ENABLE_TELEMETRY_PERSISTENCE === 'true'
     : true;
 
+// Realtime dashboard (P3.5): gates the REST snapshot seeding of current values.
+// Mirrors the backend `realtime-dashboard` feature flag; defaults to false so the
+// app falls back to placeholder values until the first socket event when disabled.
+export const ENABLE_REALTIME_DASHBOARD =
+  import.meta.env.VITE_ENABLE_REALTIME_DASHBOARD === 'true';
+
 // i18n configuration
 export const DEFAULT_LANGUAGE = 'en';
 export const SUPPORTED_LANGUAGES = ['en', 'es'];
