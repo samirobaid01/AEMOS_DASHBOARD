@@ -60,9 +60,9 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         element.style.borderColor = isDarkMode ? "#ef5350" : "#ef4444";
       } else {
         element.style.boxShadow = `0 0 0 3px ${
-          isDarkMode ? "rgba(77, 126, 250, 0.3)" : "rgba(59, 130, 246, 0.2)"
+          isDarkMode ? "rgba(52, 211, 153, 0.3)" : "rgba(16, 185, 129, 0.2)"
         }`;
-        element.style.borderColor = isDarkMode ? "#4d7efa" : "#3b82f6";
+        element.style.borderColor = isDarkMode ? "#34d399" : "#10b981";
       }
 
       // Call the original onFocus if provided
@@ -95,7 +95,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={inputId}
-            className="block text-xs sm:text-sm font-medium text-soil-700 dark:text-soil-300 mb-1 transition-colors"
+            className="block text-xs sm:text-sm font-medium text-textSecondary dark:text-textSecondary-dark mb-1 transition-colors"
           >
             {label}
             {required && (
@@ -105,7 +105,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         )}
         <div className="relative">
           {leftIcon && (
-            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-soil-500 dark:text-soil-400">
+            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-textMuted dark:text-textMuted-dark">
               {leftIcon}
             </div>
           )}
@@ -126,7 +126,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             {...props}
           />
           {rightIcon && (
-            <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-soil-500 dark:text-soil-400">
+            <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-textMuted dark:text-textMuted-dark">
               {rightIcon}
             </div>
           )}
@@ -142,7 +142,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         {helperText && !error && (
           <p
             id={`${inputId}-helper`}
-            className="mt-1 text-xs sm:text-sm text-soil-500 dark:text-soil-400 transition-colors"
+            className="mt-1 text-xs sm:text-sm text-textMuted dark:text-textMuted-dark transition-colors"
           >
             {helperText}
           </p>

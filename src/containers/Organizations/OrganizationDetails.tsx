@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useGoBack } from '../../hooks/useGoBack';
 import { useAppDispatch, useAppSelector } from '../../state/store';
 import {
   fetchOrganizationById,
@@ -54,9 +55,7 @@ const OrganizationDetails = () => {
     }
   };
 
-  const handleBack = () => {
-    navigate('/organizations');
-  };
+  const handleBack = useGoBack('/organizations');
 
   const handleOpenDeleteModal = () => {
     setDeleteModalOpen(true);

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { ArrowRight, type LucideIcon } from 'lucide-react';
 
 export interface Entity {
   id: string | number;
@@ -10,9 +11,9 @@ export interface Entity {
 
 interface EntityListProps {
   title: string;
-  titleIcon: string;
+  titleIcon: LucideIcon;
   entities: Entity[];
-  entityIcon: string;
+  entityIcon: LucideIcon;
   emptyMessage: string;
   basePath: string;
   createPath: string;
@@ -30,9 +31,9 @@ interface EntityListProps {
 
 const EntityList: React.FC<EntityListProps> = ({
   title,
-  titleIcon,
+  titleIcon: TitleIcon,
   entities,
-  entityIcon,
+  entityIcon: EntityIcon,
   emptyMessage,
   basePath,
   createPath,
@@ -55,8 +56,8 @@ const EntityList: React.FC<EntityListProps> = ({
       data-walkthrough="entity-list"
     >
       <div className={`flex items-center justify-between px-4 py-3 rounded-t-xl text-white ${headerColor}`}>
-        <h2 className="text-sm sm:text-base font-bold flex items-center m-0">
-          <span className="mr-2">{titleIcon}</span>
+        <h2 className="text-sm sm:text-base font-bold flex items-center gap-2 m-0">
+          <TitleIcon className="w-4 h-4" aria-hidden />
           {title}
         </h2>
         {entities.length > 0 && (
@@ -82,9 +83,9 @@ const EntityList: React.FC<EntityListProps> = ({
                   className={`flex items-center p-2 rounded-lg no-underline transition-colors ${hoverClass} bg-transparent`}
                 >
                   <div
-                    className={`h-9 w-9 rounded-lg flex items-center justify-center mr-3 text-white text-lg shrink-0 ${headerColor}`}
+                    className={`h-9 w-9 rounded-lg flex items-center justify-center mr-3 text-white shrink-0 ${headerColor}`}
                   >
-                    {entityIcon}
+                    <EntityIcon className="w-4 h-4" aria-hidden />
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-semibold text-textPrimary dark:text-textPrimary-dark m-0 overflow-hidden text-ellipsis whitespace-nowrap">
@@ -114,16 +115,16 @@ const EntityList: React.FC<EntityListProps> = ({
                 className={`inline-flex items-center text-sm font-medium no-underline transition-colors ${buttonColor} ${buttonHoverClass}`}
               >
                 {viewAllText}
-                <svg className="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                </svg>
+                <ArrowRight className="ml-1 w-4 h-4" aria-hidden />
               </Link>
             </div>
           )}
         </div>
       ) : (
         <div className="flex flex-col items-center justify-center py-12 px-4 flex-1 bg-card dark:bg-card-dark text-textMuted dark:text-textMuted-dark">
-          <span className="text-5xl mb-5">{entityIcon}</span>
+          <span className="w-14 h-14 rounded-full bg-ink-100 dark:bg-ink-800 grid place-items-center mb-5">
+            <EntityIcon className="w-6 h-6" aria-hidden />
+          </span>
           <p className="text-center text-sm m-0 mb-6">{emptyMessage}</p>
           <Link
             to={createPath}

@@ -8,7 +8,6 @@ const RuleEdit: React.FC<RuleEditProps> = ({
   isLoading,
   error,
   onSubmit,
-  windowWidth = window.innerWidth,
   ruleChainId,
   onNodeDelete,
   onNodeCreate,
@@ -16,7 +15,6 @@ const RuleEdit: React.FC<RuleEditProps> = ({
   onNextNodeChange,
 }) => {
   const { t } = useTranslation();
-  const isMobile = windowWidth < 768;
 
   if (isLoading) {
     return (
@@ -31,7 +29,7 @@ const RuleEdit: React.FC<RuleEditProps> = ({
 
   if (error) {
     return (
-      <div className={`max-w-[800px] mx-auto ${isMobile ? 'p-4' : 'p-6'}`}>
+      <div className="max-w-[800px] mx-auto p-4 sm:p-6">
         <p className="text-dangerText dark:text-dangerText-dark my-4 m-0">
           {error}
         </p>
@@ -41,7 +39,7 @@ const RuleEdit: React.FC<RuleEditProps> = ({
 
   if (!rule) {
     return (
-      <div className={`max-w-[800px] mx-auto ${isMobile ? 'p-4' : 'p-6'}`}>
+      <div className="max-w-[800px] mx-auto p-4 sm:p-6">
         <p className="text-textSecondary dark:text-textSecondary-dark my-4 m-0">
           {t('rules.notFound')}
         </p>
@@ -50,7 +48,7 @@ const RuleEdit: React.FC<RuleEditProps> = ({
   }
 
   return (
-    <div className={`max-w-[800px] mx-auto ${isMobile ? 'p-4' : 'p-6'}`}>
+    <div className="max-w-[800px] mx-auto p-4 sm:p-6">
       <h1 className="text-2xl font-semibold text-textPrimary dark:text-textPrimary-dark mb-6 m-0">
         {t('rules.edit')}: {rule.name}
       </h1>

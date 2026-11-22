@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '../../state/store';
 import { useTranslation } from 'react-i18next';
+import { Camera, CheckCircle2, AlertCircle } from 'lucide-react';
 import { selectCurrentUser, fetchUserProfile } from '../../state/slices/auth.slice';
 import Input from '../../components/common/Input/Input';
 import Button from '../../components/common/Button/Button';
@@ -101,17 +102,17 @@ const Profile = () => {
   }
 
   return (
-    <div className="py-6 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-3xl mx-auto">
-        <h1 className="text-2xl font-semibold text-gray-900 mb-6">{t('profile')}</h1>
+    <div className="p-4 sm:py-6 sm:px-8 bg-background dark:bg-background-dark min-h-[calc(100vh-60px)]">
+      <div className="w-full">
+        <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-textPrimary dark:text-textPrimary-dark mb-6">{t('profile')}</h1>
 
-        <div className="bg-white shadow rounded-lg overflow-hidden">
+        <div className="rounded-xl border border-border dark:border-border-dark bg-card dark:bg-card-dark shadow-sm overflow-hidden">
           <form onSubmit={handleSubmit} className="p-6 space-y-6">
             {/* Avatar section */}
             <div className="flex flex-col items-center sm:flex-row sm:items-start space-y-4 sm:space-y-0 sm:space-x-6">
               <div className="flex-shrink-0">
                 <div className="relative">
-                  <div className="h-24 w-24 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center">
+                  <div className="h-24 w-24 rounded-full overflow-hidden bg-ink-100 dark:bg-ink-800 flex items-center justify-center">
                     {avatarPreview ? (
                       <img
                         src={avatarPreview}
@@ -119,23 +120,16 @@ const Profile = () => {
                         className="h-full w-full object-cover"
                       />
                     ) : (
-                      <div className="h-full w-full flex items-center justify-center bg-blue-500 text-white text-2xl font-medium">
+                      <div className="h-full w-full flex items-center justify-center bg-leaf-600 text-white text-2xl font-semibold">
                         {user?.userName?.charAt(0).toUpperCase() || '?'}
                       </div>
                     )}
                   </div>
                   <label
                     htmlFor="avatar-upload"
-                    className="absolute bottom-0 right-0 bg-white rounded-full p-1 shadow-md cursor-pointer"
+                    className="absolute bottom-0 right-0 bg-card dark:bg-card-dark border border-border dark:border-border-dark rounded-full p-1.5 shadow-md cursor-pointer text-textSecondary dark:text-textSecondary-dark hover:text-leaf-600 dark:hover:text-leaf-400 transition-colors"
                   >
-                    <svg
-                      className="h-5 w-5 text-gray-700"
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
-                      <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                    </svg>
+                    <Camera className="h-4 w-4" aria-hidden />
                     <input
                       id="avatar-upload"
                       name="avatar"
@@ -149,13 +143,13 @@ const Profile = () => {
               </div>
 
               <div className="flex-1">
-                <h2 className="text-lg font-medium text-gray-900">{user?.userName}</h2>
-                <p className="text-sm text-gray-500">{user?.email}</p>
-                <p className="mt-4 text-sm text-gray-500">{t('change_photo_description')}</p>
+                <h2 className="text-lg font-semibold text-textPrimary dark:text-textPrimary-dark">{user?.userName}</h2>
+                <p className="text-sm text-textMuted dark:text-textMuted-dark">{user?.email}</p>
+                <p className="mt-4 text-sm text-textMuted dark:text-textMuted-dark">{t('change_photo_description')}</p>
               </div>
             </div>
 
-            <div className="border-t border-gray-200 pt-6">
+            <div className="border-t border-border dark:border-border-dark pt-6">
               <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
                 <div className="sm:col-span-3">
                   <Input
@@ -200,9 +194,9 @@ const Profile = () => {
                         type="checkbox"
                         checked={formData.notifyByEmail}
                         onChange={handleChange}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        className="h-4 w-4 text-leaf-600 focus:ring-leaf-500 border-border dark:border-border-dark rounded"
                       />
-                      <label htmlFor="notifyByEmail" className="ml-2 block text-sm text-gray-700">
+                      <label htmlFor="notifyByEmail" className="ml-2 block text-sm text-textSecondary dark:text-textSecondary-dark">
                         {t('notify_by_email')}
                       </label>
                     </div>
@@ -214,9 +208,9 @@ const Profile = () => {
                         type="checkbox"
                         checked={formData.notifyBySMS}
                         onChange={handleChange}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        className="h-4 w-4 text-leaf-600 focus:ring-leaf-500 border-border dark:border-border-dark rounded"
                       />
-                      <label htmlFor="notifyBySMS" className="ml-2 block text-sm text-gray-700">
+                      <label htmlFor="notifyBySMS" className="ml-2 block text-sm text-textSecondary dark:text-textSecondary-dark">
                         {t('notify_by_sms')}
                       </label>
                     </div>
@@ -226,39 +220,23 @@ const Profile = () => {
             </div>
 
             {success && (
-              <div className="rounded-md bg-green-50 p-4">
-                <div className="flex">
-                  <div className="flex-shrink-0">
-                    <svg className="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <div className="ml-3">
-                    <p className="text-sm font-medium text-green-800">{success}</p>
-                  </div>
-                </div>
+              <div className="flex items-center gap-2 rounded-lg bg-successBg dark:bg-successBg-dark text-successText dark:text-successText-dark p-3 text-sm font-medium">
+                <CheckCircle2 className="h-5 w-5 shrink-0" aria-hidden />
+                {success}
               </div>
             )}
 
             {error && (
-              <div className="rounded-md bg-red-50 p-4">
-                <div className="flex">
-                  <div className="flex-shrink-0">
-                    <svg className="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <div className="ml-3">
-                    <p className="text-sm font-medium text-red-800">{error}</p>
-                  </div>
-                </div>
+              <div className="flex items-center gap-2 rounded-lg bg-dangerBg dark:bg-dangerBg-dark text-dangerText dark:text-dangerText-dark p-3 text-sm font-medium">
+                <AlertCircle className="h-5 w-5 shrink-0" aria-hidden />
+                {error}
               </div>
             )}
 
             <div className="flex justify-end space-x-3">
               <Button
                 type="button"
-                variant="outline"
+                variant="secondary"
                 onClick={() => window.history.back()}
               >
                 {t('cancel')}

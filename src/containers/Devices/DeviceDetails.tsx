@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useGoBack } from "../../hooks/useGoBack";
 import { useAppDispatch, useAppSelector } from "../../state/store";
 import {
   fetchDeviceDetails,
@@ -226,9 +227,7 @@ const DeviceDetails = () => {
     }
   };
 
-  const handleNavigateBack = () => {
-    navigate("/devices");
-  };
+  const handleNavigateBack = useGoBack("/devices");
 
   return (
     <DeviceDetailsComponent

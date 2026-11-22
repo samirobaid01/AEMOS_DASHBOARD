@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Settings as SettingsIcon, Languages, Moon, Compass, Bell, UserCog } from 'lucide-react';
 import i18n from '../../i18n/i18n';
 import { useTheme } from '../../context/ThemeContext';
 import { useWalkthrough } from '../../context/WalkthroughContext';
@@ -11,21 +12,11 @@ const Settings = () => {
   const { darkMode, toggleDarkMode } = useTheme();
   const { isWalkthroughEnabled, toggleWalkthroughEnabled, resetCompletedWalkthroughs } = useWalkthrough();
   const [language, setLanguage] = useState(i18n.language || 'en');
-  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [notifications, setNotifications] = useState({
     email: true,
     sms: false,
-    app: true
+    app: true,
   });
-
-  useEffect(() => {
-    const handleResize = () => {
-      setWindowWidth(window.innerWidth);
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   const handleLanguageChange = (lang: string) => {
     setLanguage(lang);
@@ -34,164 +25,117 @@ const Settings = () => {
   };
 
   const handleNotificationChange = (type: keyof typeof notifications) => {
-    setNotifications(prev => ({
-      ...prev,
-      [type]: !prev[type]
-    }));
+    setNotifications((prev) => ({ ...prev, [type]: !prev[type] }));
   };
 
-  // Theme styles based on dark mode
-  const getThemeStyles = () => {
-    return {
-      containerStyle: {
-        padding: '1.5rem 1rem',
-        backgroundColor: darkMode ? '#111827' : '#f0f9f0',
-        color: darkMode ? '#f9fafb' : '#1f2937',
-      },
-      headerStyle: {
-        fontSize: '1.5rem',
-        fontWeight: 600,
-        color: darkMode ? '#f9fafb' : '#1f2937',
-        marginBottom: '1.5rem',
-      },
-      cardStyle: {
-        backgroundColor: darkMode ? '#1f2937' : 'white',
-        boxShadow: darkMode 
-          ? '0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1)'
-          : '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
-        borderRadius: '0.5rem',
-        overflow: 'hidden',
-        border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
-      },
-      sectionStyle: {
-        padding: '1.5rem',
-        borderBottom: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
-      },
-      sectionTitleStyle: {
-        fontSize: '1.125rem',
-        fontWeight: 500,
-        color: darkMode ? '#f9fafb' : '#1f2937',
-        marginBottom: '1rem',
-      },
-    };
-  };
+  const notificationRows: { key: keyof typeof notifications; title: string; desc: string }[] = [
+    { key: 'email', title: t('email_notifications'), desc: t('email_notifications_desc') },
+    { key: 'sms', title: t('sms_notifications'), desc: t('sms_notifications_desc') },
+    { key: 'app', title: t('app_notifications'), desc: t('app_notifications_desc') },
+  ];
 
-  const styles = getThemeStyles();
-
-  const languageGridStyle = {
-    display: 'grid',
-    gridTemplateColumns: windowWidth >= 640 ? 'repeat(2, 1fr)' : '1fr',
-    gap: '1rem',
-  };
+  const sectionClass = 'p-6 border-b border-border dark:border-border-dark last:border-0';
+  const sectionTitleClass = 'flex items-center gap-2 text-base font-semibold text-textPrimary dark:text-textPrimary-dark mb-4 m-0';
 
   return (
-    <div style={styles.containerStyle}>
-      <h1 style={styles.headerStyle}>{t('settings.title')}</h1>
-      
-      <div style={styles.cardStyle}>
-        {/* Language Section */}
-        <div style={styles.sectionStyle}>
-          <h2 style={styles.sectionTitleStyle}>{t('language')}</h2>
-          <div style={languageGridStyle}>
-            <Button
-              type="button"
-              variant={language === 'en' ? 'primary' : 'secondary'}
-              onClick={() => handleLanguageChange('en')}
-            >
-              <span style={{ marginRight: '0.5rem' }}>🇺🇸</span> English
-            </Button>
-            <Button
-              type="button"
-              variant={language === 'es' ? 'primary' : 'secondary'}
-              onClick={() => handleLanguageChange('es')}
-            >
-              <span style={{ marginRight: '0.5rem' }}>🇪🇸</span> Español
-            </Button>
+    <div className="p-4 sm:py-6 sm:px-8 bg-background dark:bg-background-dark min-h-[calc(100vh-60px)]">
+      <div className="w-full">
+        {/* Page header */}
+        <div className="flex items-center gap-3 mb-6">
+          <div className="shrink-0 w-10 h-10 rounded-lg bg-leaf-50 dark:bg-leaf-900/40 text-leaf-600 dark:text-leaf-400 grid place-items-center">
+            <SettingsIcon className="w-5 h-5" aria-hidden />
+          </div>
+          <div>
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-textPrimary dark:text-textPrimary-dark m-0">
+              {t('settings.title')}
+            </h1>
+            <p className="text-sm text-textMuted dark:text-textMuted-dark m-0 mt-0.5">
+              {t('settings.subtitle', { defaultValue: 'Manage your preferences and account' })}
+            </p>
           </div>
         </div>
-        
-        {/* Theme Section */}
-        <div style={styles.sectionStyle}>
-          <h2 style={styles.sectionTitleStyle}>{t('theme')}</h2>
-          <Toggle
-            label={t('dark_mode')}
-            isChecked={darkMode}
-            onChange={toggleDarkMode}
-          />
-        </div>
-        
-        {/* Walkthrough Section */}
-        <div style={styles.sectionStyle}>
-          <h2 style={styles.sectionTitleStyle}>{t('walkthrough')}</h2>
-          <Toggle
-            label={t('enable_walkthrough')}
-            isChecked={isWalkthroughEnabled}
-            onChange={toggleWalkthroughEnabled}
-            helperText={t('walkthrough_description')}
-          />
-          <div style={{ marginTop: '1rem' }}>
-            <Button
-              type="button"
-              onClick={() => {
-                resetCompletedWalkthroughs();
-                alert('Walkthroughs have been reset. You will see them again on your next visit.');
-              }}
-            >
-              Reset Walkthroughs
-            </Button>
-          </div>
-        </div>
-        
-        {/* Notifications Section */}
-        <div style={styles.sectionStyle}>
-          <h2 style={styles.sectionTitleStyle}>{t('notifications')}</h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-              <div style={{ flex: '1 1 0', minWidth: 0 }}>
-                <div style={{ fontSize: '0.875rem', fontWeight: 500, color: darkMode ? '#d1d5db' : '#4b5563' }}>
-                  {t('email_notifications')}
-                </div>
-                <div style={{ fontSize: '0.875rem', color: darkMode ? '#9ca3af' : '#6b7280', marginTop: '0.25rem' }}>
-                  {t('email_notifications_desc')}
-                </div>
-              </div>
-              <Toggle isChecked={notifications.email} onChange={() => handleNotificationChange('email')} />
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-              <div style={{ flex: '1 1 0', minWidth: 0 }}>
-                <div style={{ fontSize: '0.875rem', fontWeight: 500, color: darkMode ? '#d1d5db' : '#4b5563' }}>
-                  {t('sms_notifications')}
-                </div>
-                <div style={{ fontSize: '0.875rem', color: darkMode ? '#9ca3af' : '#6b7280', marginTop: '0.25rem' }}>
-                  {t('sms_notifications_desc')}
-                </div>
-              </div>
-              <Toggle isChecked={notifications.sms} onChange={() => handleNotificationChange('sms')} />
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-              <div style={{ flex: '1 1 0', minWidth: 0 }}>
-                <div style={{ fontSize: '0.875rem', fontWeight: 500, color: darkMode ? '#d1d5db' : '#4b5563' }}>
-                  {t('app_notifications')}
-                </div>
-                <div style={{ fontSize: '0.875rem', color: darkMode ? '#9ca3af' : '#6b7280', marginTop: '0.25rem' }}>
-                  {t('app_notifications_desc')}
-                </div>
-              </div>
-              <Toggle isChecked={notifications.app} onChange={() => handleNotificationChange('app')} />
+
+        <div className="rounded-xl border border-border dark:border-border-dark bg-card dark:bg-card-dark shadow-sm overflow-hidden">
+          {/* Language */}
+          <div className={sectionClass}>
+            <h2 className={sectionTitleClass}>
+              <Languages className="w-4 h-4 text-textMuted dark:text-textMuted-dark" aria-hidden />
+              {t('language')}
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <Button type="button" variant={language === 'en' ? 'primary' : 'secondary'} onClick={() => handleLanguageChange('en')}>
+                <span className="mr-2">🇺🇸</span> English
+              </Button>
+              <Button type="button" variant={language === 'es' ? 'primary' : 'secondary'} onClick={() => handleLanguageChange('es')}>
+                <span className="mr-2">🇪🇸</span> Español
+              </Button>
             </div>
           </div>
-        </div>
-        
-        {/* Account Section */}
-        <div style={styles.sectionStyle}>
-          <h2 style={styles.sectionTitleStyle}>{t('account')}</h2>
-          <div style={{ marginTop: '0.75rem', display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-            <Button type="button">
-              {t('change_password')}
-            </Button>
-            <Button type="button" variant="danger">
-              {t('delete_account')}
-            </Button>
+
+          {/* Theme */}
+          <div className={sectionClass}>
+            <h2 className={sectionTitleClass}>
+              <Moon className="w-4 h-4 text-textMuted dark:text-textMuted-dark" aria-hidden />
+              {t('theme')}
+            </h2>
+            <Toggle label={t('dark_mode')} isChecked={darkMode} onChange={toggleDarkMode} />
+          </div>
+
+          {/* Walkthrough */}
+          <div className={sectionClass}>
+            <h2 className={sectionTitleClass}>
+              <Compass className="w-4 h-4 text-textMuted dark:text-textMuted-dark" aria-hidden />
+              {t('walkthrough')}
+            </h2>
+            <Toggle
+              label={t('enable_walkthrough')}
+              isChecked={isWalkthroughEnabled}
+              onChange={toggleWalkthroughEnabled}
+              helperText={t('walkthrough_description')}
+            />
+            <div className="mt-4">
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => {
+                  resetCompletedWalkthroughs();
+                  alert('Walkthroughs have been reset. You will see them again on your next visit.');
+                }}
+              >
+                {t('settings.resetWalkthroughs', { defaultValue: 'Reset Walkthroughs' })}
+              </Button>
+            </div>
+          </div>
+
+          {/* Notifications */}
+          <div className={sectionClass}>
+            <h2 className={sectionTitleClass}>
+              <Bell className="w-4 h-4 text-textMuted dark:text-textMuted-dark" aria-hidden />
+              {t('notifications')}
+            </h2>
+            <div className="flex flex-col gap-5">
+              {notificationRows.map((row) => (
+                <div key={row.key} className="flex justify-between items-center gap-4 flex-wrap">
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-medium text-textSecondary dark:text-textSecondary-dark">{row.title}</div>
+                    <div className="text-sm text-textMuted dark:text-textMuted-dark mt-1">{row.desc}</div>
+                  </div>
+                  <Toggle isChecked={notifications[row.key]} onChange={() => handleNotificationChange(row.key)} />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Account */}
+          <div className={sectionClass}>
+            <h2 className={sectionTitleClass}>
+              <UserCog className="w-4 h-4 text-textMuted dark:text-textMuted-dark" aria-hidden />
+              {t('account')}
+            </h2>
+            <div className="mt-1 flex gap-3 flex-wrap">
+              <Button type="button" variant="secondary">{t('change_password')}</Button>
+              <Button type="button" variant="danger">{t('delete_account')}</Button>
+            </div>
           </div>
         </div>
       </div>
@@ -199,4 +143,4 @@ const Settings = () => {
   );
 };
 
-export default Settings; 
+export default Settings;

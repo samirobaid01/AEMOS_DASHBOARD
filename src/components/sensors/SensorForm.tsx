@@ -1,6 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { Plus, Trash2, Thermometer, ArrowLeft } from 'lucide-react';
 import { ALLOWED_SENSOR_STATUSES } from '../../types/sensor';
+import { useGoBack } from '../../hooks/useGoBack';
 import type { SensorCreateRequest, SensorUpdateRequest, TelemetryDatatype } from '../../types/sensor';
 import FormField from '../common/FormField';
 import FormActions from '../common/FormActions';
@@ -12,11 +14,11 @@ export type { TelemetryRowPayload, TelemetryRowFormState };
 const TELEMETRY_DATATYPES: TelemetryDatatype[] = ['float', 'int', 'string', 'boolean'];
 
 const inputClasses =
-  'block w-full px-3 py-2 rounded border border-border dark:border-border-dark text-sm bg-surface dark:bg-surface-dark text-textPrimary dark:text-textPrimary-dark outline-none focus:ring-2 focus:ring-primary';
+  'block w-full px-3 py-2 rounded-lg border border-border dark:border-border-dark text-sm bg-surface dark:bg-surface-dark text-textPrimary dark:text-textPrimary-dark outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors';
 const selectClasses =
-  'block w-full px-3 py-2 pr-10 rounded border border-border dark:border-border-dark text-sm bg-surface dark:bg-surface-dark text-textPrimary dark:text-textPrimary-dark outline-none focus:ring-2 focus:ring-primary appearance-none bg-no-repeat bg-[length:1.5rem_1.5rem] bg-[right_0.5rem_center] bg-[url("data:image/svg+xml,%3csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 20 20\'%3e%3cpath stroke=\'%236b7280\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1.5\' d=\'M6 8l4 4 4-4\'/%3e%3c/svg%3e")]';
+  'block w-full px-3 py-2 pr-10 rounded-lg border border-border dark:border-border-dark text-sm bg-surface dark:bg-surface-dark text-textPrimary dark:text-textPrimary-dark outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors appearance-none bg-no-repeat bg-[length:1.5rem_1.5rem] bg-[right_0.5rem_center] bg-[url("data:image/svg+xml,%3csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 20 20\'%3e%3cpath stroke=\'%236b7280\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1.5\' d=\'M6 8l4 4 4-4\'/%3e%3c/svg%3e")]';
 const textareaClasses =
-  'block w-full min-h-24 px-3 py-2 rounded border border-border dark:border-border-dark text-sm bg-surface dark:bg-surface-dark text-textPrimary dark:text-textPrimary-dark outline-none focus:ring-2 focus:ring-primary resize-y';
+  'block w-full min-h-24 px-3 py-2 rounded-lg border border-border dark:border-border-dark text-sm bg-surface dark:bg-surface-dark text-textPrimary dark:text-textPrimary-dark outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors resize-y';
 const labelClasses = 'block text-sm font-medium text-textSecondary dark:text-textSecondary-dark mb-2';
 
 const SensorForm: React.FC<SensorFormProps> = ({
@@ -27,11 +29,10 @@ const SensorForm: React.FC<SensorFormProps> = ({
   onSubmit,
   onCancel,
   isSubmitting,
-  windowWidth,
   isEditMode = false,
 }) => {
   const { t } = useTranslation();
-  const isMobile = windowWidth < 768;
+  const goBack = useGoBack('/sensors');
   const safeAreas = Array.isArray(areas) ? areas : [];
 
   const [formData, setFormData] = React.useState<SensorCreateRequest | SensorUpdateRequest>({
@@ -103,16 +104,31 @@ const SensorForm: React.FC<SensorFormProps> = ({
   };
 
   return (
-    <div className={`bg-background dark:bg-background-dark ${isMobile ? 'p-4' : 'p-6 px-8'}`}>
-      <form onSubmit={handleSubmit} className="max-w-3xl mx-auto">
-        <div className="rounded-lg border border-border dark:border-border-dark bg-card dark:bg-card-dark shadow-sm overflow-hidden">
-          <div className="p-6 border-b border-border dark:border-border-dark bg-surfaceHover dark:bg-surfaceHover-dark">
-            <h2 className="text-xl font-semibold text-textPrimary dark:text-textPrimary-dark m-0">
-              {isEditMode ? t('sensors.edit') : t('sensors.add')}
-            </h2>
-            <p className="text-sm text-textMuted dark:text-textMuted-dark mt-2 m-0">
-              {isEditMode ? t('sensors.editSensorDescription') : t('sensors.addSensorDescription')}
-            </p>
+    <div className="bg-background dark:bg-background-dark p-4 sm:py-6 sm:px-8">
+      <form onSubmit={handleSubmit} className="w-full">
+        <Button
+          type="button"
+          variant="secondary"
+          size="sm"
+          onClick={goBack}
+          leftIcon={<ArrowLeft className="w-4 h-4" />}
+          className="mb-4"
+        >
+          {t('common.back')}
+        </Button>
+        <div className="rounded-xl border border-border dark:border-border-dark bg-card dark:bg-card-dark shadow-sm overflow-hidden">
+          <div className="flex items-center gap-3 p-6 border-b border-border dark:border-border-dark">
+            <div className="shrink-0 w-10 h-10 rounded-lg bg-leaf-50 dark:bg-leaf-900/40 text-leaf-600 dark:text-leaf-400 grid place-items-center">
+              <Thermometer className="w-5 h-5" aria-hidden />
+            </div>
+            <div className="min-w-0">
+              <h2 className="text-lg sm:text-xl font-bold tracking-tight text-textPrimary dark:text-textPrimary-dark m-0">
+                {isEditMode ? t('sensors.edit') : t('sensors.add')}
+              </h2>
+              <p className="text-sm text-textMuted dark:text-textMuted-dark mt-0.5 m-0">
+                {isEditMode ? t('sensors.editSensorDescription') : t('sensors.addSensorDescription')}
+              </p>
+            </div>
           </div>
           <div className="p-6">
             {error && (
@@ -121,6 +137,7 @@ const SensorForm: React.FC<SensorFormProps> = ({
               </div>
             )}
 
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6">
             <FormField label={t('sensors.name')} id="name" required>
               <input
                 type="text"
@@ -182,6 +199,7 @@ const SensorForm: React.FC<SensorFormProps> = ({
                 ))}
               </select>
             </FormField>
+            </div>
 
             <FormField label={t('sensors.description')} id="description">
               <textarea
@@ -241,17 +259,25 @@ const SensorForm: React.FC<SensorFormProps> = ({
                   </div>
                   <Button
                     type="button"
-                    variant="danger"
+                    variant="secondary"
                     size="sm"
                     onClick={() => handleRemoveTelemetryRow(index)}
                     title={t('sensors.removeTelemetry')}
-                    className="h-9 shrink-0 min-w-8 p-1"
+                    aria-label={t('sensors.removeTelemetry')}
+                    className="h-9 shrink-0 p-2 text-danger hover:text-danger"
                   >
-                    ×
+                    <Trash2 className="w-4 h-4" />
                   </Button>
                 </div>
               ))}
-              <Button type="button" size="sm" onClick={handleAddTelemetryRow} variant="primary" className="mt-2">
+              <Button
+                type="button"
+                size="sm"
+                onClick={handleAddTelemetryRow}
+                variant="secondary"
+                className="mt-2"
+                leftIcon={<Plus className="w-4 h-4" />}
+              >
                 {t('sensors.addTelemetry')}
               </Button>
             </div>

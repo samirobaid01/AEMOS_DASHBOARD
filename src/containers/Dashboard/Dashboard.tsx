@@ -5,6 +5,7 @@ import { selectAreas, fetchAreas } from '../../state/slices/areas.slice';
 import { selectSensors, fetchSensors } from '../../state/slices/sensors.slice';
 import { selectDevices, fetchDevices } from '../../state/slices/devices.slice';
 import { useTranslation } from 'react-i18next';
+import { Building2, Map, Thermometer, Cpu, Radio } from 'lucide-react';
 import Card from '../../components/common/Card/Card';
 import LoadingScreen from '../../components/common/Loading/LoadingScreen';
 import Page from '../../components/common/Page/Page';
@@ -46,15 +47,18 @@ const Dashboard = () => {
   }
 
   const stats = [
-    { name: t('common.organizations'), count: organizations.length, path: '/organizations', icon: '🚜', color: 'bg-leaf-600', textColor: 'text-leaf-800', bgColor: 'bg-leaf-50', borderColor: 'border-leaf-200' },
-    { name: t('common.areas'), count: areas.length, path: '/areas', icon: '🌾', color: 'bg-soil-600', textColor: 'text-soil-800', bgColor: 'bg-soil-50', borderColor: 'border-soil-200' },
-    { name: t('common.sensors'), count: sensors.length, path: '/sensors', icon: '🌡️', color: 'bg-wheat-600', textColor: 'text-wheat-800', bgColor: 'bg-wheat-50', borderColor: 'border-wheat-200' },
-    { name: t('common.devices'), count: devices.length, path: '/devices', icon: '📡', color: 'bg-sky-600', textColor: 'text-sky-800', bgColor: 'bg-sky-50', borderColor: 'border-sky-200' }
+    { name: t('common.organizations'), count: organizations.length, path: '/organizations', icon: Building2, color: 'bg-leaf-600' },
+    { name: t('common.areas'), count: areas.length, path: '/areas', icon: Map, color: 'bg-soil-600' },
+    { name: t('common.sensors'), count: sensors.length, path: '/sensors', icon: Thermometer, color: 'bg-wheat-600' },
+    { name: t('common.devices'), count: devices.length, path: '/devices', icon: Cpu, color: 'bg-sky-600' }
   ];
 
   return (
     <Page className="bg-background dark:bg-background-dark min-h-[calc(100vh-60px)] text-textPrimary dark:text-textPrimary-dark">
-      <DashboardHeader title={t('dashboard.title')} />
+      <DashboardHeader
+        title={t('dashboard.title')}
+        subtitle={t('dashboard.subtitle', { defaultValue: 'Overview of your organizations, areas, sensors, and devices' })}
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-10">
         {stats.map((stat) => (
@@ -65,9 +69,6 @@ const Dashboard = () => {
             path={stat.path}
             icon={stat.icon}
             color={stat.color}
-            textColor={stat.textColor}
-            bgColor={stat.bgColor}
-            borderColor={stat.borderColor}
           />
         ))}
       </div>
@@ -76,9 +77,9 @@ const Dashboard = () => {
         <Card contentClassName="p-0">
           <EntityList
             title={t('dashboard.recent_organizations')}
-            titleIcon="🚜"
+            titleIcon={Building2}
             entities={organizations as unknown as Entity[]}
-            entityIcon="🚜"
+            entityIcon={Building2}
             emptyMessage={t('dashboard.no_organizations')}
             basePath="/organizations"
             createPath="/organizations/create"
@@ -97,9 +98,9 @@ const Dashboard = () => {
         <Card contentClassName="p-0">
           <EntityList
             title={t('dashboard.recent_devices')}
-            titleIcon="📡"
+            titleIcon={Radio}
             entities={devices as unknown as Entity[]}
-            entityIcon="📡"
+            entityIcon={Radio}
             emptyMessage={t('dashboard.no_devices')}
             basePath="/devices"
             createPath="/devices/create"

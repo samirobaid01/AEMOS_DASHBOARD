@@ -1,15 +1,13 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { Cpu, Plus, AlertCircle } from 'lucide-react';
 import DeviceItem from './DeviceItem';
 import DeviceFilter from './DeviceFilter';
 import EmptyState from '../common/EmptyState';
 import Button from '../common/Button/Button';
-import ErrorDisplay from './ErrorDisplay';
-import { cn } from '../../utils/cn';
 import type { DeviceListProps } from './types';
 
 const DeviceList: React.FC<DeviceListProps> = ({
-  devices,
   filteredDevices,
   searchTerm,
   setSearchTerm,
@@ -17,68 +15,53 @@ const DeviceList: React.FC<DeviceListProps> = ({
   setTypeFilter,
   deviceTypes,
   onAddDevice,
-  isLoading,
   error,
-  windowWidth
+  windowWidth,
 }) => {
   const { t } = useTranslation();
   const isMobile = windowWidth < 768;
 
+  const PageHeader = (
+    <div className="flex justify-between items-start sm:items-center flex-col sm:flex-row gap-4 mb-6">
+      <div className="flex items-center gap-3 min-w-0">
+        <div className="shrink-0 w-10 h-10 rounded-lg bg-leaf-50 dark:bg-leaf-900/40 text-leaf-600 dark:text-leaf-400 grid place-items-center">
+          <Cpu className="w-5 h-5" aria-hidden />
+        </div>
+        <div className="min-w-0">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-textPrimary dark:text-textPrimary-dark m-0 flex items-center gap-2">
+            {t('devices.title')}
+            {filteredDevices.length > 0 && (
+              <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-ink-100 dark:bg-ink-800 text-ink-600 dark:text-ink-300 tabular-nums">
+                {filteredDevices.length}
+              </span>
+            )}
+          </h1>
+          <p className="text-sm text-textMuted dark:text-textMuted-dark m-0 mt-0.5">
+            {t('devices.subtitle', { defaultValue: 'Monitor and manage your devices' })}
+          </p>
+        </div>
+      </div>
+      <Button type="button" variant="primary" onClick={onAddDevice} leftIcon={<Plus className="w-4 h-4" />}>
+        {t('devices.add')}
+      </Button>
+    </div>
+  );
+
   if (error) {
     return (
-      <div className="p-4 sm:p-6 lg:p-8">
-        <ErrorDisplay errorMessage={error} />
-      </div>
-    );
-  }
-
-  if (isLoading && devices.length === 0) {
-    return (
-      <div className="p-4 sm:p-6 lg:p-8">
-        <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/4 mb-4"></div>
-          <div className="space-y-3">
-            <div className="h-20 bg-gray-200 dark:bg-gray-700 rounded"></div>
-            <div className="h-20 bg-gray-200 dark:bg-gray-700 rounded"></div>
-            <div className="h-20 bg-gray-200 dark:bg-gray-700 rounded"></div>
-          </div>
+      <div className="p-4 sm:py-6 sm:px-8 bg-background dark:bg-background-dark">
+        {PageHeader}
+        <div className="flex items-center gap-2 p-4 rounded-xl bg-dangerBg dark:bg-dangerBg-dark text-dangerText dark:text-dangerText-dark text-sm font-medium">
+          <AlertCircle className="w-5 h-5 shrink-0" aria-hidden />
+          {error}
         </div>
       </div>
     );
   }
 
   return (
-    <div className={cn(
-      'bg-background dark:bg-background-dark',
-      isMobile ? 'p-4' : 'p-6 lg:p-8'
-    )}>
-      <div className={cn(
-        'flex justify-between mb-6',
-        isMobile ? 'flex-col items-start gap-4' : 'flex-row items-center'
-      )}>
-        <h1 className="text-2xl font-semibold text-textPrimary dark:text-textPrimary-dark m-0">
-          {t('devices.title')}
-        </h1>
-        <Button
-          type="button"
-          onClick={onAddDevice}
-          fullWidth={isMobile}
-          className={isMobile ? 'w-full' : ''}
-        >
-          <svg
-            className="w-4 h-4 mr-1.5"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-          >
-            <path
-              fillRule="evenodd"
-              d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
-              clipRule="evenodd"
-            />
-          </svg>
-          {t('devices.add')}
-        </Button>
-      </div>
+    <div className="p-4 sm:py-6 sm:px-8 bg-background dark:bg-background-dark">
+      {PageHeader}
 
       <DeviceFilter
         searchTerm={searchTerm}
@@ -92,21 +75,18 @@ const DeviceList: React.FC<DeviceListProps> = ({
       {filteredDevices.length === 0 ? (
         <EmptyState
           title={searchTerm || typeFilter ? t('devices.noDevicesFound') : t('devices.noDevices')}
-          description={searchTerm || typeFilter
-            ? t('devices.noDevicesFoundWithFilters')
-            : t('devices.noDevicesDescription')
+          description={
+            searchTerm || typeFilter
+              ? t('devices.noDevicesFoundWithFilters')
+              : t('devices.noDevicesDescription')
           }
           actionLabel={t('devices.add')}
           onAction={onAddDevice}
         />
       ) : (
-        <div className="flex flex-col gap-4">
-          {filteredDevices.map(device => (
-            <DeviceItem 
-              key={device.id} 
-              device={device} 
-              isMobile={isMobile} 
-            />
+        <div>
+          {filteredDevices.map((device) => (
+            <DeviceItem key={device.id} device={device} isMobile={isMobile} />
           ))}
         </div>
       )}
@@ -114,4 +94,4 @@ const DeviceList: React.FC<DeviceListProps> = ({
   );
 };
 
-export default DeviceList; 
+export default DeviceList;

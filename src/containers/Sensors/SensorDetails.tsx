@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../../state/store';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useGoBack } from '../../hooks/useGoBack';
 import { useTranslation } from 'react-i18next';
 import SensorDetailsComponent from '../../components/sensors/SensorDetails';
 import LoadingScreen from '../../components/common/Loading/LoadingScreen';
@@ -168,9 +169,7 @@ const SensorDetails = () => {
   };
 
   // Handle navigating back to sensors list
-  const handleBack = () => {
-    navigate('/sensors');
-  };
+  const handleBack = useGoBack('/sensors');
 
   // Handle deletion
   const handleDelete = async () => {

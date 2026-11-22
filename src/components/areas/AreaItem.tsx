@@ -1,18 +1,18 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { Map, ChevronRight } from 'lucide-react';
 import type { AreaItemProps } from './types';
 
-const AreaItem: React.FC<AreaItemProps> = React.memo(({ area, windowWidth }) => {
+const AreaItem: React.FC<AreaItemProps> = React.memo(({ area }) => {
   const { t } = useTranslation();
-  const isMobile = windowWidth < 768;
 
   const statusClass =
     area.status === 'active'
       ? 'bg-successBg dark:bg-successBg-dark text-successText dark:text-successText-dark'
       : area.status === 'inactive'
         ? 'bg-dangerBg dark:bg-dangerBg-dark text-dangerText dark:text-dangerText-dark'
-        : 'bg-border dark:bg-border-dark text-textSecondary dark:text-textSecondary-dark';
+        : 'bg-ink-100 dark:bg-ink-800 text-ink-600 dark:text-ink-300';
 
   const dotClass =
     area.status === 'active'
@@ -22,31 +22,38 @@ const AreaItem: React.FC<AreaItemProps> = React.memo(({ area, windowWidth }) => 
         : 'bg-textMuted dark:bg-textMuted-dark';
 
   return (
-    <Link
-      to={`/areas/${area.id}`}
-      className="block p-4 rounded-lg border border-border dark:border-border-dark bg-card dark:bg-card-dark shadow-sm mb-3 no-underline transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
-    >
-      <div className={`flex justify-between ${isMobile ? 'flex-col items-start gap-3' : 'flex-row items-center'}`}>
+    <Link to={`/areas/${area.id}`} className="no-underline text-inherit block">
+      <div className="group flex flex-col sm:flex-row sm:items-center items-start gap-4 p-4 rounded-xl border border-border dark:border-border-dark bg-card dark:bg-card-dark shadow-sm mb-3 transition-all duration-150 hover:-translate-y-0.5 hover:shadow-md hover:border-leaf-300 dark:hover:border-leaf-600">
+        {/* Icon tile */}
+        <div className="shrink-0 w-11 h-11 rounded-lg bg-leaf-50 dark:bg-leaf-900/40 text-leaf-600 dark:text-leaf-400 grid place-items-center">
+          <Map className="w-5 h-5" aria-hidden />
+        </div>
+
         <div className="flex-1 min-w-0">
-          <p className="text-base font-semibold text-info dark:text-info-dark truncate m-0 mb-2">
+          <h3 className="text-base font-semibold text-textPrimary dark:text-textPrimary-dark m-0 mb-1.5 truncate">
             {area.name}
-          </p>
-          <div className="flex items-center flex-wrap gap-2 mb-2">
-            {area.organizationId && (
-              <span className="text-xs px-2 py-0.5 rounded-full bg-infoBg dark:bg-infoBg-dark text-infoText dark:text-infoText-dark inline-block">
+          </h3>
+          {area.organizationId && (
+            <div className="flex items-center flex-wrap gap-2 mb-1.5">
+              <span className="text-xs px-2 py-0.5 rounded-full bg-leaf-50 dark:bg-leaf-900/40 text-leaf-700 dark:text-leaf-300 inline-block">
                 {area.organization?.name || t('organization')}
               </span>
-            )}
-          </div>
+            </div>
+          )}
           <p className="text-sm text-textMuted dark:text-textMuted-dark m-0 truncate">
             {area.description || t('areas.noDescription')}
           </p>
         </div>
-        <div className={`flex-shrink-0 ${isMobile ? 'mt-0' : 'ml-4'}`}>
+
+        <div className="flex items-center gap-2 shrink-0 mt-1 sm:mt-0">
           <span className={`inline-flex items-center py-1 px-2.5 rounded-full text-xs font-medium ${statusClass}`}>
             <span className={`w-2 h-2 rounded-full mr-1.5 ${dotClass}`} />
             {t(area.status)}
           </span>
+          <ChevronRight
+            className="hidden sm:block w-4 h-4 text-textMuted dark:text-textMuted-dark opacity-0 group-hover:opacity-100 transition-opacity"
+            aria-hidden
+          />
         </div>
       </div>
     </Link>

@@ -12,6 +12,13 @@ import FormActions from '../common/FormActions';
 import Button from '../common/Button/Button';
 import type { DeviceIdentityFormProps } from './types';
 
+const inputClasses =
+  'block w-full px-3 py-2 rounded-lg border border-border dark:border-border-dark text-sm bg-surface dark:bg-surface-dark text-textPrimary dark:text-textPrimary-dark outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors';
+const selectClasses =
+  'block w-full px-3 py-2 pr-10 rounded-lg border border-border dark:border-border-dark text-sm bg-surface dark:bg-surface-dark text-textPrimary dark:text-textPrimary-dark outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors appearance-none bg-no-repeat bg-[length:1.5rem_1.5rem] bg-[right_0.5rem_center] bg-[url("data:image/svg+xml,%3csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 20 20\'%3e%3cpath stroke=\'%236b7280\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1.5\' d=\'M6 8l4 4 4-4\'/%3e%3c/svg%3e")]';
+const textareaClasses =
+  'block w-full min-h-24 px-3 py-2 rounded-lg border border-border dark:border-border-dark text-sm bg-surface dark:bg-surface-dark text-textPrimary dark:text-textPrimary-dark outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors resize-y';
+
 const DeviceIdentityForm: React.FC<DeviceIdentityFormProps> = ({
   formData,
   formErrors,
@@ -27,16 +34,6 @@ const DeviceIdentityForm: React.FC<DeviceIdentityFormProps> = ({
   className,
 }) => {
   const { t } = useTranslation();
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-
-  const inputClassName = "w-full px-3 py-2 rounded-md border border-border dark:border-border-dark text-sm bg-background dark:bg-background-dark text-textPrimary dark:text-textPrimary-dark focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-primary-dark";
-  
-  const selectClassName = cn(
-    inputClassName,
-    "appearance-none bg-no-repeat pr-10",
-    "bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 20 20\"%3E%3Cpath stroke=\"%236b7280\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.5\" d=\"M6 8l4 4 4-4\"/%3E%3C/svg%3E')]",
-    "bg-[length:1.5rem_1.5rem] bg-[right_0.5rem_center]"
-  );
 
   return (
     <form onSubmit={onSubmit} className={cn('p-6', className)}>
@@ -46,7 +43,7 @@ const DeviceIdentityForm: React.FC<DeviceIdentityFormProps> = ({
         </div>
       )}
 
-      <div className={cn('grid gap-4', isMobile ? 'grid-cols-1' : 'grid-cols-2')}>
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
         <FormField label={t('devices.name')} id="name" required error={formErrors.name}>
           <input
             type="text"
@@ -55,7 +52,7 @@ const DeviceIdentityForm: React.FC<DeviceIdentityFormProps> = ({
             value={formData.name}
             onChange={onChange}
             required
-            className={inputClassName}
+            className={inputClasses}
           />
         </FormField>
 
@@ -66,7 +63,7 @@ const DeviceIdentityForm: React.FC<DeviceIdentityFormProps> = ({
             value={formData.deviceType}
             onChange={onChange}
             required
-            className={selectClassName}
+            className={selectClasses}
           >
             <option value="">{t('devices.selectDeviceType')}</option>
             {ALLOWED_DEVICE_TYPES.map((type) => (
@@ -78,14 +75,14 @@ const DeviceIdentityForm: React.FC<DeviceIdentityFormProps> = ({
         </FormField>
       </div>
 
-      <div className={cn('grid gap-4', isMobile ? 'grid-cols-1' : 'grid-cols-2')}>
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
         <FormField label={t('devices.selectProtocol')} id="communicationProtocol">
           <select
             id="communicationProtocol"
             name="communicationProtocol"
             value={formData.communicationProtocol ?? ''}
             onChange={onChange}
-            className={selectClassName}
+            className={selectClasses}
           >
             <option value="">{t('devices.selectProtocol')}</option>
             {ALLOWED_PROTOCOLS.map((protocol) => (
@@ -100,10 +97,10 @@ const DeviceIdentityForm: React.FC<DeviceIdentityFormProps> = ({
           <select 
             id="status" 
             name="status" 
-            value={formData.status} 
-            onChange={onChange} 
-            required 
-            className={selectClassName}
+            value={formData.status}
+            onChange={onChange}
+            required
+            className={selectClasses}
           >
             {ALLOWED_STATUSES.map((status) => (
               <option key={status} value={status}>
@@ -114,7 +111,7 @@ const DeviceIdentityForm: React.FC<DeviceIdentityFormProps> = ({
         </FormField>
       </div>
 
-      <div className={cn('grid gap-4', isMobile ? 'grid-cols-1' : 'grid-cols-2')}>
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
         <FormField label={t('devices.organization')} id="organizationId" required error={formErrors.organizationId}>
           <select
             id="organizationId"
@@ -122,7 +119,7 @@ const DeviceIdentityForm: React.FC<DeviceIdentityFormProps> = ({
             value={formData.organizationId ?? ''}
             onChange={onChange}
             required
-            className={selectClassName}
+            className={selectClasses}
           >
             <option value="">{t('devices.selectOrganization')}</option>
             {organizations.map((org) => (
@@ -139,7 +136,7 @@ const DeviceIdentityForm: React.FC<DeviceIdentityFormProps> = ({
             name="areaId"
             value={formData.areaId ?? ''}
             onChange={onChange}
-            className={selectClassName}
+            className={selectClasses}
           >
             <option value="">{t('devices.selectArea')}</option>
             {areas
@@ -163,7 +160,7 @@ const DeviceIdentityForm: React.FC<DeviceIdentityFormProps> = ({
             const selectedModes = Array.from(e.target.selectedOptions, (option) => option.value);
             onControlModesChange(selectedModes);
           }}
-          className={cn(selectClassName, 'h-24')}
+          className={cn(selectClasses, 'h-24')}
         >
           {CONTROL_MODES.map((mode) => (
             <option key={mode} value={mode}>
@@ -199,7 +196,7 @@ const DeviceIdentityForm: React.FC<DeviceIdentityFormProps> = ({
           rows={3}
           value={formData.description ?? ''}
           onChange={onChange}
-          className={cn(inputClassName, 'resize-y min-h-24')}
+          className={textareaClasses}
         />
       </FormField>
 

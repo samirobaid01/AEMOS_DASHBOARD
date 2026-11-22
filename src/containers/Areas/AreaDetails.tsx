@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useGoBack } from '../../hooks/useGoBack';
 import { useAppDispatch, useAppSelector } from '../../state/store';
 import {
   fetchAreaById,
@@ -72,9 +73,7 @@ const AreaDetailsContainer = () => {
     }
   };
 
-  const handleBack = () => {
-    navigate('/areas');
-  };
+  const handleBack = useGoBack('/areas');
 
   if (isLoading && !area) {
     return <LoadingScreen />;
