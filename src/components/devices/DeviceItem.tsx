@@ -1,121 +1,71 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import type { DeviceStatus } from '../../constants/device';
-import Card from '../common/Card/Card';
-import { cn } from '../../utils/cn';
+import { Cpu, ChevronRight } from 'lucide-react';
 import type { DeviceItemProps } from './types';
 
-const DeviceItem: React.FC<DeviceItemProps> = React.memo(({ device, isMobile, className }) => {
+const DeviceItem: React.FC<DeviceItemProps> = React.memo(({ device, className }) => {
   const { t } = useTranslation();
 
-  const getStatusClasses = (status: DeviceStatus) => {
-    switch (status) {
-      case 'active':
-        return {
-          bg: 'bg-green-100 dark:bg-green-900/20',
-          text: 'text-green-700 dark:text-green-400',
-          dot: 'bg-green-600'
-        };
-      case 'inactive':
-        return {
-          bg: 'bg-red-100 dark:bg-red-900/20',
-          text: 'text-red-700 dark:text-red-400',
-          dot: 'bg-red-500'
-        };
-      default:
-        return {
-          bg: 'bg-yellow-100 dark:bg-yellow-900/20',
-          text: 'text-yellow-700 dark:text-yellow-400',
-          dot: 'bg-yellow-500'
-        };
-    }
-  };
-
-  const getDeviceTypeClasses = (type: string) => {
-    switch (type) {
-      case 'actuator':
-        return 'bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400';
-      case 'sensor':
-        return 'bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400';
-      case 'gateway':
-        return 'bg-yellow-100 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400';
-      case 'controller':
-        return 'bg-indigo-100 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400';
-      default:
-        return 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400';
-    }
-  };
-
-  const statusClasses = getStatusClasses(device.status);
+  const isActive = device.status === 'active';
 
   return (
-    <Link 
-      to={`/devices/${device.id}`}
-      className="block no-underline text-inherit"
-    >
-      <Card 
-        className={cn(
-          'hover:-translate-y-0.5 hover:shadow-lg transition-all duration-150 mb-4',
-          className
-        )}
-        contentClassName="p-4"
+    <Link to={`/devices/${device.id}`} className="no-underline text-inherit block">
+      <div
+        className={`group flex flex-col sm:flex-row sm:items-center items-start gap-4 p-4 rounded-xl border border-border dark:border-border-dark bg-card dark:bg-card-dark shadow-sm mb-3 transition-all duration-150 hover:-translate-y-0.5 hover:shadow-md hover:border-leaf-300 dark:hover:border-leaf-600 ${className ?? ''}`}
       >
-        <div className={cn(
-          'flex',
-          isMobile ? 'flex-col items-start' : 'flex-row items-center'
-        )}>
-          <div className="flex-1 min-w-0">
-            <h3 className="text-base font-semibold text-textPrimary dark:text-textPrimary-dark mb-2 truncate m-0">
-              {device.name}
-            </h3>
-
-            <div className="flex items-center flex-wrap gap-2 mb-2">
-              <span className={cn(
-                'text-xs px-2 py-0.5 rounded-full inline-block',
-                getDeviceTypeClasses(device.deviceType)
-              )}>
-                {device.deviceType}
-              </span>
-
-              <span className="text-xs px-2 py-0.5 rounded-full inline-block bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400">
-                {device.controlType}
-              </span>
-
-              {device.communicationProtocol && (
-                <span className="text-xs px-2 py-0.5 rounded-full inline-block bg-surface dark:bg-surface-dark text-textSecondary dark:text-textSecondary-dark">
-                  {device.communicationProtocol}
-                </span>
-              )}
-            </div>
-
-            <p className="text-sm text-textMuted dark:text-textMuted-dark m-0 truncate">
-              {device.description || t('devices.noDescription')}
-            </p>
-          </div>
-
-          <div className={cn(
-            'flex-shrink-0',
-            isMobile ? 'mt-3' : 'ml-4'
-          )}>
-            <span className={cn(
-              'inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium',
-              statusClasses.bg,
-              statusClasses.text
-            )}>
-              <span className={cn(
-                'w-2 h-2 rounded-full mr-1.5',
-                statusClasses.dot
-              )}></span>
-              {t(`devices.statuses.${device.status}`)}
-            </span>
-          </div>
+        {/* Icon tile */}
+        <div className="shrink-0 w-11 h-11 rounded-lg bg-leaf-50 dark:bg-leaf-900/40 text-leaf-600 dark:text-leaf-400 grid place-items-center">
+          <Cpu className="w-5 h-5" aria-hidden />
         </div>
-      </Card>
+
+        <div className="flex-1 min-w-0">
+          <h3 className="text-base font-semibold text-textPrimary dark:text-textPrimary-dark m-0 mb-1.5 truncate">
+            {device.name}
+          </h3>
+          <div className="flex items-center flex-wrap gap-2 mb-1.5">
+            <span className="text-xs px-2 py-0.5 rounded-full bg-ink-100 dark:bg-ink-800 text-ink-600 dark:text-ink-300 inline-block">
+              {device.deviceType}
+            </span>
+            <span className="text-xs px-2 py-0.5 rounded-full bg-leaf-50 dark:bg-leaf-900/40 text-leaf-700 dark:text-leaf-300 inline-block">
+              {device.controlType}
+            </span>
+            {device.communicationProtocol && (
+              <span className="text-xs px-2 py-0.5 rounded-full bg-ink-100 dark:bg-ink-800 text-ink-600 dark:text-ink-300 inline-block">
+                {device.communicationProtocol}
+              </span>
+            )}
+          </div>
+          <p className="text-sm text-textMuted dark:text-textMuted-dark m-0 truncate">
+            {device.description || t('devices.noDescription')}
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2 shrink-0 mt-1 sm:mt-0">
+          <span
+            className={`inline-flex items-center py-1 px-2.5 rounded-full text-xs font-medium ${
+              isActive
+                ? 'bg-successBg dark:bg-successBg-dark text-successText dark:text-successText-dark'
+                : 'bg-dangerBg dark:bg-dangerBg-dark text-dangerText dark:text-dangerText-dark'
+            }`}
+          >
+            <span
+              className={`w-2 h-2 rounded-full mr-1.5 ${
+                isActive ? 'bg-success dark:bg-success-dark' : 'bg-danger dark:bg-danger-dark'
+              }`}
+            />
+            {t(`devices.statuses.${device.status}`)}
+          </span>
+          <ChevronRight
+            className="hidden sm:block w-4 h-4 text-textMuted dark:text-textMuted-dark opacity-0 group-hover:opacity-100 transition-opacity"
+            aria-hidden
+          />
+        </div>
+      </div>
     </Link>
   );
 });
 
 DeviceItem.displayName = 'DeviceItem';
 
-export default DeviceItem; 
+export default DeviceItem;

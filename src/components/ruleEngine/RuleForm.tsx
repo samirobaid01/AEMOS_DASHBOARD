@@ -4,6 +4,7 @@ import NodeDialog from './NodeDialog';
 import ActionDialog from './ActionDialog';
 import NodeSummary from './NodeSummary';
 import { useTranslation } from 'react-i18next';
+import { Zap, Plus, Trash2, Pencil, ChevronRight } from 'lucide-react';
 import { ruleFormResolver } from '../../utils/validation/ruleFormValidation';
 import Input from '../common/Input/Input';
 import Button from '../common/Button/Button';
@@ -63,6 +64,11 @@ interface ActionNodeData {
   name?: string;
   config: ActionConfig;
 }
+
+const textareaClasses =
+  'block w-full min-h-24 px-3 py-2 rounded-lg border border-border dark:border-border-dark text-sm bg-surface dark:bg-surface-dark text-textPrimary dark:text-textPrimary-dark outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors resize-y';
+const selectClasses =
+  'block w-full px-3 py-2 pr-10 rounded-lg border border-border dark:border-border-dark text-sm bg-surface dark:bg-surface-dark text-textPrimary dark:text-textPrimary-dark outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors appearance-none bg-no-repeat bg-[length:1.5rem_1.5rem] bg-[right_0.5rem_center] bg-[url("data:image/svg+xml,%3csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 20 20\'%3e%3cpath stroke=\'%236b7280\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1.5\' d=\'M6 8l4 4 4-4\'/%3e%3c/svg%3e")]';
 
 const RuleForm: React.FC<RuleFormProps> = ({
   initialData,
@@ -354,9 +360,23 @@ const RuleForm: React.FC<RuleFormProps> = ({
           e.preventDefault();
           handleSubmit(handleMainFormSubmit)(e);
         }}
-        className="rounded-lg border border-border dark:border-border-dark bg-card dark:bg-card-dark shadow-sm p-6"
+        className="rounded-xl border border-border dark:border-border-dark bg-card dark:bg-card-dark shadow-sm overflow-hidden"
         noValidate
       >
+        <div className="flex items-center gap-3 p-6 border-b border-border dark:border-border-dark">
+          <div className="shrink-0 w-10 h-10 rounded-lg bg-leaf-50 dark:bg-leaf-900/40 text-leaf-600 dark:text-leaf-400 grid place-items-center">
+            <Zap className="w-5 h-5" aria-hidden />
+          </div>
+          <div className="min-w-0">
+            <h2 className="text-lg sm:text-xl font-bold tracking-tight text-textPrimary dark:text-textPrimary-dark m-0">
+              {t('ruleEngine.ruleChainDetails', { defaultValue: 'Rule Chain Details' })}
+            </h2>
+            <p className="text-sm text-textMuted dark:text-textMuted-dark mt-0.5 m-0">
+              {t('ruleEngine.ruleChainDetailsSubtitle', { defaultValue: 'Name your rule chain and build its conditions and actions.' })}
+            </p>
+          </div>
+        </div>
+        <div className="p-6">
         <div className="mb-6">
           <Controller
             name="name"
@@ -381,7 +401,7 @@ const RuleForm: React.FC<RuleFormProps> = ({
                   {...field}
                   id="rule-form-description"
                   rows={3}
-                  className="block w-full px-3 py-2 rounded border border-border dark:border-border-dark bg-surface dark:bg-surface-dark text-textPrimary dark:text-textPrimary-dark text-sm resize-y"
+                  className={textareaClasses}
                 />
                 {errors.description?.message && (
                   <p className="mt-1 text-sm text-danger dark:text-danger-dark">{errors.description.message}</p>
@@ -395,7 +415,7 @@ const RuleForm: React.FC<RuleFormProps> = ({
           <>
             <div className="mt-6">
               <h2 className="text-lg font-semibold text-textPrimary dark:text-textPrimary-dark mb-2">
-                Rule Chain Nodes
+                {t('ruleEngine.ruleChainNodes', { defaultValue: 'Rule Chain Nodes' })}
               </h2>
 
               {nodes.map((node, index) => (
@@ -410,18 +430,18 @@ const RuleForm: React.FC<RuleFormProps> = ({
                     <div className="flex gap-2">
                       <Button
                         type="button"
-                        variant="outline"
+                        variant="secondary"
                         size="sm"
                         onClick={() => node.type === 'filter' ? handleNodeDialogOpen(index) : handleActionDialogOpen(index)}
                         title={t('common.edit')}
+                        aria-label={t('common.edit')}
+                        className="p-2"
                       >
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
+                        <Pencil className="w-4 h-4" aria-hidden />
                       </Button>
                       <Button
                         type="button"
-                        variant="danger"
+                        variant="secondary"
                         size="sm"
                         onClick={(e) => {
                           e.preventDefault();
@@ -429,10 +449,10 @@ const RuleForm: React.FC<RuleFormProps> = ({
                           handleNodeDelete(node.id);
                         }}
                         title={t('common.delete')}
+                        aria-label={t('common.delete')}
+                        className="p-2 text-danger hover:text-danger"
                       >
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
+                        <Trash2 className="w-4 h-4" aria-hidden />
                       </Button>
                     </div>
                   </div>
@@ -445,7 +465,7 @@ const RuleForm: React.FC<RuleFormProps> = ({
                         {t('ruleEngine.nextNode')}
                       </label>
                       <select
-                        className="w-full px-3 py-2 rounded border border-border dark:border-border-dark bg-surface dark:bg-surface-dark text-textPrimary dark:text-textPrimary-dark text-sm outline-none focus:ring-2 focus:ring-primary"
+                        className={selectClasses}
                         value={node.nextNodeId == null ? '' : String(node.nextNodeId)}
                         onChange={async (e) => {
                           const next = e.target.value === '' ? null : Number(e.target.value);
@@ -469,45 +489,39 @@ const RuleForm: React.FC<RuleFormProps> = ({
 
                   {index < nodes.length - 1 && (
                     <div className="flex justify-center my-4 text-textMuted dark:text-textMuted-dark">
-                      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                      </svg>
+                      <ChevronRight className="w-6 h-6 rotate-90" aria-hidden />
                     </div>
                   )}
                 </div>
               ))}
 
-              <div className="flex gap-4 mt-4">
+              <div className="flex flex-col sm:flex-row gap-4 mt-4">
                 <Button
                   type="button"
-                  variant="outline"
+                  variant="secondary"
                   className="flex-1"
+                  leftIcon={<Plus className="w-4 h-4" />}
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
                     handleNodeDialogOpen(null);
                   }}
                 >
-                  <svg className="w-4 h-4 mr-1.5 inline-block" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
-                  </svg>
-                  Add Node
+                  {t('ruleEngine.addNode', { defaultValue: 'Add Node' })}
                 </Button>
 
                 <Button
                   type="button"
-                  variant="outline"
+                  variant="secondary"
                   className="flex-1"
+                  leftIcon={<Plus className="w-4 h-4" />}
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
                     handleActionDialogOpen();
                   }}
                 >
-                  <svg className="w-4 h-4 mr-1.5 inline-block" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
-                  </svg>
-                  Add Action
+                  {t('ruleEngine.addAction', { defaultValue: 'Add Action' })}
                 </Button>
               </div>
             </div>
@@ -558,6 +572,7 @@ const RuleForm: React.FC<RuleFormProps> = ({
             </Button>
           </div>
         )}
+        </div>
       </form>
     </div>
   );

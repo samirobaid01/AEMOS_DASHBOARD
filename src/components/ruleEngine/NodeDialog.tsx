@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { Plus, Trash2 } from "lucide-react";
 import type { Device, DeviceStateRecord } from "../../types/device";
 import type { Sensor } from "../../types/sensor";
 import * as deviceStatesService from '../../services/deviceStates.service';
@@ -17,9 +18,9 @@ import type { NodeDialogProps } from './types';
 import { parseNodeConfig, serializeNodeConfig } from '../../utils/ruleNodeConfig';
 
 const inputClasses =
-  'block w-full min-w-0 px-3 py-2 rounded border border-border dark:border-border-dark bg-surface dark:bg-surface-dark text-textPrimary dark:text-textPrimary-dark text-sm outline-none focus:ring-2 focus:ring-primary';
+  'block w-full min-w-0 px-3 py-2 rounded-lg border border-border dark:border-border-dark text-sm bg-surface dark:bg-surface-dark text-textPrimary dark:text-textPrimary-dark outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors';
 const selectClasses =
-  'block w-full min-w-0 px-3 py-2 rounded border border-border dark:border-border-dark bg-surface dark:bg-surface-dark text-textPrimary dark:text-textPrimary-dark text-sm outline-none focus:ring-2 focus:ring-primary';
+  'block w-full min-w-0 px-3 py-2 pr-10 rounded-lg border border-border dark:border-border-dark text-sm bg-surface dark:bg-surface-dark text-textPrimary dark:text-textPrimary-dark outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors appearance-none bg-no-repeat bg-[length:1.5rem_1.5rem] bg-[right_0.5rem_center] bg-[url("data:image/svg+xml,%3csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 20 20\'%3e%3cpath stroke=\'%236b7280\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1.5\' d=\'M6 8l4 4 4-4\'/%3e%3c/svg%3e")]';
 
 interface ConditionData {
   sourceType: 'sensor' | 'device';
@@ -517,10 +518,15 @@ const ConditionBuilder: React.FC<{
       />
 
       {onDelete && (
-        <Button type="button" variant="danger" size="sm" onClick={onDelete} className="ml-auto">
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-          </svg>
+        <Button
+          type="button"
+          variant="secondary"
+          size="sm"
+          onClick={onDelete}
+          aria-label="Remove condition"
+          className="ml-auto p-2 text-danger hover:text-danger"
+        >
+          <Trash2 className="w-4 h-4" aria-hidden />
         </Button>
       )}
     </div>
@@ -576,7 +582,7 @@ const ExpressionGroup: React.FC<{
   };
 
   return (
-    <div className="rounded border border-border dark:border-border-dark p-4 mb-4 bg-card dark:bg-card-dark">
+    <div className="rounded-lg border border-border dark:border-border-dark p-4 mb-4 bg-card dark:bg-card-dark">
       <div className="space-y-4">
         <div className="flex items-center gap-4">
           <FormField label="Group Type" id={`group-type-${group.type}-${group.expressions.length}`}>
@@ -590,10 +596,15 @@ const ExpressionGroup: React.FC<{
             </select>
           </FormField>
           {onDelete && (
-            <Button type="button" variant="danger" size="sm" onClick={onDelete} className="ml-auto">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-              </svg>
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={onDelete}
+              aria-label="Remove group"
+              className="ml-auto p-2 text-danger hover:text-danger"
+            >
+              <Trash2 className="w-4 h-4" aria-hidden />
             </Button>
           )}
         </div>
@@ -630,16 +641,10 @@ const ExpressionGroup: React.FC<{
         ))}
 
         <div className="flex gap-2">
-          <Button type="button" variant="outline" size="sm" onClick={addCondition}>
-            <svg className="w-4 h-4 mr-1 inline-block" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
-            </svg>
+          <Button type="button" variant="secondary" size="sm" onClick={addCondition} leftIcon={<Plus className="w-4 h-4" />}>
             Add Condition
           </Button>
-          <Button type="button" variant="outline" size="sm" onClick={addGroup}>
-            <svg className="w-4 h-4 mr-1 inline-block" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
-            </svg>
+          <Button type="button" variant="secondary" size="sm" onClick={addGroup} leftIcon={<Plus className="w-4 h-4" />}>
             Add Group
           </Button>
         </div>
@@ -907,7 +912,7 @@ const NodeDialog: React.FC<NodeDialogProps> = ({
           onFetchSensorDetails={onFetchSensorDetails}
         />
 
-        <div className="mt-2 p-4 rounded border border-border dark:border-border-dark bg-surfaceHover dark:bg-surfaceHover-dark">
+        <div className="mt-2 p-4 rounded-lg border border-border dark:border-border-dark bg-surfaceHover dark:bg-surfaceHover-dark">
           <p className="text-sm font-medium text-textSecondary dark:text-textSecondary-dark mb-2 m-0">
             Preview:
           </p>

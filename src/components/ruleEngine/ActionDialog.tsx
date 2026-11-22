@@ -13,9 +13,9 @@ import {
 } from '../../state/slices/ruleEngine.slice';
 
 const inputClasses =
-  'w-full px-3 py-2 rounded border border-border dark:border-border-dark bg-surface dark:bg-surface-dark text-textPrimary dark:text-textPrimary-dark text-sm outline-none focus:ring-2 focus:ring-primary';
+  'block w-full px-3 py-2 rounded-lg border border-border dark:border-border-dark text-sm bg-surface dark:bg-surface-dark text-textPrimary dark:text-textPrimary-dark outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors';
 const selectClasses =
-  'w-full px-3 py-2 rounded border border-border dark:border-border-dark bg-surface dark:bg-surface-dark text-textPrimary dark:text-textPrimary-dark text-sm outline-none focus:ring-2 focus:ring-primary';
+  'block w-full px-3 py-2 pr-10 rounded-lg border border-border dark:border-border-dark text-sm bg-surface dark:bg-surface-dark text-textPrimary dark:text-textPrimary-dark outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors appearance-none bg-no-repeat bg-[length:1.5rem_1.5rem] bg-[right_0.5rem_center] bg-[url("data:image/svg+xml,%3csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 20 20\'%3e%3cpath stroke=\'%236b7280\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1.5\' d=\'M6 8l4 4 4-4\'/%3e%3c/svg%3e")]';
 
 const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
   open,
@@ -355,7 +355,7 @@ const ActionDialog: React.FC<ActionDialogProps> = React.memo(({
         )}
 
         {jsonOutput && (
-          <div className="mt-2 p-4 rounded border border-border dark:border-border-dark bg-card dark:bg-card-dark">
+          <div className="mt-2 p-4 rounded-lg border border-border dark:border-border-dark bg-card dark:bg-card-dark">
             <p className="text-sm font-medium text-textSecondary dark:text-textSecondary-dark mb-2 m-0">
               Action Configuration:
             </p>

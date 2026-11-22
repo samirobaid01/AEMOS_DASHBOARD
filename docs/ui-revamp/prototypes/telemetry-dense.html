@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AEMOS — Dense Telemetry (mockup)</title>
+<!-- Throwaway local mockup. Framework CDNs render locally; no data is uploaded. -->
+<script src="https://cdn.tailwindcss.com/3.4.16"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      fontFamily: { sans: ['Inter','system-ui','sans-serif'] },
+      colors: {
+        leaf: { 50:'#ecfdf5',100:'#d1fae5',200:'#a7f3d0',300:'#6ee7b7',400:'#34d399',500:'#10b981',600:'#059669',700:'#047857',800:'#065f46',900:'#064e3b' },
+        ink:  { 50:'#f8fafc',100:'#f1f5f9',200:'#e2e8f0',300:'#cbd5e1',400:'#94a3b8',500:'#64748b',600:'#475569',700:'#334155',800:'#1e293b',900:'#0f172a' },
+      }
+    }
+  }
+}
+</script>
+<style>
+  body{ font-feature-settings:"cv11","ss01"; }
+  .tnum{ font-variant-numeric: tabular-nums; }
+  ::-webkit-scrollbar{ width:8px;height:8px } ::-webkit-scrollbar-thumb{ background:#cbd5e1;border-radius:8px }
+  .widget{ transition: box-shadow .15s ease, transform .15s ease; }
+  .widget:hover{ box-shadow: 0 6px 24px -8px rgba(15,23,42,.18); }
+  .pulse-dot{ animation: pulse 1.8s ease-in-out infinite; } @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+</style>
+</head>
+<body class="bg-ink-100 text-ink-800 antialiased">
+
+<div class="flex min-h-screen">
+  <!-- Rail sidebar (compact, icon+label) -->
+  <aside class="hidden md:flex w-56 shrink-0 flex-col bg-white border-r border-ink-200">
+    <div class="h-14 flex items-center gap-2 px-4 border-b border-ink-200">
+      <div class="w-7 h-7 rounded-lg bg-leaf-600 text-white grid place-items-center font-bold">A</div>
+      <div class="font-bold text-ink-900">AEMOS <span class="text-leaf-600 font-semibold">Agri</span></div>
+    </div>
+    <nav class="p-2 text-sm">
+      <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-ink-600 hover:bg-ink-100">◇ Dashboard</a>
+      <a class="flex items-center gap-3 px-3 py-2 rounded-lg bg-leaf-600 text-white font-medium">▤ Live Telemetry</a>
+      <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-ink-600 hover:bg-ink-100">◎ Organizations</a>
+      <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-ink-600 hover:bg-ink-100">◱ Areas</a>
+      <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-ink-600 hover:bg-ink-100">⌁ Sensors</a>
+      <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-ink-600 hover:bg-ink-100">⊡ Devices</a>
+      <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-ink-600 hover:bg-ink-100">⚡ Rules</a>
+      <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-ink-600 hover:bg-ink-100">⚙ Settings</a>
+    </nav>
+  </aside>
+
+  <!-- Main -->
+  <div class="flex-1 min-w-0 flex flex-col">
+    <!-- Top bar -->
+    <header class="h-14 bg-white border-b border-ink-200 flex items-center gap-3 px-4 sticky top-0 z-10">
+      <div class="min-w-0">
+        <h1 class="text-base font-semibold text-ink-900 leading-tight">Live Telemetry</h1>
+        <p class="text-xs text-ink-500 leading-tight">Real-time sensor &amp; device monitoring</p>
+      </div>
+      <div class="ml-auto flex items-center gap-2 text-sm">
+        <div class="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-ink-100 text-ink-700">◫ GreenTech Solutions ltd</div>
+        <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-leaf-50 text-leaf-700 border border-leaf-200">
+          <span class="w-2 h-2 rounded-full bg-leaf-500 pulse-dot"></span> Live
+        </div>
+        <div class="tnum px-2.5 py-1.5 rounded-lg bg-ink-100 text-ink-600" id="clock">--:--:--</div>
+        <button class="px-2.5 py-1.5 rounded-lg bg-ink-100 text-ink-600 hover:bg-ink-200">⟳</button>
+      </div>
+    </header>
+
+    <main class="flex-1 p-4 space-y-4">
+
+      <!-- Add bar (compact, inline — not a giant card) -->
+      <div class="widget bg-white rounded-xl border border-ink-200 p-3 flex flex-wrap items-end gap-2">
+        <div class="flex-1 min-w-[150px]">
+          <label class="block text-[11px] font-medium text-ink-500 mb-1">Organization</label>
+          <select class="w-full h-9 rounded-lg border border-ink-200 bg-white px-2 text-sm"><option>GreenTech Solutions ltd</option></select>
+        </div>
+        <div class="flex-1 min-w-[150px]">
+          <label class="block text-[11px] font-medium text-ink-500 mb-1">Area</label>
+          <select class="w-full h-9 rounded-lg border border-ink-200 bg-white px-2 text-sm"><option>Hydroponics Bay A</option></select>
+        </div>
+        <div class="flex-1 min-w-[150px]">
+          <label class="block text-[11px] font-medium text-ink-500 mb-1">Sensor</label>
+          <select class="w-full h-9 rounded-lg border border-ink-200 bg-white px-2 text-sm"><option>Select sensor…</option></select>
+        </div>
+        <div class="flex-1 min-w-[150px]">
+          <label class="block text-[11px] font-medium text-ink-500 mb-1">Device</label>
+          <select class="w-full h-9 rounded-lg border border-ink-200 bg-white px-2 text-sm"><option>Select device…</option></select>
+        </div>
+        <button class="h-9 px-3 rounded-lg bg-leaf-600 hover:bg-leaf-700 text-white text-sm font-medium">+ Add</button>
+      </div>
+
+      <!-- KPI tiles -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="widget bg-white rounded-xl border border-ink-200 p-4">
+          <div class="flex items-center justify-between"><span class="text-xs font-medium text-ink-500">Monitored</span><span class="text-ink-300">▤</span></div>
+          <div class="mt-1 text-3xl font-bold tnum text-ink-900">3</div>
+          <div class="text-xs text-ink-400">entities</div>
+        </div>
+        <div class="widget bg-white rounded-xl border border-ink-200 p-4">
+          <div class="flex items-center justify-between"><span class="text-xs font-medium text-ink-500">Online</span><span class="w-2 h-2 rounded-full bg-leaf-500 mt-1"></span></div>
+          <div class="mt-1 text-3xl font-bold tnum text-leaf-600">3</div>
+          <div class="text-xs text-ink-400">100% connected</div>
+        </div>
+        <div class="widget bg-white rounded-xl border border-ink-200 p-4">
+          <div class="flex items-center justify-between"><span class="text-xs font-medium text-ink-500">Active alarms</span><span class="text-ink-300">△</span></div>
+          <div class="mt-1 text-3xl font-bold tnum text-ink-900">0</div>
+          <div class="text-xs text-ink-400">all nominal</div>
+        </div>
+        <div class="widget bg-white rounded-xl border border-ink-200 p-4">
+          <div class="flex items-center justify-between"><span class="text-xs font-medium text-ink-500">Data points / min</span><span class="text-ink-300">↯</span></div>
+          <div class="mt-1 text-3xl font-bold tnum text-ink-900">42</div>
+          <div class="text-xs text-leaf-600">▲ 8% vs last hr</div>
+        </div>
+      </div>
+
+      <!-- Main grid: chart + gauges -->
+      <div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
+        <div class="widget xl:col-span-2 bg-white rounded-xl border border-ink-200 p-4">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="font-semibold text-ink-800">Telemetry — last 30 min</h3>
+            <div class="flex gap-1 text-xs">
+              <button class="px-2 py-1 rounded-md bg-ink-900 text-white">30m</button>
+              <button class="px-2 py-1 rounded-md bg-ink-100 text-ink-600">6h</button>
+              <button class="px-2 py-1 rounded-md bg-ink-100 text-ink-600">24h</button>
+            </div>
+          </div>
+          <div class="h-64"><canvas id="tsChart"></canvas></div>
+        </div>
+
+        <div class="widget bg-white rounded-xl border border-ink-200 p-4">
+          <h3 class="font-semibold text-ink-800 mb-3">Key readings</h3>
+          <div class="grid grid-cols-2 gap-3">
+            <div class="text-center">
+              <canvas id="g1" width="120" height="120"></canvas>
+              <div class="text-xs text-ink-500 -mt-1">Dissolved O₂</div>
+            </div>
+            <div class="text-center">
+              <canvas id="g2" width="120" height="120"></canvas>
+              <div class="text-xs text-ink-500 -mt-1">DO Saturation</div>
+            </div>
+            <div class="text-center">
+              <canvas id="g3" width="120" height="120"></canvas>
+              <div class="text-xs text-ink-500 -mt-1">Soil moisture</div>
+            </div>
+            <div class="text-center">
+              <canvas id="g4" width="120" height="120"></canvas>
+              <div class="text-xs text-ink-500 -mt-1">Battery</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sensor widget cards (dense, replaces the sparse table) -->
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+
+        <!-- Card template -->
+        <div class="widget bg-white rounded-xl border border-ink-200 overflow-hidden">
+          <div class="px-4 py-3 border-b border-ink-100 flex items-center gap-2">
+            <span class="w-8 h-8 rounded-lg bg-sky-50 text-sky-600 grid place-items-center text-sm">⌁</span>
+            <div class="min-w-0">
+              <div class="font-semibold text-ink-800 truncate">EC/TDS Meter — Main Tank</div>
+              <div class="text-xs text-ink-400 truncate">Hydroponics Bay A</div>
+            </div>
+            <span class="ml-auto inline-flex items-center gap-1 text-xs text-leaf-700"><span class="w-1.5 h-1.5 rounded-full bg-leaf-500"></span>Live</span>
+          </div>
+          <div class="p-3 grid grid-cols-3 gap-2">
+            <div class="rounded-lg bg-ink-50 p-2">
+              <div class="text-[11px] text-ink-500 truncate">EC</div>
+              <div class="text-lg font-bold tnum text-ink-900">1.98<span class="text-xs font-normal text-ink-400"> mS</span></div>
+              <svg viewBox="0 0 80 20" class="w-full h-5"><polyline fill="none" stroke="#0ea5e9" stroke-width="2" points="0,14 13,12 26,15 39,9 52,11 65,6 80,8"/></svg>
+            </div>
+            <div class="rounded-lg bg-ink-50 p-2">
+              <div class="text-[11px] text-ink-500 truncate">TDS</div>
+              <div class="text-lg font-bold tnum text-ink-900">980<span class="text-xs font-normal text-ink-400"> ppm</span></div>
+              <svg viewBox="0 0 80 20" class="w-full h-5"><polyline fill="none" stroke="#0ea5e9" stroke-width="2" points="0,10 13,11 26,8 39,12 52,9 65,13 80,10"/></svg>
+            </div>
+            <div class="rounded-lg bg-ink-50 p-2">
+              <div class="text-[11px] text-ink-500 truncate">Temp</div>
+              <div class="text-lg font-bold tnum text-ink-900">1.58<span class="text-xs font-normal text-ink-400"> °C</span></div>
+              <svg viewBox="0 0 80 20" class="w-full h-5"><polyline fill="none" stroke="#10b981" stroke-width="2" points="0,12 13,10 26,11 39,8 52,10 65,7 80,9"/></svg>
+            </div>
+          </div>
+          <div class="px-4 py-2 border-t border-ink-100 text-[11px] text-ink-400 flex justify-between"><span>3 variables</span><span>updated 5:05:21 PM</span></div>
+        </div>
+
+        <div class="widget bg-white rounded-xl border border-ink-200 overflow-hidden">
+          <div class="px-4 py-3 border-b border-ink-100 flex items-center gap-2">
+            <span class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 grid place-items-center text-sm">⌁</span>
+            <div class="min-w-0">
+              <div class="font-semibold text-ink-800 truncate">SoilMoisture-AG11</div>
+              <div class="text-xs text-ink-400 truncate">Field North · Row 3</div>
+            </div>
+            <span class="ml-auto inline-flex items-center gap-1 text-xs text-leaf-700"><span class="w-1.5 h-1.5 rounded-full bg-leaf-500"></span>Live</span>
+          </div>
+          <div class="p-3 grid grid-cols-2 gap-2">
+            <div class="rounded-lg bg-ink-50 p-2"><div class="text-[11px] text-ink-500">Soil moisture</div><div class="text-lg font-bold tnum text-ink-900">38<span class="text-xs text-ink-400"> %</span></div><svg viewBox="0 0 80 20" class="w-full h-5"><polyline fill="none" stroke="#059669" stroke-width="2" points="0,12 13,11 26,9 39,10 52,8 65,9 80,7"/></svg></div>
+            <div class="rounded-lg bg-ink-50 p-2"><div class="text-[11px] text-ink-500">Soil temp</div><div class="text-lg font-bold tnum text-ink-900">22.4<span class="text-xs text-ink-400"> °C</span></div><svg viewBox="0 0 80 20" class="w-full h-5"><polyline fill="none" stroke="#10b981" stroke-width="2" points="0,10 13,9 26,11 39,8 52,10 65,9 80,8"/></svg></div>
+            <div class="rounded-lg bg-ink-50 p-2"><div class="text-[11px] text-ink-500">Battery</div><div class="text-lg font-bold tnum text-ink-900">61<span class="text-xs text-ink-400"> %</span></div><svg viewBox="0 0 80 20" class="w-full h-5"><polyline fill="none" stroke="#f59e0b" stroke-width="2" points="0,6 13,7 26,8 39,9 52,10 65,11 80,12"/></svg></div>
+            <div class="rounded-lg bg-ink-50 p-2"><div class="text-[11px] text-ink-500">Signal</div><div class="text-lg font-bold tnum text-ink-900">61<span class="text-xs text-ink-400"> dBm</span></div><svg viewBox="0 0 80 20" class="w-full h-5"><polyline fill="none" stroke="#64748b" stroke-width="2" points="0,9 13,8 26,10 39,9 52,8 65,10 80,9"/></svg></div>
+          </div>
+          <div class="px-4 py-2 border-t border-ink-100 text-[11px] text-ink-400 flex justify-between"><span>4 variables</span><span>updated 5:05:21 PM</span></div>
+        </div>
+
+        <div class="widget bg-white rounded-xl border border-ink-200 overflow-hidden">
+          <div class="px-4 py-3 border-b border-ink-100 flex items-center gap-2">
+            <span class="w-8 h-8 rounded-lg bg-sky-50 text-sky-600 grid place-items-center text-sm">⌁</span>
+            <div class="min-w-0">
+              <div class="font-semibold text-ink-800 truncate">Dissolved Oxygen Sensor</div>
+              <div class="text-xs text-ink-400 truncate">Hydroponics Bay A</div>
+            </div>
+            <span class="ml-auto inline-flex items-center gap-1 text-xs text-leaf-700"><span class="w-1.5 h-1.5 rounded-full bg-leaf-500"></span>Live</span>
+          </div>
+          <div class="p-3 grid grid-cols-2 gap-2">
+            <div class="rounded-lg bg-ink-50 p-2"><div class="text-[11px] text-ink-500">Dissolved O₂</div><div class="text-lg font-bold tnum text-ink-900">74.40<span class="text-xs text-ink-400"> %</span></div><svg viewBox="0 0 80 20" class="w-full h-5"><polyline fill="none" stroke="#0ea5e9" stroke-width="2" points="0,9 13,8 26,7 39,9 52,6 65,8 80,7"/></svg></div>
+            <div class="rounded-lg bg-ink-50 p-2"><div class="text-[11px] text-ink-500">DO Saturation</div><div class="text-lg font-bold tnum text-ink-900">7.10<span class="text-xs text-ink-400"> mg/L</span></div><svg viewBox="0 0 80 20" class="w-full h-5"><polyline fill="none" stroke="#10b981" stroke-width="2" points="0,11 13,10 26,12 39,9 52,11 65,8 80,10"/></svg></div>
+          </div>
+          <div class="px-4 py-2 border-t border-ink-100 text-[11px] text-ink-400 flex justify-between"><span>2 variables</span><span>updated 5:05:21 PM</span></div>
+        </div>
+      </div>
+
+      <!-- Alarms / events strip -->
+      <div class="widget bg-white rounded-xl border border-ink-200 p-4">
+        <div class="flex items-center justify-between mb-2"><h3 class="font-semibold text-ink-800">Recent events</h3><a class="text-xs text-leaf-700">View all →</a></div>
+        <table class="w-full text-sm">
+          <thead class="text-[11px] uppercase text-ink-400 text-left"><tr><th class="py-1 font-medium">Time</th><th class="py-1 font-medium">Source</th><th class="py-1 font-medium">Event</th><th class="py-1 font-medium">Severity</th></tr></thead>
+          <tbody class="tnum">
+            <tr class="border-t border-ink-100"><td class="py-2 text-ink-500">17:05:21</td><td>Dissolved Oxygen Sensor</td><td>New datastream received</td><td><span class="px-1.5 py-0.5 rounded bg-ink-100 text-ink-600 text-xs">info</span></td></tr>
+            <tr class="border-t border-ink-100"><td class="py-2 text-ink-500">17:04:58</td><td>SoilMoisture-AG11</td><td>Battery below 65%</td><td><span class="px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 text-xs">warning</span></td></tr>
+            <tr class="border-t border-ink-100"><td class="py-2 text-ink-500">17:03:10</td><td>EC/TDS Meter</td><td>Reconnected</td><td><span class="px-1.5 py-0.5 rounded bg-leaf-100 text-leaf-700 text-xs">ok</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<script>
+  // live clock
+  const clk = document.getElementById('clock');
+  setInterval(()=>{ clk.textContent = new Date().toLocaleTimeString(); }, 1000);
+
+  // time-series chart
+  const labels = Array.from({length:30},(_,i)=>`${i}`);
+  const series = (base,amp,seed)=>labels.map((_,i)=>+(base+Math.sin(i/3+seed)*amp+Math.random()*amp*0.4).toFixed(2));
+  new Chart(document.getElementById('tsChart'), {
+    type:'line',
+    data:{ labels,
+      datasets:[
+        {label:'Solution Temp (°C)', data:series(22,1.2,0), borderColor:'#10b981', backgroundColor:'rgba(16,185,129,.08)', fill:true, tension:.35, pointRadius:0, borderWidth:2},
+        {label:'Dissolved O₂ (%)', data:series(74,3,1), borderColor:'#0ea5e9', backgroundColor:'rgba(14,165,233,.06)', fill:true, tension:.35, pointRadius:0, borderWidth:2},
+        {label:'Soil moisture (%)', data:series(38,2,2), borderColor:'#f59e0b', backgroundColor:'rgba(245,158,11,.06)', fill:true, tension:.35, pointRadius:0, borderWidth:2},
+      ]},
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ position:'bottom', labels:{ boxWidth:10, font:{size:11}, color:'#64748b' } } },
+      scales:{ x:{ display:false }, y:{ grid:{ color:'#f1f5f9' }, ticks:{ color:'#94a3b8', font:{size:10} } } } }
+  });
+
+  // radial gauges
+  function gauge(id,value,max,color,unit){
+    new Chart(document.getElementById(id), {
+      type:'doughnut',
+      data:{ datasets:[{ data:[value, Math.max(max-value,0)], backgroundColor:[color,'#eef2f6'], borderWidth:0 }] },
+      options:{ cutout:'72%', circumference:270, rotation:225, responsive:false,
+        plugins:{ legend:{display:false}, tooltip:{enabled:false} } },
+      plugins:[{ id:'txt', afterDraw(c){ const {ctx,chartArea:{width,height}}=c; ctx.save();
+        ctx.font='700 18px Inter'; ctx.fillStyle='#0f172a'; ctx.textAlign='center'; ctx.textBaseline='middle';
+        ctx.fillText(value+(unit||''), width/2, height/2+8); ctx.restore(); } }]
+    });
+  }
+  gauge('g1',74.4,100,'#0ea5e9','%');
+  gauge('g2',7.1,14,'#10b981','');
+  gauge('g3',38,100,'#059669','%');
+  gauge('g4',61,100,'#f59e0b','%');
+</script>
+</body>
+</html>

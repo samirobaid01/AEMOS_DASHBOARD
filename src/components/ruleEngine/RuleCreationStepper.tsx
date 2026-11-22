@@ -1,4 +1,5 @@
 import React from 'react';
+import { Check } from 'lucide-react';
 
 interface Step {
   label: string;
@@ -26,16 +27,14 @@ const RuleCreationStepper: React.FC<RuleCreationStepperProps> = ({ steps, curren
                 className={[
                   'w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold shrink-0 transition-colors',
                   isCompleted
-                    ? 'bg-success dark:bg-success-dark text-white'
+                    ? 'bg-leaf-600 text-white'
                     : isActive
-                      ? 'bg-primary dark:bg-primary-dark text-white'
-                      : 'bg-surfaceHover dark:bg-surfaceHover-dark text-textMuted dark:text-textMuted-dark border border-border dark:border-border-dark',
+                      ? 'bg-leaf-600 text-white ring-2 ring-leaf-200 dark:ring-leaf-900'
+                      : 'bg-ink-100 dark:bg-ink-800 text-ink-500 dark:text-ink-400',
                 ].join(' ')}
               >
                 {isCompleted ? (
-                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
+                  <Check className="w-3.5 h-3.5" strokeWidth={3} aria-hidden />
                 ) : (
                   index + 1
                 )}
@@ -55,7 +54,7 @@ const RuleCreationStepper: React.FC<RuleCreationStepperProps> = ({ steps, curren
               <div
                 className={[
                   'flex-1 h-px mx-3 transition-colors',
-                  isCompleted ? 'bg-success dark:bg-success-dark' : 'bg-border dark:bg-border-dark',
+                  isCompleted ? 'bg-leaf-600' : 'bg-border dark:bg-border-dark',
                 ].join(' ')}
               />
             )}

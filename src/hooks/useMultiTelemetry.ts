@@ -12,6 +12,10 @@ interface UseMultiTelemetryReturn {
   telemetryData: TelemetryData;
   addEntity: (entity: MonitoredEntity) => void;
   removeEntity: (entityId: string) => void;
+  seedValues: (
+    entityId: string,
+    values: Record<string, { value: string | number | boolean; timestamp: string }>,
+  ) => void;
   isConnected: boolean;
 }
 
@@ -71,22 +75,58 @@ export const useMultiTelemetry = (options: UseMultiTelemetryOptions): UseMultiTe
     }));
   }, [initializeTelemetryData, isConnected]);
 
+  // Seed current values from the REST snapshot without disturbing the live socket
+  // flow: never overwrite a value that a socket update already made fresher, and
+  // never move a timestamp backwards. Seeded values are not "new" (no flash).
+  const seedValues = useCallback((
+    entityId: string,
+    values: Record<string, { value: string | number | boolean; timestamp: string }>,
+  ) => {
+    if (Object.keys(values).length === 0) return;
+
+    setTelemetryData(prev => {
+      const entity = prev[entityId];
+      if (!entity) return prev;
+
+      const nextValues = { ...entity.values };
+      let lastUpdate = entity.lastUpdate;
+      let changed = false;
+
+      for (const [key, seeded] of Object.entries(values)) {
+        const existing = nextValues[key];
+        const hasLiveValue = existing && existing.value !== '-' && existing.value !== undefined;
+        if (
+          hasLiveValue &&
+          existing.timestamp &&
+          new Date(existing.timestamp).getTime() >= new Date(seeded.timestamp).getTime()
+        ) {
+          continue; // a fresher live value is already in place
+        }
+
+        nextValues[key] = { value: seeded.value, timestamp: seeded.timestamp, isNew: false };
+        changed = true;
+        if (!lastUpdate || new Date(seeded.timestamp).getTime() > new Date(lastUpdate).getTime()) {
+          lastUpdate = seeded.timestamp;
+        }
+      }
+
+      if (!changed) return prev;
+      return { ...prev, [entityId]: { ...entity, values: nextValues, lastUpdate } };
+    });
+  }, []);
+
   const removeEntity = useCallback((entityId: string) => {
     const entity = monitoredEntities.find(e => e.id === entityId);
     
     if (entity && socketRef.current?.connected) {
-      console.log(`[MultiTelemetry] Removing entity: ${entity.name} (${entity.type})`);
-      
       if (entity.type === 'sensor' && entity.telemetryVariables) {
         entity.telemetryVariables.forEach((variable) => {
           const roomName = `telemetry-${variable.id}`;
-          console.log(`[MultiTelemetry] Leaving room: ${roomName}`);
           socketRef.current?.emit('leave', roomName);
           joinedRoomsRef.current.delete(roomName);
         });
       } else if (entity.type === 'device' && entity.uuid) {
         const roomName = `device-uuid-${entity.uuid}`;
-        console.log(`[MultiTelemetry] Leaving room: ${roomName}`);
         socketRef.current?.emit('leave', roomName);
         joinedRoomsRef.current.delete(roomName);
       }
@@ -291,9 +331,10 @@ export const useMultiTelemetry = (options: UseMultiTelemetryOptions): UseMultiTe
     });
 
     return () => {
-      if (socket) {
-        socket.disconnect();
-      }
+      // Disconnect regardless of connection state; socket.io handles mid-handshake
+      // teardown gracefully when we null the ref first so no stale emits follow
+      socketRef.current = null;
+      socket.disconnect();
     };
   }, [options.authToken, serverUrl]);
 
@@ -329,6 +370,7 @@ export const useMultiTelemetry = (options: UseMultiTelemetryOptions): UseMultiTe
     telemetryData,
     addEntity,
     removeEntity,
+    seedValues,
     isConnected
   };
 };

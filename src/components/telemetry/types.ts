@@ -3,6 +3,7 @@ import type { Device } from '../../types/device';
 import type { Organization } from '../../types/organization';
 import type { Area } from '../../types/area';
 import type { DeviceState } from '../../state/slices/deviceDetails.slice';
+import type { TelemetryHistory } from '../../hooks/useTelemetryHistory';
 
 export type EntityType = 'sensor' | 'device';
 
@@ -70,6 +71,7 @@ export interface TelemetryRowProps {
 export interface TelemetryDashboardProps {
   monitoredEntities: MonitoredEntity[];
   telemetryData: TelemetryData;
+  history: TelemetryHistory;
   organizations: Pick<Organization, 'id' | 'name'>[];
   areas: Pick<Area, 'id' | 'name' | 'organizationId'>[];
   sensors: Pick<Sensor, 'id' | 'name' | 'areaId' | 'description' | 'TelemetryData' | 'status'>[];

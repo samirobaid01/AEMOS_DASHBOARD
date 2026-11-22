@@ -10,6 +10,9 @@ import { selectSelectedOrganizationId } from '../../state/slices/auth.slice';
 import TelemetryDashboardComponent from '../../components/telemetry/TelemetryDashboard';
 import LoadingScreen from '../../components/common/Loading/LoadingScreen';
 import { useMultiTelemetry } from '../../hooks/useMultiTelemetry';
+import { useTelemetryHistory } from '../../hooks/useTelemetryHistory';
+import { useDashboardSnapshot } from '../../hooks/useDashboardSnapshot';
+import { buildSeedValues } from '../../services/dashboard.service';
 import { ENABLE_TELEMETRY_PERSISTENCE } from '../../config';
 import { loadTelemetryEntities, saveTelemetryEntities } from '../../utils/telemetryStorage';
 import type { MonitoredEntity } from '../../components/telemetry/types';
@@ -35,12 +38,28 @@ const TelemetryDashboard = () => {
   const authToken = useAppSelector((state) => state.auth.token) || '';
   const organizationId = useAppSelector(selectSelectedOrganizationId);
 
-  const { telemetryData, addEntity, removeEntity, isConnected } = useMultiTelemetry({
+  const { telemetryData, addEntity, removeEntity, seedValues } = useMultiTelemetry({
     authToken,
     serverUrl: import.meta.env.VITE_SOCKET_URL || 'http://localhost:3000'
   });
 
+  // Rolling history per variable, so sparklines and the chart fill as data streams in.
+  const history = useTelemetryHistory(telemetryData);
+
+  // REST snapshot of current values for the selected org (realtime-dashboard flag).
+  const { snapshot } = useDashboardSnapshot(organizationId);
+
   const hasRestoredFromStorage = useRef(false);
+
+  // Seed current values from the snapshot as entities/snapshot become available,
+  // so cells show real values on load instead of placeholders. The socket keeps
+  // them live afterwards; seedValues won't overwrite fresher live updates.
+  useEffect(() => {
+    if (!snapshot.available) return;
+    monitoredEntities.forEach((entity) => {
+      seedValues(entity.id, buildSeedValues(entity, snapshot));
+    });
+  }, [snapshot, monitoredEntities, seedValues]);
 
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth);
@@ -282,6 +301,7 @@ const TelemetryDashboard = () => {
     <TelemetryDashboardComponent
       monitoredEntities={monitoredEntities}
       telemetryData={telemetryData}
+      history={history}
       organizations={organizations}
       areas={areas}
       sensors={sensors.map(s => 
@@ -308,7 +328,8 @@ const TelemetryDashboard = () => {
       onAddEntity={handleAddEntity}
       onRemoveEntity={handleRemoveEntity}
       windowWidth={windowWidth}
-      isLoading={!isConnected}
+      // Staging/adding entities is local; don't gate the toolbar on socket connection.
+      isLoading={false}
     />
   );
 };

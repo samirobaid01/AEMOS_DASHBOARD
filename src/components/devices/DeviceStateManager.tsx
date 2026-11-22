@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { cn } from '../../utils/cn';
+import { Plus, Pencil, Power } from 'lucide-react';
 import Card from '../common/Card/Card';
 import Modal from '../common/Modal/Modal';
 import type { DeviceState } from '../../state/slices/deviceStates.slice';
@@ -16,7 +16,6 @@ const DeviceStateManager: React.FC<DeviceStateManagerProps> = ({
   error
 }) => {
   const { t } = useTranslation();
-  const isMobile = window.innerWidth < 768;
 
   const [newState, setNewState] = useState<Omit<DeviceState, 'id' | 'createdAt' | 'updatedAt'>>({
     stateName: '',
@@ -47,7 +46,7 @@ const DeviceStateManager: React.FC<DeviceStateManagerProps> = ({
     }
   };
 
-  const inputClassName = "w-full px-3 py-2 rounded-md border border-border dark:border-border-dark bg-background dark:bg-background-dark text-textPrimary dark:text-textPrimary-dark text-sm focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-primary-dark";
+  const inputClassName = "w-full px-3 py-2 rounded-lg border border-border dark:border-border-dark bg-surface dark:bg-surface-dark text-textPrimary dark:text-textPrimary-dark text-sm outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors";
 
   if (isLoading) {
     return (
@@ -81,10 +80,7 @@ const DeviceStateManager: React.FC<DeviceStateManagerProps> = ({
         </div>
       )}
 
-      <div className={cn(
-        'grid gap-4 mb-6',
-        isMobile ? 'grid-cols-1' : 'grid-cols-[repeat(auto-fit,minmax(200px,1fr))]'
-      )}>
+      <div className="grid gap-4 mb-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         <input
           type="text"
           placeholder={t('devices.deviceState.stateName')}
@@ -119,29 +115,29 @@ const DeviceStateManager: React.FC<DeviceStateManagerProps> = ({
           variant="primary"
           onClick={handleAddState}
           disabled={isLoading || !newState.stateName}
+          leftIcon={<Plus className="w-4 h-4" />}
         >
           {t('devices.deviceState.addState')}
         </Button>
       </div>
 
-      <div className={cn(
-        'grid gap-4',
-        isMobile ? 'grid-cols-1' : 'grid-cols-[repeat(auto-fill,minmax(300px,1fr))]'
-      )}>
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         {Array.isArray(states) && states.map((state) => (
-          <div key={state.id} className="p-4 bg-surface dark:bg-surface-dark rounded-md border border-border dark:border-border-dark">
-            <div className="mb-3">
+          <div key={state.id} className="p-4 bg-surface dark:bg-surface-dark rounded-xl border border-border dark:border-border-dark">
+            <div className="mb-3 flex items-center flex-wrap gap-2">
               <strong className="text-textPrimary dark:text-textPrimary-dark">
                 {state.stateName}
               </strong>
-              <span className={cn(
-                'ml-2 text-xs',
-                state.status === 'active' ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400'
-              )}>
-                ({state.status === 'active' ? t('devices.deviceState.active') : state.status === 'inactive' ? t('devices.deviceState.inactive') : t('devices.deviceState.suspended')})
+              <span className={`inline-flex items-center py-0.5 px-2 rounded-full text-xs font-medium ${
+                state.status === 'active'
+                  ? 'bg-successBg dark:bg-successBg-dark text-successText dark:text-successText-dark'
+                  : 'bg-dangerBg dark:bg-dangerBg-dark text-dangerText dark:text-dangerText-dark'
+              }`}>
+                <span className={`w-2 h-2 rounded-full mr-1.5 ${state.status === 'active' ? 'bg-success dark:bg-success-dark' : 'bg-danger dark:bg-danger-dark'}`} />
+                {state.status === 'active' ? t('devices.deviceState.active') : state.status === 'inactive' ? t('devices.deviceState.inactive') : t('devices.deviceState.suspended')}
               </span>
             </div>
-            <div className="text-sm text-textSecondary dark:text-textSecondary-dark mb-2 space-y-1">
+            <div className="text-sm text-textSecondary dark:text-textSecondary-dark mb-3 space-y-1">
               <div>Type: {state.dataType}</div>
               <div>Default: {state.defaultValue}</div>
               <div>Allowed: {(Array.isArray(state.allowedValues) ? state.allowedValues : []).join(', ')}</div>
@@ -161,6 +157,7 @@ const DeviceStateManager: React.FC<DeviceStateManagerProps> = ({
                   }
                 })}
                 disabled={isLoading}
+                leftIcon={<Pencil className="w-3.5 h-3.5" />}
               >
                 {t('devices.deviceState.editState')}
               </Button>
@@ -169,6 +166,7 @@ const DeviceStateManager: React.FC<DeviceStateManagerProps> = ({
                 size="sm"
                 onClick={() => onDeactivateState(state.id)}
                 disabled={isLoading || state.status === 'inactive' || state.status === 'suspended'}
+                leftIcon={<Power className="w-3.5 h-3.5" />}
               >
                 {t('devices.deviceState.deactivate')}
               </Button>
@@ -261,4 +259,4 @@ const DeviceStateManager: React.FC<DeviceStateManagerProps> = ({
   );
 };
 
-export default DeviceStateManager; 
+export default DeviceStateManager;

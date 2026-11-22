@@ -36,9 +36,9 @@ const Button: React.FC<ButtonProps> = ({
   const getVariantStyles = (): React.CSSProperties => {
     const variants = {
       primary: {
-        backgroundColor: darkMode ? '#4d7efa' : '#3b82f6',
+        backgroundColor: darkMode ? '#10b981' : '#059669',
         color: 'white',
-        hoverBg: darkMode ? '#5d8efa' : '#2563eb',
+        hoverBg: darkMode ? '#34d399' : '#047857',
         border: 'none'
       },
       secondary: {

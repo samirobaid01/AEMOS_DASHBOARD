@@ -25,114 +25,93 @@ export const useTelemetrySocket = (telemetryVariables: TelemetryVariable[] | und
   const [telemetryValues, setTelemetryValues] = useState<TelemetryValues>({});
   const [connected, setConnected] = useState(false);
   const socketRef = useRef<Socket | null>(null);
+  const variablesRef = useRef(telemetryVariables);
   const socketUrl = import.meta.env.VITE_SOCKET_URL || 'http://localhost:3000';
 
+  // Keep variablesRef current without triggering reconnects
   useEffect(() => {
-    // Only connect if we have telemetry variables
-    if (!telemetryVariables || telemetryVariables.length === 0) {
+    variablesRef.current = telemetryVariables;
+  });
+
+  // Stable dependency: reconnect only when the set of IDs changes, not on every render
+  const variableIds = telemetryVariables?.map((v) => v.id).join(',') ?? '';
+
+  useEffect(() => {
+    if (!variableIds) {
       return;
     }
 
-    console.log('Attempting to connect to socket server at:', socketUrl);
-    
-    // Create socket connection
-    socketRef.current = io(socketUrl, {
+    // Disconnect any existing socket before creating a new one
+    if (socketRef.current) {
+      socketRef.current.disconnect();
+      socketRef.current = null;
+    }
+
+    const socket = io(socketUrl, {
       transports: ['websocket'],
       path: '/socket.io',
       reconnection: true,
       reconnectionAttempts: 5,
       reconnectionDelay: 1000,
     });
-
-    // Set up connection handlers
-    const socket = socketRef.current;
+    socketRef.current = socket;
 
     socket.on('connect', () => {
-      console.log('Connected to telemetry socket:', socket.id);
-      console.log('Socket transport:', socket.io.engine.transport.name);
       setConnected(true);
-
-      // Join rooms for each telemetry variable
-      telemetryVariables.forEach((variable) => {
-        const roomName = `telemetry-${variable.id}`;
-        console.log(`Joining telemetry room: ${roomName} for variable: ${variable.variableName}`);
-        socket.emit('join', roomName);
+      variablesRef.current?.forEach((variable) => {
+        socket.emit('join', `telemetry-${variable.id}`);
       });
     });
 
-    socket.on('connect_error', (error) => {
-      console.error('Socket connection error:', error);
-      console.error('Socket connection error details:', error.message);
+    socket.on('connect_error', () => {
       setConnected(false);
     });
 
-    socket.on('disconnect', (reason) => {
-      console.log('Disconnected from socket:', reason);
+    socket.on('disconnect', () => {
       setConnected(false);
     });
 
-    // Listen for new datastreams, now using the updated format
     socket.on('new-datastream', (payload: DataStreamPayload) => {
-      console.log('New datastream received:', payload);
-      
-      // Extract the relevant data from the nested structure
       const { dataStream, timestamp } = payload;
       const { telemetryDataId, value } = dataStream;
 
       setTelemetryValues((prev) => {
-        // Mark all existing values as not new
-        const resetState = Object.entries(prev).reduce((acc, [id, value]) => {
-          acc[Number(id)] = { ...value, isNew: false };
+        const resetState = Object.entries(prev).reduce((acc, [id, val]) => {
+          acc[Number(id)] = { ...val, isNew: false };
           return acc;
         }, {} as TelemetryValues);
 
-        // Add or update the value that just came in, marking it as new
         return {
           ...resetState,
-          [telemetryDataId]: {
-            value: value,
-            timestamp: timestamp,
-            isNew: true
-          }
+          [telemetryDataId]: { value, timestamp, isNew: true },
         };
       });
 
-      // Reset the "isNew" flag after animation time
       setTimeout(() => {
         setTelemetryValues((prev) => {
-          if (prev[telemetryDataId]) {
-            return {
-              ...prev,
-              [telemetryDataId]: {
-                ...prev[telemetryDataId],
-                isNew: false
-              }
-            };
-          }
-          return prev;
+          if (!prev[telemetryDataId]) return prev;
+          return {
+            ...prev,
+            [telemetryDataId]: { ...prev[telemetryDataId], isNew: false },
+          };
         });
       }, 2000);
     });
 
-    // Add a catch-all listener to see all events
-    socket.onAny((eventName, ...args) => {
-      console.log(`Received socket event: ${eventName}`, args);
-    });
-
-    // Cleanup function
     return () => {
-      // Leave telemetry rooms before disconnecting
-      if (socket && telemetryVariables) {
-        telemetryVariables.forEach((variable) => {
-          const roomName = `telemetry-${variable.id}`;
-          console.log(`Leaving telemetry room: ${roomName}`);
-          socket.emit('leave', roomName);
+      // Only emit leave if the socket is actually connected; emitting on a
+      // mid-handshake socket is what causes "WebSocket closed before established"
+      if (socket.connected) {
+        variablesRef.current?.forEach((variable) => {
+          socket.emit('leave', `telemetry-${variable.id}`);
         });
-        socket.disconnect();
-        setConnected(false);
       }
+      socket.disconnect();
+      socketRef.current = null;
+      setConnected(false);
     };
-  }, [telemetryVariables]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [variableIds, socketUrl]);
 
   return { telemetryValues, connected };
 }; 

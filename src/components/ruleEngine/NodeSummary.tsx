@@ -45,7 +45,7 @@ function renderExpression(expr: FilterExpression | FilterGroup, depth = 0): Reac
   if (group.type === 'AND' || group.type === 'OR') {
     return (
       <div key={depth} className={depth > 0 ? 'ml-3 border-l-2 border-border dark:border-border-dark pl-2' : undefined}>
-        <span className="text-xs font-semibold text-primary dark:text-primary-dark uppercase mr-1">{group.type}</span>
+        <span className="inline-block text-xs font-semibold px-1.5 py-0.5 rounded bg-leaf-50 dark:bg-leaf-900/40 text-leaf-700 dark:text-leaf-300 uppercase mr-1">{group.type}</span>
         {group.expressions?.map((child, i) => (
           <div key={i}>{renderExpression(child as FilterExpression | FilterGroup, depth + 1)}</div>
         ))}
@@ -54,11 +54,11 @@ function renderExpression(expr: FilterExpression | FilterGroup, depth = 0): Reac
   }
   const cond = expr as FilterExpression;
   return (
-    <div className="flex flex-wrap gap-1 items-center text-xs py-0.5">
+    <div className="flex flex-wrap gap-1.5 items-center text-xs py-0.5">
       <span className="text-textMuted dark:text-textMuted-dark">{cond.sourceType}</span>
       <span className="font-mono text-textPrimary dark:text-textPrimary-dark">{cond.key || cond.UUID}</span>
-      <span className="text-accent dark:text-accent-dark">{cond.operator}</span>
-      <span className="font-semibold text-textPrimary dark:text-textPrimary-dark">{String(cond.value ?? '')}</span>
+      <span className="font-mono text-leaf-600 dark:text-leaf-400">{cond.operator}</span>
+      <span className="font-semibold font-mono text-textPrimary dark:text-textPrimary-dark">{String(cond.value ?? '')}</span>
       {cond.duration != null && (
         <span className="text-textMuted dark:text-textMuted-dark">for {cond.duration}s</span>
       )}
@@ -76,7 +76,7 @@ const NodeSummary: React.FC<NodeSummaryProps> = ({ config }) => {
     parsed = parseNodeConfig<NodeConfig>(config);
   } catch {
     return (
-      <pre className="rounded bg-surfaceHover dark:bg-surfaceHover-dark border border-border dark:border-border-dark p-3 font-mono text-xs overflow-x-auto text-textPrimary dark:text-textPrimary-dark m-0">
+      <pre className="rounded-lg bg-card dark:bg-card-dark border border-border dark:border-border-dark p-3 font-mono text-xs overflow-x-auto text-textPrimary dark:text-textPrimary-dark m-0">
         {typeof config === 'string' ? config : JSON.stringify(config, null, 2)}
       </pre>
     );
@@ -85,18 +85,18 @@ const NodeSummary: React.FC<NodeSummaryProps> = ({ config }) => {
   if (isActionConfig(parsed)) {
     const { command } = parsed;
     return (
-      <div className="rounded border border-border dark:border-border-dark bg-surfaceHover dark:bg-surfaceHover-dark p-3 text-sm space-y-1">
+      <div className="rounded-lg border border-border dark:border-border-dark bg-card dark:bg-card-dark p-3 text-sm space-y-1">
         <div className="flex gap-2">
           <span className="text-textMuted dark:text-textMuted-dark w-24 shrink-0">Device</span>
           <span className="font-mono text-textPrimary dark:text-textPrimary-dark break-all">{command.deviceUuid || '—'}</span>
         </div>
         <div className="flex gap-2">
           <span className="text-textMuted dark:text-textMuted-dark w-24 shrink-0">State</span>
-          <span className="font-semibold text-textPrimary dark:text-textPrimary-dark">{command.stateName || '—'}</span>
+          <span className="font-semibold font-mono text-textPrimary dark:text-textPrimary-dark">{command.stateName || '—'}</span>
         </div>
         <div className="flex gap-2">
           <span className="text-textMuted dark:text-textMuted-dark w-24 shrink-0">Value</span>
-          <span className="font-semibold text-textPrimary dark:text-textPrimary-dark">{command.value || '—'}</span>
+          <span className="font-semibold font-mono text-textPrimary dark:text-textPrimary-dark">{command.value || '—'}</span>
         </div>
       </div>
     );
@@ -104,14 +104,14 @@ const NodeSummary: React.FC<NodeSummaryProps> = ({ config }) => {
 
   if (isFilterConfig(parsed)) {
     return (
-      <div className="rounded border border-border dark:border-border-dark bg-surfaceHover dark:bg-surfaceHover-dark p-3 text-sm">
+      <div className="rounded-lg border border-border dark:border-border-dark bg-card dark:bg-card-dark p-3 text-sm">
         {renderExpression(parsed)}
       </div>
     );
   }
 
   return (
-    <pre className="rounded bg-surfaceHover dark:bg-surfaceHover-dark border border-border dark:border-border-dark p-3 font-mono text-xs overflow-x-auto text-textPrimary dark:text-textPrimary-dark m-0">
+    <pre className="rounded-lg bg-card dark:bg-card-dark border border-border dark:border-border-dark p-3 font-mono text-xs overflow-x-auto text-textPrimary dark:text-textPrimary-dark m-0">
       {JSON.stringify(parsed, null, 2)}
     </pre>
   );

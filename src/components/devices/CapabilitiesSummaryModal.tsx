@@ -46,7 +46,7 @@ const CapabilitiesSummaryModal: React.FC<CapabilitiesSummaryModalProps> = ({
         </div>
       )}
 
-      <pre className="flex-1 overflow-auto m-0 p-4 text-[0.8125rem] leading-relaxed bg-surface dark:bg-surface-dark text-textPrimary dark:text-textPrimary-dark rounded border border-border dark:border-border-dark font-mono min-h-[12rem]">
+      <pre className="flex-1 overflow-auto m-0 p-4 text-[0.8125rem] leading-relaxed bg-surface dark:bg-surface-dark text-textPrimary dark:text-textPrimary-dark rounded-lg border border-border dark:border-border-dark font-mono min-h-[12rem]">
         {displayJson || '{}'}
       </pre>
     </Modal>

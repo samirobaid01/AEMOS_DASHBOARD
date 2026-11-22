@@ -1,5 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { Plus, X } from 'lucide-react';
 import { DEVICE_STATE_UI_TYPES } from '../../constants/device';
 import FormField from '../common/FormField';
 import Button from '../common/Button/Button';
@@ -9,9 +10,9 @@ import type { DeviceStatesModalProps, DeviceStatePayload } from './types';
 export type { DeviceStatePayload };
 
 const inputClasses =
-  'block w-full px-3 py-2 rounded border border-border dark:border-border-dark bg-surface dark:bg-surface-dark text-textPrimary dark:text-textPrimary-dark text-sm outline-none focus:ring-2 focus:ring-primary';
+  'block w-full px-3 py-2 rounded-lg border border-border dark:border-border-dark bg-surface dark:bg-surface-dark text-textPrimary dark:text-textPrimary-dark text-sm outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors';
 const selectClasses =
-  'block w-full px-3 py-2 pr-10 rounded border border-border dark:border-border-dark bg-surface dark:bg-surface-dark text-textPrimary dark:text-textPrimary-dark text-sm outline-none focus:ring-2 focus:ring-primary appearance-none bg-no-repeat bg-[length:1.5rem_1.5rem] bg-[right_0.5rem_center] bg-[url("data:image/svg+xml,%3csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 20 20\'%3e%3cpath stroke=\'%236b7280\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1.5\' d=\'M6 8l4 4 4-4\'/%3e%3c/svg%3e")]';
+  'block w-full px-3 py-2 pr-10 rounded-lg border border-border dark:border-border-dark bg-surface dark:bg-surface-dark text-textPrimary dark:text-textPrimary-dark text-sm outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors appearance-none bg-no-repeat bg-[length:1.5rem_1.5rem] bg-[right_0.5rem_center] bg-[url("data:image/svg+xml,%3csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 20 20\'%3e%3cpath stroke=\'%236b7280\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1.5\' d=\'M6 8l4 4 4-4\'/%3e%3c/svg%3e")]';
 
 const DeviceStatesModal: React.FC<DeviceStatesModalProps> = ({
   isOpen,
@@ -212,9 +213,10 @@ const DeviceStatesModal: React.FC<DeviceStatesModalProps> = ({
                     variant="danger"
                     size="sm"
                     onClick={() => setEnumValues(enumValues.filter((_, i) => i !== index))}
+                    aria-label={t('devices.deviceState.removeValue', { defaultValue: 'Remove value' })}
                     className="p-2 min-w-[2rem]"
                   >
-                    ×
+                    <X className="w-4 h-4" />
                   </Button>
                 )}
               </div>
@@ -224,8 +226,9 @@ const DeviceStatesModal: React.FC<DeviceStatesModalProps> = ({
               variant="secondary"
               onClick={() => setEnumValues([...enumValues, ''])}
               className="mt-2"
+              leftIcon={<Plus className="w-4 h-4" />}
             >
-              + {t('devices.deviceState.addValues')}
+              {t('devices.deviceState.addValues')}
             </Button>
           </FormField>
           <FormField label={t('devices.deviceState.defaultValue')}>

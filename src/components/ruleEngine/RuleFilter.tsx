@@ -4,20 +4,16 @@ import FormField from '../common/FormField';
 import type { RuleFilterProps } from './types';
 
 const inputClasses =
-  'w-full px-3 py-2 text-sm text-textPrimary dark:text-textPrimary-dark bg-surface dark:bg-surface-dark rounded border border-border dark:border-border-dark outline-none focus:ring-2 focus:ring-primary shadow-sm';
+  'w-full px-3 py-2 text-sm text-textPrimary dark:text-textPrimary-dark bg-background dark:bg-background-dark rounded border border-border dark:border-border-dark shadow-sm outline-none focus:ring-2 focus:ring-primary';
 
 const RuleFilter: React.FC<RuleFilterProps> = ({
   searchTerm,
   onSearchChange,
-  windowWidth = window.innerWidth
 }) => {
   const { t } = useTranslation();
-  const isMobile = windowWidth < 768;
 
   return (
-    <div
-      className={`flex ${isMobile ? 'flex-col' : 'flex-row'} gap-4 mb-6 p-4 rounded-lg border border-border dark:border-border-dark bg-card dark:bg-card-dark shadow-sm`}
-    >
+    <div className="flex flex-col md:flex-row gap-4 mb-6 p-4 rounded-xl border border-border dark:border-border-dark bg-card dark:bg-card-dark shadow-sm">
       <div className="flex flex-col flex-1">
         <FormField label={t('common.search')} id="ruleSearch">
           <input

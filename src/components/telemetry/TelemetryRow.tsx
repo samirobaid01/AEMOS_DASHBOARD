@@ -2,65 +2,16 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import Button from '../common/Button/Button';
 import SensorIcon from './SensorIcon';
+import { formatTelemetryValue, extractEntityVariables } from '../../utils/telemetryFormat';
 import type { TelemetryRowProps } from './types';
 
 const TelemetryRow: React.FC<TelemetryRowProps> = React.memo(({ entity, telemetryData, onRemove, isMobile }) => {
   const { t } = useTranslation();
 
-  const formatValue = (value: string | number | boolean, variableName?: string): string => {
-    if (value === '-' || value === null || value === undefined) return '-';
-    
-    if (typeof value === 'boolean') {
-      return value ? t('common.yes') : t('common.no');
-    }
-    
-    if (typeof value === 'number') {
-      if (variableName) {
-        const lowerName = variableName.toLowerCase();
-        if (lowerName.includes('temperature')) return `${value.toFixed(1)}°C`;
-        if (lowerName.includes('moisture') || lowerName.includes('humidity')) return `${value.toFixed(1)}%`;
-        if (lowerName.includes('pressure')) return `${value.toFixed(0)} hPa`;
-        if (lowerName.includes('battery')) return `${value.toFixed(0)}%`;
-      }
-      return value.toFixed(2);
-    }
-    
-    return String(value);
-  };
+  const formatValue = (value: string | number | boolean, variableName?: string): string =>
+    formatTelemetryValue(value, variableName, t('common.yes'), t('common.no'));
 
-  const getVariablesList = () => {
-    const variables: Array<{ id: string; name: string; value: string | number | boolean; isNew: boolean }> = [];
-
-    if (entity.type === 'sensor' && entity.telemetryVariables) {
-      entity.telemetryVariables.forEach(variable => {
-        const dataValue = telemetryData.values[variable.id];
-        if (dataValue) {
-          variables.push({
-            id: variable.id.toString(),
-            name: variable.variableName,
-            value: dataValue.value,
-            isNew: dataValue.isNew
-          });
-        }
-      });
-    } else if (entity.type === 'device' && entity.states) {
-      entity.states.forEach(state => {
-        const dataValue = telemetryData.values[state.id];
-        if (dataValue) {
-          variables.push({
-            id: state.id.toString(),
-            name: state.stateName,
-            value: dataValue.value,
-            isNew: dataValue.isNew
-          });
-        }
-      });
-    }
-
-    return variables;
-  };
-
-  const variables = getVariablesList();
+  const variables = extractEntityVariables(entity, telemetryData);
   const typeIcon = entity.type === 'sensor' ? (
     <SensorIcon className="w-5 h-5 text-wheat-600 dark:text-wheat-400" />
   ) : (

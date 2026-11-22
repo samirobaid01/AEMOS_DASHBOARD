@@ -50,10 +50,9 @@ const Login = () => {
   );
   
   return (
-    <AuthCard 
+    <AuthCard
       title={t('auth.signIn')}
       subtitle={subtitle}
-      icon="🌾"
     >
       <form className="space-y-6" onSubmit={handleSubmit}>
         <div className="space-y-4">
@@ -69,7 +68,6 @@ const Login = () => {
               label={t('email')}
               placeholder={t('auth.email')}
               error={error ? '' : undefined}
-              className="border-soil-200 focus:border-leaf-500 focus:ring-leaf-500"
             />
           </div>
           <div>
@@ -84,7 +82,6 @@ const Login = () => {
               label={t('password')}
               placeholder={t('auth.password')}
               error={error ? '' : undefined}
-              className="border-soil-200 focus:border-leaf-500 focus:ring-leaf-500"
             />
           </div>
         </div>
@@ -95,15 +92,15 @@ const Login = () => {
               id="remember-me"
               name="remember-me"
               type="checkbox"
-              className="h-4 w-4 text-leaf-600 focus:ring-leaf-500 border-soil-300 rounded"
+              className="h-4 w-4 text-leaf-600 focus:ring-leaf-500 border-border dark:border-border-dark rounded"
             />
-            <label htmlFor="remember-me" className="ml-2 block text-sm text-soil-700">
+            <label htmlFor="remember-me" className="ml-2 block text-sm text-textSecondary dark:text-textSecondary-dark">
               {t('auth.rememberMe')}
             </label>
           </div>
 
           <div className="text-sm">
-            <Link to="/forgot-password" className="font-medium text-wheat-600 hover:text-wheat-700 transition-colors duration-200">
+            <Link to="/forgot-password" className="font-medium text-leaf-600 hover:text-leaf-700 dark:text-leaf-400 dark:hover:text-leaf-300 transition-colors duration-200">
               {t('auth.forgotPassword')}
             </Link>
           </div>
@@ -122,7 +119,7 @@ const Login = () => {
             isLoading={isLoading}
             fullWidth
             variant="primary"
-            className="bg-leaf-600 hover:bg-leaf-700 focus:ring-leaf-500"
+            className="focus:ring-leaf-500"
           >
             {t('auth.signIn')}
           </Button>
